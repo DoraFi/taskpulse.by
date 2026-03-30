@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>TaskPulse</title>
+    <link rel="icon" type="image/svg+xml" href="/static/source/logo_no_back.svg">
+    <link rel="stylesheet" href="/static/scss/style.css">
+    
+</head>
+
+<body>
+    <div class="header">
+        <div class="gap-24 flex-row">
+            <a href="/templates/pages/index.html"><img class="logo" src="/static/source/logo_rect.svg"
+                    alt="TaskPulse"></a>
+            <div class="search-panel border-dark-1 br-5">
+                <img class="h-16" src="/static/source/icons/search.svg" alt="Поиск">
+                <input class="text-basic" type="text" placeholder="Поиск">
+            </div>
+        </div>
+        <ul class="gap-24 flex-row">
+            <li><img class="h-32" src="/static/source/icons/plus.svg" alt=""></li>
+            <li><img class="h-32" src="/static/source/icons/settings.svg" alt=""></li>
+            <li><img class="h-32" src="/static/source/icons/profile.svg" alt=""></li>
+            <li><img class="h-32" src="/static/source/icons/logout.svg" alt=""></li>
+            <li><img class="h-32" src="/static/source/icons/lighttheme.svg" alt=""></li>
+        </ul>
+    </div>
+    <div class="main-layout">
+        <aside id="aside-container"></aside>
+        <div class="app-container flex-col">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="assigned">Назначенные мне</button>
+                <button class="tab-btn" data-tab="deadline">Срок истекает</button>
+                <button class="tab-btn" data-tab="todo">К выполнению</button>
+                <button class="tab-btn" data-tab="created">Созданные мной</button>
+            </div>
+        
+            <div class="card">
+                <div class="tasks-header flex-row-between">
+                    <p class="text-header" id="tasks-header-title">Назначенные мне задачи</p>
+                    <div class="info" style="position: relative;">
+                        <ul class="gap-24 flex-row">
+                            <li class="filter-icon" id="filterIcon">
+                                <img class="h-32" src="/static/source/icons/filter.svg" alt="Фильтры">
+                            </li>
+                            <li class="more-actions" id="moreActionsBtn">
+                                <img class="h-32" src="/static/source/icons/info.svg" alt="Действия">
+                            </li>
+                        </ul>            
+                    </div>
+                </div>
+
+                <div class="dropdown-menu border-dark-1 br-5" id="actionsMenu">
+                    <div class="dropdown-header">
+                        <p class="text-header">Действия</p>
+                        <button class="dropdown-close">
+                            <img src="/static/source/icons/cross.svg" alt="Закрыть" >
+                        </button>
+                    </div>
+                    <ul>
+                        <li class="dropdown-item text-basic" data-action="columns">
+                            <span>Настроить колонки</span>
+                        </li>
+                        <li class="dropdown-item text-basic" data-action="print">
+                            <span>Печать</span>
+                        </li>
+                        <li class="dropdown-item text-basic" data-action="share">
+                            <span>Поделиться ссылкой</span>
+                        </li>
+                    </ul>          
+                </div>
+                
+                <div class="modal-overlay" id="filterModal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <p class="text-header">Фильтры</p>
+                            <button class="modal-close" id="closeModal">
+                                <img src="/static/source/icons/cross.svg" alt="Закрыть" width="24" height="24">                   
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <!-- Статус -->
+                            <div class="filter-section">
+                                <label class="filter-label">Статус</label>
+                                <div class="filter-checkbox-group">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="neutral">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="checkbox-text">Назначена</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="inprocess">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="checkbox-text">В работе</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="done">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="checkbox-text">Завершено</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="exit">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="checkbox-text">Отложено</span>
+                                    </label>
+                                </div>                      
+                            </div>
+                        
+                            <!-- Приоритет -->
+                            <div class="filter-section">
+                                <label class="filter-label">Приоритет</label>
+                                <div class="filter-checkbox-group">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="срочно">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="checkbox-text">Срочно</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="обычный">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="checkbox-text">Обычный</span>
+                                    </label>
+                                </div>
+                            </div>
+                        
+                            <!-- Проект -->
+                            <div class="filter-section">
+                                <label class="filter-label">Проект</label>
+                                <div class="filter-checkbox-group">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="Корпоративный портал">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="checkbox-text">Корпоративный портал</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="Микросервисная платформа">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="checkbox-text">Микросервисная платформа</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="CRM-система">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="checkbox-text">CRM-система</span>
+                                    </label>
+                                </div>
+                            </div>
+                        
+                            <!-- Исполнитель -->
+                            <div class="filter-section">
+                                <label class="filter-label">Исполнитель</label>
+                                <div class="filter-checkbox-group">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="Лев Аксенов">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="checkbox-text">Лев Аксенов</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="Дарья Швед">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="checkbox-text">Дарья Швед</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="Ксения Глебко">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="checkbox-text">Ксения Глебко</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="Полина Ильючик">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="checkbox-text">Полина Ильючик</span>
+                                    </label>
+                                </div>
+                            </div>
+                        
+                            <!-- Создатель -->
+                            <div class="filter-section">
+                                <label class="filter-label">Создатель</label>
+                                <div class="filter-checkbox-group">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="Лев Аксенов">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="checkbox-text">Лев Аксенов</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="Дарья Швед">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="checkbox-text">Дарья Швед</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="Оксана Кветко">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="checkbox-text">Оксана Кветко</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="Ксения Глебко">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="checkbox-text">Ксения Глебко</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="Полина Ильючик">
+                                        <span class="custom-checkbox"></span>
+                                        <span class="checkbox-text">Полина Ильючик</span>
+                                    </label>
+                                </div>
+                            </div>
+                        
+                            <!-- Сложность (SP) -->
+                            <div class="filter-section">
+                                <label class="filter-label">Сложность (SP)</label>
+                                <div class="filter-range">
+                                    <div class="range-values">
+                                        <span>0</span>
+                                        <span>13</span>
+                                    </div>
+                                    <input type="range" min="0" max="13" value="13" class="range-input" id="complexityRange">
+                                    <div class="range-selected" id="complexityValue">До 13 SP</div>
+                                </div>
+                            </div>
+                        
+                            <!-- Срок выполнения -->
+                            <div class="filter-section">
+                                <label class="filter-label">Срок выполнения</label>
+                                <div class="filter-date">
+                                    <input type="date" class="filter-input" placeholder="От">
+                                    <span>—</span>
+                                    <input type="date" class="filter-input" placeholder="До">
+                                </div>
+                            </div>                  
+                        </div>
+                        <div class="modal-footer">
+                            <button class="button-secondary">Сбросить фильтры</button>
+                            <button class="button-basic">Применить фильтры</button>
+                        </div>
+                    </div>          
+                </div>
+                <div class="tasks-grid-wrapper">
+                    <div class="tasks-grid" id="tasks-grid"></div>      
+                </div>            
+            </div> 
+            <div class="tasks-footer">
+                <button class="button-secondary reset-filters-btn" id="resetFiltersBtn">Сбросить фильтры</button>      
+            </div>
+        </div>
+    </div>
+    <script src="/static/js/loadComponents.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/tasks.js"></script>
+</body>
+
+</html>

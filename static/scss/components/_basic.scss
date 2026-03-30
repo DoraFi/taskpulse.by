@@ -1,0 +1,65 @@
+a {
+    color: $dark-gray;
+}
+
+ul {
+    list-style-type: none;
+}
+
+.checkbox-item {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-8;
+    cursor: pointer;
+    font-size: $font-size-bs;
+    color: $dark-gray;
+    position: relative;
+
+    input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+
+        &:checked+.custom-checkbox {
+            background: transparent;
+
+            &::after {
+                transform: scale(1);
+            }
+        }
+    }
+
+    .custom-checkbox {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: $space-24;
+        height: $space-24;
+        border: $space-2 solid $dark-gray;
+        transition: all 0.2s ease;
+        background: transparent;
+        @extend .br-5;
+
+        &::after {
+            content: "";
+            display: block;
+            width: $space-16;
+            height: $space-12;
+            background-image: url('/static/source/icons/check.svg');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            transform: scale(0);
+            transition: transform 0.15s ease;
+        }
+    }
+
+    &:hover {
+        .custom-checkbox {
+            border-color: $green;
+        }
+
+        color: $green;
+    }
+}

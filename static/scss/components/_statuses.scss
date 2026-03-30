@@ -1,0 +1,34 @@
+@use '../variables' as vars;
+@use '../typo' as typo;
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: vars.$space-8;
+    padding: vars.$space-4 vars.$space-16;
+    border-radius: vars.$radius-sm;
+    font-size: typo.$font-size-bs;
+    font-weight: 400;
+    cursor: default;
+    transition: all 0.2s ease;
+    position: relative;
+    white-space: nowrap;
+    user-select: none;
+    color: vars.$light-light-green;
+
+    &.neutral {
+        background: vars.$light-gray;
+    }
+
+    &.inprocess {
+        background: vars.$green;
+    }
+
+    &.done {
+        background: vars.$dark-green;
+    }
+
+    &.exit {
+        background: vars.$pink;
+    }
+}

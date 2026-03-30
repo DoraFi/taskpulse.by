@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>TaskPulse</title>
+    <link rel="icon" type="image/svg+xml" href="/static/source/logo_no_back.svg">
+    <link rel="stylesheet" href="/static/scss/style.css">
+</head>
+
+<body>
+    <div class="header">
+        <div class="gap-24 flex-row">
+            <a href="/templates/pages/index.html"><img class="logo" src="/static/source/logo_rect.svg"
+                    alt="TaskPulse"></a>
+            <div class="search-panel border-dark-1 br-5">
+                <img class="h-16" src="/static/source/icons/search.svg" alt="Поиск">
+                <input class="text-basic" type="text" placeholder="Поиск">
+            </div>
+        </div>
+        <ul class="gap-24 flex-row">
+            <li><img class="h-32" src="/static/source/icons/plus.svg" alt=""></li>
+            <li><img class="h-32" src="/static/source/icons/settings.svg" alt=""></li>
+            <li><img class="h-32" src="/static/source/icons/profile.svg" alt=""></li>
+            <li><img class="h-32" src="/static/source/icons/logout.svg" alt=""></li>
+            <li><img class="h-32" src="/static/source/icons/lighttheme.svg" alt=""></li>
+        </ul>
+    </div>
+    <div class="main-layout">
+        <aside>
+            <nav>
+                <ul>
+                    <li class="item">
+                        <a class="text-header" href="/templates/pages/index.html">Меню</a>
+                    </li>
+                    <li class="item">
+                        <a class="text-basic" href="/templates/pages/index.html">Сводка</a>
+                    </li>
+                    <li class="item">
+                        <a class="text-basic" href="/templates/pages/index.html">Задачи</a>
+                    </li>
+                    <li class="item">
+                        <span class="arrow-wrapper">
+                            <img src="/static/source/icons/arrow_dark_cropped.svg" alt="" class="arrow-img">
+                        </span>
+                        <a class="text-basic" href="/templates/pages/index.html">Проекты</a>
+                        <ul class="submenu">
+                            <li><a href="#">Диплом Очередь</a></li>
+                            <li><a href="#">Диплом canban</a></li>
+                            <li><a href="#">Диплом Scrum</a></li>
+                            <li><a href="#">Диплом Scrumban</a></li>
+                            <li><a href="#">Мои проекты</a></li>
+                            <li><a href="#">Проекты организации</a></li>
+                            <li><a href="#">Архивные проекты</a></li>
+                        </ul>
+                    </li>
+                    <li class="item">
+                        <span class="arrow-wrapper">
+                            <img src="/static/source/icons/arrow_dark_cropped.svg" alt="" class="arrow-img">
+                        </span>
+                        <a class="text-basic" href="/templates/pages/index.html">Команда</a>
+                        <ul class="submenu">
+                            <li><a href="#">Члены команды</a></li>
+                            <li><a href="#">Роли и права</a></li>
+                            <li><a href="#">История активности</a></li>
+                        </ul>
+                    </li>
+                    <li class="item">
+                        <span class="arrow-wrapper">
+                            <img src="/static/source/icons/arrow_dark_cropped.svg" alt="" class="arrow-img">
+                        </span>
+                        <a class="text-basic" href="/templates/pages/index.html">Аналитика</a>
+                        <ul class="submenu">
+                            <li><a href="#">Отчеты</a></li>
+                            <li><a href="#">Диаграммы прогресса</a></li>
+                            <li><a href="#">Сравнительный анализ</a></li>
+                        </ul>
+                    </li>
+                    <li class="item">
+                        <a class="text-basic" href="/templates/pages/index.html">Документация</a>
+                    </li>
+                    <li class="item">
+                        <span class="arrow-wrapper">
+                            <img src="/static/source/icons/arrow_dark_cropped.svg" alt="" class="arrow-img">
+                        </span>
+                        <a class="text-basic" href="/templates/pages/index.html">Помощь</a>
+                        <ul class="submenu">
+                            <li><a href="#">Документация</a></li>
+                            <li><a href="#">FAQ</a></li>
+                            <li><a href="#">Контактная поддержка</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+        <div class="app-container ">
+
+        </div>
+    </div>
+    <script src="/static/js/app.js"></script>
+</body>
+
+</html>

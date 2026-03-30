@@ -1,0 +1,35 @@
+.header {
+    padding: $space-16 $space-64;
+    background: $light-green;
+    border-bottom: $space-1 solid $light-light-green;
+    display: flex;
+    justify-content: space-between;
+    width: 100vw;
+
+    .logo,
+        a,
+        li {
+            height: $space-32;   
+        }
+
+    .logo {
+        padding: $space-3;
+        border: $space-1 solid $green;
+        border-radius: $radius-sm;
+    }
+}
+
+.search-panel {
+    display: flex;
+    align-items: center;
+    padding: $space-8 $space-16;
+    gap: $space-8;
+    height: $space-32;
+    width: 33vw;
+
+    input {
+        border: none;
+        outline: none;
+        background: transparent;
+    }
+}

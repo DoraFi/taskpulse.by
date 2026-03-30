@@ -1,0 +1,103 @@
+aside {
+    padding: $space-48 $space-32 $space-48 $space-64;
+    background-color: $light-green;
+    margin: 0;
+    min-width: 20vw;
+    height: calc(100vh - $space-64);
+    overflow-y: auto;
+    flex-shrink: 0;
+
+    &::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        background: transparent;
+    }
+
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    .item {
+        margin-bottom: $space-24;
+
+        .item-header {
+            display: flex;
+            align-items: center;
+            gap: $space-8;
+        }
+
+        .arrow-wrapper {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: $space-16;
+            height: $space-16;
+            cursor: pointer;
+            flex-shrink: 0;
+
+            .arrow-img {
+                display: block;
+                width: $space-16;
+                height: $space-8;
+                transition: transform 0.3s ease;
+                transform-origin: center center;
+                pointer-events: none;
+            }
+        }
+
+        .nav-link {
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            font-family: inherit;
+            padding: 0;
+            text-align: left;
+            flex: 1;
+
+            &:hover {
+                color: $green;
+            }
+
+            &.active {
+                color: $green;
+                font-weight: 500;
+                position: relative;
+
+                &::after {
+                    content: '';
+                    position: absolute;
+                    left: 0;
+                    bottom: -2px;
+                    width: 100%;
+                    height: 2px;
+                    background-color: $green;
+                    border-radius: 1px;
+                }       
+            }
+        }   
+    }
+
+    .submenu {
+        padding-left: $space-48;
+        margin-top: $space-16;
+
+        .nav-link {
+            margin-bottom: $space-16;
+            display: block;
+            text-align: left;
+            @extend .text-basic;
+        }
+    }
+
+    &:empty {
+        opacity: 0;
+        visibility: hidden;
+    }
+
+    &:not(:empty) {
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 0.2s ease;
+    }
+}

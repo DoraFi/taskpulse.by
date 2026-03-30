@@ -1,0 +1,27 @@
+@use '../variables' as vars;
+
+*::-webkit-scrollbar {
+    height: vars.$space-16;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: height 0.2s ease;
+}
+
+*::-webkit-scrollbar-track {
+    background: rgba(vars.$green, 0.1);
+    backdrop-filter: blur(6px);
+    @extend .br-10;
+    margin: 0;
+    box-shadow: inset 0 0 vars.$space-2 rgba(255, 255, 255, 0.2);
+}
+
+*::-webkit-scrollbar-thumb {
+    background: rgba(vars.$green, 0.3);
+    backdrop-filter: blur(4px);
+    @extend .br-10;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background: rgba(vars.$green, 0.5);
+    }
+}

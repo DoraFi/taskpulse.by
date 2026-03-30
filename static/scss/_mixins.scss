@@ -1,0 +1,28 @@
+@mixin flex-center($direction: row) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: $direction; 
+}
+
+@mixin flex-start($direction: row) {
+    display: flex;
+    justify-content: flex-start;
+    align-items: start;
+    flex-direction: $direction;
+}
+
+@mixin ellipsis-single-line($max-width) {
+    display: block;
+    max-width: $max-width;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle; 
+}
+
+@mixin avatar-size($size) {
+    width: $size;
+    height: $size;
+    border-radius: 50%;
+}

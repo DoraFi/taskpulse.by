@@ -1,0 +1,24 @@
+$font-size-sm: 0.75rem;
+$font-size-bs: 1rem;
+$font-size-md: 1.25rem;
+$font-size-lg: 1.5rem;
+
+.text-signature {
+    font-size: $font-size-sm;
+    font-weight: 400;
+}
+
+.text-basic {
+    font-size: $font-size-bs;
+    font-weight: 400;
+}
+
+.text-subheader {
+    font-size: $font-size-md;
+    font-weight: 400;
+}
+
+.text-header {
+    font-size: $font-size-lg;
+    font-weight: 500;
+}

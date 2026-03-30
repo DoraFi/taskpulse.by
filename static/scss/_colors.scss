@@ -1,0 +1,37 @@
+@use 'variables' as vars;
+
+.bg-dark-green {
+    background: vars.$dark-green;
+}
+
+.bg-green {
+    background: vars.$green;
+}
+
+.bg-light-gray { 
+    background: vars.$light-gray;
+}
+
+.light-gray {
+    color: vars.$light-gray;
+}
+
+.pink {
+    color: vars.$pink;
+}
+
+.border-dark-1 {
+    border: vars.$space-1 solid vars.$dark-gray;
+}
+
+.border-dark-2 {
+    border: vars.$space-2 solid vars.$dark-gray;
+}
+
+.border-green-1 {
+    border: vars.$space-1 solid vars.$green;
+}
+
+.border-gray-1 {
+    border: vars.$space-1 solid vars.$light-gray;
+}
