@@ -130,9 +130,25 @@ function handleNavigationClick(e) {
     loadPage(url);
 }
 
+// --- Функция загрузки внешних скриптов ---
 async function loadExternalScript(src) {
+    // Проверяем, не загружен ли уже этот скрипт (по src)
     if (document.querySelector(`script[src="${src}"]`)) {
         console.log(`Скрипт ${src} уже загружен`);
+        return true;
+    }
+    
+    // Проверяем, не загружен ли скрипт через window (для модулей)
+    if (src.includes('board_list') && window.initBoardListPage) {
+        console.log(`Скрипт ${src} уже инициализирован через window`);
+        return true;
+    }
+    if (src.includes('tasks') && window.initTasksPage) {
+        console.log(`Скрипт ${src} уже инициализирован через window`);
+        return true;
+    }
+    if (src.includes('index') && window.initIndexPage) {
+        console.log(`Скрипт ${src} уже инициализирован через window`);
         return true;
     }
     
@@ -166,30 +182,34 @@ async function loadPage(url) {
     console.log('=== loadPage начат ===', url);
     try {
         const response = await fetch(url);
-        console.log('Ответ получен, статус:', response.status);
         const html = await response.text();
-        console.log('HTML получен, длина:', html.length);
-        
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
         const newContent = doc.querySelector('.app-container');
         
-        console.log('Новый контент найден:', !!newContent);
-        
         if (newContent) {
             const currentContent = document.querySelector('.app-container');
-            console.log('Текущий контент:', !!currentContent);
-            
             if (currentContent) {
+                // Загружаем внешние скрипты только если их функции не определены
                 const externalScripts = doc.querySelectorAll('script[src]');
-                console.log('Внешних скриптов для загрузки:', externalScripts.length);
                 
                 for (const script of externalScripts) {
                     const src = script.src;
                     if (src.includes('loadComponents.js') || src.includes('app.js')) {
                         continue;
                     }
-                    await loadExternalScript(src);
+                    
+                    // Проверяем, нужно ли загружать скрипт
+                    let isNeeded = false;
+                    if (src.includes('board_list') && !window.initBoardListPage) isNeeded = true;
+                    if (src.includes('tasks') && !window.initTasksPage) isNeeded = true;
+                    if (src.includes('index') && !window.initIndexPage) isNeeded = true;
+                    
+                    if (isNeeded) {
+                        await loadExternalScript(src);
+                    } else {
+                        console.log(`Скрипт ${src} уже загружен, пропускаем`);
+                    }
                 }
                 
                 currentContent.style.opacity = '0';
@@ -204,6 +224,7 @@ async function loadPage(url) {
                     
                     executeInlineScripts(currentContent);
                     
+                    // Вызываем инициализаторы для разных страниц
                     if (currentContent.querySelector('#tasks-grid') && typeof window.initTasksPage === 'function') {
                         console.log('Вызов initTasksPage');
                         window.initTasksPage();
@@ -213,17 +234,20 @@ async function loadPage(url) {
                         console.log('Вызов initIndexPage');
                         window.initIndexPage();
                     }
+
+                    if (window.initBoardListPage) {
+                        console.log('Принудительный вызов initBoardListPage');
+                        window.initBoardListPage();
+                    }
                     
                     initSubmenus();
                     initNavigation();
-                    
                     updateActiveMenuItem();
                     
                     console.log('Загрузка страницы завершена');
                 }, 200);
             }
         } else {
-            console.log('Нет .app-container, переход по ссылке');
             window.location.href = url;
         }
     } catch (error) {

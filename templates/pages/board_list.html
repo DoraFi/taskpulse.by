@@ -3,10 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>TaskPulse</title>
+    <title>TaskPulse - Доски проектов</title>
     <link rel="icon" type="image/svg+xml" href="/static/source/logo_no_back.svg">
     <link rel="stylesheet" href="/static/scss/style.css">
-    
 </head>
 
 <body>
@@ -27,78 +26,37 @@
             <li><img class="h-32" src="/static/source/icons/lighttheme.svg" alt=""></li>
         </ul>
     </div>
+
     <div class="main-layout">
         <aside id="aside-container"></aside>
-        <div class="app-container flex-col">
+
+        <div class="app-container flex-col board-list">
             <div class="tabs-buttons">
                 <div class="tabs">
-                    <button class="tab-btn active" data-tab="board"><img src="/static/source/icons/board.svg" alt=""> Доски</button>
-                    <button class="tab-btn" data-tab="tables"><img src="/static/source/icons/table.svg" alt="">Таблицы</button>
-                    <button class="tab-btn" data-tab="timline"><img src="/static/source/icons/timeline.svg" alt="">Таймлайн</button>
+                    <button class="tab-btn active" data-tab="board">
+                        <img src="/static/source/icons/board.svg" alt=""> Доски
+                    </button>
+                    <button class="tab-btn" data-tab="tables">
+                        <img src="/static/source/icons/table.svg" alt=""> Таблицы
+                    </button>
+                    <button class="tab-btn" data-tab="timeline">
+                        <img src="/static/source/icons/timeline.svg" alt=""> Таймлайн
+                    </button>
                 </div>
                 <button class="button-basic">Отчеты</button>
                 <button class="button-basic">Архив задач</button>
             </div>
-        
-            <div class="card card-list">
-                <div class="tasks-header flex-row-between">
-                    <div class="taskheader-count">
-                        <p class="text-header" id="tasks-header-title">Название списка</p>
-                        <div class="num-of-tasks">10</div>
-                    </div>
-                    <div class="info" style="position: relative;">
-                        <ul class="gap-24 flex-row">
-                            <li class="more-actions" id="moreActionsBtn">
-                                <img class="h-32" src="/static/source/icons/info.svg" alt="Действия">
-                            </li>
-                        </ul>            
-                    </div>
-                </div>
 
-                <div class="dropdown-menu border-dark-1 br-5" id="actionsMenu">
-                    <div class="dropdown-header">
-                        <p class="text-header">Настройка доски</p>
-                        <button class="dropdown-close">
-                            <img src="/static/source/icons/cross.svg" alt="Закрыть" >
-                        </button>
-                    </div>
-                    <ul>
-                        <li class="dropdown-item text-basic" data-action="">
-                            <span>Скопировать ссылку</span>
-                        </li>
-                        <li class="dropdown-item text-basic" data-action="">
-                            <span>Переименовать</span>
-                        </li>
-                        <li class="dropdown-item text-basic" data-action="">
-                            <span>Добавить описание</span>
-                        </li>
-                        <li class="dropdown-item text-basic" data-action="">
-                            <span>Клонировать доску (стрелка arrow_dark.svg открывает подменю текстом внизу: только структуру и структуру и задачи)</span>
-                        </li>
-                        <li class="dropdown-item text-basic pink" data-action="">
-                            <span>Очистить доску</span>
-                        </li>
-                        <li class="dropdown-item text-basic pink" data-action="">
-                            <span>Удалить доску</span>
-                        </li>
-                    </ul>          
-                </div>       
-                
-                <div class="list">
-                    <div class="item">
-                        <label class="column-option checkbox-item">
-                            <input type="checkbox">
-                            <span class="custom-checkbox"></span>
-                            <span class="checkbox-text">Наименование</span>    
-                        </label>
-                    </div>
-                </div>
-            </div> 
+            <div class="cards">
+                <!-- Карточки будут добавлены динамически через JavaScript -->
+            </div>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="/static/js/loadComponents.js"></script>
     <script src="/static/js/app.js"></script>
-    <script src="/static/js/tasks.js"></script>
+    <script src="/static/js/board_list.js"></script>
 </body>
 
 </html>

@@ -1,0 +1,135 @@
+{
+  "boards": [
+    {
+      "id": 1,
+      "name": "Ремонт квартиры",
+      "tasks": [
+        {
+          "id": 101,
+          "name": "Выбрать дизайн интерьера",
+          "priority": "срочно",
+          "dueDate": "05.04.2026",
+          "assignee": "Я",
+          "assigneeAvatar": "basic_avatar.png",
+          "subtasks": [
+            { "name": "Посмотреть варианты в Pinterest", "completed": true },
+            { "name": "Согласовать с дизайнером", "completed": false },
+            { "name": "Утвердить финальный вариант", "completed": false }
+          ]
+        },
+        {
+          "id": 102,
+          "name": "Купить материалы для стен",
+          "dueDate": "10.04.2026",
+          "subtasks": [
+            { "name": "Краска", "completed": false },
+            { "name": "Обои", "completed": true },
+            { "name": "Шпаклевка", "completed": false }
+          ]
+        },
+        {
+          "id": 103,
+          "name": "Заказать кухонный гарнитур"
+        },
+        {
+          "id": 104,
+          "name": "Найти бригаду строителей",
+          "priority": "срочно"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Планы на отпуск",
+      "tasks": [
+        {
+          "id": 201,
+          "name": "Выбрать направление",
+          "priority": "срочно",
+          "dueDate": "20.04.2026",
+          "assignee": "Семья",
+          "assigneeAvatar": "basic_avatar.png",
+          "subtasks": [
+            { "name": "Море", "completed": false },
+            { "name": "Горы", "completed": false },
+            { "name": "Европа", "completed": true }
+          ]
+        },
+        {
+          "id": 202,
+          "name": "Купить билеты",
+          "dueDate": "01.05.2026"
+        },
+        {
+          "id": 203,
+          "name": "Забронировать отель"
+        },
+        {
+          "id": 204,
+          "name": "Собрать чемоданы",
+          "assignee": "Семья",
+          "dueDate": "30.05.2026"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Спортивные цели",
+      "tasks": [
+        {
+          "id": 301,
+          "name": "Пробежать 5 км",
+          "priority": "срочно",
+          "dueDate": "08.04.2026",
+          "subtasks": [
+            { "name": "Купить кроссовки", "completed": true },
+            { "name": "Найти маршрут", "completed": true },
+            { "name": "Пробежать первый раз", "completed": false }
+          ]
+        },
+        {
+          "id": 302,
+          "name": "Записаться в бассейн",
+          "dueDate": "15.04.2026"
+        },
+        {
+          "id": 303,
+          "name": "Купить абонемент в спортзал",
+          "priority": "обычный"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Покупки",
+      "tasks": [
+        {
+          "id": 501,
+          "name": "Продукты на неделю",
+          "priority": "срочно",
+          "dueDate": "03.04.2026",
+          "subtasks": [
+            { "name": "Молоко", "completed": false },
+            { "name": "Хлеб", "completed": false },
+            { "name": "Фрукты", "completed": false },
+            { "name": "Овощи", "completed": false }
+          ]
+        },
+        {
+          "id": 502,
+          "name": "Новый чайник"
+        },
+        {
+          "id": 503,
+          "name": "Подарок другу",
+          "dueDate": "07.04.2026"
+        },
+        {
+          "id": 504,
+          "name": "Корм для кота",
+          "priority": "срочно"
+        }
+      ]
+    }
+  ]
+}

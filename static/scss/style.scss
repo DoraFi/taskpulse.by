@@ -949,37 +949,257 @@ body {
     }
 }
 
-.card-list{
-    width: 32vw;
+.board-list {
+    .cards {
+        column-count: 2;
+        column-gap: $space-48;
+        flex: 1;
+        user-select: none;
 
-    .taskheader-count{
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: $space-16;
-        width: 100%;
-
-        .num-of-tasks {
+        &.dragging-active {
+            column-count: unset;
             display: flex;
-            flex-direction: row;
-            justify-content: center;
-            align-items: center;
-            padding: $space-8;
-            height: $space-32;
-            background: $light-gray;
-            @extend .br-5;
-            @extend .text-subheader;
-            color: $light-light-green !important;
+            flex-wrap: wrap;
+            gap: $space-48;
+            
+            .card {
+                width: calc((100% - $space-48) / 2);
+                margin-bottom: $space-48;
+            }
         }
     }
 
-    .list{
+    .card {
+        break-inside: avoid;
+        margin-bottom: $space-48;
         width: 100%;
-        
-        .item {
-            width: 100%;
-            padding: $space-16 $space-24;
-            @extend .border-gray-1, .br-5;
+        cursor: grab;
+        transition: transform 0.2s ease;
+        user-select: none;
+
+        &:active {
+            cursor: grabbing;
         }
+        
+        &.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+        
+        &.drag-over {
+            transform: translateY($space-16);
+            transition: transform 0.2s ease;
+        }
+        
+        &.task-drag-over {
+            background: rgba($green, 0.1);
+            border: 2px dashed $green;
+            transform: scale(1.01);
+        }
+
+        .taskheader-count {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: $space-16;
+            width: 100%;
+
+            .num-of-tasks {
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+                padding: $space-8;
+                height: $space-32;
+                background: $light-gray;
+                @extend .br-5;
+                @extend .text-subheader;
+                color: $light-light-green !important;
+            }
+        }
+
+        .list {
+            width: 100%;
+            @extend .flex-col;
+            gap: $space-16;
+
+            .item {
+                width: 100%;
+                padding: $space-16 $space-24;
+                @extend .border-gray-1, .br-5;
+                @extend .flex-col;
+                gap: $space-12;
+                cursor: grab;
+                transition: all 0.2s ease;
+                user-select: none;
+                position: relative;
+
+                &:active {
+                    cursor: grabbing;
+                }
+                
+                &.task-dragging {
+                    opacity: 0.5;
+                    cursor: grabbing;
+                    transform: scale(0.98);
+                }
+                
+                &.task-drag-over {
+                    transform: translateY(8px);
+                    border: 2px dashed $green;
+                    background: rgba($green, 0.05);
+                    transition: transform 0.2s ease;
+                }
+            }
+
+            .subtasks {
+                @extend .flex-col;
+                gap: $space-8;
+
+                .count {
+                    display: flex;
+                    justify-content: space-between;
+                }
+
+                .subtasks-list {
+                    @extend .flex-col;
+                    gap: $space-4;
+
+                    .custom-checkbox {
+                        width: $space-20;
+                        height: $space-20;
+                        border: $space-2 solid $dark-gray;
+
+                        &::after {
+                            width: $space-12;
+                            height: $space-8;
+                        }
+                    }
+                }
+
+                .checkbox-text {
+                    @extend .text-signature;
+                }
+
+                .name {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: $space-4;
+
+                    &::after {
+                        content: '';
+                        display: inline-block;
+                        height: 1em;
+                        aspect-ratio: 2/3;
+                        background-image: url('/static/source/icons/arrow_dark_cropped.svg');
+                        background-size: contain;
+                        background-repeat: no-repeat;
+                        background-position: center;
+                        flex-shrink: 0;
+                        transition: transform 0.2s ease;
+                    }
+
+                    &.open::after {
+                        transform: rotate(-90deg);
+                    }
+                }
+
+                .progress-line {
+                    display: flex;
+                    width: 100%;
+
+                    .completed {
+                        border-bottom: $space-3 solid $green;
+                    }
+
+                    .todo {
+                        border-bottom: $space-3 solid rgba($light-gray, 0.5);
+                    }
+                }
+            }
+
+            .tag {
+                width: 100%;
+                display: flex;
+                justify-content: flex-end;
+                align-items: stretch;
+                gap: $space-16;
+
+                .executor {
+                    display: flex;
+                    align-items: center;
+
+                    img {
+                        height: calc(1em + $space-8 * 2);
+                        @extend .br-5;
+                    }
+                }
+
+                .priority-high,
+                .priority-normal {
+                    @extend .br-5;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: calc(1em + $space-8 * 2);
+                    width: calc(1em + $space-8 * 2);
+                    color: $light-light-green;
+                }
+
+                .priority-high {
+                    background-color: $pink;
+                }
+
+                .priority-normal {
+                    background-color: rgba($green, 0.5);
+                }
+
+                .deadline {
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: center;
+                    align-items: center;
+                    padding: $space-4 $space-16;
+                    height: calc(1em + $space-8 * 2);
+                    gap: $space-8;
+                    color: $light-gray;
+                    background: rgba($green, 0.15);
+                    @extend .br-5;
+
+                    &::before {
+                        content: '';
+                        display: inline-block;
+                        width: 1em;
+                        height: 1em;
+                        background-image: url('/static/source/icons/deadline.svg');
+                        background-size: contain;
+                        background-repeat: no-repeat;
+                        background-position: center;
+                        flex-shrink: 0;
+                    }
+                }
+            }
+        }
+    }
+
+    .sortable-ghost {
+        opacity: 0.4;
+        background: rgba($green, 0.1);
+        border: 2px dashed $green;
+        transform: scale(0.98);
+    }
+    
+    .sortable-drag {
+        opacity: 0.7;
+        transform: rotate(2deg);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+}
+
+.board-drag-handle {
+    cursor: grab;
+
+    &:active {
+        cursor: grabbing;
     }
 }
