@@ -1209,3 +1209,11 @@ body {
     column-count: 1 !important;
     display: block;
 }
+
+.board-list .tasks-grid{
+    grid-template-columns: auto auto 1fr auto auto auto auto !important;
+}
+
+.table-rows{
+    display: contents;
+}

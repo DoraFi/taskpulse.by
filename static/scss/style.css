@@ -1483,4 +1483,12 @@ aside .submenu .events-grid .col-event .nav-link,
   -moz-column-count: 1 !important;
        column-count: 1 !important;
   display: block;
+}
+
+.board-list .tasks-grid {
+  grid-template-columns: auto auto 1fr auto auto auto auto !important;
+}
+
+.table-rows {
+  display: contents;
 }/*# sourceMappingURL=style.css.map */

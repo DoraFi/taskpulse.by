@@ -117,7 +117,7 @@ function renderBoardView() {
 function renderTableView() {
     const container = document.querySelector('#cards-container');
     if (!container) return;
-
+    
     container.classList.add('tables-view');
     
     if (!boardsData || boardsData.length === 0) {
@@ -133,19 +133,20 @@ function renderTableView() {
         boardCard.dataset.boardId = board.id;
         boardCard.dataset.boardIndex = boardIndex;
         
-        // Заголовок карточки (как в режиме досок)
         const header = createCardHeader(board, boardIndex);
         boardCard.appendChild(header);
         
-        // Таблица задач доски
         const tasks = board.tasks || [];
-        const table = createBoardTable(board, tasks, boardIndex); 
+        const table = createBoardTable(board, tasks, boardIndex);
         boardCard.appendChild(table);
         
         container.appendChild(boardCard);
     });
     
-    // Переинициализируем обработчики меню (для карточек табличного режима)
+    initBoardDragAndDrop();
+    
+    initTableRowsSortable();
+    
     initBoardEvents();
 }
 
@@ -155,7 +156,6 @@ function createBoardTable(board, tasks, boardIndex) {
     const table = document.createElement('div');
     table.className = 'tasks-grid';
     
-    // Добавляем колонку чекбокса первой
     const columns = ['select', 'id', 'name', 'priority', 'dueDate', 'assignee', 'subtasksCount'];
     const columnNames = {
         select: '',
@@ -167,16 +167,13 @@ function createBoardTable(board, tasks, boardIndex) {
         subtasksCount: 'Подзадачи'
     };
     
-    // Заголовок таблицы
     const headerRow = document.createElement('div');
     headerRow.className = 'grid-header';
-    
     columns.forEach(col => {
         const headerCell = document.createElement('div');
         headerCell.className = `col-${col}`;
         headerCell.setAttribute('data-sort', col);
         if (col === 'select') {
-            // Можно добавить иконку или оставить пустое место
             headerCell.innerHTML = `<span class="header-title"></span>`;
         } else {
             headerCell.innerHTML = `<span class="header-title">${columnNames[col]}</span>
@@ -189,7 +186,9 @@ function createBoardTable(board, tasks, boardIndex) {
     });
     table.appendChild(headerRow);
     
-    // Сортируем задачи (как было)
+    const rowsContainer = document.createElement('div');
+    rowsContainer.className = 'table-rows';
+    
     let sortedTasks = [...tasks];
     const sortState = boardTableSortState[board.id];
     if (sortState && sortState.column) {
@@ -213,11 +212,9 @@ function createBoardTable(board, tasks, boardIndex) {
         });
     }
     
-    // Строки таблицы
     sortedTasks.forEach(task => {
         const row = document.createElement('div');
         row.className = 'grid-row';
-        
         columns.forEach(col => {
             const cell = document.createElement('div');
             cell.className = `col-${col}`;
@@ -269,9 +266,10 @@ function createBoardTable(board, tasks, boardIndex) {
             }
             row.appendChild(cell);
         });
-        table.appendChild(row);
+        rowsContainer.appendChild(row);
     });
     
+    table.appendChild(rowsContainer);
     tableWrapper.appendChild(table);
     return tableWrapper;
 }
@@ -634,6 +632,78 @@ function createDropdownMenu(board, boardIndex) {
         </ul>
     `;
     return dropdown;
+}
+
+function initTableRowsSortable() {
+    const containers = document.querySelectorAll('#cards-container .board-table-card .table-rows');
+    containers.forEach(container => {
+        const boardCard = container.closest('.board-table-card');
+        const boardId = parseInt(boardCard.dataset.boardId);
+        
+        if (container.sortable) {
+            container.sortable.destroy();
+        }
+        
+        const sortable = new Sortable(container, {
+            animation: 0, 
+            group: {
+                name: 'table-tasks',
+                pull: true,
+                revertClone: false,
+                sort: true
+            },
+            handle: '.grid-row',
+            draggable: '.grid-row',
+            ghostClass: 'task-dragging',
+            dragClass: 'task-drag-over',
+            forceFallback: false, 
+            swapThreshold: 0.5,
+            invertSwap: true,
+            onEnd: function(evt) {
+                const fromContainer = evt.from;
+                const toContainer = evt.to;
+                const fromBoardCard = fromContainer.closest('.board-table-card');
+                const toBoardCard = toContainer.closest('.board-table-card');
+                const fromBoardId = parseInt(fromBoardCard.dataset.boardId);
+                const toBoardId = parseInt(toBoardCard.dataset.boardId);
+                const draggedRow = evt.item;
+                const taskId = parseInt(draggedRow.querySelector('.col-id')?.textContent);
+                if (!taskId) return;
+                
+                if (fromBoardId === toBoardId) {
+                    // Переупорядочивание внутри одной доски
+                    const rows = Array.from(toContainer.children);
+                    const newOrder = rows.map(row => parseInt(row.querySelector('.col-id')?.textContent)).filter(id => id);
+                    const board = boardsData.find(b => b.id === toBoardId);
+                    if (board) {
+                        const newTasks = [];
+                        for (const id of newOrder) {
+                            const task = board.tasks.find(t => t.id === id);
+                            if (task) newTasks.push(task);
+                        }
+                        if (newTasks.length === board.tasks.length) {
+                            board.tasks = newTasks;
+                            saveBoardsToLocalStorage();
+                            showToast('Порядок задач изменён');
+                        }
+                    }
+                } else {
+                    // Перемещение между разными досками
+                    const sourceBoard = boardsData.find(b => b.id === fromBoardId);
+                    const targetBoard = boardsData.find(b => b.id === toBoardId);
+                    const taskIndex = sourceBoard.tasks.findIndex(t => t.id === taskId);
+                    if (taskIndex !== -1) {
+                        const movedTask = sourceBoard.tasks.splice(taskIndex, 1)[0];
+                        targetBoard.tasks.push(movedTask);
+                        saveBoardsToLocalStorage();
+                        renderCurrentView(); // перерисовка текущего представления
+                        showToast(`Задача "${movedTask.name}" перемещена в доску "${targetBoard.name}"`);
+                    }
+                }
+            }
+        });
+        container.sortable = sortable;
+    });
 }
 
 function initTaskSortable(container, boardId) {
