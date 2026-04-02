@@ -1,5 +1,12 @@
 let boardsData = [];
 let isDragging = false;
+let currentView = 'board';
+
+// Сортировка таблицы (глобальная для табличного режима)
+let tableSortColumn = null;
+let tableSortDirection = 'asc';
+
+// ==================== ЗАГРУЗКА И СОХРАНЕНИЕ ====================
 
 async function loadBoardsData() {
     try {
@@ -10,13 +17,14 @@ async function loadBoardsData() {
         const data = await response.json();
         boardsData = data.boards || data;
         reorderBoardsForColumnCount();
-        renderBoards();
+        renderCurrentView();
         initBoardEvents();
+        initViewSwitching();
     } catch (error) {
         console.error('Ошибка загрузки данных досок:', error);
-        const cardsContainer = document.querySelector('.board-list .cards');
-        if (cardsContainer) {
-            cardsContainer.innerHTML = '<div class="error-message">Ошибка загрузки данных. Проверьте файл boards.json</div>';
+        const container = document.querySelector('#cards-container');
+        if (container) {
+            container.innerHTML = '<div class="error-message">Ошибка загрузки данных. Проверьте файл boards.json</div>';
         }
     }
 }
@@ -50,10 +58,315 @@ function loadBoardsFromLocalStorage() {
     return false;
 }
 
+// ==================== ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ====================
+
+function initViewSwitching() {
+    const tabs = document.querySelectorAll('.board-list .tabs .tab-btn');
+    tabs.forEach(btn => {
+        btn.removeEventListener('click', handleTabClick);
+        btn.addEventListener('click', handleTabClick);
+    });
+}
+
+function handleTabClick(e) {
+    const tab = e.currentTarget.dataset.tab;
+    if (tab === 'board') currentView = 'board';
+    else if (tab === 'tables') currentView = 'tables';
+    else if (tab === 'timeline') currentView = 'timeline';
+    
+    document.querySelectorAll('.board-list .tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+    e.currentTarget.classList.add('active');
+    
+    renderCurrentView();
+}
+
+function renderCurrentView() {
+    if (currentView === 'board') renderBoardView();
+    else if (currentView === 'tables') renderTableView();
+    else if (currentView === 'timeline') renderTimelineView();
+}
+
+// ==================== ПРЕДСТАВЛЕНИЕ "ДОСКИ" ====================
+
+function renderBoardView() {
+    const container = document.querySelector('#cards-container');
+    if (!container) return;
+
+    container.classList.remove('tables-view');
+
+    if (!boardsData || boardsData.length === 0) {
+        container.innerHTML = '<div class="empty-message">Нет созданных досок</div>';
+        return;
+    }
+    container.innerHTML = '';
+    boardsData.forEach((board, boardIndex) => {
+        const tasks = board.tasks || [];
+        const validTasks = tasks.filter(t => t);
+        const sortedTasks = sortTasksByPriorityAndDate(validTasks);
+        const card = createBoardCard(board, boardIndex, sortedTasks);
+        container.appendChild(card);
+    });
+    updateCardsDataset();
+    setTimeout(() => {
+        reinitBoardAndTaskHandlers();
+    }, 50);
+}
+
+// ==================== ПРЕДСТАВЛЕНИЕ "ТАБЛИЦЫ" ====================
+
+function renderTableView() {
+    const container = document.querySelector('#cards-container');
+    if (!container) return;
+
+    container.classList.add('tables-view');
+    
+    if (!boardsData || boardsData.length === 0) {
+        container.innerHTML = '<div class="empty-message">Нет созданных досок</div>';
+        return;
+    }
+    
+    container.innerHTML = '';
+    
+    boardsData.forEach((board, boardIndex) => {
+        const boardCard = document.createElement('div');
+        boardCard.className = 'card board-table-card';
+        boardCard.dataset.boardId = board.id;
+        boardCard.dataset.boardIndex = boardIndex;
+        
+        // Заголовок карточки (как в режиме досок)
+        const header = createCardHeader(board, boardIndex);
+        boardCard.appendChild(header);
+        
+        // Таблица задач доски
+        const tasks = board.tasks || [];
+        const table = createBoardTable(board, tasks, boardIndex); 
+        boardCard.appendChild(table);
+        
+        container.appendChild(boardCard);
+    });
+    
+    // Переинициализируем обработчики меню (для карточек табличного режима)
+    initBoardEvents();
+}
+
+function createBoardTable(board, tasks, boardIndex) {
+    const tableWrapper = document.createElement('div');
+    tableWrapper.className = 'tasks-grid-wrapper';
+    const table = document.createElement('div');
+    table.className = 'tasks-grid';
+    
+    // Добавляем колонку чекбокса первой
+    const columns = ['select', 'id', 'name', 'priority', 'dueDate', 'assignee', 'subtasksCount'];
+    const columnNames = {
+        select: '',
+        id: 'ID',
+        name: 'Название',
+        priority: 'Приоритет',
+        dueDate: 'Срок',
+        assignee: 'Исполнитель',
+        subtasksCount: 'Подзадачи'
+    };
+    
+    // Заголовок таблицы
+    const headerRow = document.createElement('div');
+    headerRow.className = 'grid-header';
+    
+    columns.forEach(col => {
+        const headerCell = document.createElement('div');
+        headerCell.className = `col-${col}`;
+        headerCell.setAttribute('data-sort', col);
+        if (col === 'select') {
+            // Можно добавить иконку или оставить пустое место
+            headerCell.innerHTML = `<span class="header-title"></span>`;
+        } else {
+            headerCell.innerHTML = `<span class="header-title">${columnNames[col]}</span>
+                                    <span class="sort-icon"><img src="/static/source/icons/arrow_dark.svg" alt="Сортировка"></span>`;
+            headerCell.addEventListener('click', () => {
+                sortBoardTable(board.id, col);
+            });
+        }
+        headerRow.appendChild(headerCell);
+    });
+    table.appendChild(headerRow);
+    
+    // Сортируем задачи (как было)
+    let sortedTasks = [...tasks];
+    const sortState = boardTableSortState[board.id];
+    if (sortState && sortState.column) {
+        sortedTasks.sort((a, b) => {
+            let valA = a[sortState.column];
+            let valB = b[sortState.column];
+            if (sortState.column === 'dueDate') {
+                valA = parseDateBoard(valA);
+                valB = parseDateBoard(valB);
+                return sortState.direction === 'asc' ? valA - valB : valB - valA;
+            }
+            if (sortState.column === 'subtasksCount') {
+                valA = (a.subtasks ? a.subtasks.length : 0);
+                valB = (b.subtasks ? b.subtasks.length : 0);
+                return sortState.direction === 'asc' ? valA - valB : valB - valA;
+            }
+            valA = (valA || '').toString().toLowerCase();
+            valB = (valB || '').toString().toLowerCase();
+            if (sortState.direction === 'asc') return valA.localeCompare(valB);
+            else return valB.localeCompare(valA);
+        });
+    }
+    
+    // Строки таблицы
+    sortedTasks.forEach(task => {
+        const row = document.createElement('div');
+        row.className = 'grid-row';
+        
+        columns.forEach(col => {
+            const cell = document.createElement('div');
+            cell.className = `col-${col}`;
+            switch (col) {
+                case 'select':
+                    const checkboxLabel = document.createElement('label');
+                    checkboxLabel.className = 'checkbox-item';
+                    checkboxLabel.innerHTML = `
+                        <input type="checkbox" data-task-id="${task.id}">
+                        <span class="custom-checkbox"></span>
+                        <span class="checkbox-text"></span>
+                    `;
+                    const checkbox = checkboxLabel.querySelector('input');
+                    checkbox.addEventListener('change', (e) => {
+                        if (e.target.checked) {
+                            archiveTask(boardIndex, task.id, true);
+                        }
+                    });
+                    cell.appendChild(checkboxLabel);
+                    break;
+                case 'id':
+                    cell.textContent = task.id;
+                    break;
+                case 'name':
+                    cell.textContent = task.name;
+                    break;
+                case 'priority':
+                    const prioritySpan = document.createElement('span');
+                    prioritySpan.className = task.priority === 'срочно' ? 'priority-high' : 'priority-normal';
+                    prioritySpan.textContent = task.priority === 'срочно' ? 'Срочно' : 'Обычный';
+                    cell.appendChild(prioritySpan);
+                    break;
+                case 'dueDate':
+                    const dueSpan = document.createElement('span');
+                    const dueDate = task.dueDate ? formatDateBoard(task.dueDate) : '—';
+                    dueSpan.textContent = dueDate;
+                    if (task.dueDate && parseDateBoard(task.dueDate) < new Date()) {
+                        dueSpan.classList.add('overdue');
+                    }
+                    cell.appendChild(dueSpan);
+                    break;
+                case 'assignee':
+                    cell.textContent = task.assignee || '—';
+                    break;
+                case 'subtasksCount':
+                    const count = task.subtasks ? task.subtasks.length : 0;
+                    cell.textContent = count;
+                    break;
+            }
+            row.appendChild(cell);
+        });
+        table.appendChild(row);
+    });
+    
+    tableWrapper.appendChild(table);
+    return tableWrapper;
+}
+
+// Хранилище состояния сортировки для каждой доски в табличном режиме
+let boardTableSortState = {};
+
+function sortBoardTable(boardId, column) {
+    if (!boardTableSortState[boardId]) {
+        boardTableSortState[boardId] = { column: null, direction: 'asc' };
+    }
+    const state = boardTableSortState[boardId];
+    if (state.column === column) {
+        state.direction = state.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+        state.column = column;
+        state.direction = 'asc';
+    }
+    renderTableView(); // перерисовываем табличное представление
+}
+
+// ==================== ПРЕДСТАВЛЕНИЕ "ТАЙМЛАЙН" ====================
+
+function renderTimelineView() {
+    const container = document.querySelector('#cards-container');
+    if (!container) return;
+    
+    let tasksWithDates = [];
+    boardsData.forEach(board => {
+        if (board.tasks && board.tasks.length) {
+            board.tasks.forEach(task => {
+                if (task.dueDate) {
+                    tasksWithDates.push({
+                        ...task,
+                        boardName: board.name,
+                        dueDateObj: parseDateBoard(task.dueDate)
+                    });
+                }
+            });
+        }
+    });
+    
+    if (tasksWithDates.length === 0) {
+        container.innerHTML = '<div class="empty-message">Нет задач с указанными сроками</div>';
+        return;
+    }
+    
+    tasksWithDates.sort((a, b) => a.dueDateObj - b.dueDateObj);
+    
+    const groups = {};
+    tasksWithDates.forEach(task => {
+        const dateKey = formatDateBoard(task.dueDate);
+        if (!groups[dateKey]) groups[dateKey] = [];
+        groups[dateKey].push(task);
+    });
+    
+    const timeline = document.createElement('div');
+    timeline.className = 'timeline-view';
+    
+    for (const [date, tasks] of Object.entries(groups)) {
+        const dateGroup = document.createElement('div');
+        dateGroup.className = 'timeline-date-group';
+        
+        const dateHeader = document.createElement('div');
+        dateHeader.className = 'timeline-date-header';
+        dateHeader.textContent = date;
+        dateGroup.appendChild(dateHeader);
+        
+        const taskList = document.createElement('div');
+        taskList.className = 'timeline-task-list';
+        tasks.forEach(task => {
+            const taskItem = document.createElement('div');
+            taskItem.className = 'timeline-task-item';
+            taskItem.innerHTML = `
+                <div class="timeline-task-name">${escapeHtml(task.name)}</div>
+                <div class="timeline-task-board">${escapeHtml(task.boardName)}</div>
+                ${task.assignee ? `<div class="timeline-task-assignee">${escapeHtml(task.assignee)}</div>` : ''}
+                ${task.priority ? `<div class="timeline-task-priority ${task.priority === 'срочно' ? 'priority-high' : 'priority-normal'}">${task.priority === 'срочно' ? 'Срочно' : 'Обычный'}</div>` : ''}
+            `;
+            taskList.appendChild(taskItem);
+        });
+        dateGroup.appendChild(taskList);
+        timeline.appendChild(dateGroup);
+    }
+    
+    container.innerHTML = '';
+    container.appendChild(timeline);
+}
+
+// ==================== СУЩЕСТВУЮЩИЕ ФУНКЦИИ (АДАПТИРОВАНЫ ПОД #cards-container) ====================
+
 let draggedBoard = null;
 
 function initBoardDragAndDrop() {
-    const handles = document.querySelectorAll('.board-drag-handle');
+    const handles = document.querySelectorAll('#cards-container .board-drag-handle');
     console.log('initBoardDragAndDrop: найдено ручек:', handles.length);
     handles.forEach(handle => {
         handle.setAttribute('draggable', 'true');
@@ -72,7 +385,6 @@ function initBoardDragAndDrop() {
 }
 
 function handleBoardDragStart(e) {
-    // Запрещаем перетаскивание, если цель не сам drag-handle (это на всякий случай)
     if (!e.target.closest('.board-drag-handle')) {
         e.preventDefault();
         return false;
@@ -106,7 +418,7 @@ function handleBoardDragEnd(e) {
         draggedBoard.classList.remove('dragging');
         draggedBoard = null;
     }
-    document.querySelectorAll('.card').forEach(card => {
+    document.querySelectorAll('#cards-container .card').forEach(card => {
         card.classList.remove('drag-over');
     });
 }
@@ -147,7 +459,6 @@ function handleBoardDrop(e) {
     const mouseY = e.clientY;
     let insertBefore = mouseY < rect.top + rect.height / 2;
 
-    // Корректировка для вставки
     if (fromIndex < toIndex && insertBefore) insertBefore = false;
     if (fromIndex > toIndex && !insertBefore) insertBefore = true;
 
@@ -158,56 +469,11 @@ function handleBoardDrop(e) {
     boardsData.splice(insertIndex, 0, movedBoard);
     
     saveBoardsToLocalStorage();
-    renderBoards();
-}
-
-function moveCardWithinBoard(boardId, fromIndex, toIndex, currentCardsOrder) {
-    console.log('moveCardWithinBoard called', { boardId, fromIndex, toIndex });
-    // Получаем новый порядок карточек из DOM
-    const cardsContainer = document.querySelector('.cards');
-    const newOrder = Array.from(cardsContainer.children).map(card => parseInt(card.dataset.boardId));
-    console.log('Новый порядок boardId из DOM:', newOrder);
-    // Переупорядочиваем boardsData согласно новому порядку
-    const newBoards = [];
-    for (const id of newOrder) {
-        const board = boardsData.find(b => b.id === id);
-        if (board) newBoards.push(board);
-    }
-    if (newBoards.length === boardsData.length) {
-        boardsData = newBoards;
-        saveBoardsToLocalStorage();
-        // Не перерисовываем, так как DOM уже в правильном порядке
-        // Но нужно обновить dataset для карточек
-        updateCardsDataset();
-        console.log('Доски переупорядочены согласно DOM');
-    } else {
-        console.error('Не удалось переупорядочить доски');
-    }
-}
-
-function moveCardBetweenBoards(sourceBoardId, sourceCardIndex, targetBoardId, targetIndex, currentCardsOrder) {
-    console.log('moveCardBetweenBoards called', { sourceBoardId, sourceCardIndex, targetBoardId, targetIndex });
-    // Аналогично, получаем новый порядок из DOM
-    const cardsContainer = document.querySelector('.cards');
-    const newOrder = Array.from(cardsContainer.children).map(card => parseInt(card.dataset.boardId));
-    console.log('Новый порядок boardId из DOM:', newOrder);
-    const newBoards = [];
-    for (const id of newOrder) {
-        const board = boardsData.find(b => b.id === id);
-        if (board) newBoards.push(board);
-    }
-    if (newBoards.length === boardsData.length) {
-        boardsData = newBoards;
-        saveBoardsToLocalStorage();
-        updateCardsDataset();
-        console.log('Доски переупорядочены согласно DOM');
-    } else {
-        console.error('Не удалось переупорядочить доски');
-    }
+    renderCurrentView();
 }
 
 function updateCardsDataset() {
-    const allCards = document.querySelectorAll('.card');
+    const allCards = document.querySelectorAll('#cards-container .card');
     allCards.forEach((card, idx) => {
         card.dataset.originalIndex = idx;
     });
@@ -218,7 +484,7 @@ function findBoardIndexById(boardId) {
 }
 
 function findBoardDomIndexByBoardId(boardId) {
-    const cards = document.querySelectorAll('.card');
+    const cards = document.querySelectorAll('#cards-container .card');
     for (let i = 0; i < cards.length; i++) {
         if (parseInt(cards[i].dataset.boardId) === boardId) {
             return i;
@@ -246,7 +512,7 @@ function moveTaskBetweenBoards(sourceBoardId, targetBoardId, taskId) {
 }
 
 function updateBoardsInDOM(boardIndex1, boardIndex2) {
-    const cardsContainer = document.querySelector('.cards');
+    const cardsContainer = document.querySelector('#cards-container');
     if (!cardsContainer) return;
     const board1 = boardsData[boardIndex1];
     const board1Card = cardsContainer.querySelector(`.card[data-board-index="${boardIndex1}"]`);
@@ -268,72 +534,12 @@ function updateBoardsInDOM(boardIndex1, boardIndex2) {
     }, 50);
 }
 
-function renderBoards() {
-    const cardsContainer = document.querySelector('.cards');
-    if (!cardsContainer) return;
-    if (!boardsData || boardsData.length === 0) {
-        cardsContainer.innerHTML = '<div class="empty-message">Нет созданных досок</div>';
-        return;
-    }
-    cardsContainer.innerHTML = '';
-    boardsData.forEach((board, boardIndex) => {
-        const tasks = board.tasks || [];
-        const validTasks = tasks.filter(t => t);
-        const sortedTasks = sortTasksByPriorityAndDate(validTasks);
-        const card = createBoardCard(board, boardIndex, sortedTasks);
-        cardsContainer.appendChild(card);
-    });
-    updateCardsDataset();
-    setTimeout(() => {
-        reinitBoardAndTaskHandlers();
-    }, 50);
-}
-
-function parseDateBoard(dateStr) {
-    if (!dateStr) return new Date(9999, 11, 31);
-    if (typeof dateStr === 'string' && dateStr.includes('.')) {
-        const parts = dateStr.split('.');
-        if (parts.length === 3) {
-            const [day, month, year] = parts;
-            const date = new Date(year, month - 1, day);
-            return isNaN(date.getTime()) ? new Date(9999, 11, 31) : date;
-        }
-    }
-    return new Date(9999, 11, 31);
-}
-
-function formatDateBoard(dateStr) {
-    if (!dateStr) return '';
-    if (typeof dateStr === 'string' && dateStr.includes('.')) {
-        const parts = dateStr.split('.');
-        if (parts.length >= 2) {
-            return `${parts[0]}.${parts[1]}`;
-        }
-    }
-    return dateStr;
-}
-
-function sortTasksByPriorityAndDate(tasks) {
-    if (!tasks || tasks.length === 0) return [];
-    return [...tasks].sort((a, b) => {
-        const priorityA = a.priority || 'обычный';
-        const priorityB = b.priority || 'обычный';
-        if (priorityA !== priorityB) {
-            return priorityA === 'срочно' ? -1 : 1;
-        }
-        const dateA = parseDateBoard(a.dueDate);
-        const dateB = parseDateBoard(b.dueDate);
-        return dateA - dateB;
-    });
-}
-
 function createBoardCard(board, boardIndex, sortedTasks) {
     const card = document.createElement('div');
     card.className = 'card';
     card.dataset.boardId = board.id;
     card.dataset.boardIndex = boardIndex;
     card.dataset.originalIndex = boardIndex;
-    // НЕ ставим draggable на card
     const header = createCardHeader(board, boardIndex);
     const list = document.createElement('div');
     list.className = 'list';
@@ -358,7 +564,6 @@ function createCardHeader(board, boardIndex) {
     const header = document.createElement('div');
     header.className = 'tasks-header flex-row-between';
     
-    // Создаём перетаскиваемую область
     const dragHandle = document.createElement('div');
     dragHandle.className = 'board-drag-handle';
     dragHandle.setAttribute('draggable', 'true');
@@ -391,73 +596,9 @@ function createCardHeader(board, boardIndex) {
     const dropdownMenu = createDropdownMenu(board, boardIndex);
     header.appendChild(dropdownMenu);
     
-    // Сохраняем ссылку на dragHandle для обработчиков
     header.dragHandle = dragHandle;
     
     return header;
-}
-
-function initTaskSortable(container, boardId) {
-    if (!container) return;
-    if (container.sortable) {
-        container.sortable.destroy();
-        delete container.sortable;
-    }
-    const sortable = new Sortable(container, {
-        animation: 150,
-        group: {
-            name: 'tasks',
-            pull: true,
-            revertClone: false,
-            sort: true
-        },
-        handle: '.item',
-        draggable: '.item',
-        ghostClass: 'task-dragging',   // применяется к элементу-заполнителю (место вставки)
-        dragClass: 'task-drag-over',   // применяется к перетаскиваемому элементу
-        forceFallback: false,           // нативный drag – плавный и быстрый
-        swapThreshold: 0.5,
-        invertSwap: true,
-        onEnd: function(evt) {
-            const fromList = evt.from;
-            const toList = evt.to;
-            const fromBoard = fromList.closest('.card');
-            const toBoard = toList.closest('.card');
-            const fromBoardId = parseInt(fromBoard.dataset.boardId);
-            const toBoardId = parseInt(toBoard.dataset.boardId);
-            const draggedItem = evt.item;
-            const taskId = parseInt(draggedItem.dataset.taskId);
-            if (fromBoardId === toBoardId) {
-                const items = Array.from(toList.children);
-                const newOrder = items.map(item => parseInt(item.dataset.taskId));
-                const board = boardsData.find(b => b.id === toBoardId);
-                if (board) {
-                    const newTasks = [];
-                    for (const id of newOrder) {
-                        const task = board.tasks.find(t => t.id === id);
-                        if (task) newTasks.push(task);
-                    }
-                    if (newTasks.length === board.tasks.length) {
-                        board.tasks = newTasks;
-                        saveBoardsToLocalStorage();
-                        showToast('Порядок задач изменён');
-                    }
-                }
-            } else {
-                const sourceBoard = boardsData.find(b => b.id === fromBoardId);
-                const targetBoard = boardsData.find(b => b.id === toBoardId);
-                const taskIndex = sourceBoard.tasks.findIndex(t => t.id === taskId);
-                if (taskIndex !== -1) {
-                    const movedTask = sourceBoard.tasks.splice(taskIndex, 1)[0];
-                    targetBoard.tasks.push(movedTask);
-                    saveBoardsToLocalStorage();
-                    renderBoards();
-                    showToast(`Задача "${movedTask.name}" перемещена в доску "${targetBoard.name}"`);
-                }
-            }
-        }
-    });
-    container.sortable = sortable;
 }
 
 function createDropdownMenu(board, boardIndex) {
@@ -493,6 +634,69 @@ function createDropdownMenu(board, boardIndex) {
         </ul>
     `;
     return dropdown;
+}
+
+function initTaskSortable(container, boardId) {
+    if (!container) return;
+    if (container.sortable) {
+        container.sortable.destroy();
+        delete container.sortable;
+    }
+    const sortable = new Sortable(container, {
+        animation: 150,
+        group: {
+            name: 'tasks',
+            pull: true,
+            revertClone: false,
+            sort: true
+        },
+        handle: '.item',
+        draggable: '.item',
+        ghostClass: 'task-dragging',
+        dragClass: 'task-drag-over',
+        forceFallback: false,
+        swapThreshold: 0.5,
+        invertSwap: true,
+        onEnd: function(evt) {
+            const fromList = evt.from;
+            const toList = evt.to;
+            const fromBoard = fromList.closest('.card');
+            const toBoard = toList.closest('.card');
+            const fromBoardId = parseInt(fromBoard.dataset.boardId);
+            const toBoardId = parseInt(toBoard.dataset.boardId);
+            const draggedItem = evt.item;
+            const taskId = parseInt(draggedItem.dataset.taskId);
+            if (fromBoardId === toBoardId) {
+                const items = Array.from(toList.children);
+                const newOrder = items.map(item => parseInt(item.dataset.taskId));
+                const board = boardsData.find(b => b.id === toBoardId);
+                if (board) {
+                    const newTasks = [];
+                    for (const id of newOrder) {
+                        const task = board.tasks.find(t => t.id === id);
+                        if (task) newTasks.push(task);
+                    }
+                    if (newTasks.length === board.tasks.length) {
+                        board.tasks = newTasks;
+                        saveBoardsToLocalStorage();
+                        showToast('Порядок задач изменён');
+                    }
+                }
+            } else {
+                const sourceBoard = boardsData.find(b => b.id === fromBoardId);
+                const targetBoard = boardsData.find(b => b.id === toBoardId);
+                const taskIndex = sourceBoard.tasks.findIndex(t => t.id === taskId);
+                if (taskIndex !== -1) {
+                    const movedTask = sourceBoard.tasks.splice(taskIndex, 1)[0];
+                    targetBoard.tasks.push(movedTask);
+                    saveBoardsToLocalStorage();
+                    renderCurrentView();
+                    showToast(`Задача "${movedTask.name}" перемещена в доску "${targetBoard.name}"`);
+                }
+            }
+        }
+    });
+    container.sortable = sortable;
 }
 
 function createTaskItem(task, boardIndex, taskIndex) {
@@ -643,22 +847,18 @@ function archiveTask(boardIndex, taskId, isArchived) {
         board.tasks.splice(taskIndex, 1);
     }
     saveBoardsToLocalStorage();
-    renderBoards();
+    renderCurrentView();
     initBoardEvents();
     showToast(isArchived ? 'Задача перемещена в архив' : 'Задача восстановлена');
 }
 
 function reinitBoardAndTaskHandlers() {
-    // Инициализация drag-and-drop для досок (кастомная)
     initBoardDragAndDrop();
-
-    // Инициализация Sortable для задач внутри досок
-    document.querySelectorAll('.card .list').forEach(list => {
+    document.querySelectorAll('#cards-container .card .list').forEach(list => {
         const card = list.closest('.card');
         const boardId = parseInt(card.dataset.boardId);
         initTaskSortable(list, boardId);
     });
-
     initBoardEvents();
 }
 
@@ -673,6 +873,18 @@ function initBoardEvents() {
     });
     document.removeEventListener('click', handleOutsideClick);
     document.addEventListener('click', handleOutsideClick);
+
+    const closeBtns = document.querySelectorAll('.dropdown-close');
+    closeBtns.forEach(btn => {
+        btn.removeEventListener('click', handleDropdownClose);
+        btn.addEventListener('click', handleDropdownClose);
+    });
+}
+
+function handleDropdownClose(e) {
+    e.stopPropagation();
+    const dropdown = this.closest('.dropdown-menu');
+    if (dropdown) dropdown.classList.remove('show');
 }
 
 function handleMoreActionsClick(e) {
@@ -681,10 +893,17 @@ function handleMoreActionsClick(e) {
     const card = btn.closest('.card');
     const dropdown = card?.querySelector('.dropdown-menu');
     if (dropdown) {
+        const isOpen = dropdown.classList.contains('show');
         document.querySelectorAll('.board-list .dropdown-menu').forEach(menu => {
-            if (menu !== dropdown) menu.classList.remove('show');
+            if (menu !== dropdown) {
+                menu.classList.remove('show');
+            }
         });
-        dropdown.classList.toggle('show');
+        if (!isOpen) {
+            dropdown.classList.add('show');
+        } else {
+            dropdown.classList.remove('show');
+        }
     }
 }
 
@@ -741,7 +960,7 @@ function renameBoard(boardIndex) {
     if (newName && newName.trim()) {
         board.name = newName.trim();
         saveBoardsToLocalStorage();
-        renderBoards();
+        renderCurrentView();
         initBoardEvents();
         showToast('Доска переименована');
     }
@@ -764,7 +983,7 @@ function cloneBoard(boardIndex) {
     boardsData.push(newBoard);
     reorderBoardsForColumnCount();
     saveBoardsToLocalStorage();
-    renderBoards();
+    renderCurrentView();
     initBoardEvents();
     showToast('Доска скопирована');
 }
@@ -773,7 +992,7 @@ function clearBoard(boardIndex) {
     if (confirm('Вы уверены, что хотите очистить доску? Все задачи будут удалены.')) {
         boardsData[boardIndex].tasks = [];
         saveBoardsToLocalStorage();
-        renderBoards();
+        renderCurrentView();
         initBoardEvents();
         showToast('Доска очищена');
     }
@@ -784,7 +1003,7 @@ function deleteBoard(boardIndex) {
         boardsData.splice(boardIndex, 1);
         reorderBoardsForColumnCount();
         saveBoardsToLocalStorage();
-        renderBoards();
+        renderCurrentView();
         initBoardEvents();
         showToast('Доска удалена');
     }
@@ -812,13 +1031,56 @@ function showToast(message) {
     }, 2000);
 }
 
+// ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ ДАТ ====================
+
+function parseDateBoard(dateStr) {
+    if (!dateStr) return new Date(9999, 11, 31);
+    if (typeof dateStr === 'string' && dateStr.includes('.')) {
+        const parts = dateStr.split('.');
+        if (parts.length === 3) {
+            const [day, month, year] = parts;
+            const date = new Date(year, month - 1, day);
+            return isNaN(date.getTime()) ? new Date(9999, 11, 31) : date;
+        }
+    }
+    return new Date(9999, 11, 31);
+}
+
+function formatDateBoard(dateStr) {
+    if (!dateStr) return '';
+    if (typeof dateStr === 'string' && dateStr.includes('.')) {
+        const parts = dateStr.split('.');
+        if (parts.length >= 2) {
+            return `${parts[0]}.${parts[1]}`;
+        }
+    }
+    return dateStr;
+}
+
+function sortTasksByPriorityAndDate(tasks) {
+    if (!tasks || tasks.length === 0) return [];
+    return [...tasks].sort((a, b) => {
+        const priorityA = a.priority || 'обычный';
+        const priorityB = b.priority || 'обычный';
+        if (priorityA !== priorityB) {
+            return priorityA === 'срочно' ? -1 : 1;
+        }
+        const dateA = parseDateBoard(a.dueDate);
+        const dateB = parseDateBoard(b.dueDate);
+        return dateA - dateB;
+    });
+}
+
+// ==================== ИНИЦИАЛИЗАЦИЯ СТРАНИЦЫ ====================
+
 function initBoardListPage() {
     if (!document.querySelector('.board-list')) return;
     const hasLocalData = loadBoardsFromLocalStorage();
     if (hasLocalData && boardsData.length > 0) {
         reorderBoardsForColumnCount();
-        renderBoards();
+        renderCurrentView();
         initBoardEvents();
+        initViewSwitching();
     } else {
         loadBoardsData();
     }

@@ -1145,7 +1145,7 @@ aside .submenu .events-grid .col-event .nav-link,
   position: absolute;
   top: 0;
   right: 0;
-  min-width: 14vw;
+  min-width: 16vw;
   background: #F6FBF2;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   z-index: 1000;
@@ -1473,7 +1473,14 @@ aside .submenu .events-grid .col-event .nav-link,
 
 .board-drag-handle {
   cursor: grab;
+  gap: 0.375rem;
 }
 .board-drag-handle:active {
   cursor: grabbing;
+}
+
+.board-list .cards.tables-view {
+  -moz-column-count: 1 !important;
+       column-count: 1 !important;
+  display: block;
 }/*# sourceMappingURL=style.css.map */
