@@ -7,14 +7,22 @@
     @extend .br-5;
 }
 
-.button-basic, .reset-filters-btn {
+.button-small {
+    @extend .border-green-1;
+    @extend .text-signature;
+    padding: $space-3 $space-24;
+    @extend .br-5;
+}
+
+.button-basic, .reset-filters-btn, .button-small {
     background-color: $light-green;
     transition: box-shadow 0.2s ease;
     box-shadow: $space-1 $space-1 3px $dark-gray; 
 }
 
 .button-basic:hover,
-.reset-filters-btn:hover{
+.reset-filters-btn:hover,
+.button-small:hover{
     box-shadow: none;
     background-color: $light-light-green;
 }

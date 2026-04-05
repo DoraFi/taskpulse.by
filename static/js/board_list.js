@@ -1,12 +1,42 @@
 let boardsData = [];
 let isDragging = false;
 let currentView = 'board';
-
-// Сортировка таблицы (глобальная для табличного режима)
+let teamMembers = [];
 let tableSortColumn = null;
 let tableSortDirection = 'asc';
 
-// ==================== ЗАГРУЗКА И СОХРАНЕНИЕ ====================
+let VanillaCalendarReady = false;
+let VanillaCalendarConstructor = null;
+
+function loadVanillaCalendar() {
+    return new Promise((resolve) => {
+        if (VanillaCalendarReady && VanillaCalendarConstructor) {
+            resolve(VanillaCalendarConstructor);
+            return;
+        }
+        const onReady = () => {
+            VanillaCalendarReady = true;
+            VanillaCalendarConstructor = window.VanillaCalendar;
+            resolve(VanillaCalendarConstructor);
+            window.removeEventListener('vanillaCalendarReady', onReady);
+        };
+        window.addEventListener('vanillaCalendarReady', onReady);
+        if (window.VanillaCalendar) {
+            onReady();
+        }
+    });
+}
+
+async function loadTeamData() {
+    try {
+        const response = await fetch('/static/data/team.json');
+        if (!response.ok) throw new Error('Ошибка загрузки команды');
+        teamMembers = await response.json();
+    } catch (error) {
+        console.error('Ошибка загрузки team.json:', error);
+        teamMembers = [];
+    }
+}
 
 async function loadBoardsData() {
     try {
@@ -58,8 +88,6 @@ function loadBoardsFromLocalStorage() {
     return false;
 }
 
-// ==================== ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ====================
-
 function initViewSwitching() {
     const tabs = document.querySelectorAll('.board-list .tabs .tab-btn');
     tabs.forEach(btn => {
@@ -73,10 +101,8 @@ function handleTabClick(e) {
     if (tab === 'board') currentView = 'board';
     else if (tab === 'tables') currentView = 'tables';
     else if (tab === 'timeline') currentView = 'timeline';
-    
     document.querySelectorAll('.board-list .tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
     e.currentTarget.classList.add('active');
-    
     renderCurrentView();
 }
 
@@ -86,14 +112,10 @@ function renderCurrentView() {
     else if (currentView === 'timeline') renderTimelineView();
 }
 
-// ==================== ПРЕДСТАВЛЕНИЕ "ДОСКИ" ====================
-
 function renderBoardView() {
     const container = document.querySelector('#cards-container');
     if (!container) return;
-
     container.classList.remove('tables-view');
-
     if (!boardsData || boardsData.length === 0) {
         container.innerHTML = '<div class="empty-message">Нет созданных досок</div>';
         return;
@@ -112,21 +134,15 @@ function renderBoardView() {
     }, 50);
 }
 
-// ==================== ПРЕДСТАВЛЕНИЕ "ТАБЛИЦЫ" ====================
-
 function renderTableView() {
     const container = document.querySelector('#cards-container');
     if (!container) return;
-    
     container.classList.add('tables-view');
-    
     if (!boardsData || boardsData.length === 0) {
         container.innerHTML = '<div class="empty-message">Нет созданных досок</div>';
         return;
     }
-    
     container.innerHTML = '';
-    
     boardsData.forEach((board, boardIndex) => {
         const boardCard = document.createElement('div');
         boardCard.className = 'card board-table-card';
@@ -137,36 +153,493 @@ function renderTableView() {
         boardCard.appendChild(header);
         
         const tasks = board.tasks || [];
-        const table = createBoardTable(board, tasks, boardIndex);
-        boardCard.appendChild(table);
+        const tableOrMessage = createBoardTable(board, tasks, boardIndex);
+        boardCard.appendChild(tableOrMessage);
+        
+        const addTaskForm = createAddTaskForm(board.id, boardIndex);
+        boardCard.appendChild(addTaskForm);
         
         container.appendChild(boardCard);
     });
-    
     initBoardDragAndDrop();
-    
     initTableRowsSortable();
-    
     initBoardEvents();
 }
 
+function createAddTaskForm(boardId, boardIndex) {
+    const form = document.createElement('form');
+    form.className = 'form-add-task';
+    form.dataset.boardId = boardId;
+    form.dataset.boardIndex = boardIndex;
+    form.style.position = 'relative';
+
+    form.innerHTML = `
+        <input type="text" placeholder="Создайте краткое описание задачи">
+        <div class="tag">
+            <div class="assignee-wrapper" style="display: flex; align-items: center; gap: 0.25rem;">
+                <img src="/static/source/icons/profile_select.svg" alt="Исполнитель" class="assignee-icon" style="cursor: pointer;">
+                <span class="assignee-name text-signature"></span>
+            </div>
+            <div class="calendar-trigger" style="display: inline-flex; align-items: center; gap: 0.25rem; cursor: pointer;">
+                <img src="/static/source/icons/calendar.svg" alt="Срок" class="calendar-icon">
+                <span class="calendar-value text-signature"></span>
+            </div>
+            <button type="button" class="button-small">Создать</button>
+        </div>
+    `;
+
+    const input = form.querySelector('input');
+    const tagDiv = form.querySelector('.tag');
+    const assigneeIcon = form.querySelector('.assignee-icon');
+    const assigneeNameSpan = form.querySelector('.assignee-name');
+    const calendarTrigger = form.querySelector('.calendar-trigger');
+    const calendarIcon = calendarTrigger.querySelector('.calendar-icon');
+    const calendarValueSpan = calendarTrigger.querySelector('.calendar-value');
+    const createBtn = form.querySelector('button');
+
+    let selectedAssignee = null;
+    let selectedDueDate = null; 
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const [year, month, day] = dateStr.split('-');
+        const currentYear = new Date().getFullYear();
+        if (parseInt(year) === currentYear) {
+            return `${day}.${month}`;
+        } else {
+            return `${day}.${month}.${year}`;
+        }
+    }
+
+    function formatDateRange(start, end) {
+        if (start && end && start !== end) return `${formatDate(start)} - ${formatDate(end)}`;
+        if (end) return `до ${formatDate(end)}`;
+        if (start) return `с ${formatDate(start)}`;
+        return '';
+    }
+
+    function updateCalendarDisplay() {
+        if (selectedDueDate) {
+            if (typeof selectedDueDate === 'string') {
+                calendarValueSpan.textContent = formatDateRange(null, selectedDueDate);
+                calendarIcon.style.display = 'none';
+            } else if (selectedDueDate.start && selectedDueDate.end) {
+                calendarValueSpan.textContent = formatDateRange(selectedDueDate.start, selectedDueDate.end);
+                calendarIcon.style.display = 'none';
+            } else if (selectedDueDate.end) {
+                calendarValueSpan.textContent = formatDateRange(null, selectedDueDate.end);
+                calendarIcon.style.display = 'none';
+            }
+        } else {
+            calendarValueSpan.textContent = '';
+            calendarIcon.style.display = 'inline';
+        }
+    }
+
+    let currentYear = new Date().getFullYear();
+    let currentMonth = new Date().getMonth(); 
+    let selectionStart = null;
+    let selectionEnd = null;
+    let isRangeMode = true;
+
+    function buildMonthCalendar(container, year, month, isFirstMonth) {
+        const date = new Date(year, month, 1);
+        const firstDay = date.getDay(); 
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const prevMonthDays = new Date(year, month, 0).getDate();
+        const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+
+        const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+
+        let html = `
+            <div class="custom-calendar-month">
+                <div class="month-header">
+                    <button class="change-month" data-month="${month}" data-year="${year}" data-dir="${isFirstMonth ? 'prev' : 'next'}">
+                        ${monthNames[month]} ${year}
+                    </button>
+                </div>
+                <div class="weekdays">
+                    <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
+                </div>
+                <div class="days">
+        `;
+
+        for (let i = 0; i < startOffset; i++) {
+            const prevDate = prevMonthDays - startOffset + i + 1;
+            const prevYear = month === 0 ? year - 1 : year;
+            const prevMonth = month === 0 ? 11 : month - 1;
+            const dateStr = `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-${String(prevDate).padStart(2, '0')}`;
+            html += `<div class="other-month" data-date="${dateStr}">${prevDate}</div>`;
+        }
+
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            let classes = 'day';
+            if (selectionStart === dateStr) classes += ' selected-start';
+            if (selectionEnd === dateStr) classes += ' selected-end';
+            if (selectionStart && selectionEnd && dateStr > selectionStart && dateStr < selectionEnd) classes += ' in-range';
+            html += `<div class="${classes}" data-date="${dateStr}">${d}</div>`;
+        }
+
+        const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
+        const remaining = totalCells - (startOffset + daysInMonth);
+        for (let i = 1; i <= remaining; i++) {
+            const nextYear = month === 11 ? year + 1 : year;
+            const nextMonth = month === 11 ? 0 : month + 1;
+            const dateStr = `${nextYear}-${String(nextMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+            html += `<div class="other-month" data-date="${dateStr}">${i}</div>`;
+        }
+
+        html += `</div></div>`;
+        container.innerHTML = html;
+
+        container.querySelectorAll('.day').forEach(dayEl => {
+            dayEl.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const dateStr = dayEl.dataset.date;
+                if (!selectionStart || (selectionStart && selectionEnd)) {
+                    selectionStart = dateStr;
+                    selectionEnd = null;
+                } else {
+                    if (dateStr < selectionStart) {
+                        selectionEnd = selectionStart;
+                        selectionStart = dateStr;
+                    } else {
+                        selectionEnd = dateStr;
+                    }
+                }
+                renderBothMonths();
+                if (selectionEnd) {
+                    selectedDueDate = { start: selectionStart, end: selectionEnd };
+                } else if (selectionStart) {
+                    selectedDueDate = selectionStart;
+                } else {
+                    selectedDueDate = null;
+                }
+                updateCalendarDisplay();
+            });
+        });
+
+        const monthBtn = container.querySelector('.change-month');
+        if (monthBtn) {
+            monthBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const dir = monthBtn.dataset.dir;
+                if (dir === 'prev') {
+                    if (currentMonth === 0) {
+                        currentMonth = 11;
+                        currentYear--;
+                    } else {
+                        currentMonth--;
+                    }
+                } else {
+                    if (currentMonth === 11) {
+                        currentMonth = 0;
+                        currentYear++;
+                    } else {
+                        currentMonth++;
+                    }
+                }
+                renderBothMonths();
+            });
+        }
+    }
+
+    function renderBothMonths() {
+        const monthsContainer = document.querySelector('.custom-calendar-months');
+        if (!monthsContainer) return;
+        monthsContainer.innerHTML = '';
+        const firstMonth = document.createElement('div');
+        buildMonthCalendar(firstMonth, currentYear, currentMonth, true);
+        monthsContainer.appendChild(firstMonth);
+        let secondYear = currentYear;
+        let secondMonth = currentMonth + 1;
+        if (secondMonth === 12) {
+            secondMonth = 0;
+            secondYear++;
+        }
+        const secondMonthDiv = document.createElement('div');
+        buildMonthCalendar(secondMonthDiv, secondYear, secondMonth, false);
+        monthsContainer.appendChild(secondMonthDiv);
+    }
+
+    function openCustomCalendar() {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay custom-calendar-modal';
+        const calendarWrapper = document.createElement('div');
+        calendarWrapper.className = 'custom-calendar';
+        calendarWrapper.innerHTML = `
+            <div class="custom-calendar-header">
+                <button class="prev-both">←</button>
+                <div class="custom-calendar-title">Выберите диапазон дат</div>
+                <button class="next-both">→</button>
+            </div>
+            <div class="custom-calendar-months"></div>
+            <div class="custom-calendar-footer">
+                <button class="button-secondary reset-dates">Сбросить</button>
+                <button class="button-basic apply-dates">Применить</button>
+            </div>
+        `;
+        modal.appendChild(calendarWrapper);
+        document.body.appendChild(modal);
+        modal.classList.add('show');
+
+        if (selectedDueDate) {
+            if (typeof selectedDueDate === 'string') {
+                selectionEnd = selectedDueDate;
+                selectionStart = null;
+            } else {
+                selectionStart = selectedDueDate.start;
+                selectionEnd = selectedDueDate.end;
+            }
+        } else {
+            selectionStart = null;
+            selectionEnd = null;
+        }
+
+        if (selectionEnd) {
+            const endDate = new Date(selectionEnd);
+            currentYear = endDate.getFullYear();
+            currentMonth = endDate.getMonth();
+        } else {
+            const now = new Date();
+            currentYear = now.getFullYear();
+            currentMonth = now.getMonth();
+        }
+        renderBothMonths();
+
+        const prevBoth = calendarWrapper.querySelector('.prev-both');
+        const nextBoth = calendarWrapper.querySelector('.next-both');
+        prevBoth.addEventListener('click', () => {
+            if (currentMonth === 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else {
+                currentMonth--;
+            }
+            renderBothMonths();
+        });
+        nextBoth.addEventListener('click', () => {
+            if (currentMonth === 11) {
+                currentMonth = 0;
+                currentYear++;
+            } else {
+                currentMonth++;
+            }
+            renderBothMonths();
+        });
+
+        const resetBtn = calendarWrapper.querySelector('.reset-dates');
+        resetBtn.addEventListener('click', () => {
+            selectionStart = null;
+            selectionEnd = null;
+            selectedDueDate = null;
+            renderBothMonths();
+            updateCalendarDisplay();
+        });
+
+        const applyBtn = calendarWrapper.querySelector('.apply-dates');
+        applyBtn.addEventListener('click', () => {
+            if (selectionStart && selectionEnd) {
+                selectedDueDate = { start: selectionStart, end: selectionEnd };
+            } else if (selectionEnd) {
+                selectedDueDate = selectionEnd;
+            } else if (selectionStart) {
+                selectedDueDate = selectionStart;
+            } else {
+                selectedDueDate = null;
+            }
+            updateCalendarDisplay();
+            modal.classList.remove('show');
+            setTimeout(() => modal.remove(), 200);
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('show');
+                setTimeout(() => modal.remove(), 200);
+            }
+        });
+    }
+
+    calendarTrigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openCustomCalendar();
+    });
+
+    function openAssigneeModal() {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content" style="width: 28vw; height: auto; max-height: 70vh;">
+                <div class="modal-header">
+                    <p class="text-header">Выберите исполнителя</p>
+                    <button class="modal-close">
+                        <img src="/static/source/icons/cross.svg" alt="Закрыть">
+                    </button>
+                </div>
+                <div class="modal-body" style="gap: 0.75rem;">
+                    ${teamMembers.map(member => `
+                        <div class="user-img-text assignee-option" data-name="${member.name}" data-avatar="${member.avatar}" style="cursor: pointer;">
+                            <img src="/static/source/user_img/${member.avatar}" alt="">
+                            <div class="basic-and-signature">
+                                <p class="text-basic">${escapeHtml(member.name)}</p>
+                                <p class="text-signature">${escapeHtml(member.role)}</p>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="modal-footer">
+                    <button class="button-secondary modal-cancel">Отмена</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.classList.add('show');
+        const closeModal = () => {
+            modal.classList.remove('show');
+            setTimeout(() => modal.remove(), 200);
+        };
+        modal.querySelector('.modal-close').addEventListener('click', closeModal);
+        modal.querySelector('.modal-cancel').addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+        modal.querySelectorAll('.assignee-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                const name = opt.dataset.name;
+                const avatar = opt.dataset.avatar;
+                selectedAssignee = { name, avatar };
+                assigneeIcon.src = `/static/source/user_img/${avatar}`;
+                assigneeIcon.style.borderRadius = '50%';
+                assigneeNameSpan.textContent = name;
+                closeModal();
+            });
+        });
+    }
+
+    assigneeIcon.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (teamMembers.length) openAssigneeModal();
+        else showToast('Список команды не загружен');
+    });
+
+    function showTag() {
+        tagDiv.style.display = 'flex';
+    }
+
+    function hideTagAndReset() {
+        tagDiv.style.display = 'none';
+        input.value = '';
+        selectedAssignee = null;
+        selectedDueDate = null;
+        assigneeIcon.src = '/static/source/icons/profile_select.svg';
+        assigneeIcon.style.borderRadius = '0';
+        assigneeNameSpan.textContent = '';
+        calendarValueSpan.textContent = '';
+        calendarIcon.style.display = 'inline';
+    }
+
+    input.addEventListener('focus', showTag);
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            createBtn.click();
+        }
+    });
+
+    createBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const taskName = input.value.trim();
+        if (!taskName) {
+            showToast('Введите название задачи');
+            return;
+        }
+        const board = boardsData[boardIndex];
+        if (!board) return;
+        const maxId = Math.max(0, ...board.tasks.map(t => t.id).filter(id => typeof id === 'number'));
+        const newId = maxId + 1;
+        let dueDate = null;
+        if (selectedDueDate) {
+            if (typeof selectedDueDate === 'string') dueDate = selectedDueDate;
+            else if (selectedDueDate.end) dueDate = selectedDueDate.end;
+        }
+        const newTask = {
+            id: newId,
+            name: taskName,
+            priority: 'обычный',
+            dueDate: dueDate,
+            assignee: selectedAssignee ? selectedAssignee.name : null,
+            assigneeAvatar: selectedAssignee ? selectedAssignee.avatar : null,
+            subtasks: []
+        };
+        board.tasks.push(newTask);
+        saveBoardsToLocalStorage();
+        renderCurrentView();
+        showToast(`Задача "${taskName}" создана в доске "${board.name}"`);
+        hideTagAndReset();
+    });
+
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('.modal-overlay')) return;
+        if (!form.contains(e.target) && tagDiv.style.display === 'flex') {
+            hideTagAndReset();
+        }
+    });
+
+    hideTagAndReset();
+    return form;
+}
+
+function createBoardCard(board, boardIndex, sortedTasks) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.boardId = board.id;
+    card.dataset.boardIndex = boardIndex;
+    card.dataset.originalIndex = boardIndex;
+    const header = createCardHeader(board, boardIndex);
+    const list = document.createElement('div');
+    list.className = 'list';
+    const validTasks = sortedTasks.filter(t => t);
+    if (validTasks.length === 0) {
+        const emptyItem = document.createElement('div');
+        emptyItem.className = 'empty-task';
+        emptyItem.textContent = 'Нет задач в этой доске';
+        list.appendChild(emptyItem);
+    } else {
+        validTasks.forEach((task, taskIndex) => {
+            const taskItem = createTaskItem(task, boardIndex, taskIndex);
+            list.appendChild(taskItem);
+        });
+    }
+    const addTaskForm = createAddTaskForm(board.id, boardIndex);
+    card.appendChild(header);
+    card.appendChild(list);
+    card.appendChild(addTaskForm);
+    return card;
+}
+
 function createBoardTable(board, tasks, boardIndex) {
+    if (!tasks || tasks.length === 0) {
+        const emptyMessage = document.createElement('div');
+        emptyMessage.className = 'empty-task';
+        emptyMessage.textContent = 'Нет задач в этой таблице';
+        return emptyMessage;
+    }
+    
     const tableWrapper = document.createElement('div');
     tableWrapper.className = 'tasks-grid-wrapper';
     const table = document.createElement('div');
     table.className = 'tasks-grid';
-    
-    const columns = ['select', 'id', 'name', 'priority', 'dueDate', 'assignee', 'subtasksCount'];
+    const columns = ['select', 'id', 'name', 'priority', 'dueDate', 'assignee'];
     const columnNames = {
         select: '',
         id: 'ID',
         name: 'Название',
         priority: 'Приоритет',
         dueDate: 'Срок',
-        assignee: 'Исполнитель',
-        subtasksCount: 'Подзадачи'
+        assignee: 'Исполнитель'
     };
-    
     const headerRow = document.createElement('div');
     headerRow.className = 'grid-header';
     columns.forEach(col => {
@@ -188,7 +661,6 @@ function createBoardTable(board, tasks, boardIndex) {
     
     const rowsContainer = document.createElement('div');
     rowsContainer.className = 'table-rows';
-    
     let sortedTasks = [...tasks];
     const sortState = boardTableSortState[board.id];
     if (sortState && sortState.column) {
@@ -211,7 +683,6 @@ function createBoardTable(board, tasks, boardIndex) {
             else return valB.localeCompare(valA);
         });
     }
-    
     sortedTasks.forEach(task => {
         const row = document.createElement('div');
         row.className = 'grid-row';
@@ -238,9 +709,86 @@ function createBoardTable(board, tasks, boardIndex) {
                 case 'id':
                     cell.textContent = task.id;
                     break;
-                case 'name':
-                    cell.textContent = task.name;
+                case 'name': {
+                    const container = document.createElement('div');
+                    container.style.display = 'flex';
+                    container.style.flexDirection = 'column';
+                    container.style.gap = '8px';
+
+                    const topRow = document.createElement('div');
+                    topRow.style.display = 'flex';
+                    topRow.style.alignItems = 'center';
+                    topRow.style.gap = '8px';
+                    topRow.style.flexWrap = 'wrap';
+
+                    const nameSpan = document.createElement('span');
+                    nameSpan.textContent = task.name;
+                    topRow.appendChild(nameSpan);
+
+                    let subtasksList = null;
+                    let totalCount = 0;
+                    let completedCount = 0;
+                    let trigger = null;
+
+                    if (task.subtasks && task.subtasks.length > 0) {
+                        totalCount = task.subtasks.length;
+                        completedCount = task.subtasks.filter(st => st.completed).length;
+
+                        trigger = document.createElement('span');
+                        trigger.className = 'name';
+                        trigger.textContent = `${completedCount} / ${totalCount}`;
+                        trigger.style.cursor = 'pointer';
+                        trigger.style.display = 'inline-flex';
+                        trigger.style.alignItems = 'center';
+                        trigger.style.gap = '0.25rem';
+                        topRow.appendChild(trigger);
+
+                        subtasksList = document.createElement('div');
+                        subtasksList.className = 'subtasks-list';
+                        subtasksList.style.display = 'none';
+
+                        task.subtasks.forEach(subtask => {
+                            const subtaskItem = document.createElement('div');
+                            subtaskItem.className = 'subtask-item';
+                            subtaskItem.innerHTML = `
+                                <label class="checkbox-item">
+                                    <input type="checkbox" ${subtask.completed ? 'checked' : ''}>
+                                    <span class="custom-checkbox"></span>
+                                    <span class="checkbox-text">${escapeHtml(subtask.name)}</span>
+                                </label>
+                            `;
+                            const subtaskCheckbox = subtaskItem.querySelector('input');
+                            subtaskCheckbox.addEventListener('change', (e) => {
+                                subtask.completed = e.target.checked;
+                                const newCompleted = task.subtasks.filter(st => st.completed).length;
+                                trigger.textContent = `${newCompleted} / ${totalCount}`;
+                                saveBoardsToLocalStorage();
+
+                                const allCompleted = task.subtasks.every(st => st.completed);
+                                if (allCompleted && totalCount > 0) {
+                                    archiveTask(boardIndex, task.id, true);
+                                }
+                            });
+                            subtasksList.appendChild(subtaskItem);
+                        });
+
+                        trigger.addEventListener('click', () => {
+                            const isOpen = subtasksList.style.display === 'flex';
+                            subtasksList.style.display = isOpen ? 'none' : 'flex';
+                            trigger.classList.toggle('open', !isOpen);
+                            if (!isOpen) {
+                                row.classList.add('subtasks-open');
+                            } else {
+                                row.classList.remove('subtasks-open');
+                            }
+                        });
+                    }
+
+                    container.appendChild(topRow);
+                    if (subtasksList) container.appendChild(subtasksList);
+                    cell.appendChild(container);
                     break;
+                }
                 case 'priority':
                     const prioritySpan = document.createElement('span');
                     prioritySpan.className = task.priority === 'срочно' ? 'priority-high' : 'priority-normal';
@@ -249,7 +797,7 @@ function createBoardTable(board, tasks, boardIndex) {
                     break;
                 case 'dueDate':
                     const dueSpan = document.createElement('span');
-                    const dueDate = task.dueDate ? formatDateBoard(task.dueDate) : '—';
+                    const dueDate = task.dueDate ? formatDueDate(task.dueDate) : '—';
                     dueSpan.textContent = dueDate;
                     if (task.dueDate && parseDateBoard(task.dueDate) < new Date()) {
                         dueSpan.classList.add('overdue');
@@ -257,24 +805,45 @@ function createBoardTable(board, tasks, boardIndex) {
                     cell.appendChild(dueSpan);
                     break;
                 case 'assignee':
-                    cell.textContent = task.assignee || '—';
-                    break;
-                case 'subtasksCount':
-                    const count = task.subtasks ? task.subtasks.length : 0;
-                    cell.textContent = count;
+                    const assigneeName = task.assignee || '';
+                    let assigneeAvatar = task.assigneeAvatar || '';
+                    if (assigneeName && !assigneeAvatar) {
+                        const teamMember = teamMembers.find(m => m.name === assigneeName);
+                        if (teamMember) assigneeAvatar = teamMember.avatar;
+                    }
+                    if (assigneeName) {
+                        const userDiv = document.createElement('div');
+                        userDiv.className = 'user-img-text';
+                        userDiv.style.display = 'flex';
+                        userDiv.style.alignItems = 'center';
+                        userDiv.style.gap = '0.375rem';
+                        const img = document.createElement('img');
+                        img.src = `/static/source/user_img/${assigneeAvatar || 'basic_avatar.png'}`;
+                        img.alt = assigneeName;
+                        img.style.width = '1.5rem';
+                        img.style.height = '1.5rem';
+                        img.style.borderRadius = '50%';
+                        img.style.objectFit = 'cover';
+                        const nameSpan = document.createElement('span');
+                        nameSpan.className = 'text-basic';
+                        nameSpan.textContent = assigneeName;
+                        userDiv.appendChild(img);
+                        userDiv.appendChild(nameSpan);
+                        cell.appendChild(userDiv);
+                    } else {
+                        cell.textContent = '—';
+                    }
                     break;
             }
             row.appendChild(cell);
         });
         rowsContainer.appendChild(row);
     });
-    
     table.appendChild(rowsContainer);
     tableWrapper.appendChild(table);
     return tableWrapper;
 }
 
-// Хранилище состояния сортировки для каждой доски в табличном режиме
 let boardTableSortState = {};
 
 function sortBoardTable(boardId, column) {
@@ -288,15 +857,12 @@ function sortBoardTable(boardId, column) {
         state.column = column;
         state.direction = 'asc';
     }
-    renderTableView(); // перерисовываем табличное представление
+    renderTableView();
 }
-
-// ==================== ПРЕДСТАВЛЕНИЕ "ТАЙМЛАЙН" ====================
 
 function renderTimelineView() {
     const container = document.querySelector('#cards-container');
     if (!container) return;
-    
     let tasksWithDates = [];
     boardsData.forEach(board => {
         if (board.tasks && board.tasks.length) {
@@ -311,33 +877,26 @@ function renderTimelineView() {
             });
         }
     });
-    
     if (tasksWithDates.length === 0) {
         container.innerHTML = '<div class="empty-message">Нет задач с указанными сроками</div>';
         return;
     }
-    
     tasksWithDates.sort((a, b) => a.dueDateObj - b.dueDateObj);
-    
     const groups = {};
     tasksWithDates.forEach(task => {
-        const dateKey = formatDateBoard(task.dueDate);
+        const dateKey = formatDueDate(task.dueDate);
         if (!groups[dateKey]) groups[dateKey] = [];
         groups[dateKey].push(task);
     });
-    
     const timeline = document.createElement('div');
     timeline.className = 'timeline-view';
-    
     for (const [date, tasks] of Object.entries(groups)) {
         const dateGroup = document.createElement('div');
         dateGroup.className = 'timeline-date-group';
-        
         const dateHeader = document.createElement('div');
         dateHeader.className = 'timeline-date-header';
-        dateHeader.textContent = date;
+        dateHeader.textContent = dateKey;
         dateGroup.appendChild(dateHeader);
-        
         const taskList = document.createElement('div');
         taskList.className = 'timeline-task-list';
         tasks.forEach(task => {
@@ -354,18 +913,14 @@ function renderTimelineView() {
         dateGroup.appendChild(taskList);
         timeline.appendChild(dateGroup);
     }
-    
     container.innerHTML = '';
     container.appendChild(timeline);
 }
-
-// ==================== СУЩЕСТВУЮЩИЕ ФУНКЦИИ (АДАПТИРОВАНЫ ПОД #cards-container) ====================
 
 let draggedBoard = null;
 
 function initBoardDragAndDrop() {
     const handles = document.querySelectorAll('#cards-container .board-drag-handle');
-    console.log('initBoardDragAndDrop: найдено ручек:', handles.length);
     handles.forEach(handle => {
         handle.setAttribute('draggable', 'true');
         handle.removeEventListener('dragstart', handleBoardDragStart);
@@ -373,7 +928,6 @@ function initBoardDragAndDrop() {
         handle.removeEventListener('dragover', handleBoardDragOver);
         handle.removeEventListener('dragleave', handleBoardDragLeave);
         handle.removeEventListener('drop', handleBoardDrop);
-        
         handle.addEventListener('dragstart', handleBoardDragStart);
         handle.addEventListener('dragend', handleBoardDragEnd);
         handle.addEventListener('dragover', handleBoardDragOver);
@@ -393,13 +947,9 @@ function handleBoardDragStart(e) {
     draggedBoard = card;
     const boardId = parseInt(card.dataset.boardId);
     const boardName = card.querySelector('.text-header')?.textContent;
-    console.log('=== DRAGSTART ДОСКИ ===');
-    console.log('Перетаскиваемая доска:', boardName, '(id:', boardId, ')');
-    
     card.classList.add('dragging');
     e.dataTransfer.setData('text/plain', boardId);
     e.dataTransfer.effectAllowed = 'move';
-    
     const ghost = card.cloneNode(true);
     ghost.style.position = 'absolute';
     ghost.style.top = '-1000px';
@@ -409,10 +959,8 @@ function handleBoardDragStart(e) {
 }
 
 function handleBoardDragEnd(e) {
-    console.log('=== DRAGEND ДОСКИ ===');
     if (draggedBoard) {
         const boardName = draggedBoard.querySelector('.text-header')?.textContent;
-        console.log('Завершено перетаскивание доски:', boardName);
         draggedBoard.classList.remove('dragging');
         draggedBoard = null;
     }
@@ -442,30 +990,22 @@ function handleBoardDrop(e) {
     const targetBoard = targetHandle.closest('.card');
     if (!targetBoard) return;
     targetBoard.classList.remove('drag-over');
-    
-    console.log('=== DROP ДОСКИ (INSERT) ===');
-    
     if (!draggedBoard || draggedBoard === targetBoard) return;
-
     const fromId = parseInt(draggedBoard.dataset.boardId);
     const toId = parseInt(targetBoard.dataset.boardId);
     const fromIndex = boardsData.findIndex(b => b.id === fromId);
     let toIndex = boardsData.findIndex(b => b.id === toId);
     if (fromIndex === -1 || toIndex === -1) return;
-
     const rect = targetBoard.getBoundingClientRect();
     const mouseY = e.clientY;
     let insertBefore = mouseY < rect.top + rect.height / 2;
-
     if (fromIndex < toIndex && insertBefore) insertBefore = false;
     if (fromIndex > toIndex && !insertBefore) insertBefore = true;
-
     const movedBoard = boardsData.splice(fromIndex, 1)[0];
     let newToIndex = toIndex;
     if (fromIndex < toIndex) newToIndex = toIndex - 1;
     let insertIndex = insertBefore ? newToIndex : newToIndex + 1;
     boardsData.splice(insertIndex, 0, movedBoard);
-    
     saveBoardsToLocalStorage();
     renderCurrentView();
 }
@@ -532,54 +1072,24 @@ function updateBoardsInDOM(boardIndex1, boardIndex2) {
     }, 50);
 }
 
-function createBoardCard(board, boardIndex, sortedTasks) {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.dataset.boardId = board.id;
-    card.dataset.boardIndex = boardIndex;
-    card.dataset.originalIndex = boardIndex;
-    const header = createCardHeader(board, boardIndex);
-    const list = document.createElement('div');
-    list.className = 'list';
-    const validTasks = sortedTasks.filter(t => t);
-    if (validTasks.length === 0) {
-        const emptyItem = document.createElement('div');
-        emptyItem.className = 'empty-task';
-        emptyItem.textContent = 'Нет задач в этой доске';
-        list.appendChild(emptyItem);
-    } else {
-        validTasks.forEach((task, taskIndex) => {
-            const taskItem = createTaskItem(task, boardIndex, taskIndex);
-            list.appendChild(taskItem);
-        });
-    }
-    card.appendChild(header);
-    card.appendChild(list);
-    return card;
-}
-
 function createCardHeader(board, boardIndex) {
     const header = document.createElement('div');
     header.className = 'tasks-header flex-row-between';
-    
     const dragHandle = document.createElement('div');
     dragHandle.className = 'board-drag-handle';
     dragHandle.setAttribute('draggable', 'true');
     dragHandle.style.cursor = 'grab';
     dragHandle.style.display = 'flex';
     dragHandle.style.alignItems = 'center';
-    dragHandle.style.gap = '8px';
-    
+    dragHandle.style.gap = '0.375rem';
     const taskheaderCount = document.createElement('div');
     taskheaderCount.className = 'taskheader-count';
     taskheaderCount.innerHTML = `
         <p class="text-header">${escapeHtml(board.name)}</p>
         <div class="num-of-tasks">${board.tasks ? board.tasks.filter(t => t).length : 0}</div>
     `;
-    
     dragHandle.appendChild(taskheaderCount);
     header.appendChild(dragHandle);
-    
     const info = document.createElement('div');
     info.className = 'info';
     info.style.position = 'relative';
@@ -593,9 +1103,7 @@ function createCardHeader(board, boardIndex) {
     header.appendChild(info);
     const dropdownMenu = createDropdownMenu(board, boardIndex);
     header.appendChild(dropdownMenu);
-    
     header.dragHandle = dragHandle;
-    
     return header;
 }
 
@@ -639,13 +1147,11 @@ function initTableRowsSortable() {
     containers.forEach(container => {
         const boardCard = container.closest('.board-table-card');
         const boardId = parseInt(boardCard.dataset.boardId);
-        
         if (container.sortable) {
             container.sortable.destroy();
         }
-        
         const sortable = new Sortable(container, {
-            animation: 0, 
+            animation: 0,
             group: {
                 name: 'table-tasks',
                 pull: true,
@@ -656,7 +1162,7 @@ function initTableRowsSortable() {
             draggable: '.grid-row',
             ghostClass: 'task-dragging',
             dragClass: 'task-drag-over',
-            forceFallback: false, 
+            forceFallback: false,
             swapThreshold: 0.5,
             invertSwap: true,
             onEnd: function(evt) {
@@ -669,9 +1175,7 @@ function initTableRowsSortable() {
                 const draggedRow = evt.item;
                 const taskId = parseInt(draggedRow.querySelector('.col-id')?.textContent);
                 if (!taskId) return;
-                
                 if (fromBoardId === toBoardId) {
-                    // Переупорядочивание внутри одной доски
                     const rows = Array.from(toContainer.children);
                     const newOrder = rows.map(row => parseInt(row.querySelector('.col-id')?.textContent)).filter(id => id);
                     const board = boardsData.find(b => b.id === toBoardId);
@@ -688,7 +1192,6 @@ function initTableRowsSortable() {
                         }
                     }
                 } else {
-                    // Перемещение между разными досками
                     const sourceBoard = boardsData.find(b => b.id === fromBoardId);
                     const targetBoard = boardsData.find(b => b.id === toBoardId);
                     const taskIndex = sourceBoard.tasks.findIndex(t => t.id === taskId);
@@ -696,7 +1199,7 @@ function initTableRowsSortable() {
                         const movedTask = sourceBoard.tasks.splice(taskIndex, 1)[0];
                         targetBoard.tasks.push(movedTask);
                         saveBoardsToLocalStorage();
-                        renderCurrentView(); // перерисовка текущего представления
+                        renderCurrentView();
                         showToast(`Задача "${movedTask.name}" перемещена в доску "${targetBoard.name}"`);
                     }
                 }
@@ -777,31 +1280,50 @@ function createTaskItem(task, boardIndex, taskIndex) {
     const board = boardsData[boardIndex];
     const boardId = board ? board.id : boardIndex;
     item.dataset.boardId = boardId;
-    const checkbox = document.createElement('label');
-    checkbox.className = 'column-option checkbox-item';
-    checkbox.innerHTML = `
+
+    const row = document.createElement('div');
+    row.style.display = 'flex';
+    row.style.alignItems = 'center';
+    row.style.gap = '0.375rem';
+
+    const checkboxLabel = document.createElement('label');
+    checkboxLabel.className = 'checkbox-item';
+    checkboxLabel.style.margin = '0';
+    checkboxLabel.style.cursor = 'pointer';
+    checkboxLabel.innerHTML = `
         <input type="checkbox" data-task-id="${task.id}" ${task.archived ? 'checked disabled' : ''}>
         <span class="custom-checkbox"></span>
-        <span class="checkbox-text">${escapeHtml(task.name)}</span>
     `;
-    const checkboxInput = checkbox.querySelector('input');
-    if (!task.archived) {
-        checkboxInput.addEventListener('change', (e) => {
-            archiveTask(boardIndex, task.id, e.target.checked);
-        });
-    }
-    item.appendChild(checkbox);
+    const checkbox = checkboxLabel.querySelector('input');
+    checkbox.addEventListener('change', (e) => {
+        e.stopPropagation();
+        if (checkbox.checked) {
+            archiveTask(boardIndex, task.id, true);
+        }
+    });
+    checkbox.setAttribute('draggable', 'false');
+    row.appendChild(checkboxLabel);
+
+    const textSpan = document.createElement('span');
+    textSpan.className = 'checkbox-text'; 
+    textSpan.textContent = escapeHtml(task.name);
+    textSpan.style.cursor = 'default';
+    row.appendChild(textSpan);
+
+    item.appendChild(row);
+
     if (task.subtasks && task.subtasks.length > 0) {
         const subtasksBlock = createSubtasksBlock(task);
         item.appendChild(subtasksBlock);
     }
+
     const tagBlock = createTagBlock(task);
     if (tagBlock) {
         item.appendChild(tagBlock);
     }
+
     return item;
 }
-
 function createSubtasksBlock(task) {
     const subtasksBlock = document.createElement('div');
     subtasksBlock.className = 'subtasks text-signature';
@@ -821,6 +1343,7 @@ function createSubtasksBlock(task) {
     const subtasksList = document.createElement('div');
     subtasksList.className = 'subtasks-list';
     subtasksList.style.display = 'none';
+    
     task.subtasks.forEach(subtask => {
         const subtaskItem = document.createElement('div');
         subtaskItem.className = 'subtask-item';
@@ -835,6 +1358,23 @@ function createSubtasksBlock(task) {
         subtaskCheckbox.addEventListener('change', (e) => {
             subtask.completed = e.target.checked;
             updateSubtasksProgress(task);
+            
+            const allCompleted = task.subtasks.every(st => st.completed);
+            if (allCompleted && task.subtasks.length > 0) {
+                let boardIndex = null;
+                let taskIndex = null;
+                for (let bi = 0; bi < boardsData.length; bi++) {
+                    const idx = boardsData[bi].tasks.findIndex(t => t.id === task.id);
+                    if (idx !== -1) {
+                        boardIndex = bi;
+                        taskIndex = idx;
+                        break;
+                    }
+                }
+                if (boardIndex !== null && taskIndex !== null) {
+                    archiveTask(boardIndex, task.id, true);
+                }
+            }
         });
         subtasksList.appendChild(subtaskItem);
     });
@@ -900,17 +1440,24 @@ function createTagBlock(task) {
     if (hasDueDate) {
         const deadlineDiv = document.createElement('div');
         deadlineDiv.className = 'deadline';
-        deadlineDiv.textContent = formatDateBoard(task.dueDate);
+        deadlineDiv.textContent = formatDueDate(task.dueDate);
         tagBlock.appendChild(deadlineDiv);
     }
     return tagBlock;
 }
 
 function archiveTask(boardIndex, taskId, isArchived) {
+    console.log('archiveTask вызван', boardIndex, taskId, isArchived);
     const board = boardsData[boardIndex];
-    if (!board) return;
+    if (!board) {
+        console.error('Доска не найдена', boardIndex);
+        return;
+    }
     const taskIndex = board.tasks.findIndex(t => t.id === taskId);
-    if (taskIndex === -1) return;
+    if (taskIndex === -1) {
+        console.error('Задача не найдена', taskId);
+        return;
+    }
     if (isArchived) {
         if (!board.archivedTasks) board.archivedTasks = [];
         board.archivedTasks.push({...board.tasks[taskIndex], archivedDate: new Date().toISOString()});
@@ -943,7 +1490,6 @@ function initBoardEvents() {
     });
     document.removeEventListener('click', handleOutsideClick);
     document.addEventListener('click', handleOutsideClick);
-
     const closeBtns = document.querySelectorAll('.dropdown-close');
     closeBtns.forEach(btn => {
         btn.removeEventListener('click', handleDropdownClose);
@@ -1101,8 +1647,6 @@ function showToast(message) {
     }, 2000);
 }
 
-// ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ ДАТ ====================
-
 function parseDateBoard(dateStr) {
     if (!dateStr) return new Date(9999, 11, 31);
     if (typeof dateStr === 'string' && dateStr.includes('.')) {
@@ -1114,6 +1658,34 @@ function parseDateBoard(dateStr) {
         }
     }
     return new Date(9999, 11, 31);
+}
+
+function formatDueDate(dateStr) {
+    if (!dateStr) return '';
+    let year, month, day;
+    if (dateStr.includes('.')) {
+        const parts = dateStr.split('.');
+        if (parts.length === 3) {
+            day = parts[0];
+            month = parts[1];
+            year = parts[2];
+        }
+    } else if (dateStr.includes('-')) {
+        const parts = dateStr.split('-');
+        if (parts.length === 3) {
+            year = parts[0];
+            month = parts[1];
+            day = parts[2];
+        }
+    } else {
+        return dateStr; 
+    }
+    const currentYear = new Date().getFullYear();
+    if (parseInt(year) === currentYear) {
+        return `${day}.${month}`;
+    } else {
+        return `${day}.${month}.${year}`;
+    }
 }
 
 function formatDateBoard(dateStr) {
@@ -1141,9 +1713,8 @@ function sortTasksByPriorityAndDate(tasks) {
     });
 }
 
-// ==================== ИНИЦИАЛИЗАЦИЯ СТРАНИЦЫ ====================
-
-function initBoardListPage() {
+async function initBoardListPage() {
+    await loadTeamData();
     if (!document.querySelector('.board-list')) return;
     const hasLocalData = loadBoardsFromLocalStorage();
     if (hasLocalData && boardsData.length > 0) {
@@ -1152,7 +1723,7 @@ function initBoardListPage() {
         initBoardEvents();
         initViewSwitching();
     } else {
-        loadBoardsData();
+        await loadBoardsData();
     }
 }
 

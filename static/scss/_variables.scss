@@ -27,3 +27,11 @@ $space-64: 3rem;
 $radius-sm: 0.3rem;
 $radius-md: 0.6rem;
 $radius-lg: 1rem;
+
+[data-vc-theme="light"] {
+    --vc-accent-500: $green; 
+    --vc-accent-600: $dark-green; 
+    --vc-danger-500: $pink;
+    --vc-gray-200: $light-gray;
+    --vc-gray-900: $dark-gray;
+}

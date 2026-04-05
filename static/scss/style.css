@@ -1,6 +1,18 @@
 @charset "UTF-8";
+[data-vc-theme=light] {
+  --vc-accent-500: $green;
+  --vc-accent-600: $dark-green;
+  --vc-danger-500: $pink;
+  --vc-gray-200: $light-gray;
+  --vc-gray-900: $dark-gray;
+}
+
 .bg-dark-green, .project .done {
   background: #2A4D14;
+}
+
+.bg-light-green, .form-add-task {
+  background: #EEF7E9;
 }
 
 .bg-green, .project .inprocess {
@@ -19,7 +31,7 @@
   color: #F8085C;
 }
 
-.border-dark-1, .tasks-grid .col-status .status-dropdown, .tabs {
+.border-dark-1, .form-add-task, .tasks-grid .col-status .status-dropdown, .tabs {
   border: 0.0625rem solid #2D3229;
 }
 
@@ -27,7 +39,7 @@
   border: 0.125rem solid #2D3229;
 }
 
-.border-green-1, .button-basic,
+.border-green-1, .button-small, .button-basic,
 .button-secondary,
 .reset-filters-btn {
   border: 0.0625rem solid #61A039;
@@ -37,12 +49,12 @@
   border: 0.0625rem solid #7F8C73;
 }
 
-.text-signature, .board-list .card .list .subtasks .checkbox-text, .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-label, .tasks-grid .grid-header, .legends .legend {
+.text-signature, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-list .card .list .subtasks .checkbox-text, .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-label, .tasks-grid .grid-header, .legends .legend, .button-small {
   font-size: 0.75rem;
   font-weight: 400;
 }
 
-.text-basic, .modal-content .modal-body .filter-section .filter-input, .tasks-grid .grid-row, .tab-btn, .button-basic,
+.text-basic, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar, .modal-content .modal-body .filter-section .filter-input, .tasks-grid .grid-row, .tab-btn, .button-basic,
 .button-secondary,
 .reset-filters-btn, aside .submenu .nav-link {
   font-size: 1rem;
@@ -54,9 +66,17 @@
   font-weight: 400;
 }
 
-.text-header {
+.text-header, .custom-calendar-modal .custom-calendar .custom-calendar-header .custom-calendar-title, .custom-calendar-modal .custom-calendar .custom-calendar-header button {
   font-size: 1.5rem;
   font-weight: 500;
+}
+
+[data-vc-theme=light] {
+  --vc-accent-500: $green;
+  --vc-accent-600: $dark-green;
+  --vc-danger-500: $pink;
+  --vc-gray-200: $light-gray;
+  --vc-gray-900: $dark-gray;
 }
 
 aside {
@@ -214,14 +234,19 @@ ul {
   padding: 0.375rem 1.125rem;
 }
 
-.button-basic, .reset-filters-btn {
+.button-small {
+  padding: 0.19rem 1.125rem;
+}
+
+.button-basic, .reset-filters-btn, .button-small {
   background-color: #EEF7E9;
   transition: box-shadow 0.2s ease;
   box-shadow: 0.0625rem 0.0625rem 3px #2D3229;
 }
 
 .button-basic:hover,
-.reset-filters-btn:hover {
+.reset-filters-btn:hover,
+.button-small:hover {
   box-shadow: none;
   background-color: #F6FBF2;
 }
@@ -288,6 +313,14 @@ ul {
   background: transparent;
 }
 
+[data-vc-theme=light] {
+  --vc-accent-500: $green;
+  --vc-accent-600: $dark-green;
+  --vc-danger-500: $pink;
+  --vc-gray-200: $light-gray;
+  --vc-gray-900: $dark-gray;
+}
+
 *::-webkit-scrollbar {
   height: 0.75rem;
   -webkit-appearance: none;
@@ -313,12 +346,20 @@ ul {
   background: rgba(97, 160, 57, 0.5);
 }
 
-.text-signature, .board-list .card .list .subtasks .checkbox-text, .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-label, .tasks-grid .grid-header, .legends .legend {
+[data-vc-theme=light] {
+  --vc-accent-500: $green;
+  --vc-accent-600: $dark-green;
+  --vc-danger-500: $pink;
+  --vc-gray-200: $light-gray;
+  --vc-gray-900: $dark-gray;
+}
+
+.text-signature, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-list .card .list .subtasks .checkbox-text, .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-label, .tasks-grid .grid-header, .legends .legend, .button-small {
   font-size: 0.75rem;
   font-weight: 400;
 }
 
-.text-basic, .modal-content .modal-body .filter-section .filter-input, .tasks-grid .grid-row, aside .submenu .nav-link, .button-basic,
+.text-basic, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar, .modal-content .modal-body .filter-section .filter-input, .tasks-grid .grid-row, aside .submenu .nav-link, .button-basic,
 .button-secondary,
 .reset-filters-btn, .tab-btn {
   font-size: 1rem;
@@ -330,7 +371,7 @@ ul {
   font-weight: 400;
 }
 
-.text-header {
+.text-header, .custom-calendar-modal .custom-calendar .custom-calendar-header .custom-calendar-title, .custom-calendar-modal .custom-calendar .custom-calendar-header button {
   font-size: 1.5rem;
   font-weight: 500;
 }
@@ -398,14 +439,15 @@ body {
   height: 1.5rem;
 }
 
-.br-5, .board-list .card .list .tag .deadline, .board-list .card .list .tag .priority-high,
+.br-5, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .day,
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .other-month, .custom-calendar-modal .custom-calendar .custom-calendar-header button, .form-add-task, .board-list .card .list .tag .deadline, .board-list .card .list .tag .priority-high,
 .board-list .card .list .tag .priority-normal, .board-list .card .list .tag .executor img, .board-list .card .list .item, .board-list .card .taskheader-count .num-of-tasks, .modal-content .modal-body .filter-section .filter-range .range-input, .tabs, .project-percents, .checkbox-item .custom-checkbox, .button-basic,
 .button-secondary,
-.reset-filters-btn, .tab-btn {
+.reset-filters-btn, .button-small, .tab-btn {
   border-radius: 0.3rem;
 }
 
-.br-10, .dropdown-menu, .card, *::-webkit-scrollbar-track, *::-webkit-scrollbar-thumb {
+.br-10, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar, .dropdown-menu, .card, *::-webkit-scrollbar-track, *::-webkit-scrollbar-thumb {
   border-radius: 0.6rem;
 }
 
@@ -413,7 +455,7 @@ body {
   gap: 1.125rem;
 }
 
-.gap-32, .app-container .column, .app-container {
+.gap-32, .custom-calendar-modal .custom-calendar .custom-calendar-months, .app-container .column, .app-container {
   gap: 1.5rem;
 }
 
@@ -427,7 +469,7 @@ body {
   align-items: center;
 }
 
-.flex-col, .board-list .card .list .subtasks .subtasks-list, .board-list .card .list .subtasks, .board-list .card .list .item, .board-list .card .list {
+.flex-col, .board-table-card .subtasks .subtasks-list, .board-table-card .subtasks, .board-list .tasks-grid .subtasks-list, .board-list .card .list .subtasks .subtasks-list, .board-list .card .list .subtasks, .board-list .card .list .item, .board-list .card .list {
   display: flex;
   flex-direction: column;
 }
@@ -525,10 +567,14 @@ body {
   flex-direction: column;
   gap: 0.125rem;
 }
-.tasks-to-do-grid .col-task .text-basic, .tasks-to-do-grid .col-task .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .tasks-to-do-grid .col-task .filter-input, .tasks-to-do-grid .col-task .tasks-grid .grid-row, .tasks-grid .tasks-to-do-grid .col-task .grid-row, .tasks-to-do-grid .col-task aside .submenu .nav-link, aside .submenu .tasks-to-do-grid .col-task .nav-link, .tasks-to-do-grid .col-task .button-basic,
+.tasks-to-do-grid .col-task .text-basic, .tasks-to-do-grid .col-task .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .tasks-to-do-grid .col-task button, .tasks-to-do-grid .col-task .custom-calendar-modal .custom-calendar, .custom-calendar-modal .tasks-to-do-grid .col-task .custom-calendar, .tasks-to-do-grid .col-task .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .tasks-to-do-grid .col-task .filter-input, .tasks-to-do-grid .col-task .tasks-grid .grid-row, .tasks-grid .tasks-to-do-grid .col-task .grid-row, .tasks-to-do-grid .col-task aside .submenu .nav-link, aside .submenu .tasks-to-do-grid .col-task .nav-link, .tasks-to-do-grid .col-task .button-basic,
 .tasks-to-do-grid .col-task .button-secondary,
-.tasks-to-do-grid .col-task .reset-filters-btn, .tasks-to-do-grid .col-task .tab-btn, .tasks-to-do-grid .col-task .text-signature, .tasks-to-do-grid .col-task .board-list .card .list .subtasks .checkbox-text, .board-list .card .list .subtasks .tasks-to-do-grid .col-task .checkbox-text, .tasks-to-do-grid .col-task .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-range .tasks-to-do-grid .col-task .range-values, .tasks-to-do-grid .col-task .modal-content .modal-body .filter-section .filter-label, .modal-content .modal-body .filter-section .tasks-to-do-grid .col-task .filter-label, .tasks-to-do-grid .col-task .tasks-grid .grid-header, .tasks-grid .tasks-to-do-grid .col-task .grid-header, .tasks-to-do-grid .col-task .legends .legend, .legends .tasks-to-do-grid .col-task .legend,
+.tasks-to-do-grid .col-task .reset-filters-btn, .tasks-to-do-grid .col-task .tab-btn, .tasks-to-do-grid .col-task .text-signature, .tasks-to-do-grid .col-task .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .tasks-to-do-grid .col-task .weekdays, .tasks-to-do-grid .col-task .board-table-card .subtasks .checkbox-text, .board-table-card .subtasks .tasks-to-do-grid .col-task .checkbox-text, .tasks-to-do-grid .col-task .board-list .tasks-grid .subtasks-list span, .board-list .tasks-grid .subtasks-list .tasks-to-do-grid .col-task span, .tasks-to-do-grid .col-task .board-list .card .list .subtasks .checkbox-text, .board-list .card .list .subtasks .tasks-to-do-grid .col-task .checkbox-text, .tasks-to-do-grid .col-task .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-range .tasks-to-do-grid .col-task .range-values, .tasks-to-do-grid .col-task .modal-content .modal-body .filter-section .filter-label, .modal-content .modal-body .filter-section .tasks-to-do-grid .col-task .filter-label, .tasks-to-do-grid .col-task .tasks-grid .grid-header, .tasks-grid .tasks-to-do-grid .col-task .grid-header, .tasks-to-do-grid .col-task .legends .legend, .legends .tasks-to-do-grid .col-task .legend, .tasks-to-do-grid .col-task .button-small,
 .tasks-to-do-grid .col-event .text-basic,
+.tasks-to-do-grid .col-event .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button,
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .tasks-to-do-grid .col-event button,
+.tasks-to-do-grid .col-event .custom-calendar-modal .custom-calendar,
+.custom-calendar-modal .tasks-to-do-grid .col-event .custom-calendar,
 .tasks-to-do-grid .col-event .modal-content .modal-body .filter-section .filter-input,
 .modal-content .modal-body .filter-section .tasks-to-do-grid .col-event .filter-input,
 .tasks-to-do-grid .col-event .tasks-grid .grid-row,
@@ -540,6 +586,12 @@ aside .submenu .tasks-to-do-grid .col-event .nav-link,
 .tasks-to-do-grid .col-event .reset-filters-btn,
 .tasks-to-do-grid .col-event .tab-btn,
 .tasks-to-do-grid .col-event .text-signature,
+.tasks-to-do-grid .col-event .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays,
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .tasks-to-do-grid .col-event .weekdays,
+.tasks-to-do-grid .col-event .board-table-card .subtasks .checkbox-text,
+.board-table-card .subtasks .tasks-to-do-grid .col-event .checkbox-text,
+.tasks-to-do-grid .col-event .board-list .tasks-grid .subtasks-list span,
+.board-list .tasks-grid .subtasks-list .tasks-to-do-grid .col-event span,
 .tasks-to-do-grid .col-event .board-list .card .list .subtasks .checkbox-text,
 .board-list .card .list .subtasks .tasks-to-do-grid .col-event .checkbox-text,
 .tasks-to-do-grid .col-event .modal-content .modal-body .filter-section .filter-range .range-values,
@@ -550,7 +602,12 @@ aside .submenu .tasks-to-do-grid .col-event .nav-link,
 .tasks-grid .tasks-to-do-grid .col-event .grid-header,
 .tasks-to-do-grid .col-event .legends .legend,
 .legends .tasks-to-do-grid .col-event .legend,
+.tasks-to-do-grid .col-event .button-small,
 .events-grid .col-task .text-basic,
+.events-grid .col-task .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button,
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .events-grid .col-task button,
+.events-grid .col-task .custom-calendar-modal .custom-calendar,
+.custom-calendar-modal .events-grid .col-task .custom-calendar,
 .events-grid .col-task .modal-content .modal-body .filter-section .filter-input,
 .modal-content .modal-body .filter-section .events-grid .col-task .filter-input,
 .events-grid .col-task .tasks-grid .grid-row,
@@ -562,6 +619,12 @@ aside .submenu .events-grid .col-task .nav-link,
 .events-grid .col-task .reset-filters-btn,
 .events-grid .col-task .tab-btn,
 .events-grid .col-task .text-signature,
+.events-grid .col-task .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays,
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .events-grid .col-task .weekdays,
+.events-grid .col-task .board-table-card .subtasks .checkbox-text,
+.board-table-card .subtasks .events-grid .col-task .checkbox-text,
+.events-grid .col-task .board-list .tasks-grid .subtasks-list span,
+.board-list .tasks-grid .subtasks-list .events-grid .col-task span,
 .events-grid .col-task .board-list .card .list .subtasks .checkbox-text,
 .board-list .card .list .subtasks .events-grid .col-task .checkbox-text,
 .events-grid .col-task .modal-content .modal-body .filter-section .filter-range .range-values,
@@ -572,7 +635,12 @@ aside .submenu .events-grid .col-task .nav-link,
 .tasks-grid .events-grid .col-task .grid-header,
 .events-grid .col-task .legends .legend,
 .legends .events-grid .col-task .legend,
+.events-grid .col-task .button-small,
 .events-grid .col-event .text-basic,
+.events-grid .col-event .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button,
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .events-grid .col-event button,
+.events-grid .col-event .custom-calendar-modal .custom-calendar,
+.custom-calendar-modal .events-grid .col-event .custom-calendar,
 .events-grid .col-event .modal-content .modal-body .filter-section .filter-input,
 .modal-content .modal-body .filter-section .events-grid .col-event .filter-input,
 .events-grid .col-event .tasks-grid .grid-row,
@@ -584,6 +652,12 @@ aside .submenu .events-grid .col-event .nav-link,
 .events-grid .col-event .reset-filters-btn,
 .events-grid .col-event .tab-btn,
 .events-grid .col-event .text-signature,
+.events-grid .col-event .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays,
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .events-grid .col-event .weekdays,
+.events-grid .col-event .board-table-card .subtasks .checkbox-text,
+.board-table-card .subtasks .events-grid .col-event .checkbox-text,
+.events-grid .col-event .board-list .tasks-grid .subtasks-list span,
+.board-list .tasks-grid .subtasks-list .events-grid .col-event span,
 .events-grid .col-event .board-list .card .list .subtasks .checkbox-text,
 .board-list .card .list .subtasks .events-grid .col-event .checkbox-text,
 .events-grid .col-event .modal-content .modal-body .filter-section .filter-range .range-values,
@@ -593,7 +667,8 @@ aside .submenu .events-grid .col-event .nav-link,
 .events-grid .col-event .tasks-grid .grid-header,
 .tasks-grid .events-grid .col-event .grid-header,
 .events-grid .col-event .legends .legend,
-.legends .events-grid .col-event .legend {
+.legends .events-grid .col-event .legend,
+.events-grid .col-event .button-small {
   display: block;
   max-width: 100%;
   white-space: nowrap;
@@ -782,7 +857,6 @@ aside .submenu .events-grid .col-event .nav-link,
 .tasks-grid-wrapper {
   overflow-x: auto;
   width: 100%;
-  padding-bottom: 0.375rem;
 }
 
 .tasks-grid {
@@ -792,7 +866,6 @@ aside .submenu .events-grid .col-event .nav-link,
   width: -moz-max-content;
   width: max-content;
   min-width: 100%;
-  padding-bottom: 0.375rem;
   overflow-x: auto;
 }
 .tasks-grid .grid-header, .tasks-grid .grid-row {
@@ -1167,7 +1240,7 @@ aside .submenu .events-grid .col-event .nav-link,
   padding-bottom: 0.75rem;
   border-bottom: 1px solid #61A039;
 }
-.dropdown-menu .dropdown-header .text-header {
+.dropdown-menu .dropdown-header .text-header, .dropdown-menu .dropdown-header .custom-calendar-modal .custom-calendar .custom-calendar-header .custom-calendar-title, .custom-calendar-modal .custom-calendar .custom-calendar-header .dropdown-menu .dropdown-header .custom-calendar-title, .dropdown-menu .dropdown-header .custom-calendar-modal .custom-calendar .custom-calendar-header button, .custom-calendar-modal .custom-calendar .custom-calendar-header .dropdown-menu .dropdown-header button {
   margin: 0;
   font-size: 1.25rem;
 }
@@ -1291,7 +1364,6 @@ aside .submenu .events-grid .col-event .nav-link,
        break-inside: avoid;
   margin-bottom: 2.25rem;
   width: 100%;
-  cursor: grab;
   transition: transform 0.2s ease;
   -webkit-user-select: none;
      -moz-user-select: none;
@@ -1486,9 +1558,232 @@ aside .submenu .events-grid .col-event .nav-link,
 }
 
 .board-list .tasks-grid {
-  grid-template-columns: auto auto 1fr auto auto auto auto !important;
+  grid-template-columns: auto auto 1fr auto auto auto !important;
+}
+.board-list .tasks-grid .name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+.board-list .tasks-grid .name::after {
+  content: "";
+  display: inline-block;
+  height: 1em;
+  aspect-ratio: 2/3;
+  background-image: url("/static/source/icons/arrow_dark_cropped.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+.board-list .tasks-grid .name.open::after {
+  transform: rotate(-90deg);
+}
+.board-list .tasks-grid .subtasks-list {
+  gap: 0.25rem;
+}
+.board-list .tasks-grid .subtasks-list .custom-checkbox {
+  width: 1rem;
+  height: 1rem;
+  border: 0.125rem solid #2D3229;
+}
+.board-list .tasks-grid .subtasks-list .custom-checkbox::after {
+  width: 0.5625rem;
+  height: 0.375rem;
+}
+.board-list .tasks-grid .grid-row.subtasks-open {
+  align-items: flex-start;
 }
 
 .table-rows {
   display: contents;
+}
+
+.board-table-card .board-table-container {
+  width: 100%;
+}
+.board-table-card .subtasks {
+  gap: 0.375rem;
+}
+.board-table-card .subtasks .count {
+  display: flex;
+  justify-content: space-between;
+}
+.board-table-card .subtasks .subtasks-list {
+  gap: 0.25rem;
+}
+.board-table-card .subtasks .subtasks-list .custom-checkbox {
+  width: 1rem;
+  height: 1rem;
+  border: 0.125rem solid #2D3229;
+}
+.board-table-card .subtasks .subtasks-list .custom-checkbox::after {
+  width: 0.5625rem;
+  height: 0.375rem;
+}
+.board-table-card .subtasks .name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.board-table-card .subtasks .name::after {
+  content: "";
+  display: inline-block;
+  height: 0.75em;
+  aspect-ratio: 2/3;
+  background-image: url("/static/source/icons/arrow_dark_cropped.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+.board-table-card .subtasks .name.open::after {
+  transform: rotate(-90deg);
+}
+
+.form-add-task {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.375rem 1.125rem;
+}
+.form-add-task input {
+  all: unset;
+  box-sizing: border-box;
+  width: 100%;
+}
+.form-add-task img {
+  height: 1.125rem;
+}
+.form-add-task .tag {
+  display: none;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  transition: display 0.2s ease;
+}
+.form-add-task:hover, .form-add-task:active, .form-add-task:focus-within {
+  background-color: #F6FBF2;
+}
+
+.assignee-option {
+  cursor: pointer;
+}
+
+/* Двухмесячный календарь */
+.custom-calendar-modal .custom-calendar {
+  background: #F6FBF2;
+  padding: 2.25rem;
+  max-width: 90vw;
+  font-family: inherit;
+}
+.custom-calendar-modal .custom-calendar .custom-calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.125rem;
+}
+.custom-calendar-modal .custom-calendar .custom-calendar-header button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #2D3229;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.custom-calendar-modal .custom-calendar .custom-calendar-header button:hover {
+  color: #61A039;
+  background: rgba(97, 160, 57, 0.1);
+}
+.custom-calendar-modal .custom-calendar .custom-calendar-header .custom-calendar-title {
+  color: #2D3229;
+}
+.custom-calendar-modal .custom-calendar .custom-calendar-months {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month {
+  flex: 1;
+}
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header {
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button {
+  background: none;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  color: #61A039;
+  padding: 0.25rem 1.125rem;
+  transition: all 0.2s;
+}
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button:hover {
+  background: rgba(97, 160, 57, 0.1);
+}
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  color: #7F8C73;
+  margin-bottom: 0.5625rem;
+}
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.375rem;
+}
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .day,
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .other-month {
+  text-align: center;
+  padding: 0.5625rem;
+  aspect-ratio: 1/1;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .day {
+  background: #F6FBF2;
+}
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .day:hover {
+  background: rgba(97, 160, 57, 0.1);
+}
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .day.selected-start, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .day.selected-end {
+  background: #61A039;
+  color: #F6FBF2;
+}
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .day.in-range {
+  background: rgba(97, 160, 57, 0.15);
+}
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .other-month {
+  color: rgb(178.2, 186, 171);
+  cursor: default;
+}
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .other-month:hover {
+  background: none;
+}
+.custom-calendar-modal .custom-calendar .custom-calendar-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  margin-top: 1.125rem;
+  border-top: 1px solid #61A039;
+}
+
+.checkbox-item {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+
+.checkbox-item input {
+  pointer-events: auto;
 }/*# sourceMappingURL=style.css.map */

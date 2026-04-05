@@ -1,0 +1,27 @@
+[
+    {
+      "name": "Лев Аксенов",
+      "role": "Разработчик",
+      "avatar": "lev_aksenov.jpg"
+    },
+    {
+      "name": "Дарья Швед",
+      "role": "Инженер-программист",
+      "avatar": "dar_shved.jpg"
+    },
+    {
+      "name": "Ксения Глебко",
+      "role": "Тестировщик",
+      "avatar": "ks_glebko.jpg"
+    },
+    {
+      "name": "Полина Ильючик",
+      "role": "Дизайнер",
+      "avatar": "pol_ilyuchik.jpg"
+    },
+    {
+      "name": "Оксана Кветко",
+      "role": "Руководитель проекта",
+      "avatar": "basic_avatar.png"
+    }
+  ]

@@ -9,8 +9,8 @@
           "name": "Выбрать дизайн интерьера",
           "priority": "срочно",
           "dueDate": "05.04.2026",
-          "assignee": "Я",
-          "assigneeAvatar": "basic_avatar.png",
+          "assignee": "Дарья Швед",
+          "assigneeAvatar": "dar_shved.jpg",
           "subtasks": [
             { "name": "Посмотреть варианты в Pinterest", "completed": true },
             { "name": "Согласовать с дизайнером", "completed": false },
@@ -47,8 +47,8 @@
           "name": "Выбрать направление",
           "priority": "срочно",
           "dueDate": "20.04.2026",
-          "assignee": "Семья",
-          "assigneeAvatar": "basic_avatar.png",
+          "assignee": "Лев Аксенов",
+          "assigneeAvatar": "lev_aksenov.jpg",
           "subtasks": [
             { "name": "Море", "completed": false },
             { "name": "Горы", "completed": false },
@@ -67,7 +67,8 @@
         {
           "id": 204,
           "name": "Собрать чемоданы",
-          "assignee": "Семья",
+          "assignee": "Лев Аксенов",
+          "assigneeAvatar": "lev_aksenov.jpg",
           "dueDate": "30.05.2026"
         }
       ]
