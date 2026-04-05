@@ -115,7 +115,7 @@ function renderCurrentView() {
 function renderBoardView() {
     const container = document.querySelector('#cards-container');
     if (!container) return;
-    container.classList.remove('tables-view');
+    container.classList.remove('tables-view', 'timeline-view');
     if (!boardsData || boardsData.length === 0) {
         container.innerHTML = '<div class="empty-message">Нет созданных досок</div>';
         return;
@@ -137,6 +137,7 @@ function renderBoardView() {
 function renderTableView() {
     const container = document.querySelector('#cards-container');
     if (!container) return;
+    container.classList.remove('timeline-view');
     container.classList.add('tables-view');
     if (!boardsData || boardsData.length === 0) {
         container.innerHTML = '<div class="empty-message">Нет созданных досок</div>';
@@ -860,61 +861,159 @@ function sortBoardTable(boardId, column) {
     renderTableView();
 }
 
+function sortTasksForTimeline(tasks) {
+    if (!tasks || tasks.length === 0) return [];
+    return [...tasks].filter(t => t).sort((a, b) => {
+        const dateA = parseDateBoard(a.dueDate);
+        const dateB = parseDateBoard(b.dueDate);
+        const diff = dateA - dateB;
+        if (diff !== 0) return diff;
+        const urgentA = a.priority === 'срочно' ? 0 : 1;
+        const urgentB = b.priority === 'срочно' ? 0 : 1;
+        return urgentA - urgentB;
+    });
+}
+
+function groupTimelineTasksByDueLabel(sortedTasks) {
+    const groups = [];
+    let currentLabel = null;
+    let bucket = null;
+    sortedTasks.forEach(task => {
+        const label =
+            task.dueDate && String(task.dueDate).trim()
+                ? formatDueDate(task.dueDate)
+                : 'Без срока';
+        if (label !== currentLabel) {
+            currentLabel = label;
+            bucket = [];
+            groups.push({ label, tasks: bucket });
+        }
+        bucket.push(task);
+    });
+    return groups;
+}
+
+function createTimelineTaskCard(task, boardIndex) {
+    const card = document.createElement('div');
+    card.className = 'timeline-task-card';
+    card.dataset.taskId = task.id;
+
+    // Верхняя строка: чекбокс + название
+    const row = document.createElement('div');
+    row.className = 'timeline-task-card__row';
+
+    const checkboxLabel = document.createElement('label');
+    checkboxLabel.className = 'checkbox-item';
+    checkboxLabel.style.margin = '0';
+    checkboxLabel.style.cursor = 'pointer';
+    checkboxLabel.style.flexShrink = '0';
+    checkboxLabel.innerHTML = `
+        <input type="checkbox" data-task-id="${task.id}" ${task.archived ? 'checked disabled' : ''}>
+        <span class="custom-checkbox"></span>
+    `;
+    const checkbox = checkboxLabel.querySelector('input');
+    checkbox.addEventListener('change', (e) => {
+        e.stopPropagation();
+        if (checkbox.checked) {
+            archiveTask(boardIndex, task.id, true);
+        }
+    });
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'timeline-task-card__name';
+    nameSpan.textContent = task.name;
+
+    row.appendChild(checkboxLabel);
+    row.appendChild(nameSpan);
+    card.appendChild(row);
+
+    // Подзадачи (если есть) – используем стандартный createSubtasksBlock
+    if (task.subtasks && task.subtasks.length > 0) {
+        card.appendChild(createSubtasksBlock(task));
+    }
+
+    // Блок тегов (исполнитель, приоритет, дедлайн) – такой же, как в досках
+    const tagBlock = createTagBlock(task);
+    if (tagBlock) {
+        card.appendChild(tagBlock);
+    }
+
+    return card;
+}
+
+function createBoardTimelineTrack(board, boardIndex, validTasks) {
+    const sorted = sortTasksForTimeline(validTasks);
+    const groups = groupTimelineTasksByDueLabel(sorted);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'timeline-board';
+
+    const track = document.createElement('div');
+    track.className = 'timeline-track';
+
+    groups.forEach(({ label, tasks }) => {
+        const milestone = document.createElement('div');
+        milestone.className = 'timeline-milestone';
+
+        const node = document.createElement('div');
+        node.className = 'timeline-node';
+        milestone.appendChild(node);
+
+        const chip = document.createElement('div');
+        chip.className = 'timeline-date-chip';
+        chip.textContent = label;
+        milestone.appendChild(chip);
+
+        const list = document.createElement('div');
+        list.className = 'timeline-milestone-tasks';
+        tasks.forEach(task => {
+            list.appendChild(createTimelineTaskCard(task, boardIndex));
+        });
+        milestone.appendChild(list);
+        track.appendChild(milestone);
+    });
+
+    wrap.appendChild(track);
+    return wrap;
+}
+
 function renderTimelineView() {
     const container = document.querySelector('#cards-container');
     if (!container) return;
-    let tasksWithDates = [];
-    boardsData.forEach(board => {
-        if (board.tasks && board.tasks.length) {
-            board.tasks.forEach(task => {
-                if (task.dueDate) {
-                    tasksWithDates.push({
-                        ...task,
-                        boardName: board.name,
-                        dueDateObj: parseDateBoard(task.dueDate)
-                    });
-                }
-            });
-        }
-    });
-    if (tasksWithDates.length === 0) {
-        container.innerHTML = '<div class="empty-message">Нет задач с указанными сроками</div>';
+    container.classList.remove('tables-view');
+    container.classList.add('timeline-view');
+    if (!boardsData || boardsData.length === 0) {
+        container.innerHTML = '<div class="empty-message">Нет созданных досок</div>';
         return;
     }
-    tasksWithDates.sort((a, b) => a.dueDateObj - b.dueDateObj);
-    const groups = {};
-    tasksWithDates.forEach(task => {
-        const dateKey = formatDueDate(task.dueDate);
-        if (!groups[dateKey]) groups[dateKey] = [];
-        groups[dateKey].push(task);
-    });
-    const timeline = document.createElement('div');
-    timeline.className = 'timeline-view';
-    for (const [date, tasks] of Object.entries(groups)) {
-        const dateGroup = document.createElement('div');
-        dateGroup.className = 'timeline-date-group';
-        const dateHeader = document.createElement('div');
-        dateHeader.className = 'timeline-date-header';
-        dateHeader.textContent = dateKey;
-        dateGroup.appendChild(dateHeader);
-        const taskList = document.createElement('div');
-        taskList.className = 'timeline-task-list';
-        tasks.forEach(task => {
-            const taskItem = document.createElement('div');
-            taskItem.className = 'timeline-task-item';
-            taskItem.innerHTML = `
-                <div class="timeline-task-name">${escapeHtml(task.name)}</div>
-                <div class="timeline-task-board">${escapeHtml(task.boardName)}</div>
-                ${task.assignee ? `<div class="timeline-task-assignee">${escapeHtml(task.assignee)}</div>` : ''}
-                ${task.priority ? `<div class="timeline-task-priority ${task.priority === 'срочно' ? 'priority-high' : 'priority-normal'}">${task.priority === 'срочно' ? 'Срочно' : 'Обычный'}</div>` : ''}
-            `;
-            taskList.appendChild(taskItem);
-        });
-        dateGroup.appendChild(taskList);
-        timeline.appendChild(dateGroup);
-    }
     container.innerHTML = '';
-    container.appendChild(timeline);
+    boardsData.forEach((board, boardIndex) => {
+        const boardCard = document.createElement('div');
+        boardCard.className = 'card board-timeline-card';
+        boardCard.dataset.boardId = board.id;
+        boardCard.dataset.boardIndex = boardIndex;
+
+        const header = createCardHeader(board, boardIndex);
+        boardCard.appendChild(header);
+
+        const tasks = board.tasks || [];
+        const validTasks = tasks.filter(t => t);
+        if (validTasks.length === 0) {
+            const emptyMessage = document.createElement('div');
+            emptyMessage.className = 'empty-task';
+            emptyMessage.textContent = 'Нет задач в этой доске';
+            boardCard.appendChild(emptyMessage);
+        } else {
+            boardCard.appendChild(createBoardTimelineTrack(board, boardIndex, validTasks));
+        }
+
+        const addTaskForm = createAddTaskForm(board.id, boardIndex);
+        boardCard.appendChild(addTaskForm);
+
+        container.appendChild(boardCard);
+    });
+    initBoardDragAndDrop();
+    initBoardEvents();
 }
 
 let draggedBoard = null;
@@ -1399,12 +1498,12 @@ function updateSubtasksProgress(task) {
     const percent = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
     const allCards = document.querySelectorAll('.board-list .card');
     for (const card of allCards) {
-        const items = card.querySelectorAll('.item');
-        for (const item of items) {
-            if (item.dataset.taskId == task.id) {
-                const progressCompleted = item.querySelector('.progress-line .completed');
-                const progressTodo = item.querySelector('.progress-line .todo');
-                const countText = item.querySelector('.count p:last-child');
+        const hosts = card.querySelectorAll('.item, .timeline-task-card');
+        for (const host of hosts) {
+            if (host.dataset.taskId == task.id) {
+                const progressCompleted = host.querySelector('.progress-line .completed');
+                const progressTodo = host.querySelector('.progress-line .todo');
+                const countText = host.querySelector('.count p:last-child');
                 if (progressCompleted) progressCompleted.style.width = `${percent}%`;
                 if (progressTodo) progressTodo.style.width = `${100 - percent}%`;
                 if (countText) countText.textContent = `${completedCount} / ${totalCount}`;
