@@ -49,7 +49,7 @@
   border: 0.0625rem solid #7F8C73;
 }
 
-.text-signature, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .timeline-due, .board-list .card .list .subtasks .checkbox-text, .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-label, .tasks-grid .grid-header, .legends .legend, .button-small {
+.text-signature, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .timeline-due, .board-list .tasks-grid-wrapper > .empty-state, .board-reports-card .reports-stat-label, .board-list .card .list .subtasks .checkbox-text, .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-label, .tasks-grid .grid-header, .legends .legend, .button-small {
   font-size: 0.75rem;
   font-weight: 400;
 }
@@ -61,12 +61,12 @@
   font-weight: 400;
 }
 
-.text-subheader, .board-list .card .taskheader-count .num-of-tasks {
+.text-subheader, .board-archive-section .archive-collapse-toggle .num-of-tasks, .board-list .card .taskheader-count .num-of-tasks {
   font-size: 1.25rem;
   font-weight: 400;
 }
 
-.text-header, .custom-calendar-modal .custom-calendar .custom-calendar-header .custom-calendar-title, .custom-calendar-modal .custom-calendar .custom-calendar-header button {
+.text-header, .custom-calendar-modal .custom-calendar .custom-calendar-header .custom-calendar-title, .custom-calendar-modal .custom-calendar .custom-calendar-header button, .board-reports-card .reports-stat-value {
   font-size: 1.5rem;
   font-weight: 500;
 }
@@ -354,7 +354,7 @@ ul {
   --vc-gray-900: $dark-gray;
 }
 
-.text-signature, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .timeline-due, .board-list .card .list .subtasks .checkbox-text, .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-label, .tasks-grid .grid-header, .legends .legend, .button-small {
+.text-signature, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .timeline-due, .board-list .tasks-grid-wrapper > .empty-state, .board-reports-card .reports-stat-label, .board-list .card .list .subtasks .checkbox-text, .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-label, .tasks-grid .grid-header, .legends .legend, .button-small {
   font-size: 0.75rem;
   font-weight: 400;
 }
@@ -366,12 +366,12 @@ ul {
   font-weight: 400;
 }
 
-.text-subheader, .board-list .card .taskheader-count .num-of-tasks {
+.text-subheader, .board-archive-section .archive-collapse-toggle .num-of-tasks, .board-list .card .taskheader-count .num-of-tasks {
   font-size: 1.25rem;
   font-weight: 400;
 }
 
-.text-header, .custom-calendar-modal .custom-calendar .custom-calendar-header .custom-calendar-title, .custom-calendar-modal .custom-calendar .custom-calendar-header button {
+.text-header, .custom-calendar-modal .custom-calendar .custom-calendar-header .custom-calendar-title, .custom-calendar-modal .custom-calendar .custom-calendar-header button, .board-reports-card .reports-stat-value {
   font-size: 1.5rem;
   font-weight: 500;
 }
@@ -441,7 +441,7 @@ body {
 
 .br-5, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .day,
 .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .other-month, .custom-calendar-modal .custom-calendar .custom-calendar-header button, .form-add-task, .board-timeline-card .tag .deadline, .board-timeline-card .tag .priority-high,
-.board-timeline-card .tag .priority-normal, .board-timeline-card .tag .executor img, .board-timeline-card .timeline-task-card, .board-timeline-card .timeline-date-chip, .board-list .card .list .tag .deadline, .board-list .card .list .tag .priority-high,
+.board-timeline-card .tag .priority-normal, .board-timeline-card .tag .executor img, .board-timeline-card .timeline-task-card, .board-timeline-card .timeline-date-chip, .board-archive-section .archive-collapse-toggle .num-of-tasks, .board-reports-card .reports-stat-chip, .board-list .card .list .tag .deadline, .board-list .card .list .tag .priority-high,
 .board-list .card .list .tag .priority-normal, .board-list .card .list .tag .executor img, .board-list .card .list .item, .board-list .card .taskheader-count .num-of-tasks, .modal-content .modal-body .filter-section .filter-range .range-input, .tabs, .project-percents, .checkbox-item .custom-checkbox, .button-basic,
 .button-secondary,
 .reset-filters-btn, .button-small, .tab-btn {
@@ -570,7 +570,7 @@ body {
 }
 .tasks-to-do-grid .col-task .text-basic, .tasks-to-do-grid .col-task .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .tasks-to-do-grid .col-task button, .tasks-to-do-grid .col-task .custom-calendar-modal .custom-calendar, .custom-calendar-modal .tasks-to-do-grid .col-task .custom-calendar, .tasks-to-do-grid .col-task .board-timeline-card .timeline-assignee span, .board-timeline-card .timeline-assignee .tasks-to-do-grid .col-task span, .tasks-to-do-grid .col-task .board-timeline-card .timeline-task-card__name, .board-timeline-card .tasks-to-do-grid .col-task .timeline-task-card__name, .tasks-to-do-grid .col-task .board-timeline-card .timeline-date-chip, .board-timeline-card .tasks-to-do-grid .col-task .timeline-date-chip, .tasks-to-do-grid .col-task .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .tasks-to-do-grid .col-task .filter-input, .tasks-to-do-grid .col-task .tasks-grid .grid-row, .tasks-grid .tasks-to-do-grid .col-task .grid-row, .tasks-to-do-grid .col-task aside .submenu .nav-link, aside .submenu .tasks-to-do-grid .col-task .nav-link, .tasks-to-do-grid .col-task .button-basic,
 .tasks-to-do-grid .col-task .button-secondary,
-.tasks-to-do-grid .col-task .reset-filters-btn, .tasks-to-do-grid .col-task .tab-btn, .tasks-to-do-grid .col-task .text-signature, .tasks-to-do-grid .col-task .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .tasks-to-do-grid .col-task .weekdays, .tasks-to-do-grid .col-task .board-table-card .subtasks .checkbox-text, .board-table-card .subtasks .tasks-to-do-grid .col-task .checkbox-text, .tasks-to-do-grid .col-task .board-list .tasks-grid .subtasks-list span, .board-list .tasks-grid .subtasks-list .tasks-to-do-grid .col-task span, .tasks-to-do-grid .col-task .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .subtasks .subtasks-list .tasks-to-do-grid .col-task .checkbox-text, .tasks-to-do-grid .col-task .board-timeline-card .timeline-due, .board-timeline-card .tasks-to-do-grid .col-task .timeline-due, .tasks-to-do-grid .col-task .board-list .card .list .subtasks .checkbox-text, .board-list .card .list .subtasks .tasks-to-do-grid .col-task .checkbox-text, .tasks-to-do-grid .col-task .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-range .tasks-to-do-grid .col-task .range-values, .tasks-to-do-grid .col-task .modal-content .modal-body .filter-section .filter-label, .modal-content .modal-body .filter-section .tasks-to-do-grid .col-task .filter-label, .tasks-to-do-grid .col-task .tasks-grid .grid-header, .tasks-grid .tasks-to-do-grid .col-task .grid-header, .tasks-to-do-grid .col-task .legends .legend, .legends .tasks-to-do-grid .col-task .legend, .tasks-to-do-grid .col-task .button-small,
+.tasks-to-do-grid .col-task .reset-filters-btn, .tasks-to-do-grid .col-task .tab-btn, .tasks-to-do-grid .col-task .text-signature, .tasks-to-do-grid .col-task .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .tasks-to-do-grid .col-task .weekdays, .tasks-to-do-grid .col-task .board-table-card .subtasks .checkbox-text, .board-table-card .subtasks .tasks-to-do-grid .col-task .checkbox-text, .tasks-to-do-grid .col-task .board-list .tasks-grid .subtasks-list span, .board-list .tasks-grid .subtasks-list .tasks-to-do-grid .col-task span, .tasks-to-do-grid .col-task .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .subtasks .subtasks-list .tasks-to-do-grid .col-task .checkbox-text, .tasks-to-do-grid .col-task .board-timeline-card .timeline-due, .board-timeline-card .tasks-to-do-grid .col-task .timeline-due, .tasks-to-do-grid .col-task .board-list .tasks-grid-wrapper > .empty-state, .board-list .tasks-to-do-grid .col-task .tasks-grid-wrapper > .empty-state, .tasks-to-do-grid .col-task .board-reports-card .reports-stat-label, .board-reports-card .tasks-to-do-grid .col-task .reports-stat-label, .tasks-to-do-grid .col-task .board-list .card .list .subtasks .checkbox-text, .board-list .card .list .subtasks .tasks-to-do-grid .col-task .checkbox-text, .tasks-to-do-grid .col-task .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-range .tasks-to-do-grid .col-task .range-values, .tasks-to-do-grid .col-task .modal-content .modal-body .filter-section .filter-label, .modal-content .modal-body .filter-section .tasks-to-do-grid .col-task .filter-label, .tasks-to-do-grid .col-task .tasks-grid .grid-header, .tasks-grid .tasks-to-do-grid .col-task .grid-header, .tasks-to-do-grid .col-task .legends .legend, .legends .tasks-to-do-grid .col-task .legend, .tasks-to-do-grid .col-task .button-small,
 .tasks-to-do-grid .col-event .text-basic,
 .tasks-to-do-grid .col-event .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button,
 .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .tasks-to-do-grid .col-event button,
@@ -603,6 +603,10 @@ aside .submenu .tasks-to-do-grid .col-event .nav-link,
 .board-timeline-card .subtasks .subtasks-list .tasks-to-do-grid .col-event .checkbox-text,
 .tasks-to-do-grid .col-event .board-timeline-card .timeline-due,
 .board-timeline-card .tasks-to-do-grid .col-event .timeline-due,
+.tasks-to-do-grid .col-event .board-list .tasks-grid-wrapper > .empty-state,
+.board-list .tasks-to-do-grid .col-event .tasks-grid-wrapper > .empty-state,
+.tasks-to-do-grid .col-event .board-reports-card .reports-stat-label,
+.board-reports-card .tasks-to-do-grid .col-event .reports-stat-label,
 .tasks-to-do-grid .col-event .board-list .card .list .subtasks .checkbox-text,
 .board-list .card .list .subtasks .tasks-to-do-grid .col-event .checkbox-text,
 .tasks-to-do-grid .col-event .modal-content .modal-body .filter-section .filter-range .range-values,
@@ -646,6 +650,10 @@ aside .submenu .events-grid .col-task .nav-link,
 .board-timeline-card .subtasks .subtasks-list .events-grid .col-task .checkbox-text,
 .events-grid .col-task .board-timeline-card .timeline-due,
 .board-timeline-card .events-grid .col-task .timeline-due,
+.events-grid .col-task .board-list .tasks-grid-wrapper > .empty-state,
+.board-list .events-grid .col-task .tasks-grid-wrapper > .empty-state,
+.events-grid .col-task .board-reports-card .reports-stat-label,
+.board-reports-card .events-grid .col-task .reports-stat-label,
 .events-grid .col-task .board-list .card .list .subtasks .checkbox-text,
 .board-list .card .list .subtasks .events-grid .col-task .checkbox-text,
 .events-grid .col-task .modal-content .modal-body .filter-section .filter-range .range-values,
@@ -689,6 +697,10 @@ aside .submenu .events-grid .col-event .nav-link,
 .board-timeline-card .subtasks .subtasks-list .events-grid .col-event .checkbox-text,
 .events-grid .col-event .board-timeline-card .timeline-due,
 .board-timeline-card .events-grid .col-event .timeline-due,
+.events-grid .col-event .board-list .tasks-grid-wrapper > .empty-state,
+.board-list .events-grid .col-event .tasks-grid-wrapper > .empty-state,
+.events-grid .col-event .board-reports-card .reports-stat-label,
+.board-reports-card .events-grid .col-event .reports-stat-label,
 .events-grid .col-event .board-list .card .list .subtasks .checkbox-text,
 .board-list .card .list .subtasks .events-grid .col-event .checkbox-text,
 .events-grid .col-event .modal-content .modal-body .filter-section .filter-range .range-values,
@@ -879,10 +891,59 @@ aside .submenu .events-grid .col-event .nav-link,
   display: flex;
   gap: 1.125rem;
   align-items: center;
+  flex-wrap: wrap;
+}
+.tabs-buttons > .button-basic[data-tab].active {
+  box-shadow: none;
+  background-color: #F6FBF2;
 }
 
 .tasks-header {
   width: 100%;
+}
+
+.board-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5625rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.board-list .tasks-header .board-section-collapse-toggle {
+  flex-shrink: 0;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.board-list .tasks-header .archive-collapse-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+.board-list .tasks-header .archive-collapse-arrow::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-image: url("/static/source/icons/arrow_dark_cropped.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  transition: transform 0.2s ease;
+}
+
+.board-list .tasks-header .board-section-collapse-toggle.open .archive-collapse-arrow::before {
+  transform: rotate(-90deg);
 }
 
 .tasks-grid-wrapper {
@@ -1271,7 +1332,7 @@ aside .submenu .events-grid .col-event .nav-link,
   padding-bottom: 0.75rem;
   border-bottom: 1px solid #61A039;
 }
-.dropdown-menu .dropdown-header .text-header, .dropdown-menu .dropdown-header .custom-calendar-modal .custom-calendar .custom-calendar-header .custom-calendar-title, .custom-calendar-modal .custom-calendar .custom-calendar-header .dropdown-menu .dropdown-header .custom-calendar-title, .dropdown-menu .dropdown-header .custom-calendar-modal .custom-calendar .custom-calendar-header button, .custom-calendar-modal .custom-calendar .custom-calendar-header .dropdown-menu .dropdown-header button {
+.dropdown-menu .dropdown-header .text-header, .dropdown-menu .dropdown-header .custom-calendar-modal .custom-calendar .custom-calendar-header .custom-calendar-title, .custom-calendar-modal .custom-calendar .custom-calendar-header .dropdown-menu .dropdown-header .custom-calendar-title, .dropdown-menu .dropdown-header .custom-calendar-modal .custom-calendar .custom-calendar-header button, .custom-calendar-modal .custom-calendar .custom-calendar-header .dropdown-menu .dropdown-header button, .dropdown-menu .dropdown-header .board-reports-card .reports-stat-value, .board-reports-card .dropdown-menu .dropdown-header .reports-stat-value {
   margin: 0;
   font-size: 1.25rem;
 }
@@ -1380,15 +1441,24 @@ aside .submenu .events-grid .col-event .nav-link,
           user-select: none;
 }
 .board-list .cards.dragging-active {
+  gap: 2.25rem;
   -moz-column-count: unset;
        column-count: unset;
   display: flex;
   flex-wrap: wrap;
-  gap: 2.25rem;
 }
 .board-list .cards.dragging-active .card {
   width: calc((100% - 2.25rem) / 2);
-  margin-bottom: 2.25rem;
+}
+.board-list .tables-view.dragging-active {
+  -moz-column-count: 1;
+       column-count: 1;
+}
+.board-list .tables-view.dragging-active .card {
+  width: 100%;
+}
+.board-list .board-card-collapsible, .board-list .archive-board-body {
+  width: 100%;
 }
 .board-list .card {
   -moz-column-break-inside: avoid;
@@ -1592,6 +1662,157 @@ aside .submenu .events-grid .col-event .nav-link,
   -moz-column-count: 1 !important;
        column-count: 1 !important;
   display: block;
+}
+
+.board-list .cards.reports-view,
+.board-list .cards.archive-view {
+  -moz-column-count: 1 !important;
+       column-count: 1 !important;
+  display: block;
+  width: 100%;
+}
+
+.board-reports-card {
+  width: 100%;
+}
+.board-reports-card .tasks-grid-wrapper {
+  width: -moz-fit-content;
+  width: fit-content;
+}
+.board-reports-card .reports-summary-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.375rem;
+  color: #F6FBF2;
+}
+.board-reports-card .reports-stat-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0.5625rem 0.75rem;
+  background: #7F8C73;
+  min-width: 7.5rem;
+}
+.board-reports-card .reports-stat-value {
+  font-size: 1.5rem;
+}
+.board-reports-card .reports-hint {
+  margin: 0;
+  max-width: 48rem;
+}
+
+.tasks-grid.reports-assignee-grid {
+  grid-template-columns: auto auto auto auto auto !important;
+}
+.tasks-grid.reports-assignee-grid .grid-row {
+  padding: 0.25rem;
+}
+.tasks-grid.reports-assignee-grid .col-member {
+  min-width: 0;
+}
+.tasks-grid.reports-assignee-grid .col-member .user-img-text {
+  height: 2.25rem;
+}
+.tasks-grid.reports-assignee-grid .col-member .user-img-text img {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+}
+.tasks-grid.reports-assignee-grid .col-archived,
+.tasks-grid.reports-assignee-grid .col-active,
+.tasks-grid.reports-assignee-grid .col-total,
+.tasks-grid.reports-assignee-grid .col-rate {
+  white-space: nowrap;
+}
+
+.board-archive-section {
+  width: 100%;
+}
+.board-archive-section .archive-board-head {
+  padding: 0;
+}
+.board-archive-section .archive-board-head button {
+  padding: 0;
+}
+.board-archive-section .archive-collapse-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5625rem;
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  padding: 0.375rem 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+.board-archive-section .archive-collapse-toggle .archive-board-title {
+  flex: 1;
+  min-width: 0;
+}
+.board-archive-section .archive-collapse-toggle .num-of-tasks {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.375rem;
+  height: 1.5rem;
+  background: #7F8C73;
+  color: #F6FBF2 !important;
+}
+.board-archive-section .archive-collapse-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.5em;
+  height: 1.5em;
+}
+.board-archive-section .archive-collapse-arrow::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-image: url("/static/source/icons/arrow_dark_cropped.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  transition: transform 0.2s ease;
+}
+.board-archive-section .archive-collapse-toggle.open .archive-collapse-arrow::before {
+  transform: rotate(-90deg);
+}
+.board-archive-section .archive-board-body {
+  padding: 0 0 0.75rem;
+}
+
+.board-list .tasks-grid.archive-tasks-grid {
+  grid-template-columns: auto 1fr auto auto auto auto auto !important;
+}
+
+.board-list .tasks-grid .archive-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  align-items: center;
+  margin-right: 0.19rem;
+}
+
+.board-list .tasks-grid .col-dueDate {
+  white-space: nowrap;
+}
+.board-list .tasks-grid .col-dueDate .overdue {
+  color: #F8085C;
+  font-weight: 500;
+}
+
+.board-list .tasks-grid-wrapper > .empty-state {
+  padding: 1.125rem 0.75rem;
 }
 
 .board-timeline-card .timeline-board {

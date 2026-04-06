@@ -361,10 +361,61 @@ body {
     display: flex;
     gap: $space-24;
     align-items: center;
+    flex-wrap: wrap;
+
+    > .button-basic[data-tab].active {
+        box-shadow: none;
+        background-color: $light-light-green;    
+    }
 }
 
 .tasks-header {
     width: 100%;
+}
+
+.board-header-left {
+    display: flex;
+    align-items: center;
+    gap: $space-12;
+    flex: 1;
+    min-width: 0;
+}
+
+.board-list .tasks-header .board-section-collapse-toggle {
+    flex-shrink: 0;
+    padding: 0;
+    margin: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.board-list .tasks-header .archive-collapse-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: $space-24;
+    height: $space-24;
+
+    &::before {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 100%;
+        background-image: url('/static/source/icons/arrow_dark_cropped.svg');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        transition: transform 0.2s ease;
+    }
+}
+
+.board-list .tasks-header .board-section-collapse-toggle.open .archive-collapse-arrow::before {
+    transform: rotate(-90deg);
 }
 
 .tasks-grid-wrapper {
@@ -955,16 +1006,29 @@ body {
         user-select: none;
 
         &.dragging-active {
-            column-count: unset;
-            display: flex;
-            flex-wrap: wrap;
             gap: $space-48;
-            
+            column-count: unset;
+            display: flex;      
+            flex-wrap: wrap;
+
             .card {
                 width: calc((100% - $space-48) / 2);
-                margin-bottom: $space-48;
             }
         }
+    }
+
+    .tables-view{
+        &.dragging-active {      
+            column-count: 1;
+
+            .card {
+                width: 100%;
+            }
+        }
+    }
+
+    .board-card-collapsible, .archive-board-body{
+        width: 100%;
     }
 
     .card {
@@ -1210,6 +1274,189 @@ body {
 .board-list .cards.timeline-view {
     column-count: 1 !important;
     display: block;
+}
+
+.board-list .cards.reports-view,
+.board-list .cards.archive-view {
+    column-count: 1 !important;
+    display: block;
+    width: 100%;
+}
+
+.board-reports-card {
+    width: 100%;
+
+    .tasks-grid-wrapper {
+        width: fit-content;
+    }
+
+    .reports-summary-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $space-16;
+        margin-bottom: $space-8;
+        color: $light-light-green;
+    }
+
+    .reports-stat-chip {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: $space-12 $space-16;
+        background: $light-gray;
+        @extend .br-5;
+        min-width: 7.5rem;
+    }
+
+    .reports-stat-value {
+        font-size: 1.5rem;
+        @extend .text-header;
+    }
+
+    .reports-stat-label {
+        @extend .text-signature;
+    }
+
+    .reports-hint {
+        margin: 0;
+        max-width: 48rem;
+    }
+}
+
+.tasks-grid.reports-assignee-grid {
+    grid-template-columns:
+        auto
+        auto
+        auto
+        auto
+        auto !important;
+
+    .grid-row {
+        padding: $space-4;
+    }
+
+    .col-member {
+        min-width: 0;
+
+        .user-img-text {
+            height: $space-48;
+
+            img {
+                width: $space-48;
+                height: $space-48;
+                border-radius: 50%;
+            }
+        }
+    }
+
+    .col-archived,
+    .col-active,
+    .col-total,
+    .col-rate {
+        white-space: nowrap;
+    }
+}
+
+.board-archive-section {
+    width: 100%;
+
+    .archive-board-head {
+        padding: 0;
+
+        button {
+            padding: 0;
+        }
+    }
+
+    .archive-collapse-toggle {
+        display: flex;
+        align-items: center;
+        gap: $space-12;
+        flex: 1;
+        min-width: 0;
+        width: 100%;
+        padding: $space-8 0;
+        margin: 0;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        text-align: left;
+        font: inherit;
+        color: inherit;
+
+        .archive-board-title {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .num-of-tasks {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: $space-8;
+            height: $space-32;
+            background: $light-gray;
+            @extend .br-5;
+            @extend .text-subheader;
+            color: $light-light-green !important;
+        }
+    }
+
+    .archive-collapse-arrow {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 1.5em;
+        height: 1.5em;
+
+        &::before {
+            content: '';
+            display: block;
+            width: 100%;
+            height: 100%;
+            background-image: url('/static/source/icons/arrow_dark_cropped.svg');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            transition: transform 0.2s ease;
+        }
+    }
+
+    .archive-collapse-toggle.open .archive-collapse-arrow::before {
+        transform: rotate(-90deg);
+    }
+
+    .archive-board-body {
+        padding: 0 0 $space-16;
+    }
+}
+
+.board-list .tasks-grid.archive-tasks-grid {
+    grid-template-columns: auto 1fr auto auto auto auto auto !important;
+}
+
+.board-list .tasks-grid .archive-row-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-8;
+    align-items: center;
+    margin-right: $space-3;
+}
+
+.board-list .tasks-grid .col-dueDate {
+    white-space: nowrap;
+
+    .overdue {
+        color: $pink;
+        font-weight: 500;
+    }
+}
+
+.board-list .tasks-grid-wrapper > .empty-state {
+    padding: $space-24 $space-16;
+    @extend .text-signature;
 }
 
 .board-timeline-card {

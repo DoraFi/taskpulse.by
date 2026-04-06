@@ -46,6 +46,7 @@ async function loadBoardsData() {
         }
         const data = await response.json();
         boardsData = data.boards || data;
+        ensureArchivedTasksArrays();
         reorderBoardsForColumnCount();
         renderCurrentView();
         initBoardEvents();
@@ -83,14 +84,78 @@ function loadBoardsFromLocalStorage() {
     const saved = localStorage.getItem('boardsData');
     if (saved) {
         boardsData = JSON.parse(saved);
+        ensureArchivedTasksArrays();
         return true;
     }
     return false;
 }
 
+function ensureArchivedTasksArrays() {
+    if (!boardsData || !boardsData.length) return;
+    boardsData.forEach(board => {
+        if (!Array.isArray(board.archivedTasks)) board.archivedTasks = [];
+    });
+}
+
+const ARCHIVE_COLLAPSE_STORAGE_KEY = 'boardListArchiveCollapsed';
+
+function getArchiveCollapseMap() {
+    try {
+        return JSON.parse(localStorage.getItem(ARCHIVE_COLLAPSE_STORAGE_KEY) || '{}');
+    } catch {
+        return {};
+    }
+}
+
+function setBoardArchiveCollapsed(boardId, collapsed) {
+    const map = getArchiveCollapseMap();
+    map[String(boardId)] = collapsed;
+    localStorage.setItem(ARCHIVE_COLLAPSE_STORAGE_KEY, JSON.stringify(map));
+}
+
+function isBoardArchiveCollapsed(boardId) {
+    return getArchiveCollapseMap()[String(boardId)] === true;
+}
+
+const BOARD_SECTION_COLLAPSE_KEY = 'boardListBoardSectionCollapsed';
+
+function getBoardSectionCollapseMap() {
+    try {
+        return JSON.parse(localStorage.getItem(BOARD_SECTION_COLLAPSE_KEY) || '{}');
+    } catch {
+        return {};
+    }
+}
+
+function setBoardSectionCollapsed(boardId, collapsed) {
+    const map = getBoardSectionCollapseMap();
+    map[String(boardId)] = collapsed;
+    localStorage.setItem(BOARD_SECTION_COLLAPSE_KEY, JSON.stringify(map));
+}
+
+function isBoardSectionCollapsed(boardId) {
+    return getBoardSectionCollapseMap()[String(boardId)] === true;
+}
+
+function getBoardListNavButtons() {
+    return document.querySelectorAll('.board-list .tabs .tab-btn[data-tab], .board-list .tabs-buttons > .button-basic[data-tab]');
+}
+
+function wireBoardCardCollapse(header, board, bodyEl) {
+    const toggle = header._collapseToggle;
+    if (!toggle || !bodyEl) return;
+    bodyEl.style.display = header._collapsedInitially ? 'none' : '';
+    toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = toggle.classList.toggle('open');
+        bodyEl.style.display = isOpen ? '' : 'none';
+        toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        setBoardSectionCollapsed(board.id, !isOpen);
+    });
+}
+
 function initViewSwitching() {
-    const tabs = document.querySelectorAll('.board-list .tabs .tab-btn');
-    tabs.forEach(btn => {
+    getBoardListNavButtons().forEach(btn => {
         btn.removeEventListener('click', handleTabClick);
         btn.addEventListener('click', handleTabClick);
     });
@@ -101,7 +166,9 @@ function handleTabClick(e) {
     if (tab === 'board') currentView = 'board';
     else if (tab === 'tables') currentView = 'tables';
     else if (tab === 'timeline') currentView = 'timeline';
-    document.querySelectorAll('.board-list .tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+    else if (tab === 'reports') currentView = 'reports';
+    else if (tab === 'archive') currentView = 'archive';
+    getBoardListNavButtons().forEach(btn => btn.classList.remove('active'));
     e.currentTarget.classList.add('active');
     renderCurrentView();
 }
@@ -110,12 +177,14 @@ function renderCurrentView() {
     if (currentView === 'board') renderBoardView();
     else if (currentView === 'tables') renderTableView();
     else if (currentView === 'timeline') renderTimelineView();
+    else if (currentView === 'reports') renderReportsView();
+    else if (currentView === 'archive') renderArchiveView();
 }
 
 function renderBoardView() {
     const container = document.querySelector('#cards-container');
     if (!container) return;
-    container.classList.remove('tables-view', 'timeline-view');
+    container.classList.remove('tables-view', 'timeline-view', 'reports-view', 'archive-view');
     if (!boardsData || boardsData.length === 0) {
         container.innerHTML = '<div class="empty-message">Нет созданных досок</div>';
         return;
@@ -137,7 +206,7 @@ function renderBoardView() {
 function renderTableView() {
     const container = document.querySelector('#cards-container');
     if (!container) return;
-    container.classList.remove('timeline-view');
+    container.classList.remove('timeline-view', 'reports-view', 'archive-view');
     container.classList.add('tables-view');
     if (!boardsData || boardsData.length === 0) {
         container.innerHTML = '<div class="empty-message">Нет созданных досок</div>';
@@ -152,14 +221,18 @@ function renderTableView() {
         
         const header = createCardHeader(board, boardIndex);
         boardCard.appendChild(header);
-        
+
         const tasks = board.tasks || [];
         const tableOrMessage = createBoardTable(board, tasks, boardIndex);
-        boardCard.appendChild(tableOrMessage);
-        
+        const bodyWrap = document.createElement('div');
+        bodyWrap.className = 'board-card-collapsible';
+        bodyWrap.appendChild(tableOrMessage);
+        boardCard.appendChild(bodyWrap);
+        wireBoardCardCollapse(header, board, bodyWrap);
+
         const addTaskForm = createAddTaskForm(board.id, boardIndex);
         boardCard.appendChild(addTaskForm);
-        
+
         container.appendChild(boardCard);
     });
     initBoardDragAndDrop();
@@ -613,10 +686,14 @@ function createBoardCard(board, boardIndex, sortedTasks) {
             list.appendChild(taskItem);
         });
     }
+    const bodyWrap = document.createElement('div');
+    bodyWrap.className = 'board-card-collapsible';
+    bodyWrap.appendChild(list);
     const addTaskForm = createAddTaskForm(board.id, boardIndex);
     card.appendChild(header);
-    card.appendChild(list);
+    card.appendChild(bodyWrap);
     card.appendChild(addTaskForm);
+    wireBoardCardCollapse(header, board, bodyWrap);
     return card;
 }
 
@@ -980,7 +1057,7 @@ function createBoardTimelineTrack(board, boardIndex, validTasks) {
 function renderTimelineView() {
     const container = document.querySelector('#cards-container');
     if (!container) return;
-    container.classList.remove('tables-view');
+    container.classList.remove('tables-view', 'reports-view', 'archive-view');
     container.classList.add('timeline-view');
     if (!boardsData || boardsData.length === 0) {
         container.innerHTML = '<div class="empty-message">Нет созданных досок</div>';
@@ -996,16 +1073,21 @@ function renderTimelineView() {
         const header = createCardHeader(board, boardIndex);
         boardCard.appendChild(header);
 
+        const bodyWrap = document.createElement('div');
+        bodyWrap.className = 'board-card-collapsible';
+
         const tasks = board.tasks || [];
         const validTasks = tasks.filter(t => t);
         if (validTasks.length === 0) {
             const emptyMessage = document.createElement('div');
             emptyMessage.className = 'empty-task';
             emptyMessage.textContent = 'Нет задач в этой доске';
-            boardCard.appendChild(emptyMessage);
+            bodyWrap.appendChild(emptyMessage);
         } else {
-            boardCard.appendChild(createBoardTimelineTrack(board, boardIndex, validTasks));
+            bodyWrap.appendChild(createBoardTimelineTrack(board, boardIndex, validTasks));
         }
+        boardCard.appendChild(bodyWrap);
+        wireBoardCardCollapse(header, board, bodyWrap);
 
         const addTaskForm = createAddTaskForm(board.id, boardIndex);
         boardCard.appendChild(addTaskForm);
@@ -1014,6 +1096,460 @@ function renderTimelineView() {
     });
     initBoardDragAndDrop();
     initBoardEvents();
+}
+
+function formatArchivedTimestamp(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return '—';
+    return d.toLocaleString('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function renderReportsView() {
+    const container = document.querySelector('#cards-container');
+    if (!container) return;
+    container.classList.remove('tables-view', 'timeline-view', 'archive-view');
+    container.classList.add('reports-view');
+
+    const demoSummary = {
+        boardCount: 6,
+        totalActive: 38,
+        totalArchived: 214,
+        urgentActive: 5,
+        noDueActive: 9
+    };
+
+    const membersForDemo = teamMembers.length
+        ? teamMembers
+        : [
+              { name: 'Лев Аксенов', avatar: 'lev_aksenov.jpg', role: 'Tech Lead' },
+              { name: 'Дарья Швед', avatar: 'dar_shved.jpg', role: 'Дизайнер' }
+          ];
+
+    const card = document.createElement('div');
+    card.className = 'card board-reports-card';
+
+    const header = document.createElement('div');
+    header.className = 'tasks-header flex-row-between';
+    header.innerHTML = '<p class="text-header">Отчёт по проекту</p>';
+    card.appendChild(header);
+
+    const summary = document.createElement('div');
+    summary.className = 'reports-summary';
+    summary.innerHTML = `
+        <div class="reports-summary-grid">
+            <div class="reports-stat-chip">
+                <span class="reports-stat-value">${demoSummary.boardCount}</span>
+                <span class="reports-stat-label">досок</span>
+            </div>
+            <div class="reports-stat-chip">
+                <span class="reports-stat-value">${demoSummary.totalActive}</span>
+                <span class="reports-stat-label">активных задач</span>
+            </div>
+            <div class="reports-stat-chip">
+                <span class="reports-stat-value">${demoSummary.totalArchived}</span>
+                <span class="reports-stat-label">в архиве (завершено)</span>
+            </div>
+            <div class="reports-stat-chip">
+                <span class="reports-stat-value">${demoSummary.urgentActive}</span>
+                <span class="reports-stat-label">срочных в работе</span>
+            </div>
+            <div class="reports-stat-chip">
+                <span class="reports-stat-value">${demoSummary.noDueActive}</span>
+                <span class="reports-stat-label">без срока (активные)</span>
+            </div>
+        </div>
+        <p class="reports-hint text-signature">Демонстрационные данные для макета. Здесь будет отчёт по реальным метрикам проекта.</p>
+    `;
+    card.appendChild(summary);
+
+    const gridWrap = document.createElement('div');
+    gridWrap.className = 'tasks-grid-wrapper';
+    const grid = document.createElement('div');
+    grid.className = 'tasks-grid reports-assignee-grid';
+
+    const headerRow = document.createElement('div');
+    headerRow.className = 'grid-header';
+    const reportCols = [
+        { key: 'member', title: 'Участник команды' },
+        { key: 'archived', title: 'Завершено (в архиве)' },
+        { key: 'active', title: 'Активных' },
+        { key: 'total', title: 'Всего' },
+        { key: 'rate', title: 'Доля завершённых' }
+    ];
+    reportCols.forEach(c => {
+        const cell = document.createElement('div');
+        cell.className = `col-${c.key}`;
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'header-title';
+        titleSpan.textContent = c.title;
+        cell.appendChild(titleSpan);
+        headerRow.appendChild(cell);
+    });
+    grid.appendChild(headerRow);
+
+    membersForDemo.forEach((member, i) => {
+        const active = 3 + ((i * 2) % 7);
+        const archived = 15 + i * 5;
+        const total = active + archived;
+        const rate = total > 0 ? Math.round((archived / total) * 100) : 0;
+
+        const gridRow = document.createElement('div');
+        gridRow.className = 'grid-row';
+
+        const colMember = document.createElement('div');
+        colMember.className = 'col-member';
+        colMember.innerHTML = `
+            <div class="user-img-text">
+                <img src="/static/source/user_img/${escapeHtml(member.avatar)}" alt="">
+                <div class="basic-and-signature">
+                    <p class="text-basic">${escapeHtml(member.name)}</p>
+                    <p class="text-signature">${escapeHtml(member.role || '')}</p>
+                </div>
+            </div>
+        `;
+
+        const colArchived = document.createElement('div');
+        colArchived.className = 'col-archived';
+        colArchived.innerHTML = `<p>${archived}</p>`;
+
+        const colActive = document.createElement('div');
+        colActive.className = 'col-active';
+        colActive.innerHTML = `<p>${active}</p>`;
+
+        const colTotal = document.createElement('div');
+        colTotal.className = 'col-total';
+        colTotal.innerHTML = `<p>${total}</p>`;
+
+        const colRate = document.createElement('div');
+        colRate.className = 'col-rate';
+        colRate.innerHTML = `<p>${total ? `${rate}%` : '—'}</p>`;
+
+        gridRow.append(colMember, colArchived, colActive, colTotal, colRate);
+        grid.appendChild(gridRow);
+    });
+
+    gridWrap.appendChild(grid);
+    card.appendChild(gridWrap);
+
+    container.innerHTML = '';
+    container.appendChild(card);
+}
+
+const ARCHIVE_GRID_COLUMNS = [
+    { key: 'id', title: 'ID' },
+    { key: 'name', title: 'Наименование' },
+    { key: 'priority', title: 'Приоритет' },
+    { key: 'dueDate', title: 'Срок' },
+    { key: 'assignee', title: 'Исполнитель' },
+    { key: 'archivedAt', title: 'Архивировано' },
+    { key: 'actions', title: 'Действия' }
+];
+
+function createArchivedTaskNameCell(task, boardIndex, row) {
+    const container = document.createElement('div');
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.gap = '8px';
+
+    const topRow = document.createElement('div');
+    topRow.style.display = 'flex';
+    topRow.style.alignItems = 'center';
+    topRow.style.gap = '8px';
+    topRow.style.flexWrap = 'wrap';
+
+    const nameSpan = document.createElement('span');
+    nameSpan.textContent = task.name;
+    topRow.appendChild(nameSpan);
+
+    let subtasksList = null;
+    let totalCount = 0;
+    let completedCount = 0;
+    let trigger = null;
+
+    if (task.subtasks && task.subtasks.length > 0) {
+        totalCount = task.subtasks.length;
+        completedCount = task.subtasks.filter(st => st.completed).length;
+
+        trigger = document.createElement('span');
+        trigger.className = 'name';
+        trigger.textContent = `${completedCount} / ${totalCount}`;
+        trigger.style.cursor = 'pointer';
+        trigger.style.display = 'inline-flex';
+        trigger.style.alignItems = 'center';
+        trigger.style.gap = '0.25rem';
+        topRow.appendChild(trigger);
+
+        subtasksList = document.createElement('div');
+        subtasksList.className = 'subtasks-list';
+        subtasksList.style.display = 'none';
+
+        task.subtasks.forEach(subtask => {
+            const subtaskItem = document.createElement('div');
+            subtaskItem.className = 'subtask-item';
+            subtaskItem.innerHTML = `
+                <label class="checkbox-item">
+                    <input type="checkbox" ${subtask.completed ? 'checked' : ''} disabled>
+                    <span class="custom-checkbox"></span>
+                    <span class="checkbox-text">${escapeHtml(subtask.name)}</span>
+                </label>
+            `;
+            subtasksList.appendChild(subtaskItem);
+        });
+
+        trigger.addEventListener('click', () => {
+            const isOpen = subtasksList.style.display === 'flex';
+            subtasksList.style.display = isOpen ? 'none' : 'flex';
+            trigger.classList.toggle('open', !isOpen);
+            if (!isOpen) {
+                row.classList.add('subtasks-open');
+            } else {
+                row.classList.remove('subtasks-open');
+            }
+        });
+    }
+
+    container.appendChild(topRow);
+    if (subtasksList) container.appendChild(subtasksList);
+    return container;
+}
+
+function createArchivedTaskRow(task, boardIndex) {
+    const row = document.createElement('div');
+    row.className = 'grid-row';
+    row.dataset.taskId = task.id;
+    row.dataset.boardIndex = boardIndex;
+
+    ARCHIVE_GRID_COLUMNS.forEach(col => {
+        const cell = document.createElement('div');
+        cell.className = `col-${col.key}`;
+        switch (col.key) {
+            case 'id':
+                cell.textContent = task.id;
+                break;
+            case 'name':
+                cell.appendChild(createArchivedTaskNameCell(task, boardIndex, row));
+                break;
+            case 'priority': {
+                const p = document.createElement('p');
+                const pr = task.priority === 'срочно' ? 'срочно' : 'обычный';
+                p.className = pr === 'срочно' ? 'priority-high' : 'priority-normal';
+                p.textContent = pr === 'срочно' ? 'Срочно' : 'Обычный';
+                cell.appendChild(p);
+                break;
+            }
+            case 'dueDate': {
+                const p = document.createElement('p');
+                if (task.dueDate && String(task.dueDate).trim()) {
+                    p.textContent = formatDueDate(task.dueDate);
+                    if (parseDateBoard(task.dueDate) < new Date()) p.classList.add('overdue');
+                } else {
+                    p.textContent = '—';
+                }
+                cell.appendChild(p);
+                break;
+            }
+            case 'assignee':
+                if (task.assignee && String(task.assignee).trim()) {
+                    let av = task.assigneeAvatar || '';
+                    if (!av) {
+                        const m = teamMembers.find(x => x.name === task.assignee);
+                        if (m) av = m.avatar;
+                    }
+                    cell.innerHTML = `
+                        <div class="user-img-text">
+                            <img src="/static/source/user_img/${escapeHtml(av || 'basic_avatar.png')}" alt="">
+                            <div class="basic-and-signature">
+                                <p class="text-basic">${escapeHtml(task.assignee)}</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    cell.innerHTML = '<p class="text-basic">—</p>';
+                }
+                break;
+            case 'archivedAt': {
+                const p = document.createElement('p');
+                p.textContent = formatArchivedTimestamp(task.archivedDate);
+                cell.appendChild(p);
+                break;
+            }
+            case 'actions': {
+                const wrap = document.createElement('div');
+                wrap.className = 'archive-row-actions';
+                const btnRestore = document.createElement('button');
+                btnRestore.type = 'button';
+                btnRestore.className = 'button-small';
+                btnRestore.textContent = 'Вернуть';
+                btnRestore.addEventListener('click', () => restoreFromArchive(boardIndex, task.id));
+                const btnCopy = document.createElement('button');
+                btnCopy.type = 'button';
+                btnCopy.className = 'button-small';
+                btnCopy.textContent = 'Копия';
+                btnCopy.addEventListener('click', () => copyArchivedTask(boardIndex, task.id));
+                wrap.append(btnRestore, btnCopy);
+                cell.appendChild(wrap);
+                break;
+            }
+            default:
+                break;
+        }
+        row.appendChild(cell);
+    });
+
+    return row;
+}
+
+function createArchiveTasksGrid(board, boardIndex) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'tasks-grid-wrapper';
+    const grid = document.createElement('div');
+    grid.className = 'tasks-grid archive-tasks-grid';
+
+    const archived = (board.archivedTasks || []).filter(t => t);
+    if (archived.length === 0) {
+        wrapper.innerHTML = '<div class="empty-state">В архиве этой доски пусто</div>';
+        return wrapper;
+    }
+
+    const headerRow = document.createElement('div');
+    headerRow.className = 'grid-header';
+    ARCHIVE_GRID_COLUMNS.forEach(col => {
+        const cell = document.createElement('div');
+        cell.className = `col-${col.key}`;
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'header-title';
+        titleSpan.textContent = col.title;
+        cell.appendChild(titleSpan);
+        headerRow.appendChild(cell);
+    });
+    grid.appendChild(headerRow);
+
+    archived.forEach(task => {
+        grid.appendChild(createArchivedTaskRow(task, boardIndex));
+    });
+
+    wrapper.appendChild(grid);
+    return wrapper;
+}
+
+function createArchiveBoardSection(board, boardIndex) {
+    const section = document.createElement('div');
+    section.className = 'card board-archive-section';
+    section.dataset.boardId = board.id;
+    section.dataset.boardIndex = boardIndex;
+
+    const archivedCount = (board.archivedTasks || []).filter(t => t).length;
+    const collapsed = isBoardArchiveCollapsed(board.id);
+
+    const head = document.createElement('div');
+    head.className = 'archive-board-head tasks-header flex-row-between';
+
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'archive-collapse-toggle';
+    if (!collapsed) toggle.classList.add('open');
+    toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+
+    const arrow = document.createElement('span');
+    arrow.className = 'archive-collapse-arrow';
+    arrow.setAttribute('aria-hidden', 'true');
+
+    const titleBlock = document.createElement('span');
+    titleBlock.className = 'archive-board-title text-header';
+    titleBlock.textContent = board.name;
+
+    const badge = document.createElement('span');
+    badge.className = 'num-of-tasks';
+    badge.textContent = String(archivedCount);
+
+    toggle.append(arrow, titleBlock, badge);
+
+    head.appendChild(toggle);
+    section.appendChild(head);
+
+    const body = document.createElement('div');
+    body.className = 'archive-board-body';
+    body.style.display = collapsed ? 'none' : '';
+    body.appendChild(createArchiveTasksGrid(board, boardIndex));
+    section.appendChild(body);
+
+    toggle.addEventListener('click', () => {
+        const isOpen = toggle.classList.toggle('open');
+        body.style.display = isOpen ? '' : 'none';
+        toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        setBoardArchiveCollapsed(board.id, !isOpen);
+    });
+
+    return section;
+}
+
+function renderArchiveView() {
+    const container = document.querySelector('#cards-container');
+    if (!container) return;
+    container.classList.remove('tables-view', 'timeline-view', 'reports-view');
+    container.classList.add('archive-view');
+    if (!boardsData || boardsData.length === 0) {
+        container.innerHTML = '<div class="empty-message">Нет созданных досок</div>';
+        return;
+    }
+    container.innerHTML = '';
+    boardsData.forEach((board, boardIndex) => {
+        container.appendChild(createArchiveBoardSection(board, boardIndex));
+    });
+}
+
+function restoreFromArchive(boardIndex, taskId) {
+    const board = boardsData[boardIndex];
+    if (!board || !board.archivedTasks) return;
+    const idx = board.archivedTasks.findIndex(t => t && Number(t.id) === Number(taskId));
+    if (idx === -1) return;
+    const task = board.archivedTasks.splice(idx, 1)[0];
+    delete task.archivedDate;
+    if (task.subtasks && task.subtasks.length) {
+        task.subtasks = task.subtasks.map(st => ({
+            ...st,
+            completed: false
+        }));
+    }
+    if (!board.tasks) board.tasks = [];
+    board.tasks.push(task);
+    saveBoardsToLocalStorage();
+    renderCurrentView();
+    initBoardEvents();
+    initViewSwitching();
+    showToast('Задача возвращена из архива');
+}
+
+function copyArchivedTask(boardIndex, taskId) {
+    const board = boardsData[boardIndex];
+    if (!board || !board.archivedTasks) return;
+    const archived = board.archivedTasks.find(t => t && Number(t.id) === Number(taskId));
+    if (!archived) return;
+    const copy = JSON.parse(JSON.stringify(archived));
+    delete copy.archivedDate;
+    const idPool = [
+        ...(board.tasks || []).map(t => t.id),
+        ...(board.archivedTasks || []).map(t => t.id)
+    ].filter(id => typeof id === 'number');
+    const maxId = idPool.length ? Math.max(...idPool) : 0;
+    copy.id = maxId + 1;
+    if (Array.isArray(copy.subtasks)) {
+        copy.subtasks = copy.subtasks.map(st => ({ name: st.name, completed: false }));
+    }
+    if (!board.tasks) board.tasks = [];
+    board.tasks.push(copy);
+    saveBoardsToLocalStorage();
+    renderCurrentView();
+    initBoardEvents();
+    initViewSwitching();
+    showToast(`Копия задачи «${copy.name}» добавлена на доску`);
 }
 
 let draggedBoard = null;
@@ -1174,6 +1710,22 @@ function updateBoardsInDOM(boardIndex1, boardIndex2) {
 function createCardHeader(board, boardIndex) {
     const header = document.createElement('div');
     header.className = 'tasks-header flex-row-between';
+
+    const leftWrap = document.createElement('div');
+    leftWrap.className = 'board-header-left';
+
+    const collapsed = isBoardSectionCollapsed(board.id);
+    const collapseToggle = document.createElement('button');
+    collapseToggle.type = 'button';
+    collapseToggle.className = 'archive-collapse-toggle board-section-collapse-toggle';
+    if (!collapsed) collapseToggle.classList.add('open');
+    collapseToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    collapseToggle.setAttribute('aria-label', 'Свернуть или развернуть содержимое доски');
+    const arrow = document.createElement('span');
+    arrow.className = 'archive-collapse-arrow';
+    arrow.setAttribute('aria-hidden', 'true');
+    collapseToggle.appendChild(arrow);
+
     const dragHandle = document.createElement('div');
     dragHandle.className = 'board-drag-handle';
     dragHandle.setAttribute('draggable', 'true');
@@ -1188,7 +1740,12 @@ function createCardHeader(board, boardIndex) {
         <div class="num-of-tasks">${board.tasks ? board.tasks.filter(t => t).length : 0}</div>
     `;
     dragHandle.appendChild(taskheaderCount);
-    header.appendChild(dragHandle);
+    leftWrap.appendChild(collapseToggle);
+    leftWrap.appendChild(dragHandle);
+    header.appendChild(leftWrap);
+    header._collapseToggle = collapseToggle;
+    header._collapsedInitially = collapsed;
+
     const info = document.createElement('div');
     info.className = 'info';
     info.style.position = 'relative';
@@ -1249,6 +1806,7 @@ function initTableRowsSortable() {
         if (container.sortable) {
             container.sortable.destroy();
         }
+        const cardsContainer = document.querySelector('#cards-container');
         const sortable = new Sortable(container, {
             animation: 0,
             group: {
@@ -1264,7 +1822,11 @@ function initTableRowsSortable() {
             forceFallback: false,
             swapThreshold: 0.5,
             invertSwap: true,
+            onStart: function() {
+                if (cardsContainer) cardsContainer.classList.add('dragging-active');
+            },
             onEnd: function(evt) {
+                if (cardsContainer) cardsContainer.classList.remove('dragging-active');
                 const fromContainer = evt.from;
                 const toContainer = evt.to;
                 const fromBoardCard = fromContainer.closest('.board-table-card');
@@ -1314,6 +1876,7 @@ function initTaskSortable(container, boardId) {
         container.sortable.destroy();
         delete container.sortable;
     }
+    const cardsContainer = document.querySelector('#cards-container');
     const sortable = new Sortable(container, {
         animation: 150,
         group: {
@@ -1329,7 +1892,11 @@ function initTaskSortable(container, boardId) {
         forceFallback: false,
         swapThreshold: 0.5,
         invertSwap: true,
+        onStart: function() {
+            if (cardsContainer) cardsContainer.classList.add('dragging-active');
+        },
         onEnd: function(evt) {
+            if (cardsContainer) cardsContainer.classList.remove('dragging-active');
             const fromList = evt.from;
             const toList = evt.to;
             const fromBoard = fromList.closest('.card');
@@ -1366,6 +1933,9 @@ function initTaskSortable(container, boardId) {
                     showToast(`Задача "${movedTask.name}" перемещена в доску "${targetBoard.name}"`);
                 }
             }
+        },
+        onCancel: function() {
+            if (cardsContainer) cardsContainer.classList.remove('dragging-active');
         }
     });
     container.sortable = sortable;
@@ -1559,7 +2129,14 @@ function archiveTask(boardIndex, taskId, isArchived) {
     }
     if (isArchived) {
         if (!board.archivedTasks) board.archivedTasks = [];
-        board.archivedTasks.push({...board.tasks[taskIndex], archivedDate: new Date().toISOString()});
+        const taskToArchive = { ...board.tasks[taskIndex] };
+        if (taskToArchive.subtasks && taskToArchive.subtasks.length) {
+            taskToArchive.subtasks = taskToArchive.subtasks.map(st => ({
+                ...st,
+                completed: true
+            }));
+        }
+        board.archivedTasks.push({ ...taskToArchive, archivedDate: new Date().toISOString() });
         board.tasks.splice(taskIndex, 1);
     }
     saveBoardsToLocalStorage();
