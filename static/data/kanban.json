@@ -1,0 +1,55 @@
+{
+  "boards": [
+    {
+      "id": 1,
+      "name": "Наименование проекта",
+      "stages": ["Очередь", "В работе", "Готово"],
+      "tasksSource": "/static/data/kanban_tasks.json",
+      "archivedTasks": [
+        {
+          "id": 9001,
+          "name": "Старый прототип интерфейса",
+          "priority": "обычный",
+          "dueDate": "15.01.2026",
+          "assignee": "Дарья Швед",
+          "assigneeAvatar": "dar_shved.jpg",
+          "stage": "Готово",
+          "subtasks": [
+            { "name": "Сверстать макет", "completed": true },
+            { "name": "Показать заказчику", "completed": true }
+          ],
+          "archivedDate": "2026-02-10T12:00:00.000Z",
+          "archivedReason": "Заменён новой версией"
+        },
+        {
+          "id": 9002,
+          "name": "Настроить CI (демо)",
+          "priority": "срочно",
+          "dueDate": "20.02.2026",
+          "assignee": "Лев Аксенов",
+          "assigneeAvatar": "lev_aksenov.jpg",
+          "stage": "Готово",
+          "subtasks": [],
+          "archivedDate": "2026-03-01T09:30:00.000Z"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Мобильное приложение — MVP",
+      "stages": ["Очередь", "В работе", "Тестирование", "Готово"],
+      "tasksSource": "/static/data/kanban_tasks_board2.json",
+      "archivedTasks": [
+        {
+          "id": 9101,
+          "name": "Черновик экрана авторизации",
+          "priority": "обычный",
+          "dueDate": "01.03.2026",
+          "stage": "Готово",
+          "subtasks": [{ "name": "Набросок", "completed": true }],
+          "archivedDate": "2026-03-15T16:00:00.000Z"
+        }
+      ]
+    }
+  ]
+}

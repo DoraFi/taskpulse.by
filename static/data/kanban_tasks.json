@@ -1,0 +1,189 @@
+{
+  "tasks": [
+    {
+      "id": 2001,
+      "boardId": 2,
+      "name": "Экран онбординга",
+      "priority": "срочно",
+      "dueDate": "12.04.2026",
+      "assignee": "Дарья Швед",
+      "assigneeAvatar": "dar_shved.jpg",
+      "stage": "Очередь",
+      "subtasks": [
+        { "name": "Тексты и кнопки", "completed": false },
+        { "name": "Иллюстрации", "completed": false }
+      ]
+    },
+    {
+      "id": 2002,
+      "boardId": 2,
+      "name": "API авторизации",
+      "priority": "срочно",
+      "dueDate": "14.04.2026",
+      "assignee": "Лев Аксенов",
+      "assigneeAvatar": "lev_aksenov.jpg",
+      "stage": "В работе",
+      "subtasks": [
+        { "name": "JWT refresh", "completed": false },
+        { "name": "Rate-limit", "completed": false }
+      ]
+    },
+    {
+      "id": 2003,
+      "boardId": 2,
+      "name": "Пуш-уведомления",
+      "priority": "обычный",
+      "dueDate": "22.04.2026",
+      "assignee": "Лев Аксенов",
+      "assigneeAvatar": "lev_aksenov.jpg",
+      "stage": "В работе",
+      "subtasks": [{ "name": "FCM", "completed": false }]
+    },
+    {
+      "id": 2004,
+      "boardId": 2,
+      "name": "Регрессионные тесты релиза 0.3",
+      "priority": "обычный",
+      "dueDate": "25.04.2026",
+      "assignee": "Дарья Швед",
+      "assigneeAvatar": "dar_shved.jpg",
+      "stage": "Тестирование",
+      "subtasks": [
+        { "name": "Смоук-тесты", "completed": true },
+        { "name": "Чек-лист на устройствах", "completed": false }
+      ]
+    },
+    {
+      "id": 2005,
+      "boardId": 2,
+      "name": "Публикация в сторы",
+      "priority": "обычный",
+      "dueDate": "30.04.2026",
+      "stage": "Готово",
+      "subtasks": [
+        { "name": "Скриншоты", "completed": true },
+        { "name": "Описание", "completed": true }
+      ]
+    },
+    {
+      "id": 2006,
+      "boardId": 2,
+      "name": "Аналитика событий",
+      "priority": "обычный",
+      "dueDate": "08.05.2026",
+      "assignee": "Лев Аксенов",
+      "assigneeAvatar": "lev_aksenov.jpg",
+      "stage": "Очередь",
+      "subtasks": []
+    },
+    {
+      "id": 1001,
+      "boardId": 1,
+      "name": "Планирование архитектуры",
+      "priority": "срочно",
+      "dueDate": "10.04.2026",
+      "assignee": "Оксана Кветко",
+      "assigneeAvatar": "basic_avatar.png",
+      "stage": "Очередь",
+      "subtasks": [
+        { "name": "Выбор технологий", "completed": false },
+        { "name": "Схема БД", "completed": false }
+      ]
+    },
+    {
+      "id": 1002,
+      "boardId": 1,
+      "name": "Настройка сервера",
+      "priority": "обычный",
+      "dueDate": "15.04.2026",
+      "assignee": "Лев Аксенов",
+      "assigneeAvatar": "lev_aksenov.jpg",
+      "stage": "В работе",
+      "subtasks": [
+        { "name": "Docker", "completed": false },
+        { "name": "Nginx", "completed": false }
+      ]
+    },
+    {
+      "id": 1003,
+      "boardId": 1,
+      "name": "Прототип интерфейса",
+      "priority": "срочно",
+      "dueDate": "12.04.2026",
+      "assignee": "Полина Ильючик",
+      "assigneeAvatar": "pol_ilyuchik.jpg",
+      "stage": "Тестирование",
+      "subtasks": [
+        { "name": "Figma", "completed": true },
+        { "name": "Клик-прототип", "completed": false }
+      ]
+    },
+    {
+      "id": 1004,
+      "boardId": 1,
+      "name": "Документация для клиента",
+      "priority": "обычный",
+      "dueDate": "20.04.2026",
+      "assignee": "Оксана Кветко",
+      "assigneeAvatar": "basic_avatar.png",
+      "stage": "Готово",
+      "subtasks": []
+    },
+    {
+      "id": 3001,
+      "boardId": 3,
+      "name": "Интеграция с платёжной системой",
+      "priority": "срочно",
+      "dueDate": "18.04.2026",
+      "assignee": "Дарья Швед",
+      "assigneeAvatar": "dar_shved.jpg",
+      "stage": "В работе",
+      "subtasks": [
+        { "name": "Webhook", "completed": false },
+        { "name": "Тестирование", "completed": false }
+      ]
+    },
+    {
+      "id": 3002,
+      "boardId": 3,
+      "name": "Анализ конкурентов",
+      "priority": "обычный",
+      "dueDate": "25.04.2026",
+      "assignee": "Ксения Глебко",
+      "assigneeAvatar": "ks_glebko.jpg",
+      "stage": "Очередь",
+      "subtasks": [
+        { "name": "Сбор данных", "completed": false },
+        { "name": "Отчёт", "completed": false }
+      ]
+    },
+    {
+      "id": 3003,
+      "boardId": 3,
+      "name": "Локализация приложения",
+      "priority": "обычный",
+      "dueDate": "30.04.2026",
+      "assignee": "Полина Ильючик",
+      "assigneeAvatar": "pol_ilyuchik.jpg",
+      "stage": "Готово",
+      "subtasks": [
+        { "name": "Переводы", "completed": true },
+        { "name": "Адаптация вёрстки", "completed": true }
+      ]
+    },
+    {
+      "id": 3004,
+      "boardId": 3,
+      "name": "Релиз 1.0",
+      "priority": "срочно",
+      "dueDate": "05.05.2026",
+      "assignee": "Оксана Кветко",
+      "assigneeAvatar": "basic_avatar.png",
+      "stage": "Тестирование",
+      "subtasks": [
+        { "name": "Checklist", "completed": false },
+        { "name": "Уведомление команды", "completed": false }
+      ]
+    }
+  ]
+}

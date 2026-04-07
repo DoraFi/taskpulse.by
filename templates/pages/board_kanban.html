@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>TaskPulse - Доски проектов</title>
+    <link rel="icon" type="image/svg+xml" href="/static/source/logo_no_back.svg">
+    <link rel="stylesheet" href="/static/scss/style.css">
+</head>
+
+<body>
+    <div class="header">
+        <div class="gap-24 flex-row">
+            <a href="/templates/pages/index.html"><img class="logo" src="/static/source/logo_rect.svg"
+                    alt="TaskPulse"></a>
+            <div class="search-panel border-dark-1 br-5">
+                <img class="h-16" src="/static/source/icons/search.svg" alt="Поиск">
+                <input class="text-basic" type="text" placeholder="Поиск">
+            </div>
+        </div>
+        <ul class="gap-24 flex-row">
+            <li><img class="h-32" src="/static/source/icons/plus.svg" alt=""></li>
+            <li><img class="h-32" src="/static/source/icons/settings.svg" alt=""></li>
+            <li><img class="h-32" src="/static/source/icons/profile.svg" alt=""></li>
+            <li><img class="h-32" src="/static/source/icons/logout.svg" alt=""></li>
+            <li><img class="h-32" src="/static/source/icons/lighttheme.svg" alt=""></li>
+        </ul>
+    </div>
+
+    <div class="main-layout">
+        <aside id="aside-container"></aside>
+
+        <div class="app-container flex-col board-list board-kanban">
+            <div class="tabs-buttons">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="board">
+                        <img src="/static/source/icons/board.svg" alt=""> Доски
+                    </button>
+                    <button class="tab-btn" data-tab="tables">
+                        <img src="/static/source/icons/table.svg" alt=""> Таблицы
+                    </button>
+                    <button class="tab-btn" data-tab="timeline">
+                        <img src="/static/source/icons/timeline.svg" alt=""> Таймлайн
+                    </button>
+                </div>
+                <button type="button" class="button-basic" data-tab="reports">Отчеты</button>
+                <button type="button" class="button-basic" data-tab="archive">Архив задач</button>
+            </div>
+
+            <div class="cards" id="cards-container">
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="/static/js/loadComponents.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/board_kanban.js"></script>
+</body>
+
+</html>

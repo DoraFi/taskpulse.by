@@ -1,3 +1,4 @@
+(() => {
 let boardsData = [];
 let isDragging = false;
 let currentView = 'board';
@@ -1800,6 +1801,99 @@ function createDropdownMenu(board, boardIndex) {
 
 function initTableRowsSortable() {
     const containers = document.querySelectorAll('#cards-container .board-table-card .table-rows');
+    const TABLE_ROW_FALLBACK_CLASS = 'tp-table-row-fallback';
+    const buildFallbackRowInnerHtml = (row) => row?.innerHTML || '';
+    const applyTableRowComputedStylesToClone = (row, clone, { isFallback = false } = {}) => {
+        if (!row || !clone) return;
+        clone.classList.add('board-list');
+        const table = row.closest('.tasks-grid');
+        const gridCols = table ? getComputedStyle(table).gridTemplateColumns : '';
+        if (!isFallback) {
+            clone.style.setProperty('display', 'grid', 'important');
+            if (gridCols) clone.style.setProperty('grid-template-columns', gridCols, 'important');
+        } else {
+            // Для drag-элемента (это сама .grid-row) задаём grid напрямую, без subgrid.
+            clone.style.setProperty('display', 'grid');
+            // В списке используется укороченная схема колонок (см. `.board-list .tasks-grid` в scss)
+            clone.style.setProperty('grid-template-columns', 'auto auto 1fr auto auto auto');
+            clone.style.setProperty('gap', '0.75rem');
+            clone.style.setProperty('padding', '0');
+            clone.style.setProperty('border', 'none');
+            clone.style.setProperty('background', 'transparent');
+        }
+        const rect = row.getBoundingClientRect();
+        clone.style.width = `${rect.width}px`;
+        clone.style.boxSizing = 'border-box';
+        clone.style.opacity = '1';
+        clone.style.visibility = 'visible';
+        clone.style.zIndex = '3000';
+
+        const copyAllComputed = (fromEl, toEl) => {
+            const s = getComputedStyle(fromEl);
+            const skip = isFallback ? new Set([
+                'position', 'top', 'right', 'bottom', 'left',
+                'inset', 'inset-block', 'inset-inline',
+                'transform', 'translate', 'rotate', 'scale',
+                'transition', 'transition-property', 'transition-duration', 'transition-timing-function', 'transition-delay',
+                'animation', 'animation-name', 'animation-duration', 'animation-timing-function', 'animation-delay', 'animation-iteration-count',
+                'will-change',
+            ]) : null;
+            for (let i = 0; i < s.length; i++) {
+                const prop = s[i];
+                if (skip && skip.has(prop)) continue;
+                const val = s.getPropertyValue(prop);
+                if (val) toEl.style.setProperty(prop, val, 'important');
+            }
+        };
+        const fromNodes = [];
+        const toNodes = [];
+        const walk = (root, acc) => {
+            const w = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
+            let n = w.currentNode;
+            while (n) {
+                acc.push(n);
+                n = w.nextNode();
+            }
+        };
+        const toRoot = isFallback ? (clone.querySelector('.grid-row') || clone) : clone;
+        walk(row, fromNodes);
+        walk(toRoot, toNodes);
+        const n = Math.min(fromNodes.length, toNodes.length);
+        for (let i = 0; i < n; i++) copyAllComputed(fromNodes[i], toNodes[i]);
+    };
+    const freezeFallbackStyles = (container, row) => {
+        if (container._listTableRowStyleRaf) cancelAnimationFrame(container._listTableRowStyleRaf);
+        container._listTableRowStyleRaf = null;
+
+        let tries = 0;
+        const startWhenReady = () => {
+            const fallback = container._listTableRowDragEl || document.querySelector(`.${TABLE_ROW_FALLBACK_CLASS}`);
+            if (!fallback) {
+                tries += 1;
+                if (tries < 20) setTimeout(startWhenReady, 16);
+                return;
+            }
+
+            const tick = () => {
+                const fb = container._listTableRowDragEl || document.querySelector(`.${TABLE_ROW_FALLBACK_CLASS}`);
+                if (!fb) return;
+                // Дожимаем контекстный HTML, чтобы селекторы таблицы работали в body
+                if (container._listTableRowCtxHtml && fb.innerHTML !== container._listTableRowCtxHtml) {
+                    fb.innerHTML = container._listTableRowCtxHtml;
+                }
+                applyTableRowComputedStylesToClone(row, fb, { isFallback: true });
+                fb.style.setProperty('margin', '0', 'important');
+                fb.style.setProperty('margin-top', '0', 'important');
+                fb.style.setProperty('margin-right', '0', 'important');
+                fb.style.setProperty('margin-bottom', '0', 'important');
+                fb.style.setProperty('margin-left', '0', 'important');
+                container._listTableRowStyleRaf = requestAnimationFrame(tick);
+            };
+            container._listTableRowStyleRaf = requestAnimationFrame(tick);
+        };
+
+        setTimeout(startWhenReady, 0);
+    };
     containers.forEach(container => {
         const boardCard = container.closest('.board-table-card');
         const boardId = parseInt(boardCard.dataset.boardId);
@@ -1817,16 +1911,40 @@ function initTableRowsSortable() {
             },
             handle: '.grid-row',
             draggable: '.grid-row',
-            ghostClass: 'task-dragging',
-            dragClass: 'task-drag-over',
-            forceFallback: false,
-            swapThreshold: 0.5,
-            invertSwap: true,
-            onStart: function() {
+            // Визуал строки не должен меняться
+            ghostClass: '',
+            dragClass: '',
+            forceFallback: true,
+            fallbackOnBody: true,
+            fallbackTolerance: 0,
+            fallbackClass: TABLE_ROW_FALLBACK_CLASS,
+            onClone(evt) {
+                container._listTableRowDragEl = evt.clone;
+                evt.clone?.classList?.add(TABLE_ROW_FALLBACK_CLASS);
+                // Sortable может "очищать" fallback-элемент, поэтому храним HTML строки и дожимаем в RAF
+                container._listTableRowCtxHtml = buildFallbackRowInnerHtml(evt.item);
+                // Первичный "прогрев" (на случай, если контекстные стили уже достаточны)
+                evt.clone.innerHTML = container._listTableRowCtxHtml;
+                // Убираем фон/рамки контейнера, оставляем позиционирование Sortable
+                evt.clone.style.setProperty('background', 'transparent');
+                evt.clone.style.setProperty('border', 'none');
+                evt.clone.style.setProperty('padding', '0');
+                evt.clone.style.setProperty('display', 'grid');
+                evt.clone.style.setProperty('box-sizing', 'border-box');
+                evt.clone.style.setProperty('pointer-events', 'none');
+                // Дальше RAF будет дожимать computed-стили на реальный drag-элемент
+                applyTableRowComputedStylesToClone(evt.item, evt.clone, { isFallback: true });
+            },
+            onStart: function(evt) {
                 if (cardsContainer) cardsContainer.classList.add('dragging-active');
+                freezeFallbackStyles(container, evt.item);
             },
             onEnd: function(evt) {
                 if (cardsContainer) cardsContainer.classList.remove('dragging-active');
+                if (container._listTableRowStyleRaf) cancelAnimationFrame(container._listTableRowStyleRaf);
+                container._listTableRowStyleRaf = null;
+                container._listTableRowDragEl = null;
+                container._listTableRowCtxHtml = null;
                 const fromContainer = evt.from;
                 const toContainer = evt.to;
                 const fromBoardCard = fromContainer.closest('.board-table-card');
@@ -1865,6 +1983,10 @@ function initTableRowsSortable() {
                     }
                 }
             }
+            ,
+            onCancel: function() {
+                if (cardsContainer) cardsContainer.classList.remove('dragging-active');
+            }
         });
         container.sortable = sortable;
     });
@@ -1877,26 +1999,211 @@ function initTaskSortable(container, boardId) {
         delete container.sortable;
     }
     const cardsContainer = document.querySelector('#cards-container');
+    let __dragAnimId = null;
+    let __dragging = false;
+    let __dragFallbackHtml = '';
+    let __dragFallbackWidth = '';
+    // Старый механизм копирования computed-стилей больше не используем
+
+    const buildKanbanCloneHtmlForTask = (task) => {
+        // Для канбан-стилей нужен контекст .kanban-board-card .kanban-stage-col ...
+        const stageCol = document.createElement('div');
+        stageCol.className = 'kanban-stage-col';
+
+        const kanbanCard = document.createElement('div');
+        kanbanCard.className = 'item kanban-task-item';
+        kanbanCard.dataset.taskId = task.id;
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'text-basic';
+        nameSpan.textContent = task.name;
+        kanbanCard.appendChild(nameSpan);
+
+        if (task.subtasks && task.subtasks.length > 0) {
+            const completedCount = task.subtasks.filter(st => st.completed).length;
+            const totalCount = task.subtasks.length;
+            const percent = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+            const subtasksBlock = document.createElement('div');
+            subtasksBlock.className = 'subtasks text-signature';
+            subtasksBlock.innerHTML = `
+                <div class="count">
+                    <p class="name">Подзадачи</p>
+                    <p>${completedCount} / ${totalCount}</p>
+                </div>
+                <div class="progress-line">
+                    <div class="completed" style="width: ${percent}%;"></div>
+                    <div class="todo" style="width: ${100 - percent}%;"></div>
+                </div>
+            `;
+            kanbanCard.appendChild(subtasksBlock);
+        }
+
+        const hasAssignee = task.assignee && String(task.assignee).trim();
+        const hasDueDate = task.dueDate && String(task.dueDate).trim();
+        if (hasAssignee || hasDueDate) {
+            const tag = document.createElement('div');
+            tag.className = 'tag';
+            if (hasAssignee) {
+                const executor = document.createElement('div');
+                executor.className = 'executor';
+                executor.innerHTML = `<img src="/static/source/user_img/${escapeHtml(task.assigneeAvatar || 'basic_avatar.png')}" alt="${escapeHtml(task.assignee)}">`;
+                tag.appendChild(executor);
+            }
+            if (hasDueDate) {
+                const deadlineDiv = document.createElement('div');
+                deadlineDiv.className = 'deadline';
+                deadlineDiv.textContent = formatDueDate(task.dueDate);
+                tag.appendChild(deadlineDiv);
+            }
+            kanbanCard.appendChild(tag);
+        }
+
+        stageCol.appendChild(kanbanCard);
+        return stageCol.outerHTML;
+    };
+
+    const startFallbackSync = () => {
+        if (__dragAnimId) cancelAnimationFrame(__dragAnimId);
+
+        const tick = () => {
+            if (!__dragging) return;
+            const fb = document.querySelector('.sortable-fallback');
+            if (fb) {
+                // Sortable может перекидывать/менять классы у fallback в процессе, поэтому дожимаем каждый кадр.
+                // Для kanban-стилей нужен .kanban-board-card предок.
+                fb.classList.add('kanban-board-card');
+                if (__dragFallbackWidth) fb.style.width = __dragFallbackWidth;
+                fb.style.boxSizing = 'border-box';
+                fb.style.pointerEvents = 'none';
+                fb.style.border = 'none';
+
+                if (__dragFallbackHtml && fb.innerHTML !== __dragFallbackHtml) {
+                    fb.innerHTML = __dragFallbackHtml;
+                }
+            }
+            __dragAnimId = requestAnimationFrame(tick);
+        };
+        __dragAnimId = requestAnimationFrame(tick);
+    };
+
+    const stopFallbackSync = () => {
+        __dragging = false;
+        if (__dragAnimId) cancelAnimationFrame(__dragAnimId);
+        __dragAnimId = null;
+        __dragFallbackHtml = '';
+        __dragFallbackWidth = '';
+    };
+
     const sortable = new Sortable(container, {
         animation: 150,
-        group: {
-            name: 'tasks',
-            pull: true,
-            revertClone: false,
-            sort: true
-        },
+        group: { name: 'tasks', pull: true, put: true },
         handle: '.item',
         draggable: '.item',
-        ghostClass: 'task-dragging',
-        dragClass: 'task-drag-over',
-        forceFallback: false,
-        swapThreshold: 0.5,
-        invertSwap: true,
+        // В board_list эти классы дают пунктир/рамки — не используем
+        ghostClass: '',
+        dragClass: '',
+        // chosenClass тоже не используем: он может "гасить" стили/overlay на fallback
+        chosenClass: '',
+        // Чтобы клон НЕ отставал в multi-column layout, рисуем fallback на body
+        forceFallback: true,
+        fallbackOnBody: true,
+        fallbackTolerance: 0,
         onStart: function() {
             if (cardsContainer) cardsContainer.classList.add('dragging-active');
+            __dragging = true;
+            startFallbackSync();
+        },
+        onClone: function(evt) {
+            const item = evt.item;
+            const clone = evt.clone;
+            if (!item || !clone) return;
+
+            const taskId = parseInt(item.dataset.taskId);
+            if (!taskId) return;
+
+            // Найти задачу по id во всех досках
+            let task = null;
+            for (const b of boardsData) {
+                const t = (b.tasks || []).find(x => x && x.id === taskId);
+                if (t) {
+                    task = t;
+                    break;
+                }
+            }
+            if (!task) return;
+
+            // Собрать DOM как в board_kanban (структура + scss-селекторы через предков)
+            const kanbanCard = document.createElement('div');
+            kanbanCard.className = 'item kanban-task-item';
+            kanbanCard.dataset.taskId = task.id;
+
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'text-basic';
+            nameSpan.textContent = task.name;
+            kanbanCard.appendChild(nameSpan);
+
+            if (task.subtasks && task.subtasks.length > 0) {
+                const completedCount = task.subtasks.filter(st => st.completed).length;
+                const totalCount = task.subtasks.length;
+                const percent = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+                const subtasksBlock = document.createElement('div');
+                subtasksBlock.className = 'subtasks text-signature';
+                subtasksBlock.innerHTML = `
+                    <div class="count">
+                        <p class="name">Подзадачи</p>
+                        <p>${completedCount} / ${totalCount}</p>
+                    </div>
+                    <div class="progress-line">
+                        <div class="completed" style="width: ${percent}%;"></div>
+                        <div class="todo" style="width: ${100 - percent}%;"></div>
+                    </div>
+                `;
+                kanbanCard.appendChild(subtasksBlock);
+            }
+
+            // Tag как в Kanban: только исполнитель и срок (без приоритета)
+            const hasAssignee = task.assignee && String(task.assignee).trim();
+            const hasDueDate = task.dueDate && String(task.dueDate).trim();
+            if (hasAssignee || hasDueDate) {
+                const tag = document.createElement('div');
+                tag.className = 'tag';
+                if (hasAssignee) {
+                    const executor = document.createElement('div');
+                    executor.className = 'executor';
+                    executor.innerHTML = `<img src="/static/source/user_img/${escapeHtml(task.assigneeAvatar || 'basic_avatar.png')}" alt="${escapeHtml(task.assignee)}">`;
+                    tag.appendChild(executor);
+                }
+                if (hasDueDate) {
+                    const deadlineDiv = document.createElement('div');
+                    deadlineDiv.className = 'deadline';
+                    deadlineDiv.textContent = formatDueDate(task.dueDate);
+                    tag.appendChild(deadlineDiv);
+                }
+                kanbanCard.appendChild(tag);
+            }
+
+            // Как в board_kanban: добавляем kanban-контекст, от которого завязаны стили tag/subtasks
+            const scopeCard = document.createElement('div');
+            scopeCard.className = 'kanban-board-card';
+            const scopeCol = document.createElement('div');
+            scopeCol.className = 'kanban-stage-col';
+            scopeCol.appendChild(kanbanCard);
+            scopeCard.appendChild(scopeCol);
+
+            // Подготовить fallback-контент. Sortable создаёт .sortable-fallback в body и иногда трогает DOM,
+            // поэтому финально дожимаем через startFallbackSync() каждый кадр.
+            __dragFallbackHtml = scopeCard.innerHTML;
+            __dragFallbackWidth = `${item.getBoundingClientRect().width}px`;
+
+            clone.className = 'kanban-board-card';
+            clone.innerHTML = __dragFallbackHtml;
+            clone.style.width = __dragFallbackWidth;
+            clone.style.boxSizing = 'border-box';
+            clone.style.pointerEvents = 'none';
         },
         onEnd: function(evt) {
             if (cardsContainer) cardsContainer.classList.remove('dragging-active');
+            stopFallbackSync();
             const fromList = evt.from;
             const toList = evt.to;
             const fromBoard = fromList.closest('.card');
@@ -1936,6 +2243,7 @@ function initTaskSortable(container, boardId) {
         },
         onCancel: function() {
             if (cardsContainer) cardsContainer.classList.remove('dragging-active');
+            stopFallbackSync();
         }
     });
     container.sortable = sortable;
@@ -2416,3 +2724,5 @@ if (document.readyState === 'loading') {
         initBoardListPage();
     }
 }
+
+})();

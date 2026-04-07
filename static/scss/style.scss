@@ -510,6 +510,12 @@ body {
         transition: all 0.2s ease;
         @extend .text-basic;
 
+        &.dragging-active {
+            opacity: 0.6;
+            cursor: grabbing;
+            background: rgba($green, 0.05);
+        }
+
         &:hover {
             background: $green-transperent-10;
         }
@@ -627,6 +633,47 @@ body {
     }
 }
 
+// Sortable fallback-клон строки таблицы уходит в body и теряет контекстные селекторы.
+// Повторяем ключевые стили таблицы напрямую для `.tp-table-row-fallback`.
+.tp-table-row-fallback {
+    .tasks-grid {
+        display: grid;
+        gap: $space-16;
+        width: max-content;
+        min-width: 100%;
+        overflow-x: auto;
+
+        // В таблицах списка/канбан-таблицах используется укороченный набор колонок.
+        // Дублируем значение из `.board-list .tasks-grid` чтобы клон выглядел 1-в-1.
+        grid-template-columns: auto auto 1fr auto auto auto !important;
+
+        .grid-header, .grid-row {
+            display: grid;
+            // В fallback-клоне не полагаемся на subgrid (может не примениться вне исходного контекста),
+            // поэтому задаём колонки явно.
+            grid-template-columns: auto auto 1fr auto auto auto;
+            grid-column: 1 / -1;
+        }
+
+        .grid-row {
+            padding: $space-16 0;
+            align-items: center;
+            transition: all 0.2s ease;
+            @extend .text-basic;
+        }
+    }
+}
+
+// В реальном DnD перетаскивается именно `.grid-row` (fallback-element в body),
+// поэтому задаём табличный grid напрямую на нём.
+.tp-table-row-fallback.grid-row {
+    display: grid;
+    grid-template-columns: auto auto 1fr auto auto auto;
+    gap: $space-16;
+    align-items: center;
+    padding: $space-16 0;
+}
+
 .tasks-footer {
     display: flex;
     justify-content: flex-end;
@@ -731,6 +778,27 @@ body {
         &::-webkit-scrollbar {
             width: 0;
             background: transparent;
+        }
+
+        input {
+            all: unset;
+            box-sizing: border-box;
+            width: 100%;
+            padding: $space-4 $space-16;
+            border: $space-1 solid $light-gray;
+            border-radius: $radius-sm;
+            @extend .text-basic;
+            transition: all 0.2s ease;
+
+            &:focus {
+                outline: none;
+                border-color: $green;
+                box-shadow: 0 0 0 $space-2 rgba($green, 0.1);
+            }
+
+            &::placeholder {
+                color: rgba($dark-gray, 0.5);
+            }
         }
     
         scrollbar-width: none;
@@ -1017,7 +1085,7 @@ body {
         }
     }
 
-    .tables-view{
+    .tables-view, .board-view{
         &.dragging-active {      
             column-count: 1;
 
@@ -1028,7 +1096,10 @@ body {
     }
 
     .board-card-collapsible, .archive-board-body{
+        display: flex;
+        flex-direction: column;
         width: 100%;
+        @extend .gap-24;
     }
 
     .card {
@@ -1276,6 +1347,419 @@ body {
     display: block;
 }
 
+.board-kanban {
+    .cards {
+        column-count: 1 !important;
+        column-gap: 0;
+    }
+}
+
+.kanban-board-card, .kanban-archive-board {
+    width: 100%;
+
+    // Каждая колонка этапа + её разделитель живут в .kanban-stage-group
+    .kanban-stage-group {
+        display: flex;
+        align-items: stretch;
+        flex: 1;
+        gap: $space-16;
+        min-width: 0;
+
+        // Контент колонки внутри группы должен занимать всю доступную ширину группы
+        .kanban-column-head,
+        .kanban-stage-col {
+            flex: 1;
+            min-width: 0;
+        }
+
+        // Разделитель по ширине фиксированный, по высоте тянется
+        .kanban-stage-sep-line {
+            align-self: stretch;
+        }
+    }
+
+    &[data-kanban-scroll="true"] {
+        .board-card-collapsible {
+            // Скролл внутри доски, ширина карточки не меняется
+            overflow-x: auto;
+            overflow-y: visible;
+        }
+
+        .kanban-columns-head,
+        .kanban-stages-row {
+            width: max-content;
+            gap: $space-16;
+        }
+
+        .kanban-stage-group {
+            flex: 0 0 22vw;
+        }
+
+        .kanban-priority-section {
+            width: fit-content;
+            margin-right: $space-1;
+        }
+
+        .kanban-priority-section.normal {
+            margin-right: $space-8;
+        }
+    }
+
+    .kanban-columns-head {
+        display: flex;
+        align-items: stretch;
+        gap: $space-16;
+        padding: 0 $space-16 $space-12;
+    }
+
+    .kanban-column-head {
+        display: flex;
+        align-items: stretch;
+        gap: $space-16;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .kanban-column-head-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: $space-16;
+        width: 100%;
+        min-width: 0;
+
+        img {
+            height: 1em;
+        }
+    }
+
+    .kanban-column-head-titles {
+        display: flex;
+        align-items: center;
+        gap: $space-8;
+        min-width: 0;
+    }
+
+    .kanban-count-badge {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: $space-8;
+        height: $space-24;
+        background: $light-gray;
+        @extend .br-5;
+        @extend .text-signature;
+        color: $light-light-green !important;
+        aspect-ratio: 1/1;
+    }
+
+    .kanban-stage-sep-line {
+        width: $space-1;
+        flex-shrink: 0;
+        align-self: stretch;
+        min-height: $space-16;
+        background: $dark-gray;
+        border-radius: $radius-sm;
+    }
+
+    .kanban-priority-section {
+        padding: $space-16;
+        border-top: $space-1 solid rgba($dark-gray, 0.15);
+
+        &.urgent {
+            background: rgba($pink, 0.05);
+            border: $space-1 solid $pink;
+            @extend .br-10;
+
+            button .text-basic{
+                color: $pink;
+                padding: 0;
+            }
+
+            .kanban-count-chip {
+                background-color: $pink;
+            }
+        }
+
+        &.normal {
+            background: rgba($green, 0.05);
+            border: $space-1 solid $green;
+            @extend .br-10;
+
+            button .text-basic{
+                color: $green;
+            }
+
+            .kanban-count-chip {
+                background-color: $green;
+            }
+        }
+    }
+
+    .kanban-priority-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 0 $space-12;
+    }
+
+    .kanban-priority-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: $space-12;
+        border: none;
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .kanban-priority-arrow {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: $space-16;
+        height: $space-16;
+
+        &::before {
+            content: '';
+            display: block;
+            width: 100%;
+            height: 100%;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            transition: transform 0.2s ease;
+        }
+    }
+
+    .kanban-priority-toggle--urgent .kanban-priority-arrow::before {
+        background-image: url('/static/source/icons/arrow_pink_cropped.svg');
+    }
+
+    .kanban-priority-toggle--normal .kanban-priority-arrow::before {
+        background-image: url('/static/source/icons/arrow_green_cropped.svg');
+    }
+
+    .kanban-priority-toggle.open .kanban-priority-arrow::before {
+        transform: rotate(-90deg);
+    }
+
+    .kanban-count-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 $space-8;
+        height: $space-24;
+        background: $light-gray;
+        color: $light-light-green;
+        @extend .br-5;
+        @extend .text-signature;
+    }
+
+    .kanban-stages-row {
+        display: flex;
+        align-items: stretch;
+        gap: $space-16;
+        padding-bottom: $space-8;
+    }
+
+    .kanban-stage-col {
+        flex: 1;
+        min-width: 0;
+
+        .subtasks {
+            @extend .flex-col;
+            gap: $space-8;
+
+            .count {
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .subtasks-list {
+                @extend .flex-col;
+                gap: $space-4;
+
+                .custom-checkbox {
+                    width: $space-20;
+                    height: $space-20;
+                    border: $space-2 solid $dark-gray;
+
+                    &::after {
+                        width: $space-12;
+                        height: $space-8;
+                    }
+                }
+            }
+
+            .checkbox-text {
+                @extend .text-signature;
+            }
+
+            .name {
+                display: inline-flex;
+                align-items: center;
+                gap: $space-4;
+
+                &::after {
+                    content: '';
+                    display: inline-block;
+                    height: 1em;
+                    aspect-ratio: 2/3;
+                    background-image: url('/static/source/icons/arrow_dark_cropped.svg');
+                    background-size: contain;
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    flex-shrink: 0;
+                    transition: transform 0.2s ease;
+                }
+
+                &.open::after {
+                    transform: rotate(-90deg);
+                }
+            }
+
+            .progress-line {
+                display: flex;
+                width: 100%;
+
+                .completed {
+                    border-bottom: $space-3 solid $green;
+                }
+
+                .todo {
+                    border-bottom: $space-3 solid rgba($light-gray, 0.5);
+                }
+            }
+        }
+
+        .tag {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            align-items: stretch;
+            gap: $space-16;
+    
+            .executor {
+                display: flex;
+                align-items: center;
+    
+                img {
+                    height: calc(1em + $space-8 * 2);
+                    @extend .br-5;
+                }
+            }
+    
+            .priority-high,
+            .priority-normal {
+                @extend .br-5;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: calc(1em + $space-8 * 2);
+                width: calc(1em + $space-8 * 2);
+                color: $light-light-green;
+            }
+    
+            .priority-high {
+                background-color: $pink;
+            }
+    
+            .priority-normal {
+                background-color: rgba($green, 0.5);
+            }
+    
+            .deadline {
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+                padding: $space-4 $space-16;
+                height: calc(1em + $space-8 * 2);
+                gap: $space-8;
+                color: $light-gray;
+                background: rgba($green, 0.15);
+                @extend .br-5;
+    
+                &::before {
+                    content: '';
+                    display: inline-block;
+                    width: 1em;
+                    height: 1em;
+                    background-image: url('/static/source/icons/deadline.svg');
+                    background-size: contain;
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    flex-shrink: 0;
+                }
+            }
+        }
+    }
+
+    .kanban-task-list {
+        @extend .flex-col;
+        gap: $space-16;
+        min-height: $space-48;
+    }
+
+    .kanban-tables-body{
+        gap: $space-12;
+    }
+
+    .grid-row {
+        padding: $space-4 0;
+    }
+
+    .kanban-divider {
+        height: $space-1;
+        background: rgba($green, 0.5);
+    }
+
+    .kanban-stage-table {
+        padding: 0 0 $space-16;
+    }
+
+    .kanban-stage-table-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: $space-12 0;
+
+        img {
+            height: $space-24;
+        }
+    }
+
+    .kanban-stage-table-head-main{
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        min-width: 0;
+    }
+
+    .tasks-grid.kanban-tasks-grid {
+        grid-template-columns: auto 1fr auto auto auto !important;
+    }
+}
+
+.kanban-task-item {
+    cursor: grab;
+    width: 100%;
+    padding: $space-16 $space-24;
+    @extend .border-gray-1, .br-5, .bg-light-light-green;
+    @extend .flex-col;
+    gap: $space-12;
+
+    >span.text-basic,
+    >span.text-basic-line-through {
+        display: block;
+        margin-bottom: $space-8;
+    }
+}
+
 .board-list .cards.reports-view,
 .board-list .cards.archive-view {
     column-count: 1 !important;
@@ -1355,6 +1839,32 @@ body {
     .col-rate {
         white-space: nowrap;
     }
+}
+
+.tasks-grid.reports-kanban-grid {
+    grid-template-columns:
+        minmax(8rem, 1.2fr)
+        auto
+        auto
+        auto
+        auto
+        auto !important;
+
+    .col-board {
+        min-width: 0;
+    }
+
+    .col-wip,
+    .col-done,
+    .col-urgent,
+    .col-lead,
+    .col-load {
+        white-space: nowrap;
+    }
+}
+
+.board-kanban .board-archive-section .tasks-grid.archive-tasks-grid {
+    grid-template-columns: auto 1fr auto auto auto auto !important;
 }
 
 .board-archive-section {

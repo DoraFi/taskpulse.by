@@ -133,13 +133,20 @@ function handleNavigationClick(e) {
 // --- Функция загрузки внешних скриптов ---
 async function loadExternalScript(src) {
     // Проверяем, не загружен ли уже этот скрипт (по src)
-    if (document.querySelector(`script[src="${src}"]`)) {
+    const absoluteSrc = new URL(src, window.location.origin).href;
+    const exists = Array.from(document.querySelectorAll('script[src]'))
+        .some(s => new URL(s.src, window.location.origin).href === absoluteSrc);
+    if (exists) {
         console.log(`Скрипт ${src} уже загружен`);
         return true;
     }
     
     // Проверяем, не загружен ли скрипт через window (для модулей)
     if (src.includes('board_list') && window.initBoardListPage) {
+        console.log(`Скрипт ${src} уже инициализирован через window`);
+        return true;
+    }
+    if (src.includes('board_kanban') && window.initBoardKanbanPage) {
         console.log(`Скрипт ${src} уже инициализирован через window`);
         return true;
     }
@@ -168,6 +175,28 @@ async function loadExternalScript(src) {
     });
 }
 
+// --- Функция загрузки внешних стилей ---
+async function loadExternalStylesheet(href) {
+    if (!href) return true;
+    const absoluteHref = new URL(href, window.location.origin).href;
+    const exists = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+        .some(l => new URL(l.href, window.location.origin).href === absoluteHref);
+    if (exists) {
+        console.log(`Стили ${href} уже загружены`);
+        return true;
+    }
+
+    console.log(`Загружаем стили: ${href}`);
+    return new Promise((resolve, reject) => {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href;
+        link.onload = () => resolve(true);
+        link.onerror = () => reject(new Error(`Failed to load stylesheet ${href}`));
+        document.head.appendChild(link);
+    });
+}
+
 function executeInlineScripts(container) {
     const scripts = container.querySelectorAll('script:not([src])');
     scripts.forEach(oldScript => {
@@ -190,6 +219,14 @@ async function loadPage(url) {
         if (newContent) {
             const currentContent = document.querySelector('.app-container');
             if (currentContent) {
+                // 1) Подтягиваем стили из head целевой страницы (если их нет на текущей)
+                const stylesheets = doc.querySelectorAll('link[rel="stylesheet"][href]');
+                for (const link of stylesheets) {
+                    const href = link.getAttribute('href');
+                    if (!href) continue;
+                    await loadExternalStylesheet(href);
+                }
+
                 // Загружаем внешние скрипты только если их функции не определены
                 const externalScripts = doc.querySelectorAll('script[src]');
                 
@@ -199,16 +236,26 @@ async function loadPage(url) {
                         continue;
                     }
                     
-                    // Проверяем, нужно ли загружать скрипт
-                    let isNeeded = false;
-                    if (src.includes('board_list') && !window.initBoardListPage) isNeeded = true;
-                    if (src.includes('tasks') && !window.initTasksPage) isNeeded = true;
-                    if (src.includes('index') && !window.initIndexPage) isNeeded = true;
-                    
-                    if (isNeeded) {
+                    // 2) Скрипты грузим по факту наличия в DOM, а для страниц дополнительно
+                    // проверяем, инициализирована ли уже их глобальная функция.
+                    const isPageScript =
+                        src.includes('board_list') ||
+                        src.includes('board_kanban') ||
+                        src.includes('tasks') ||
+                        src.includes('index');
+
+                    const alreadyInited =
+                        (src.includes('board_list') && window.initBoardListPage) ||
+                        (src.includes('board_kanban') && window.initBoardKanbanPage) ||
+                        (src.includes('tasks') && window.initTasksPage) ||
+                        (src.includes('index') && window.initIndexPage);
+
+                    // Для сторонних библиотек (например SortableJS CDN) нет window-флага,
+                    // поэтому грузим их всегда, если их ещё нет в DOM.
+                    if (!isPageScript || !alreadyInited) {
                         await loadExternalScript(src);
                     } else {
-                        console.log(`Скрипт ${src} уже загружен, пропускаем`);
+                        console.log(`Скрипт ${src} уже инициализирован, пропускаем`);
                     }
                 }
                 
@@ -235,9 +282,21 @@ async function loadPage(url) {
                         window.initIndexPage();
                     }
 
-                    if (window.initBoardListPage) {
-                        console.log('Принудительный вызов initBoardListPage');
+                    // Инициализаторы досок вызываем строго по текущему DOM,
+                    // иначе состояния разных страниц начинают конфликтовать.
+                    // Важно: `.board-list` / `.board-kanban` — это классы самого `.app-container`,
+                    // поэтому проверяем classList, а не querySelector по потомкам.
+                    const isBoardList = currentContent.classList.contains('board-list') && !currentContent.classList.contains('board-kanban');
+                    const isBoardKanban = currentContent.classList.contains('board-kanban');
+
+                    if (isBoardList && typeof window.initBoardListPage === 'function') {
+                        console.log('Вызов initBoardListPage');
                         window.initBoardListPage();
+                    }
+
+                    if (isBoardKanban && typeof window.initBoardKanbanPage === 'function') {
+                        console.log('Вызов initBoardKanbanPage');
+                        window.initBoardKanbanPage();
                     }
                     
                     initSubmenus();
