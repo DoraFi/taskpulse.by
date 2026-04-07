@@ -2047,6 +2047,9 @@ aside .submenu .events-grid .col-event .nav-link,
 .kanban-board-card .kanban-tables-body, .kanban-archive-board .kanban-tables-body {
   gap: 0.5625rem;
 }
+.kanban-board-card .kanban-table-add-task-footer, .kanban-archive-board .kanban-table-add-task-footer {
+  margin-top: 0.375rem;
+}
 .kanban-board-card .grid-row, .kanban-archive-board .grid-row {
   padding: 0.25rem 0;
 }

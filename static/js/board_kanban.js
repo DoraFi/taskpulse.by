@@ -1092,6 +1092,14 @@ function createKanbanQueueTaskForm(boardId, boardIndex, priorityKey) {
     }
 
     input.addEventListener('focus', showTag);
+    // На канбане иногда фокус может "съедаться" из-за DnD/обработчиков,
+    // поэтому дополнительно раскрываем tag при pointerdown по форме.
+    form.addEventListener('pointerdown', (e) => {
+        if (e.target.closest('button')) return;
+        showTag();
+        // гарантируем фокус в инпуте, чтобы можно было сразу печатать
+        if (document.activeElement !== input) input.focus();
+    });
     input.addEventListener('keypress', e => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -2019,7 +2027,8 @@ function createKanbanStageTable(board, boardIndex, stageName, tasks) {
         cell.innerHTML = `<span class="header-title">${columnNames[col]}</span>`;
         headerRow.appendChild(cell);
     });
-    table.appendChild(headerRow);
+    // В таблицах канбана заголовок не показываем, если в этапе нет задач
+    if (tasks.length) table.appendChild(headerRow);
 
     const rowsContainer = document.createElement('div');
     rowsContainer.className = 'table-rows';
@@ -2079,6 +2088,14 @@ function createKanbanStageTable(board, boardIndex, stageName, tasks) {
 
     table.appendChild(rowsContainer);
     tableWrapper.appendChild(table);
+
+    // Как в списке: форма добавления — под таблицей (футер блока), не внутри .table-rows
+    if (stageName === 'Очередь') {
+        const addForm = createKanbanQueueTaskForm(board.id, boardIndex, 'normal');
+        addForm.classList.add('kanban-table-add-task-footer');
+        tableWrapper.appendChild(addForm);
+    }
+
     wrap.appendChild(tableWrapper);
     return wrap;
 }
