@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskPulse — Добро пожаловать</title>
+    <link rel="icon" type="image/svg+xml" href="/static/source/logo_no_back.svg">
+    <link rel="stylesheet" href="/static/scss/style.css">
+</head>
+
+<body class="auth-page auth-page--welcome">
+    <header class="auth-page__header">
+        <a href="/templates/pages/auth_welcome.html" class="flex-row gap-24" style="align-items: center;">
+            <img class="logo" src="/static/source/logo_rect.svg" alt="TaskPulse">
+        </a>
+        <span class="text-signature">Пульс ваших задач — в одном окне</span>
+    </header>
+
+    <main class="auth-page__main auth-page__main--split" data-auth-parallax-root>
+        <section class="auth-hero" aria-hidden="true">
+            <div class="auth-hero__orbit"></div>
+            <div class="auth-hero__inner" data-auth-parallax="0.06">
+                <p class="auth-hero__eyebrow">Не просто формы</p>
+                <h1 class="auth-hero__title">
+                    <span class="auth-hero__title-line">Задачи.</span>
+                    <span class="auth-hero__title-line auth-hero__title-line--accent">Команда.</span>
+                    <span class="auth-hero__title-line">Ритм.</span>
+                </h1>
+                <p class="auth-hero__lead text-basic">Визуальный пульс — как на дашборде: очередь, работа, финиш. Так же будет выглядеть ваш поток после входа.</p>
+
+                <div class="auth-hero__pulse-wrap">
+                    <svg class="auth-pulse-svg" viewBox="0 0 320 72" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <defs>
+                            <linearGradient id="authPulseGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="currentColor" stop-opacity="0.2" />
+                                <stop offset="50%" stop-color="currentColor" stop-opacity="0.9" />
+                                <stop offset="100%" stop-color="currentColor" stop-opacity="0.25" />
+                            </linearGradient>
+                        </defs>
+                        <path class="auth-pulse-svg__base" d="M0 36 H320" fill="none" stroke="url(#authPulseGrad)" stroke-width="1.5" />
+                        <path class="auth-pulse-svg__beat" d="M0 36 L32 36 L44 14 L56 58 L68 22 L80 50 L92 36 L320 36" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <span class="auth-hero__pulse-label text-signature">Пульс загрузки команды</span>
+                </div>
+
+                <div class="auth-hero__cards">
+                    <div class="auth-mini-card auth-mini-card--1">
+                        <span class="auth-mini-card__lane"></span>
+                        <span class="auth-mini-card__text">Очередь</span>
+                        <span class="auth-mini-card__n">12</span>
+                    </div>
+                    <div class="auth-mini-card auth-mini-card--2">
+                        <span class="auth-mini-card__lane auth-mini-card__lane--mid"></span>
+                        <span class="auth-mini-card__text">В работе</span>
+                        <span class="auth-mini-card__n">5</span>
+                    </div>
+                    <div class="auth-mini-card auth-mini-card--3">
+                        <span class="auth-mini-card__lane auth-mini-card__lane--done"></span>
+                        <span class="auth-mini-card__text">Готово</span>
+                        <span class="auth-mini-card__n">28</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="auth-page__panel">
+            <div class="modal-content auth-flow-card auth-flow-card--signature">
+                <div class="modal-header" style="margin-bottom: 0;">
+                    <p class="text-header">Начать работу</p>
+                </div>
+                <div class="modal-body" style="padding-top: 1rem;">
+                    <p class="text-basic" style="margin: 0;">Выберите, как войти — дальше откроется мастер проекта и приглашения команды.</p>
+                    <div class="flex-col" style="gap: 1rem; margin-top: 0.75rem;">
+                        <a class="button-basic" href="/templates/pages/auth_login.html" style="text-align: center; display: block;">Войти</a>
+                        <a class="button-secondary" href="/templates/pages/auth_register.html" style="text-align: center; display: block;">Создать аккаунт</a>
+                    </div>
+                </div>
+                <div class="modal-footer" style="justify-content: center;">
+                    <a class="text-basic" href="/templates/pages/index.html" style="text-decoration: underline;">В приложение без авторизации</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/static/js/auth_static.js"></script>
+</body>
+
+</html>

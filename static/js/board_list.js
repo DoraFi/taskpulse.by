@@ -1166,7 +1166,7 @@ function renderReportsView() {
                 <span class="reports-stat-label">без срока (активные)</span>
             </div>
         </div>
-        <p class="reports-hint text-signature">Демонстрационные данные для макета. Здесь будет отчёт по реальным метрикам проекта.</p>
+        <p class="reports-hint text-signature">Сводка по всем доскам текущего проекта.</p>
     `;
     card.appendChild(summary);
 

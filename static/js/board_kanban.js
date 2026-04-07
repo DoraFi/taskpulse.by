@@ -442,8 +442,6 @@ async function loadKanbanData() {
         if (!Array.isArray(b.archivedTasks)) b.archivedTasks = [];
     });
 
-    // Один и тот же tasksSource может использоваться для нескольких досок.
-    // Загружаем уникальные источники, иначе будут дубли задач.
     const sources = new Set(
         (kanbanBoards.map(b => b.tasksSource).filter(Boolean)).concat(['/static/data/kanban_tasks.json'])
     );
@@ -1092,12 +1090,9 @@ function createKanbanQueueTaskForm(boardId, boardIndex, priorityKey) {
     }
 
     input.addEventListener('focus', showTag);
-    // На канбане иногда фокус может "съедаться" из-за DnD/обработчиков,
-    // поэтому дополнительно раскрываем tag при pointerdown по форме.
     form.addEventListener('pointerdown', (e) => {
         if (e.target.closest('button')) return;
         showTag();
-        // гарантируем фокус в инпуте, чтобы можно было сразу печатать
         if (document.activeElement !== input) input.focus();
     });
     input.addEventListener('keypress', e => {
@@ -1407,7 +1402,6 @@ function initKanbanDnD(container) {
         filter: '.form-add-task',
         preventOnFilter: false,
         forceFallback: true,
-        // Важно: если fallback-клон уезжает в body, CSS (tag/subtasks) может не применяться
         fallbackOnBody: false,
         fallbackTolerance: 3,
         ghostClass: 'task-dragging',
@@ -1460,8 +1454,6 @@ function initKanbanTableRowsSortable() {
         clone.classList.add('board-list');
         const table = row.closest('.tasks-grid');
         const gridCols = table ? getComputedStyle(table).gridTemplateColumns : '';
-        // В fallback-режиме внешний элемент — просто wrapper; стилизуем внутреннюю .grid-row,
-        // иначе свойства grid/subgrid будут невалидны вне .tasks-grid.
         if (!isFallback) {
             clone.style.setProperty('display', 'grid', 'important');
             if (gridCols) clone.style.setProperty('grid-template-columns', gridCols, 'important');
@@ -1483,7 +1475,6 @@ function initKanbanTableRowsSortable() {
         const copyAllComputed = (fromEl, toEl) => {
             const s = getComputedStyle(fromEl);
             const skip = isFallback ? new Set([
-                // Motion/positioning: Sortable управляет ими сам
                 'position', 'top', 'right', 'bottom', 'left',
                 'inset', 'inset-block', 'inset-inline',
                 'transform', 'translate', 'rotate', 'scale',
@@ -1515,9 +1506,6 @@ function initKanbanTableRowsSortable() {
         for (let i = 0; i < n; i++) copyAllComputed(fromNodes[i], toNodes[i]);
     };
     const freezeFallbackStyles = (container, row) => {
-        // Дожимаем стили на .sortable-fallback кадр-в-кадр,
-        // иначе Sortable/браузер может "откатывать" display:flex и т.п.
-        // При этом НЕ трогаем motion-свойства и margin*, чтобы клон не улетал от курсора.
         if (container._kanbanTableRowStyleRaf) cancelAnimationFrame(container._kanbanTableRowStyleRaf);
         container._kanbanTableRowStyleRaf = null;
 
@@ -1537,7 +1525,6 @@ function initKanbanTableRowsSortable() {
                     fb.innerHTML = container._kanbanTableRowCtxHtml;
                 }
                 applyTableRowComputedStylesToClone(row, fb, { isFallback: true });
-                // margin в body смещает позиционирование fallback (fixed/absolute)
                 fb.style.setProperty('margin', '0', 'important');
                 fb.style.setProperty('margin-top', '0', 'important');
                 fb.style.setProperty('margin-right', '0', 'important');
@@ -1560,16 +1547,13 @@ function initKanbanTableRowsSortable() {
             group: { name: 'kanban-table-rows', pull: true, put: true },
             handle: '.grid-row',
             draggable: '.grid-row',
-            // Надёжный клон без отставания + со стилями
             forceFallback: true,
             fallbackOnBody: true,
             fallbackTolerance: 0,
             fallbackClass: TABLE_ROW_FALLBACK_CLASS,
-            // Визуал строки не должен меняться
             ghostClass: '',
             dragClass: '',
             onClone(evt) {
-                // В fallback-режиме именно evt.clone часто является реальным перетаскиваемым элементом.
                 container._kanbanTableRowDragEl = evt.clone;
                 evt.clone?.classList?.add(TABLE_ROW_FALLBACK_CLASS);
                 container._kanbanTableRowCtxHtml = buildFallbackRowInnerHtml(evt.item);
@@ -1584,8 +1568,6 @@ function initKanbanTableRowsSortable() {
             },
             onStart(evt) {
                 if (cardsContainer) cardsContainer.classList.add('dragging-active');
-                // Когда fallback-клон уходит в body, CSS по контексту может "сломаться".
-                // Фиксируем стили на .sortable-fallback, но НЕ трогаем motion-свойства.
                 freezeFallbackStyles(container, evt.item);
             },
             onEnd(evt) {
@@ -1673,7 +1655,6 @@ function initKanbanEvents() {
 
     document.querySelectorAll('.board-kanban .kanban-task-list').forEach(list => initKanbanDnD(list));
 
-    // Обновить текст пункта меню таймлайна
     const label = getTimelineShowDone() ? 'Скрыть выполненные (таймлайн)' : 'Показать выполненные (таймлайн)';
     document.querySelectorAll('.board-kanban .kanban-timeline-toggle-label').forEach(el => {
         el.textContent = label;
@@ -1697,7 +1678,6 @@ function initKanbanStagesSortable() {
             draggable: '.kanban-stage-group',
             handle: '.kanban-column-head-inner',
             forceFallback: true,
-            // Оставляем клон в контейнере, чтобы стили не слетали
             fallbackOnBody: false,
             fallbackTolerance: 3,
             ghostClass: '',
@@ -2027,14 +2007,12 @@ function createKanbanStageTable(board, boardIndex, stageName, tasks) {
         cell.innerHTML = `<span class="header-title">${columnNames[col]}</span>`;
         headerRow.appendChild(cell);
     });
-    // В таблицах канбана заголовок не показываем, если в этапе нет задач
     if (tasks.length) table.appendChild(headerRow);
 
     const rowsContainer = document.createElement('div');
     rowsContainer.className = 'table-rows';
 
     if (!tasks.length) {
-        // Оставляем droppable-контейнер для DnD даже если задач нет
         const empty = document.createElement('div');
         empty.className = 'empty-task';
         empty.textContent = 'Нет задач';
@@ -2088,14 +2066,6 @@ function createKanbanStageTable(board, boardIndex, stageName, tasks) {
 
     table.appendChild(rowsContainer);
     tableWrapper.appendChild(table);
-
-    // Как в списке: форма добавления — под таблицей (футер блока), не внутри .table-rows
-    if (stageName === 'Очередь') {
-        const addForm = createKanbanQueueTaskForm(board.id, boardIndex, 'normal');
-        addForm.classList.add('kanban-table-add-task-footer');
-        tableWrapper.appendChild(addForm);
-    }
-
     wrap.appendChild(tableWrapper);
     return wrap;
 }
@@ -2360,7 +2330,6 @@ function renderKanbanArchiveView() {
             });
 
             Object.entries(byStage).forEach(([stageName, items]) => {
-                // Требуемая структура заголовка (как у этапов)
                 const headMain = document.createElement('div');
                 headMain.className = 'kanban-stage-table-head-main';
                 headMain.innerHTML = `<p class="text-basic">${escapeHtml(stageName)}</p><span class="kanban-count-badge">${items.length}</span>`;
