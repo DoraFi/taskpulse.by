@@ -8,16 +8,53 @@
         </div>
         <div class="modal-body profile-modal__body">
             <div class="profile-modal__hero">
-                <img class="profile-modal__avatar" src="/static/source/user_img/lev_aksenov.jpg" alt="">
+                <img class="profile-modal__avatar" src="/static/source/user_img/dar_shved.jpg" alt="">
                 <div class="profile-modal__titles">
-                    <p class="text-header">Лев Аксенов</p>
-                    <p class="text-signature">Tech Lead · отдел разработки</p>
+                    <p class="text-header">Дарья Швед</p>
+                    <p class="text-signature">Инженер-программист · отдел разработки</p>
+                    <p class="text-basic profile-modal__id">@d.shved · в команде с октября 2024</p>
                 </div>
             </div>
 
-            <div class="profile-modal__section">
-                <p class="filter-label">Рабочий e-mail</p>
-                <input type="email" class="filter-input" value="lev.aksenov@taskpulse.by" readonly autocomplete="off">
+            <p class="text-signature profile-modal__settings-hint">Язык интерфейса, права, интеграции и оформление — в разделе «Настройки» в шапке.</p>
+
+            <div class="profile-modal__section profile-modal__section--card border-dark-1 br-5">
+                <p class="filter-label">Личные данные</p>
+                <div class="profile-modal__grid">
+                    <div class="auth-field profile-modal__field">
+                        <label for="profileDisplayName">Имя и фамилия</label>
+                        <input id="profileDisplayName" type="text" class="filter-input" value="Дарья Швед" autocomplete="name">
+                    </div>
+                    <div class="auth-field profile-modal__field">
+                        <label for="profileLogin">Логин</label>
+                        <input id="profileLogin" type="text" class="filter-input" value="d.shved" readonly autocomplete="username">
+                    </div>
+                    <div class="auth-field profile-modal__field">
+                        <label for="profileEmail">Рабочий e-mail</label>
+                        <input id="profileEmail" type="email" class="filter-input" value="daria.shved@taskpulse.by" autocomplete="email">
+                    </div>
+                    <div class="auth-field profile-modal__field">
+                        <label for="profilePhone">Телефон</label>
+                        <input id="profilePhone" type="tel" class="filter-input" value="+375 (29) 123-45-67" autocomplete="tel">
+                    </div>
+                    <div class="auth-field profile-modal__field">
+                        <label for="profileTimezone">Часовой пояс</label>
+                        <select id="profileTimezone" class="filter-input create-task-select profile-modal__select--full">
+                            <option value="Europe/Minsk" selected>Минск (UTC+3)</option>
+                            <option value="Europe/Moscow">Москва (UTC+3)</option>
+                            <option value="Europe/Warsaw">Варшава (UTC+1)</option>
+                        </select>
+                    </div>
+                    <div class="auth-field profile-modal__field">
+                        <label for="profileOffice">Офис / локация</label>
+                        <input id="profileOffice" type="text" class="filter-input" value="Минск, ул. Немига, 12">
+                    </div>
+                </div>
+            </div>
+
+            <div class="auth-field profile-modal__field profile-modal__field--full">
+                <label for="profileBio">О себе</label>
+                <textarea id="profileBio" class="profile-modal__bio" rows="4" placeholder="Например: направление работы, зона ответственности, чем можете помочь команде">Работаю над серверной частью и интеграциями между сервисами. В задачах опираюсь на согласованные требования, аккуратные код-ревью и предсказуемые релизы. Подключаюсь к обсуждению контрактов API и схем данных, когда это ускоряет поставку.</textarea>
             </div>
 
             <div class="profile-modal__section">
@@ -25,31 +62,98 @@
                 <div class="profile-modal__stats">
                     <div class="profile-modal__stat border-dark-1 br-5">
                         <span class="text-signature">Назначено</span>
-                        <span class="text-header">8</span>
+                        <span class="text-header">6</span>
                     </div>
                     <div class="profile-modal__stat border-dark-1 br-5">
                         <span class="text-signature">В работе</span>
-                        <span class="text-header">12</span>
+                        <span class="text-header">4</span>
                     </div>
                     <div class="profile-modal__stat border-dark-1 br-5">
                         <span class="text-signature">За неделю</span>
-                        <span class="text-header">5</span>
+                        <span class="text-header">7</span>
+                    </div>
+                    <div class="profile-modal__stat border-dark-1 br-5">
+                        <span class="text-signature">Завершено (мес.)</span>
+                        <span class="text-header">11</span>
                     </div>
                 </div>
             </div>
 
             <div class="profile-modal__section">
-                <p class="filter-label">Проекты</p>
-                <p class="text-basic">Корпоративный портал, микросервисная платформа, CRM</p>
+                <p class="filter-label">Проекты и роли</p>
+                <p class="text-basic profile-modal__projects">Корпоративный портал — разработка · Микросервисная платформа — код-ревью · CRM — консультации по API</p>
             </div>
 
-            <div class="profile-modal__actions gap-24 flex-row">
-                <button type="button" class="button-secondary" disabled title="Скоро">Изменить данные</button>
-                <button type="button" class="button-secondary" disabled title="Скоро">Уведомления</button>
+            <div class="profile-modal__section profile-modal__section--card border-dark-1 br-5">
+                <p class="filter-label">Уведомления</p>
+                <p class="text-signature profile-modal__section-lead">Что присылать на почту и в центр уведомлений в приложении</p>
+                <div class="profile-modal__notify-list">
+                    <label class="profile-modal__notify-row checkbox-item">
+                        <input type="checkbox" checked>
+                        <span class="custom-checkbox"></span>
+                        <span class="checkbox-text">Назначение и снятие с задач</span>
+                    </label>
+                    <label class="profile-modal__notify-row checkbox-item">
+                        <input type="checkbox" checked>
+                        <span class="custom-checkbox"></span>
+                        <span class="checkbox-text">Упоминания @d.shved в комментариях</span>
+                    </label>
+                    <label class="profile-modal__notify-row checkbox-item">
+                        <input type="checkbox" checked>
+                        <span class="custom-checkbox"></span>
+                        <span class="checkbox-text">Сроки и напоминания по дедлайнам</span>
+                    </label>
+                    <label class="profile-modal__notify-row checkbox-item">
+                        <input type="checkbox" checked>
+                        <span class="custom-checkbox"></span>
+                        <span class="checkbox-text">Изменения статуса в «моих» задачах</span>
+                    </label>
+                    <label class="profile-modal__notify-row checkbox-item">
+                        <input type="checkbox">
+                        <span class="custom-checkbox"></span>
+                        <span class="checkbox-text">Еженедельный дайджест по проектам</span>
+                    </label>
+                    <label class="profile-modal__notify-row checkbox-item">
+                        <input type="checkbox" checked>
+                        <span class="custom-checkbox"></span>
+                        <span class="checkbox-text">Системные объявления и обслуживание</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="profile-modal__section profile-modal__section--card profile-modal__password-block border-dark-1 br-5">
+                <p class="filter-label">Безопасность аккаунта</p>
+                <p class="text-signature profile-modal__section-lead">Смена пароля входа в TaskPulse</p>
+                <div class="auth-field profile-modal__field">
+                    <label for="profilePwdCurrent">Текущий пароль</label>
+                    <input id="profilePwdCurrent" type="password" class="filter-input" autocomplete="current-password" placeholder="••••••••">
+                </div>
+                <div class="profile-modal__grid profile-modal__grid--password">
+                    <div class="auth-field profile-modal__field">
+                        <label for="profilePwdNew">Новый пароль</label>
+                        <input id="profilePwdNew" type="password" class="filter-input" autocomplete="new-password" placeholder="Не менее 8 символов">
+                    </div>
+                    <div class="auth-field profile-modal__field">
+                        <label for="profilePwdRepeat">Повторите пароль</label>
+                        <input id="profilePwdRepeat" type="password" class="filter-input" autocomplete="new-password" placeholder="Ещё раз">
+                    </div>
+                </div>
+                <p class="text-signature profile-modal__password-hint">После смены пароля активные сессии на других устройствах можно завершить в «Настройках».</p>
+                <button type="button" class="button-secondary profile-modal__password-btn" id="profileModalChangePassword">Обновить пароль</button>
+            </div>
+
+            <div class="profile-modal__section profile-modal__section--muted border-dark-1 br-5">
+                <p class="filter-label">Активность</p>
+                <ul class="text-basic profile-modal__activity">
+                    <li>Последний вход: сегодня, 09:14 · Chrome · Windows</li>
+                    <li>Двухфакторная аутентификация: выключена <span class="text-signature">(включается в «Настройках»)</span></li>
+                    <li>Подключённые календари: не связано</li>
+                </ul>
             </div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="button-basic" id="profileModalDone">Закрыть</button>
+            <button type="button" class="button-secondary" id="profileModalExitProfile">Выйти из профиля</button>
+            <button type="button" class="button-basic" id="profileModalSave">Сохранить изменения</button>
         </div>
     </div>
 </div>

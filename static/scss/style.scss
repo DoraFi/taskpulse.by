@@ -1427,17 +1427,16 @@ body[data-theme="dark"] .modal-content.create-task-modal .create-task-deps-sugge
     background: rgba($green, 0.15);
 }
 
-/* Модалка «Профиль» (шапка / headerProfileBtn) */
+/* Модалка «Профиль» — те же габариты, что у «Создание задачи» */
 .modal-content.profile-modal {
-    width: min(28rem, 92vw);
-    height: auto;
-    max-height: 88vh;
+    width: 44vw;
+    height: 92vh;
+    max-height: 92vh;
     min-height: 0;
 
     .modal-body.profile-modal__body {
         flex: 1 1 auto;
         min-height: 0;
-        max-height: min(60vh, 28rem);
         overflow-y: auto;
         display: flex;
         flex-direction: column;
@@ -1452,8 +1451,8 @@ body[data-theme="dark"] .modal-content.create-task-modal .create-task-deps-sugge
     }
 
     .profile-modal__avatar {
-        width: $space-64;
-        height: $space-64;
+        width: 5.5rem;
+        height: 5.5rem;
         border-radius: 50%;
         object-fit: cover;
         flex-shrink: 0;
@@ -1464,16 +1463,142 @@ body[data-theme="dark"] .modal-content.create-task-modal .create-task-deps-sugge
         min-width: 0;
     }
 
+    .profile-modal__id {
+        margin: $space-8 0 0;
+        opacity: 0.85;
+    }
+
+    .profile-modal__settings-hint {
+        margin: 0;
+        padding: $space-12 $space-16;
+        border-radius: $radius-sm;
+        background: rgba($green, 0.06);
+        line-height: 1.45;
+    }
+
     .profile-modal__section {
         display: flex;
         flex-direction: column;
         gap: $space-8;
     }
 
+    .profile-modal__section--card {
+        padding: $space-16;
+        background: rgba($green, 0.04);
+    }
+
+    .profile-modal__section--muted {
+        padding: $space-16;
+    }
+
+    .profile-modal__section-lead {
+        margin: 0 0 $space-8;
+        line-height: 1.4;
+    }
+
+    .profile-modal__grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: $space-16 $space-24;
+
+        @media (max-width: 720px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .profile-modal__grid--password {
+        margin-top: $space-8;
+    }
+
+    .profile-modal__field {
+        margin: 0;
+
+        &--full {
+            grid-column: 1 / -1;
+        }
+    }
+
+    .profile-modal__field .filter-input {
+        width: 100%;
+        box-sizing: border-box;
+        background-color: $light-light-green;
+    }
+
+    /* Как select в «Создание задачи», ширина — на всю колонку сетки профиля */
+    select.create-task-select.profile-modal__select--full {
+        $chevron-w: 0.625rem;
+        $chevron-inset: $space-16;
+
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        accent-color: $green;
+        color: $dark-gray;
+        padding: $space-4 $space-16;
+        padding-right: calc(#{$chevron-inset} + #{$chevron-w} + #{$space-8});
+        border: $space-1 solid $light-gray;
+        border-radius: $radius-sm;
+        @extend .text-basic;
+        background-color: $light-light-green;
+        background-image: url('/static/source/icons/arrow_dark_cropped.svg');
+        background-repeat: no-repeat;
+        background-position: right $chevron-inset center;
+        background-size: $chevron-w auto;
+
+        &::-ms-expand {
+            display: none;
+        }
+
+        &:focus {
+            outline: none;
+            border-color: $green;
+            box-shadow: 0 0 0 $space-2 rgba($green, 0.1);
+        }
+    }
+
+    /* Как textarea описания в «Создание задачи», высота — компактная для профиля */
+    textarea.profile-modal__bio {
+        display: block;
+        width: 100%;
+        min-height: 6.5rem;
+        height: 7.5rem;
+        max-height: min(28vh, 14rem);
+        resize: vertical;
+        box-sizing: border-box;
+        padding: $space-16;
+        border: $space-1 solid $light-gray;
+        border-radius: $radius-sm;
+        @extend .text-basic;
+        background: $light-light-green;
+        transition: all 0.2s ease;
+
+        &:focus {
+            outline: none;
+            border-color: $green;
+            box-shadow: 0 0 0 $space-2 rgba($green, 0.1);
+        }
+
+        &::placeholder {
+            color: rgba($dark-gray, 0.5);
+        }
+    }
+
+    .profile-modal__projects {
+        margin: 0;
+        line-height: 1.5;
+    }
+
     .profile-modal__stats {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: $space-12;
+
+        @media (max-width: 900px) {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
     }
 
     .profile-modal__stat {
@@ -1487,9 +1612,55 @@ body[data-theme="dark"] .modal-content.create-task-modal .create-task-deps-sugge
         background: rgba($green, 0.06);
     }
 
-    .profile-modal__actions {
-        flex-wrap: wrap;
+    .profile-modal__notify-list {
+        display: flex;
+        flex-direction: column;
+        gap: $space-12;
+        margin-top: $space-8;
+    }
+
+    .profile-modal__notify-row.checkbox-item {
+        display: flex;
+        flex-direction: row;
         align-items: center;
+        width: 100%;
+        gap: $space-12;
+        cursor: pointer;
+    }
+
+    .profile-modal__notify-row .checkbox-text {
+        flex: 1;
+        min-width: 0;
+        order: 1;
+    }
+
+    .profile-modal__notify-row .custom-checkbox {
+        order: 2;
+        flex-shrink: 0;
+    }
+
+    .profile-modal__password-block {
+        padding: $space-16;
+        background: rgba($green, 0.04);
+    }
+
+    .profile-modal__password-hint {
+        margin: $space-12 0 $space-16;
+        line-height: 1.4;
+    }
+
+    .profile-modal__password-btn {
+        align-self: flex-start;
+    }
+
+    .profile-modal__activity {
+        margin: 0;
+        padding-left: 1.15rem;
+        line-height: 1.55;
+
+        li + li {
+            margin-top: $space-8;
+        }
     }
 }
 
@@ -1499,6 +1670,52 @@ body[data-theme="dark"] .modal-content.profile-modal .profile-modal__avatar {
 
 body[data-theme="dark"] .modal-content.profile-modal .profile-modal__stat {
     background: rgba($green, 0.12);
+}
+
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__section--card,
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__password-block {
+    background: $black;
+    border-color: $light-light-green;
+}
+
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__section--muted {
+    background: rgba($black, 0.55);
+    border-color: $light-light-green;
+}
+
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__settings-hint {
+    background: rgba($green, 0.14);
+    color: rgba($light-light-green, 0.92);
+}
+
+body[data-theme="dark"] .modal-content.profile-modal select.create-task-select.profile-modal__select--full {
+    background-color: $black;
+    background-image: url('/static/source/icons/arrow_light_cropped.svg');
+    background-repeat: no-repeat !important;
+    background-position: right $space-16 center !important;
+    background-size: 0.625rem auto !important;
+    color: $light-light-green;
+    border-color: $light-light-green;
+
+    &:focus {
+        border-color: $green;
+        box-shadow: 0 0 0 $space-2 rgba($green, 0.18);
+    }
+
+    option {
+        background: $dark-gray;
+        color: $light-light-green;
+    }
+}
+
+body[data-theme="dark"] .modal-content.profile-modal textarea.profile-modal__bio {
+    border-color: $light-light-green;
+    color: $light-light-green;
+    background: $black;
+
+    &::placeholder {
+        color: rgba($light-light-green, 0.45);
+    }
 }
 
 body.tp-no-enter .cards>*,

@@ -59,7 +59,7 @@
 }
 
 .text-basic, .auth-link-row a, .auth-flow-card .modal-body textarea,
-.auth-flow-card .modal-body select, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar, .board-timeline-card .timeline-assignee span, .board-timeline-card .timeline-task-card__name, .board-timeline-card .timeline-date-chip, .modal-content.create-task-modal textarea.create-task-desc, .modal-content.create-task-modal select.create-task-select, .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body input, .tp-table-row-fallback .tasks-grid .grid-row, .tasks-grid .grid-row, .tab-btn, .button-basic,
+.auth-flow-card .modal-body select, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar, .board-timeline-card .timeline-assignee span, .board-timeline-card .timeline-task-card__name, .board-timeline-card .timeline-date-chip, .modal-content.profile-modal textarea.profile-modal__bio, .modal-content.profile-modal select.create-task-select.profile-modal__select--full, .modal-content.create-task-modal textarea.create-task-desc, .modal-content.create-task-modal select.create-task-select, .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body input, .tp-table-row-fallback .tasks-grid .grid-row, .tasks-grid .grid-row, .tab-btn, .button-basic,
 .button-secondary,
 .reset-filters-btn, aside .submenu .nav-link {
   font-size: 1rem;
@@ -367,6 +367,7 @@ a.button-secondary, .button-basic {
   height: 0.75rem;
   -webkit-appearance: none;
   appearance: none;
+  -webkit-transition: height 0.2s ease;
   transition: height 0.2s ease;
 }
 
@@ -380,6 +381,7 @@ a.button-secondary, .button-basic {
 *::-webkit-scrollbar-thumb {
   background: rgba(97, 160, 57, 0.3);
   backdrop-filter: blur(4px);
+  -webkit-transition: all 0.2s ease;
   transition: all 0.2s ease;
 }
 *::-webkit-scrollbar-thumb:hover {
@@ -396,7 +398,7 @@ a.button-secondary, .button-basic {
 }
 
 .text-basic, .auth-link-row a, .auth-flow-card .modal-body textarea,
-.auth-flow-card .modal-body select, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar, .board-timeline-card .timeline-assignee span, .board-timeline-card .timeline-task-card__name, .board-timeline-card .timeline-date-chip, .modal-content.create-task-modal textarea.create-task-desc, .modal-content.create-task-modal select.create-task-select, .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body input, .tp-table-row-fallback .tasks-grid .grid-row, .tasks-grid .grid-row, aside .submenu .nav-link, .button-basic,
+.auth-flow-card .modal-body select, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar, .board-timeline-card .timeline-assignee span, .board-timeline-card .timeline-task-card__name, .board-timeline-card .timeline-date-chip, .modal-content.profile-modal textarea.profile-modal__bio, .modal-content.profile-modal select.create-task-select.profile-modal__select--full, .modal-content.create-task-modal textarea.create-task-desc, .modal-content.create-task-modal select.create-task-select, .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body input, .tp-table-row-fallback .tasks-grid .grid-row, .tasks-grid .grid-row, aside .submenu .nav-link, .button-basic,
 .button-secondary,
 .reset-filters-btn, .tab-btn {
   font-size: 1rem;
@@ -431,7 +433,9 @@ a.button-secondary, .button-basic {
   transition: all 0.2s ease;
   position: relative;
   white-space: nowrap;
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
   color: #F6FBF2;
 }
 .status.neutral, .tasks-grid .col-status .neutral.status-select {
@@ -812,6 +816,7 @@ body[data-theme=dark] .board-kanban .tasks-grid .col-name {
 .app-container .column {
   display: flex;
   flex-direction: column;
+  height: -moz-fit-content;
   height: fit-content;
   padding-bottom: 2.25rem;
 }
@@ -935,7 +940,7 @@ body[data-theme=dark] .board-kanban .tasks-grid .col-name {
 }
 .tasks-to-do-grid .col-task .text-basic, .tasks-to-do-grid .col-task .auth-link-row a, .auth-link-row .tasks-to-do-grid .col-task a, .tasks-to-do-grid .col-task .auth-flow-card .modal-body textarea, .auth-flow-card .modal-body .tasks-to-do-grid .col-task textarea,
 .tasks-to-do-grid .col-task .auth-flow-card .modal-body select,
-.auth-flow-card .modal-body .tasks-to-do-grid .col-task select, .tasks-to-do-grid .col-task .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .tasks-to-do-grid .col-task button, .tasks-to-do-grid .col-task .custom-calendar-modal .custom-calendar, .custom-calendar-modal .tasks-to-do-grid .col-task .custom-calendar, .tasks-to-do-grid .col-task .board-timeline-card .timeline-assignee span, .board-timeline-card .timeline-assignee .tasks-to-do-grid .col-task span, .tasks-to-do-grid .col-task .board-timeline-card .timeline-task-card__name, .board-timeline-card .tasks-to-do-grid .col-task .timeline-task-card__name, .tasks-to-do-grid .col-task .board-timeline-card .timeline-date-chip, .board-timeline-card .tasks-to-do-grid .col-task .timeline-date-chip, .tasks-to-do-grid .col-task .modal-content.create-task-modal textarea.create-task-desc, .modal-content.create-task-modal .tasks-to-do-grid .col-task textarea.create-task-desc, .tasks-to-do-grid .col-task .modal-content.create-task-modal select.create-task-select, .modal-content.create-task-modal .tasks-to-do-grid .col-task select.create-task-select, .tasks-to-do-grid .col-task .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .tasks-to-do-grid .col-task .filter-input, .tasks-to-do-grid .col-task .modal-content .modal-body input, .modal-content .modal-body .tasks-to-do-grid .col-task input, .tasks-to-do-grid .col-task .tasks-grid .grid-row, .tasks-grid .tasks-to-do-grid .col-task .grid-row, .tasks-to-do-grid .col-task aside .submenu .nav-link, aside .submenu .tasks-to-do-grid .col-task .nav-link, .tasks-to-do-grid .col-task .button-basic,
+.auth-flow-card .modal-body .tasks-to-do-grid .col-task select, .tasks-to-do-grid .col-task .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .tasks-to-do-grid .col-task button, .tasks-to-do-grid .col-task .custom-calendar-modal .custom-calendar, .custom-calendar-modal .tasks-to-do-grid .col-task .custom-calendar, .tasks-to-do-grid .col-task .board-timeline-card .timeline-assignee span, .board-timeline-card .timeline-assignee .tasks-to-do-grid .col-task span, .tasks-to-do-grid .col-task .board-timeline-card .timeline-task-card__name, .board-timeline-card .tasks-to-do-grid .col-task .timeline-task-card__name, .tasks-to-do-grid .col-task .board-timeline-card .timeline-date-chip, .board-timeline-card .tasks-to-do-grid .col-task .timeline-date-chip, .tasks-to-do-grid .col-task .modal-content.profile-modal textarea.profile-modal__bio, .modal-content.profile-modal .tasks-to-do-grid .col-task textarea.profile-modal__bio, .tasks-to-do-grid .col-task .modal-content.profile-modal select.create-task-select.profile-modal__select--full, .modal-content.profile-modal .tasks-to-do-grid .col-task select.create-task-select.profile-modal__select--full, .tasks-to-do-grid .col-task .modal-content.create-task-modal textarea.create-task-desc, .modal-content.create-task-modal .tasks-to-do-grid .col-task textarea.create-task-desc, .tasks-to-do-grid .col-task .modal-content.create-task-modal select.create-task-select, .modal-content.create-task-modal .tasks-to-do-grid .col-task select.create-task-select, .tasks-to-do-grid .col-task .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .tasks-to-do-grid .col-task .filter-input, .tasks-to-do-grid .col-task .modal-content .modal-body input, .modal-content .modal-body .tasks-to-do-grid .col-task input, .tasks-to-do-grid .col-task .tasks-grid .grid-row, .tasks-grid .tasks-to-do-grid .col-task .grid-row, .tasks-to-do-grid .col-task aside .submenu .nav-link, aside .submenu .tasks-to-do-grid .col-task .nav-link, .tasks-to-do-grid .col-task .button-basic,
 .tasks-to-do-grid .col-task .button-secondary,
 .tasks-to-do-grid .col-task .reset-filters-btn, .tasks-to-do-grid .col-task .tab-btn,
 .tasks-to-do-grid .col-task .text-signature,
@@ -1006,6 +1011,10 @@ body[data-theme=dark] .board-kanban .tasks-grid .col-name {
 .board-timeline-card .tasks-to-do-grid .col-event .timeline-task-card__name,
 .tasks-to-do-grid .col-event .board-timeline-card .timeline-date-chip,
 .board-timeline-card .tasks-to-do-grid .col-event .timeline-date-chip,
+.tasks-to-do-grid .col-event .modal-content.profile-modal textarea.profile-modal__bio,
+.modal-content.profile-modal .tasks-to-do-grid .col-event textarea.profile-modal__bio,
+.tasks-to-do-grid .col-event .modal-content.profile-modal select.create-task-select.profile-modal__select--full,
+.modal-content.profile-modal .tasks-to-do-grid .col-event select.create-task-select.profile-modal__select--full,
 .tasks-to-do-grid .col-event .modal-content.create-task-modal textarea.create-task-desc,
 .modal-content.create-task-modal .tasks-to-do-grid .col-event textarea.create-task-desc,
 .tasks-to-do-grid .col-event .modal-content.create-task-modal select.create-task-select,
@@ -1090,6 +1099,10 @@ aside .submenu .tasks-to-do-grid .col-event .nav-link,
 .board-timeline-card .events-grid .col-task .timeline-task-card__name,
 .events-grid .col-task .board-timeline-card .timeline-date-chip,
 .board-timeline-card .events-grid .col-task .timeline-date-chip,
+.events-grid .col-task .modal-content.profile-modal textarea.profile-modal__bio,
+.modal-content.profile-modal .events-grid .col-task textarea.profile-modal__bio,
+.events-grid .col-task .modal-content.profile-modal select.create-task-select.profile-modal__select--full,
+.modal-content.profile-modal .events-grid .col-task select.create-task-select.profile-modal__select--full,
 .events-grid .col-task .modal-content.create-task-modal textarea.create-task-desc,
 .modal-content.create-task-modal .events-grid .col-task textarea.create-task-desc,
 .events-grid .col-task .modal-content.create-task-modal select.create-task-select,
@@ -1174,6 +1187,10 @@ aside .submenu .events-grid .col-task .nav-link,
 .board-timeline-card .events-grid .col-event .timeline-task-card__name,
 .events-grid .col-event .board-timeline-card .timeline-date-chip,
 .board-timeline-card .events-grid .col-event .timeline-date-chip,
+.events-grid .col-event .modal-content.profile-modal textarea.profile-modal__bio,
+.modal-content.profile-modal .events-grid .col-event textarea.profile-modal__bio,
+.events-grid .col-event .modal-content.profile-modal select.create-task-select.profile-modal__select--full,
+.modal-content.profile-modal .events-grid .col-event select.create-task-select.profile-modal__select--full,
 .events-grid .col-event .modal-content.create-task-modal textarea.create-task-desc,
 .modal-content.create-task-modal .events-grid .col-event textarea.create-task-desc,
 .events-grid .col-event .modal-content.create-task-modal select.create-task-select,
@@ -1412,6 +1429,7 @@ aside .submenu .events-grid .col-event .nav-link,
   display: flex;
   gap: 1.125rem;
   padding: 0.375rem 1.125rem;
+  width: -moz-fit-content;
   width: fit-content;
 }
 
@@ -1487,6 +1505,7 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   grid-template-columns: auto 1fr auto auto auto auto auto auto auto auto;
   /* Проект */
   gap: 0.75rem;
+  width: -moz-max-content;
   width: max-content;
   min-width: 100%;
   overflow-x: auto;
@@ -1507,7 +1526,9 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   align-items: center;
   gap: 0.25rem;
   cursor: pointer;
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
 }
 .tasks-grid .grid-header > div .header-title {
   display: inline-block;
@@ -1652,6 +1673,7 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
 .tp-table-row-fallback .tasks-grid {
   display: grid;
   gap: 0.75rem;
+  width: -moz-max-content;
   width: max-content;
   min-width: 100%;
   overflow-x: auto;
@@ -1784,6 +1806,9 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.1);
 }
+.modal-content .modal-body input::-moz-placeholder {
+  color: rgba(45, 50, 41, 0.5);
+}
 .modal-content .modal-body input::placeholder {
   color: rgba(45, 50, 41, 0.5);
 }
@@ -1811,6 +1836,9 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.1);
 }
+.modal-content .modal-body .filter-section .filter-input::-moz-placeholder {
+  color: rgba(45, 50, 41, 0.5);
+}
 .modal-content .modal-body .filter-section .filter-input::placeholder {
   color: rgba(45, 50, 41, 0.5);
 }
@@ -1827,7 +1855,8 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
 .modal-content .modal-body .filter-section .filter-range .range-input {
   width: 100%;
   height: 0.375rem;
-  appearance: none;
+  -moz-appearance: none;
+       appearance: none;
   -webkit-appearance: none;
   background: rgba(97, 160, 57, 0.15);
   outline: none;
@@ -1839,6 +1868,7 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   background: #61A039;
   border-radius: 50%;
   cursor: pointer;
+  -webkit-transition: all 0.2s ease;
   transition: all 0.2s ease;
 }
 .modal-content .modal-body .filter-section .filter-range .range-input::-webkit-slider-thumb:hover {
@@ -1889,7 +1919,8 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   max-width: 22vw;
   box-sizing: border-box;
   cursor: pointer;
-  appearance: none;
+  -moz-appearance: none;
+       appearance: none;
   -webkit-appearance: none;
   accent-color: #61A039;
   color: #2D3229;
@@ -1975,6 +2006,9 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.1);
 }
+.modal-content.create-task-modal textarea.create-task-desc::-moz-placeholder {
+  color: rgba(45, 50, 41, 0.5);
+}
 .modal-content.create-task-modal textarea.create-task-desc::placeholder {
   color: rgba(45, 50, 41, 0.5);
 }
@@ -2005,6 +2039,9 @@ body[data-theme=dark] .modal-content.create-task-modal textarea.create-task-desc
   border-color: #F6FBF2;
   color: #F6FBF2;
   background: #282D25;
+}
+body[data-theme=dark] .modal-content.create-task-modal textarea.create-task-desc::-moz-placeholder {
+  color: rgba(246, 251, 242, 0.45);
 }
 body[data-theme=dark] .modal-content.create-task-modal textarea.create-task-desc::placeholder {
   color: rgba(246, 251, 242, 0.45);
@@ -2047,17 +2084,16 @@ body[data-theme=dark] .modal-content.create-task-modal .create-task-deps-suggest
   background: rgba(97, 160, 57, 0.15);
 }
 
-/* Модалка «Профиль» (шапка / headerProfileBtn) */
+/* Модалка «Профиль» — те же габариты, что у «Создание задачи» */
 .modal-content.profile-modal {
-  width: min(28rem, 92vw);
-  height: auto;
-  max-height: 88vh;
+  width: 44vw;
+  height: 92vh;
+  max-height: 92vh;
   min-height: 0;
 }
 .modal-content.profile-modal .modal-body.profile-modal__body {
   flex: 1 1 auto;
   min-height: 0;
-  max-height: min(60vh, 28rem);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -2070,25 +2106,140 @@ body[data-theme=dark] .modal-content.create-task-modal .create-task-deps-suggest
   gap: 1.125rem;
 }
 .modal-content.profile-modal .profile-modal__avatar {
-  width: 3rem;
-  height: 3rem;
+  width: 5.5rem;
+  height: 5.5rem;
   border-radius: 50%;
-  object-fit: cover;
+  -o-object-fit: cover;
+     object-fit: cover;
   flex-shrink: 0;
   border: 0.0625rem solid rgba(97, 160, 57, 0.4);
 }
 .modal-content.profile-modal .profile-modal__titles {
   min-width: 0;
 }
+.modal-content.profile-modal .profile-modal__id {
+  margin: 0.375rem 0 0;
+  opacity: 0.85;
+}
+.modal-content.profile-modal .profile-modal__settings-hint {
+  margin: 0;
+  padding: 0.5625rem 0.75rem;
+  border-radius: 0.3rem;
+  background: rgba(97, 160, 57, 0.06);
+  line-height: 1.45;
+}
 .modal-content.profile-modal .profile-modal__section {
   display: flex;
   flex-direction: column;
   gap: 0.375rem;
 }
+.modal-content.profile-modal .profile-modal__section--card {
+  padding: 0.75rem;
+  background: rgba(97, 160, 57, 0.04);
+}
+.modal-content.profile-modal .profile-modal__section--muted {
+  padding: 0.75rem;
+}
+.modal-content.profile-modal .profile-modal__section-lead {
+  margin: 0 0 0.375rem;
+  line-height: 1.4;
+}
+.modal-content.profile-modal .profile-modal__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1.125rem;
+}
+@media (max-width: 720px) {
+  .modal-content.profile-modal .profile-modal__grid {
+    grid-template-columns: 1fr;
+  }
+}
+.modal-content.profile-modal .profile-modal__grid--password {
+  margin-top: 0.375rem;
+}
+.modal-content.profile-modal .profile-modal__field {
+  margin: 0;
+}
+.modal-content.profile-modal .profile-modal__field--full {
+  grid-column: 1/-1;
+}
+.modal-content.profile-modal .profile-modal__field .filter-input {
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #F6FBF2;
+}
+.modal-content.profile-modal {
+  /* Как select в «Создание задачи», ширина — на всю колонку сетки профиля */
+}
+.modal-content.profile-modal select.create-task-select.profile-modal__select--full {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  cursor: pointer;
+  -moz-appearance: none;
+       appearance: none;
+  -webkit-appearance: none;
+  accent-color: #61A039;
+  color: #2D3229;
+  padding: 0.25rem 0.75rem;
+  padding-right: calc(0.75rem + 0.625rem + 0.375rem);
+  border: 0.0625rem solid #7F8C73;
+  border-radius: 0.3rem;
+  background-color: #F6FBF2;
+  background-image: url("/static/source/icons/arrow_dark_cropped.svg");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 0.625rem auto;
+}
+.modal-content.profile-modal select.create-task-select.profile-modal__select--full::-ms-expand {
+  display: none;
+}
+.modal-content.profile-modal select.create-task-select.profile-modal__select--full:focus {
+  outline: none;
+  border-color: #61A039;
+  box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.1);
+}
+.modal-content.profile-modal {
+  /* Как textarea описания в «Создание задачи», высота — компактная для профиля */
+}
+.modal-content.profile-modal textarea.profile-modal__bio {
+  display: block;
+  width: 100%;
+  min-height: 6.5rem;
+  height: 7.5rem;
+  max-height: min(28vh, 14rem);
+  resize: vertical;
+  box-sizing: border-box;
+  padding: 0.75rem;
+  border: 0.0625rem solid #7F8C73;
+  border-radius: 0.3rem;
+  background: #F6FBF2;
+  transition: all 0.2s ease;
+}
+.modal-content.profile-modal textarea.profile-modal__bio:focus {
+  outline: none;
+  border-color: #61A039;
+  box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.1);
+}
+.modal-content.profile-modal textarea.profile-modal__bio::-moz-placeholder {
+  color: rgba(45, 50, 41, 0.5);
+}
+.modal-content.profile-modal textarea.profile-modal__bio::placeholder {
+  color: rgba(45, 50, 41, 0.5);
+}
+.modal-content.profile-modal .profile-modal__projects {
+  margin: 0;
+  line-height: 1.5;
+}
 .modal-content.profile-modal .profile-modal__stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.5625rem;
+}
+@media (max-width: 900px) {
+  .modal-content.profile-modal .profile-modal__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 .modal-content.profile-modal .profile-modal__stat {
   display: flex;
@@ -2100,9 +2251,47 @@ body[data-theme=dark] .modal-content.create-task-modal .create-task-deps-suggest
   text-align: center;
   background: rgba(97, 160, 57, 0.06);
 }
-.modal-content.profile-modal .profile-modal__actions {
-  flex-wrap: wrap;
+.modal-content.profile-modal .profile-modal__notify-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5625rem;
+  margin-top: 0.375rem;
+}
+.modal-content.profile-modal .profile-modal__notify-row.checkbox-item {
+  display: flex;
+  flex-direction: row;
   align-items: center;
+  width: 100%;
+  gap: 0.5625rem;
+  cursor: pointer;
+}
+.modal-content.profile-modal .profile-modal__notify-row .checkbox-text {
+  flex: 1;
+  min-width: 0;
+  order: 1;
+}
+.modal-content.profile-modal .profile-modal__notify-row .custom-checkbox {
+  order: 2;
+  flex-shrink: 0;
+}
+.modal-content.profile-modal .profile-modal__password-block {
+  padding: 0.75rem;
+  background: rgba(97, 160, 57, 0.04);
+}
+.modal-content.profile-modal .profile-modal__password-hint {
+  margin: 0.5625rem 0 0.75rem;
+  line-height: 1.4;
+}
+.modal-content.profile-modal .profile-modal__password-btn {
+  align-self: flex-start;
+}
+.modal-content.profile-modal .profile-modal__activity {
+  margin: 0;
+  padding-left: 1.15rem;
+  line-height: 1.55;
+}
+.modal-content.profile-modal .profile-modal__activity li + li {
+  margin-top: 0.375rem;
 }
 
 body[data-theme=dark] .modal-content.profile-modal .profile-modal__avatar {
@@ -2111,6 +2300,52 @@ body[data-theme=dark] .modal-content.profile-modal .profile-modal__avatar {
 
 body[data-theme=dark] .modal-content.profile-modal .profile-modal__stat {
   background: rgba(97, 160, 57, 0.12);
+}
+
+body[data-theme=dark] .modal-content.profile-modal .profile-modal__section--card,
+body[data-theme=dark] .modal-content.profile-modal .profile-modal__password-block {
+  background: #282D25;
+  border-color: #F6FBF2;
+}
+
+body[data-theme=dark] .modal-content.profile-modal .profile-modal__section--muted {
+  background: rgba(40, 45, 37, 0.55);
+  border-color: #F6FBF2;
+}
+
+body[data-theme=dark] .modal-content.profile-modal .profile-modal__settings-hint {
+  background: rgba(97, 160, 57, 0.14);
+  color: rgba(246, 251, 242, 0.92);
+}
+
+body[data-theme=dark] .modal-content.profile-modal select.create-task-select.profile-modal__select--full {
+  background-color: #282D25;
+  background-image: url("/static/source/icons/arrow_light_cropped.svg");
+  background-repeat: no-repeat !important;
+  background-position: right 0.75rem center !important;
+  background-size: 0.625rem auto !important;
+  color: #F6FBF2;
+  border-color: #F6FBF2;
+}
+body[data-theme=dark] .modal-content.profile-modal select.create-task-select.profile-modal__select--full:focus {
+  border-color: #61A039;
+  box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.18);
+}
+body[data-theme=dark] .modal-content.profile-modal select.create-task-select.profile-modal__select--full option {
+  background: #2D3229;
+  color: #F6FBF2;
+}
+
+body[data-theme=dark] .modal-content.profile-modal textarea.profile-modal__bio {
+  border-color: #F6FBF2;
+  color: #F6FBF2;
+  background: #282D25;
+}
+body[data-theme=dark] .modal-content.profile-modal textarea.profile-modal__bio::-moz-placeholder {
+  color: rgba(246, 251, 242, 0.45);
+}
+body[data-theme=dark] .modal-content.profile-modal textarea.profile-modal__bio::placeholder {
+  color: rgba(246, 251, 242, 0.45);
 }
 
 body.tp-no-enter .cards > *,
@@ -2161,6 +2396,10 @@ body[data-theme=dark] .modal-content .filter-input {
   background: #2D3229 !important;
   color: #F6FBF2 !important;
   border-color: #F6FBF2 !important;
+}
+
+body[data-theme=dark] .modal-content .filter-input::-moz-placeholder {
+  color: rgba(246, 251, 242, 0.55) !important;
 }
 
 body[data-theme=dark] .modal-content .filter-input::placeholder {
@@ -2334,14 +2573,19 @@ body[data-theme=dark] .modal-content .filter-date span {
 }
 
 .board-list .cards {
-  column-count: 2;
-  column-gap: 2.25rem;
+  -moz-column-count: 2;
+       column-count: 2;
+  -moz-column-gap: 2.25rem;
+       column-gap: 2.25rem;
   flex: 1;
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
 }
 .board-list .cards.dragging-active {
   gap: 2.25rem;
-  column-count: unset;
+  -moz-column-count: unset;
+       column-count: unset;
   display: flex;
   flex-wrap: wrap;
 }
@@ -2350,7 +2594,8 @@ body[data-theme=dark] .modal-content .filter-date span {
 }
 .board-list .tables-view.dragging-active,
 .board-list .board-view.dragging-active {
-  column-count: 1;
+  -moz-column-count: 1;
+       column-count: 1;
 }
 .board-list .tables-view.dragging-active .card,
 .board-list .board-view.dragging-active .card {
@@ -2363,11 +2608,14 @@ body[data-theme=dark] .modal-content .filter-date span {
   width: 100%;
 }
 .board-list .card {
-  break-inside: avoid;
+  -moz-column-break-inside: avoid;
+       break-inside: avoid;
   margin-bottom: 2.25rem;
   width: 100%;
   transition: transform 0.2s ease;
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
 }
 .board-list .card:active {
   cursor: grabbing;
@@ -2412,7 +2660,9 @@ body[data-theme=dark] .modal-content .filter-date span {
   gap: 0.5625rem;
   cursor: grab;
   transition: all 0.2s ease;
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
   position: relative;
 }
 .board-list .card .list .item:active {
@@ -2554,18 +2804,22 @@ body:not([data-theme=dark]) .board-list .card .list .item {
 }
 
 .board-list .cards.tables-view {
-  column-count: 1 !important;
+  -moz-column-count: 1 !important;
+       column-count: 1 !important;
   display: block;
 }
 
 .board-list .cards.timeline-view {
-  column-count: 1 !important;
+  -moz-column-count: 1 !important;
+       column-count: 1 !important;
   display: block;
 }
 
 .board-kanban .cards {
-  column-count: 1 !important;
-  column-gap: 0;
+  -moz-column-count: 1 !important;
+       column-count: 1 !important;
+  -moz-column-gap: 0;
+       column-gap: 0;
 }
 
 .kanban-board-card,
@@ -2600,6 +2854,7 @@ body:not([data-theme=dark]) .board-list .card .list .item {
 .kanban-board-card[data-kanban-scroll=true] .kanban-stages-row,
 .kanban-archive-board[data-kanban-scroll=true] .kanban-columns-head,
 .kanban-archive-board[data-kanban-scroll=true] .kanban-stages-row {
+  width: -moz-max-content;
   width: max-content;
   gap: 0.75rem;
 }
@@ -2609,6 +2864,7 @@ body:not([data-theme=dark]) .board-list .card .list .item {
 }
 .kanban-board-card[data-kanban-scroll=true] .kanban-priority-section,
 .kanban-archive-board[data-kanban-scroll=true] .kanban-priority-section {
+  width: -moz-fit-content;
   width: fit-content;
   margin-right: 0.0625rem;
 }
@@ -2686,7 +2942,7 @@ body:not([data-theme=dark]) .board-list .card .list .item {
 .kanban-board-card .kanban-priority-section.urgent button .auth-flow-card .modal-body select,
 .auth-flow-card .modal-body .kanban-board-card .kanban-priority-section.urgent button select, .kanban-board-card .kanban-priority-section.urgent button .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .kanban-board-card .kanban-priority-section.urgent button button, .kanban-board-card .kanban-priority-section.urgent button .custom-calendar-modal .custom-calendar, .custom-calendar-modal .kanban-board-card .kanban-priority-section.urgent button .custom-calendar, .kanban-board-card .kanban-priority-section.urgent button .board-timeline-card .timeline-assignee span, .board-timeline-card .timeline-assignee .kanban-board-card .kanban-priority-section.urgent button span, .kanban-board-card .kanban-priority-section.urgent button .board-timeline-card .timeline-task-card__name, .board-timeline-card .kanban-board-card .kanban-priority-section.urgent button .timeline-task-card__name, .kanban-board-card .kanban-priority-section.urgent button .board-timeline-card .timeline-date-chip, .board-timeline-card .kanban-board-card .kanban-priority-section.urgent button .timeline-date-chip, .kanban-board-card .kanban-priority-section.urgent button aside .submenu .nav-link, aside .submenu .kanban-board-card .kanban-priority-section.urgent button .nav-link, .kanban-board-card .kanban-priority-section.urgent button .button-basic,
 .kanban-board-card .kanban-priority-section.urgent button .button-secondary,
-.kanban-board-card .kanban-priority-section.urgent button .reset-filters-btn, .kanban-board-card .kanban-priority-section.urgent button .tab-btn, .kanban-board-card .kanban-priority-section.urgent button .tasks-grid .grid-row, .tasks-grid .kanban-board-card .kanban-priority-section.urgent button .grid-row, .kanban-board-card .kanban-priority-section.urgent button .modal-content .modal-body input, .modal-content .modal-body .kanban-board-card .kanban-priority-section.urgent button input, .kanban-board-card .kanban-priority-section.urgent button .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .kanban-board-card .kanban-priority-section.urgent button .filter-input, .kanban-board-card .kanban-priority-section.urgent button .modal-content.create-task-modal select.create-task-select, .modal-content.create-task-modal .kanban-board-card .kanban-priority-section.urgent button select.create-task-select, .kanban-board-card .kanban-priority-section.urgent button .modal-content.create-task-modal textarea.create-task-desc, .modal-content.create-task-modal .kanban-board-card .kanban-priority-section.urgent button textarea.create-task-desc,
+.kanban-board-card .kanban-priority-section.urgent button .reset-filters-btn, .kanban-board-card .kanban-priority-section.urgent button .tab-btn, .kanban-board-card .kanban-priority-section.urgent button .tasks-grid .grid-row, .tasks-grid .kanban-board-card .kanban-priority-section.urgent button .grid-row, .kanban-board-card .kanban-priority-section.urgent button .modal-content .modal-body input, .modal-content .modal-body .kanban-board-card .kanban-priority-section.urgent button input, .kanban-board-card .kanban-priority-section.urgent button .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .kanban-board-card .kanban-priority-section.urgent button .filter-input, .kanban-board-card .kanban-priority-section.urgent button .modal-content.create-task-modal select.create-task-select, .modal-content.create-task-modal .kanban-board-card .kanban-priority-section.urgent button select.create-task-select, .kanban-board-card .kanban-priority-section.urgent button .modal-content.create-task-modal textarea.create-task-desc, .modal-content.create-task-modal .kanban-board-card .kanban-priority-section.urgent button textarea.create-task-desc, .kanban-board-card .kanban-priority-section.urgent button .modal-content.profile-modal select.create-task-select.profile-modal__select--full, .modal-content.profile-modal .kanban-board-card .kanban-priority-section.urgent button select.create-task-select.profile-modal__select--full, .kanban-board-card .kanban-priority-section.urgent button .modal-content.profile-modal textarea.profile-modal__bio, .modal-content.profile-modal .kanban-board-card .kanban-priority-section.urgent button textarea.profile-modal__bio,
 .kanban-archive-board .kanban-priority-section.urgent button .text-basic,
 .kanban-archive-board .kanban-priority-section.urgent button .auth-link-row a,
 .auth-link-row .kanban-archive-board .kanban-priority-section.urgent button a,
@@ -2719,7 +2975,11 @@ aside .submenu .kanban-archive-board .kanban-priority-section.urgent button .nav
 .kanban-archive-board .kanban-priority-section.urgent button .modal-content.create-task-modal select.create-task-select,
 .modal-content.create-task-modal .kanban-archive-board .kanban-priority-section.urgent button select.create-task-select,
 .kanban-archive-board .kanban-priority-section.urgent button .modal-content.create-task-modal textarea.create-task-desc,
-.modal-content.create-task-modal .kanban-archive-board .kanban-priority-section.urgent button textarea.create-task-desc {
+.modal-content.create-task-modal .kanban-archive-board .kanban-priority-section.urgent button textarea.create-task-desc,
+.kanban-archive-board .kanban-priority-section.urgent button .modal-content.profile-modal select.create-task-select.profile-modal__select--full,
+.modal-content.profile-modal .kanban-archive-board .kanban-priority-section.urgent button select.create-task-select.profile-modal__select--full,
+.kanban-archive-board .kanban-priority-section.urgent button .modal-content.profile-modal textarea.profile-modal__bio,
+.modal-content.profile-modal .kanban-archive-board .kanban-priority-section.urgent button textarea.profile-modal__bio {
   color: #F8085C;
   padding: 0;
 }
@@ -2736,7 +2996,7 @@ aside .submenu .kanban-archive-board .kanban-priority-section.urgent button .nav
 .kanban-board-card .kanban-priority-section.normal button .auth-flow-card .modal-body select,
 .auth-flow-card .modal-body .kanban-board-card .kanban-priority-section.normal button select, .kanban-board-card .kanban-priority-section.normal button .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .kanban-board-card .kanban-priority-section.normal button button, .kanban-board-card .kanban-priority-section.normal button .custom-calendar-modal .custom-calendar, .custom-calendar-modal .kanban-board-card .kanban-priority-section.normal button .custom-calendar, .kanban-board-card .kanban-priority-section.normal button .board-timeline-card .timeline-assignee span, .board-timeline-card .timeline-assignee .kanban-board-card .kanban-priority-section.normal button span, .kanban-board-card .kanban-priority-section.normal button .board-timeline-card .timeline-task-card__name, .board-timeline-card .kanban-board-card .kanban-priority-section.normal button .timeline-task-card__name, .kanban-board-card .kanban-priority-section.normal button .board-timeline-card .timeline-date-chip, .board-timeline-card .kanban-board-card .kanban-priority-section.normal button .timeline-date-chip, .kanban-board-card .kanban-priority-section.normal button aside .submenu .nav-link, aside .submenu .kanban-board-card .kanban-priority-section.normal button .nav-link, .kanban-board-card .kanban-priority-section.normal button .button-basic,
 .kanban-board-card .kanban-priority-section.normal button .button-secondary,
-.kanban-board-card .kanban-priority-section.normal button .reset-filters-btn, .kanban-board-card .kanban-priority-section.normal button .tab-btn, .kanban-board-card .kanban-priority-section.normal button .tasks-grid .grid-row, .tasks-grid .kanban-board-card .kanban-priority-section.normal button .grid-row, .kanban-board-card .kanban-priority-section.normal button .modal-content .modal-body input, .modal-content .modal-body .kanban-board-card .kanban-priority-section.normal button input, .kanban-board-card .kanban-priority-section.normal button .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .kanban-board-card .kanban-priority-section.normal button .filter-input, .kanban-board-card .kanban-priority-section.normal button .modal-content.create-task-modal select.create-task-select, .modal-content.create-task-modal .kanban-board-card .kanban-priority-section.normal button select.create-task-select, .kanban-board-card .kanban-priority-section.normal button .modal-content.create-task-modal textarea.create-task-desc, .modal-content.create-task-modal .kanban-board-card .kanban-priority-section.normal button textarea.create-task-desc,
+.kanban-board-card .kanban-priority-section.normal button .reset-filters-btn, .kanban-board-card .kanban-priority-section.normal button .tab-btn, .kanban-board-card .kanban-priority-section.normal button .tasks-grid .grid-row, .tasks-grid .kanban-board-card .kanban-priority-section.normal button .grid-row, .kanban-board-card .kanban-priority-section.normal button .modal-content .modal-body input, .modal-content .modal-body .kanban-board-card .kanban-priority-section.normal button input, .kanban-board-card .kanban-priority-section.normal button .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .kanban-board-card .kanban-priority-section.normal button .filter-input, .kanban-board-card .kanban-priority-section.normal button .modal-content.create-task-modal select.create-task-select, .modal-content.create-task-modal .kanban-board-card .kanban-priority-section.normal button select.create-task-select, .kanban-board-card .kanban-priority-section.normal button .modal-content.create-task-modal textarea.create-task-desc, .modal-content.create-task-modal .kanban-board-card .kanban-priority-section.normal button textarea.create-task-desc, .kanban-board-card .kanban-priority-section.normal button .modal-content.profile-modal select.create-task-select.profile-modal__select--full, .modal-content.profile-modal .kanban-board-card .kanban-priority-section.normal button select.create-task-select.profile-modal__select--full, .kanban-board-card .kanban-priority-section.normal button .modal-content.profile-modal textarea.profile-modal__bio, .modal-content.profile-modal .kanban-board-card .kanban-priority-section.normal button textarea.profile-modal__bio,
 .kanban-archive-board .kanban-priority-section.normal button .text-basic,
 .kanban-archive-board .kanban-priority-section.normal button .auth-link-row a,
 .auth-link-row .kanban-archive-board .kanban-priority-section.normal button a,
@@ -2769,7 +3029,11 @@ aside .submenu .kanban-archive-board .kanban-priority-section.normal button .nav
 .kanban-archive-board .kanban-priority-section.normal button .modal-content.create-task-modal select.create-task-select,
 .modal-content.create-task-modal .kanban-archive-board .kanban-priority-section.normal button select.create-task-select,
 .kanban-archive-board .kanban-priority-section.normal button .modal-content.create-task-modal textarea.create-task-desc,
-.modal-content.create-task-modal .kanban-archive-board .kanban-priority-section.normal button textarea.create-task-desc {
+.modal-content.create-task-modal .kanban-archive-board .kanban-priority-section.normal button textarea.create-task-desc,
+.kanban-archive-board .kanban-priority-section.normal button .modal-content.profile-modal select.create-task-select.profile-modal__select--full,
+.modal-content.profile-modal .kanban-archive-board .kanban-priority-section.normal button select.create-task-select.profile-modal__select--full,
+.kanban-archive-board .kanban-priority-section.normal button .modal-content.profile-modal textarea.profile-modal__bio,
+.modal-content.profile-modal .kanban-archive-board .kanban-priority-section.normal button textarea.profile-modal__bio {
   color: #61A039;
 }
 .kanban-board-card .kanban-priority-section.normal .kanban-count-chip,
@@ -3147,7 +3411,8 @@ body[data-theme=dark] .kanban-task-item, .board-list .card .list .item {
 
 .board-list .cards.reports-view,
 .board-list .cards.archive-view {
-  column-count: 1 !important;
+  -moz-column-count: 1 !important;
+       column-count: 1 !important;
   display: block;
   width: 100%;
 }
@@ -3156,6 +3421,7 @@ body[data-theme=dark] .kanban-task-item, .board-list .card .list .item {
   width: 100%;
 }
 .board-reports-card .tasks-grid-wrapper {
+  width: -moz-fit-content;
   width: fit-content;
 }
 .board-reports-card .reports-summary-grid {
@@ -3389,7 +3655,8 @@ body[data-theme=dark] .kanban-task-item, .board-list .card .list .item {
   width: 1.125rem;
   height: 1.125rem;
   border-radius: 50%;
-  object-fit: cover;
+  -o-object-fit: cover;
+     object-fit: cover;
 }
 .board-timeline-card .tag {
   width: 100%;
@@ -3786,7 +4053,9 @@ body[data-theme=dark] .custom-calendar-modal .custom-calendar .custom-calendar-f
 }
 
 .checkbox-item {
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
 }
 
 .checkbox-item input {
@@ -4106,6 +4375,7 @@ body[data-theme=dark] .custom-calendar-modal .custom-calendar .custom-calendar-f
   position: relative;
   margin: 0;
   align-self: flex-start;
+  width: -moz-fit-content;
   width: fit-content;
   max-width: 100%;
 }
@@ -4148,11 +4418,13 @@ body[data-theme=dark] .custom-calendar-modal .custom-calendar .custom-calendar-f
 }
 
 .auth-motif--board {
+  width: -moz-fit-content;
   width: fit-content;
   max-width: 100%;
 }
 
 .auth-motif--web {
+  width: -moz-fit-content;
   width: fit-content;
   max-width: 19rem;
 }
@@ -4735,4 +5007,4 @@ body[data-theme=dark] .custom-calendar-modal .custom-calendar .custom-calendar-f
     transition: none !important;
     transform: none !important;
   }
-}
+}/*# sourceMappingURL=style.css.map */

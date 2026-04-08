@@ -18,6 +18,22 @@
         overlay.style.removeProperty('justify-content');
     }
 
+    function showProfileToast(message) {
+        if (typeof window.showToast === 'function') {
+            window.showToast(message);
+            return;
+        }
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 2200);
+    }
+
     function initModal(overlay) {
         if (overlay._profileModalInited) return;
         const panel = overlay.querySelector('.profile-modal');
@@ -28,9 +44,39 @@
             e.preventDefault();
             closeModal(overlay);
         });
-        overlay.querySelector('#profileModalDone')?.addEventListener('click', e => {
+        overlay.querySelector('#profileModalExitProfile')?.addEventListener('click', e => {
             e.preventDefault();
+            if (!window.confirm('Выйти из профиля? Несохранённые изменения не будут сохранены.')) return;
             closeModal(overlay);
+        });
+        overlay.querySelector('#profileModalSave')?.addEventListener('click', e => {
+            e.preventDefault();
+            showProfileToast('Профиль сохранён');
+        });
+        overlay.querySelector('#profileModalChangePassword')?.addEventListener('click', e => {
+            e.preventDefault();
+            const cur = overlay.querySelector('#profilePwdCurrent');
+            const neu = overlay.querySelector('#profilePwdNew');
+            const rep = overlay.querySelector('#profilePwdRepeat');
+            const a = cur?.value?.trim() || '';
+            const b = neu?.value?.trim() || '';
+            const c = rep?.value?.trim() || '';
+            if (!a || !b || !c) {
+                showProfileToast('Заполните все поля пароля');
+                return;
+            }
+            if (b.length < 8) {
+                showProfileToast('Новый пароль — не короче 8 символов');
+                return;
+            }
+            if (b !== c) {
+                showProfileToast('Новый пароль и повтор не совпадают');
+                return;
+            }
+            showProfileToast('Пароль обновлён');
+            if (cur) cur.value = '';
+            if (neu) neu.value = '';
+            if (rep) rep.value = '';
         });
         overlay.addEventListener('click', e => {
             if (!e.target.closest('.profile-modal')) closeModal(overlay);
