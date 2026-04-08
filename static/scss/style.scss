@@ -35,6 +35,11 @@ body {
     flex-direction: column;
 }
 
+/* Акцент нативных select (фокус / подсветка) — зелёный вместо системного синего */
+select {
+    accent-color: $green;
+}
+
 /* =========================
    Theme toggle (app pages)
    ========================= */
@@ -1228,18 +1233,33 @@ body[data-theme="dark"] .board-kanban .tasks-grid .col-name {
         margin-bottom: $space-8;
     }
 
+    /* Нативная стрелка select игнорирует padding — убираем её и рисуем свою (как у кастомного дропдауна) */
     select.create-task-select {
+        $chevron-w: 0.625rem;
+        $chevron-inset: $space-16;
+
         width: 22vw;
         max-width: 22vw;
         box-sizing: border-box;
         cursor: pointer;
-        appearance: auto;
-        background-color: $light-light-green;
+        appearance: none;
+        -webkit-appearance: none;
+        accent-color: $green;
         color: $dark-gray;
         padding: $space-4 $space-16;
+        padding-right: calc(#{$chevron-inset} + #{$chevron-w} + #{$space-8});
         border: $space-1 solid $light-gray;
         border-radius: $radius-sm;
         @extend .text-basic;
+        background-color: $light-light-green;
+        background-image: url('/static/source/icons/arrow_dark_cropped.svg');
+        background-repeat: no-repeat;
+        background-position: right $chevron-inset center;
+        background-size: $chevron-w auto;
+
+        &::-ms-expand {
+            display: none;
+        }
 
         &:focus {
             outline: none;
@@ -1372,8 +1392,13 @@ body[data-theme="dark"] .modal-content.create-task-modal .create-task-attachment
     border-color: $light-light-green;
 }
 
+/* Тёмная тема: запасная стрелка + явный repeat/position/size (!important), иначе при override background-image слой тайлится */
 body[data-theme="dark"] .modal-content.create-task-modal select.create-task-select {
-    background: $black;
+    background-color: $black;
+    background-image: url('/static/source/icons/arrow_light_cropped.svg');
+    background-repeat: no-repeat !important;
+    background-position: right $space-16 center !important;
+    background-size: 0.625rem auto !important;
     color: $light-light-green;
     border-color: $light-light-green;
 
@@ -1400,6 +1425,80 @@ body[data-theme="dark"] .modal-content.create-task-modal .filter-section .filter
 body[data-theme="dark"] .modal-content.create-task-modal .create-task-deps-suggest__item:hover,
 body[data-theme="dark"] .modal-content.create-task-modal .create-task-deps-suggest__item:focus-visible {
     background: rgba($green, 0.15);
+}
+
+/* Модалка «Профиль» (шапка / headerProfileBtn) */
+.modal-content.profile-modal {
+    width: min(28rem, 92vw);
+    height: auto;
+    max-height: 88vh;
+    min-height: 0;
+
+    .modal-body.profile-modal__body {
+        flex: 1 1 auto;
+        min-height: 0;
+        max-height: min(60vh, 28rem);
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: $space-24;
+        padding-top: $space-24;
+    }
+
+    .profile-modal__hero {
+        display: flex;
+        align-items: center;
+        gap: $space-24;
+    }
+
+    .profile-modal__avatar {
+        width: $space-64;
+        height: $space-64;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: $space-1 solid rgba($green, 0.4);
+    }
+
+    .profile-modal__titles {
+        min-width: 0;
+    }
+
+    .profile-modal__section {
+        display: flex;
+        flex-direction: column;
+        gap: $space-8;
+    }
+
+    .profile-modal__stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: $space-12;
+    }
+
+    .profile-modal__stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: $space-4;
+        padding: $space-12 $space-8;
+        text-align: center;
+        background: rgba($green, 0.06);
+    }
+
+    .profile-modal__actions {
+        flex-wrap: wrap;
+        align-items: center;
+    }
+}
+
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__avatar {
+    border-color: rgba($light-light-green, 0.45);
+}
+
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__stat {
+    background: rgba($green, 0.12);
 }
 
 body.tp-no-enter .cards>*,
@@ -4329,6 +4428,7 @@ body[data-theme="dark"] .custom-calendar-modal .custom-calendar {
     select {
         cursor: pointer;
         background: $light-light-green;
+        accent-color: $green;
     }
 }
 

@@ -367,7 +367,6 @@ a.button-secondary, .button-basic {
   height: 0.75rem;
   -webkit-appearance: none;
   appearance: none;
-  -webkit-transition: height 0.2s ease;
   transition: height 0.2s ease;
 }
 
@@ -381,7 +380,6 @@ a.button-secondary, .button-basic {
 *::-webkit-scrollbar-thumb {
   background: rgba(97, 160, 57, 0.3);
   backdrop-filter: blur(4px);
-  -webkit-transition: all 0.2s ease;
   transition: all 0.2s ease;
 }
 *::-webkit-scrollbar-thumb:hover {
@@ -433,9 +431,7 @@ a.button-secondary, .button-basic {
   transition: all 0.2s ease;
   position: relative;
   white-space: nowrap;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
   color: #F6FBF2;
 }
 .status.neutral, .tasks-grid .col-status .neutral.status-select {
@@ -474,6 +470,11 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+/* Акцент нативных select (фокус / подсветка) — зелёный вместо системного синего */
+select {
+  accent-color: #61A039;
 }
 
 /* =========================
@@ -811,7 +812,6 @@ body[data-theme=dark] .board-kanban .tasks-grid .col-name {
 .app-container .column {
   display: flex;
   flex-direction: column;
-  height: -moz-fit-content;
   height: fit-content;
   padding-bottom: 2.25rem;
 }
@@ -1412,7 +1412,6 @@ aside .submenu .events-grid .col-event .nav-link,
   display: flex;
   gap: 1.125rem;
   padding: 0.375rem 1.125rem;
-  width: -moz-fit-content;
   width: fit-content;
 }
 
@@ -1488,7 +1487,6 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   grid-template-columns: auto 1fr auto auto auto auto auto auto auto auto;
   /* Проект */
   gap: 0.75rem;
-  width: -moz-max-content;
   width: max-content;
   min-width: 100%;
   overflow-x: auto;
@@ -1509,9 +1507,7 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   align-items: center;
   gap: 0.25rem;
   cursor: pointer;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
 }
 .tasks-grid .grid-header > div .header-title {
   display: inline-block;
@@ -1656,7 +1652,6 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
 .tp-table-row-fallback .tasks-grid {
   display: grid;
   gap: 0.75rem;
-  width: -moz-max-content;
   width: max-content;
   min-width: 100%;
   overflow-x: auto;
@@ -1789,9 +1784,6 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.1);
 }
-.modal-content .modal-body input::-moz-placeholder {
-  color: rgba(45, 50, 41, 0.5);
-}
 .modal-content .modal-body input::placeholder {
   color: rgba(45, 50, 41, 0.5);
 }
@@ -1819,9 +1811,6 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.1);
 }
-.modal-content .modal-body .filter-section .filter-input::-moz-placeholder {
-  color: rgba(45, 50, 41, 0.5);
-}
 .modal-content .modal-body .filter-section .filter-input::placeholder {
   color: rgba(45, 50, 41, 0.5);
 }
@@ -1838,8 +1827,7 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
 .modal-content .modal-body .filter-section .filter-range .range-input {
   width: 100%;
   height: 0.375rem;
-  -moz-appearance: none;
-       appearance: none;
+  appearance: none;
   -webkit-appearance: none;
   background: rgba(97, 160, 57, 0.15);
   outline: none;
@@ -1851,7 +1839,6 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   background: #61A039;
   border-radius: 50%;
   cursor: pointer;
-  -webkit-transition: all 0.2s ease;
   transition: all 0.2s ease;
 }
 .modal-content .modal-body .filter-section .filter-range .range-input::-webkit-slider-thumb:hover {
@@ -1894,19 +1881,30 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   display: block;
   margin-bottom: 0.375rem;
 }
+.modal-content.create-task-modal {
+  /* Нативная стрелка select игнорирует padding — убираем её и рисуем свою (как у кастомного дропдауна) */
+}
 .modal-content.create-task-modal select.create-task-select {
   width: 22vw;
   max-width: 22vw;
   box-sizing: border-box;
   cursor: pointer;
-  -webkit-appearance: auto;
-     -moz-appearance: auto;
-          appearance: auto;
-  background-color: #F6FBF2;
+  appearance: none;
+  -webkit-appearance: none;
+  accent-color: #61A039;
   color: #2D3229;
   padding: 0.25rem 0.75rem;
+  padding-right: calc(0.75rem + 0.625rem + 0.375rem);
   border: 0.0625rem solid #7F8C73;
   border-radius: 0.3rem;
+  background-color: #F6FBF2;
+  background-image: url("/static/source/icons/arrow_dark_cropped.svg");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 0.625rem auto;
+}
+.modal-content.create-task-modal select.create-task-select::-ms-expand {
+  display: none;
 }
 .modal-content.create-task-modal select.create-task-select:focus {
   outline: none;
@@ -1977,9 +1975,6 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.1);
 }
-.modal-content.create-task-modal textarea.create-task-desc::-moz-placeholder {
-  color: rgba(45, 50, 41, 0.5);
-}
 .modal-content.create-task-modal textarea.create-task-desc::placeholder {
   color: rgba(45, 50, 41, 0.5);
 }
@@ -2011,9 +2006,6 @@ body[data-theme=dark] .modal-content.create-task-modal textarea.create-task-desc
   color: #F6FBF2;
   background: #282D25;
 }
-body[data-theme=dark] .modal-content.create-task-modal textarea.create-task-desc::-moz-placeholder {
-  color: rgba(246, 251, 242, 0.45);
-}
 body[data-theme=dark] .modal-content.create-task-modal textarea.create-task-desc::placeholder {
   color: rgba(246, 251, 242, 0.45);
 }
@@ -2022,8 +2014,13 @@ body[data-theme=dark] .modal-content.create-task-modal .create-task-attachments.
   border-color: #F6FBF2;
 }
 
+/* Тёмная тема: запасная стрелка + явный repeat/position/size (!important), иначе при override background-image слой тайлится */
 body[data-theme=dark] .modal-content.create-task-modal select.create-task-select {
-  background: #282D25;
+  background-color: #282D25;
+  background-image: url("/static/source/icons/arrow_light_cropped.svg");
+  background-repeat: no-repeat !important;
+  background-position: right 0.75rem center !important;
+  background-size: 0.625rem auto !important;
   color: #F6FBF2;
   border-color: #F6FBF2;
 }
@@ -2048,6 +2045,72 @@ body[data-theme=dark] .modal-content.create-task-modal .filter-section .filter-d
 body[data-theme=dark] .modal-content.create-task-modal .create-task-deps-suggest__item:hover,
 body[data-theme=dark] .modal-content.create-task-modal .create-task-deps-suggest__item:focus-visible {
   background: rgba(97, 160, 57, 0.15);
+}
+
+/* Модалка «Профиль» (шапка / headerProfileBtn) */
+.modal-content.profile-modal {
+  width: min(28rem, 92vw);
+  height: auto;
+  max-height: 88vh;
+  min-height: 0;
+}
+.modal-content.profile-modal .modal-body.profile-modal__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: min(60vh, 28rem);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+  padding-top: 1.125rem;
+}
+.modal-content.profile-modal .profile-modal__hero {
+  display: flex;
+  align-items: center;
+  gap: 1.125rem;
+}
+.modal-content.profile-modal .profile-modal__avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 0.0625rem solid rgba(97, 160, 57, 0.4);
+}
+.modal-content.profile-modal .profile-modal__titles {
+  min-width: 0;
+}
+.modal-content.profile-modal .profile-modal__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+.modal-content.profile-modal .profile-modal__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5625rem;
+}
+.modal-content.profile-modal .profile-modal__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.5625rem 0.375rem;
+  text-align: center;
+  background: rgba(97, 160, 57, 0.06);
+}
+.modal-content.profile-modal .profile-modal__actions {
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+body[data-theme=dark] .modal-content.profile-modal .profile-modal__avatar {
+  border-color: rgba(246, 251, 242, 0.45);
+}
+
+body[data-theme=dark] .modal-content.profile-modal .profile-modal__stat {
+  background: rgba(97, 160, 57, 0.12);
 }
 
 body.tp-no-enter .cards > *,
@@ -2098,10 +2161,6 @@ body[data-theme=dark] .modal-content .filter-input {
   background: #2D3229 !important;
   color: #F6FBF2 !important;
   border-color: #F6FBF2 !important;
-}
-
-body[data-theme=dark] .modal-content .filter-input::-moz-placeholder {
-  color: rgba(246, 251, 242, 0.55) !important;
 }
 
 body[data-theme=dark] .modal-content .filter-input::placeholder {
@@ -2275,19 +2334,14 @@ body[data-theme=dark] .modal-content .filter-date span {
 }
 
 .board-list .cards {
-  -moz-column-count: 2;
-       column-count: 2;
-  -moz-column-gap: 2.25rem;
-       column-gap: 2.25rem;
+  column-count: 2;
+  column-gap: 2.25rem;
   flex: 1;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
 }
 .board-list .cards.dragging-active {
   gap: 2.25rem;
-  -moz-column-count: unset;
-       column-count: unset;
+  column-count: unset;
   display: flex;
   flex-wrap: wrap;
 }
@@ -2296,8 +2350,7 @@ body[data-theme=dark] .modal-content .filter-date span {
 }
 .board-list .tables-view.dragging-active,
 .board-list .board-view.dragging-active {
-  -moz-column-count: 1;
-       column-count: 1;
+  column-count: 1;
 }
 .board-list .tables-view.dragging-active .card,
 .board-list .board-view.dragging-active .card {
@@ -2310,14 +2363,11 @@ body[data-theme=dark] .modal-content .filter-date span {
   width: 100%;
 }
 .board-list .card {
-  -moz-column-break-inside: avoid;
-       break-inside: avoid;
+  break-inside: avoid;
   margin-bottom: 2.25rem;
   width: 100%;
   transition: transform 0.2s ease;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
 }
 .board-list .card:active {
   cursor: grabbing;
@@ -2362,9 +2412,7 @@ body[data-theme=dark] .modal-content .filter-date span {
   gap: 0.5625rem;
   cursor: grab;
   transition: all 0.2s ease;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
   position: relative;
 }
 .board-list .card .list .item:active {
@@ -2506,22 +2554,18 @@ body:not([data-theme=dark]) .board-list .card .list .item {
 }
 
 .board-list .cards.tables-view {
-  -moz-column-count: 1 !important;
-       column-count: 1 !important;
+  column-count: 1 !important;
   display: block;
 }
 
 .board-list .cards.timeline-view {
-  -moz-column-count: 1 !important;
-       column-count: 1 !important;
+  column-count: 1 !important;
   display: block;
 }
 
 .board-kanban .cards {
-  -moz-column-count: 1 !important;
-       column-count: 1 !important;
-  -moz-column-gap: 0;
-       column-gap: 0;
+  column-count: 1 !important;
+  column-gap: 0;
 }
 
 .kanban-board-card,
@@ -2556,7 +2600,6 @@ body:not([data-theme=dark]) .board-list .card .list .item {
 .kanban-board-card[data-kanban-scroll=true] .kanban-stages-row,
 .kanban-archive-board[data-kanban-scroll=true] .kanban-columns-head,
 .kanban-archive-board[data-kanban-scroll=true] .kanban-stages-row {
-  width: -moz-max-content;
   width: max-content;
   gap: 0.75rem;
 }
@@ -2566,7 +2609,6 @@ body:not([data-theme=dark]) .board-list .card .list .item {
 }
 .kanban-board-card[data-kanban-scroll=true] .kanban-priority-section,
 .kanban-archive-board[data-kanban-scroll=true] .kanban-priority-section {
-  width: -moz-fit-content;
   width: fit-content;
   margin-right: 0.0625rem;
 }
@@ -3105,8 +3147,7 @@ body[data-theme=dark] .kanban-task-item, .board-list .card .list .item {
 
 .board-list .cards.reports-view,
 .board-list .cards.archive-view {
-  -moz-column-count: 1 !important;
-       column-count: 1 !important;
+  column-count: 1 !important;
   display: block;
   width: 100%;
 }
@@ -3115,7 +3156,6 @@ body[data-theme=dark] .kanban-task-item, .board-list .card .list .item {
   width: 100%;
 }
 .board-reports-card .tasks-grid-wrapper {
-  width: -moz-fit-content;
   width: fit-content;
 }
 .board-reports-card .reports-summary-grid {
@@ -3349,8 +3389,7 @@ body[data-theme=dark] .kanban-task-item, .board-list .card .list .item {
   width: 1.125rem;
   height: 1.125rem;
   border-radius: 50%;
-  -o-object-fit: cover;
-     object-fit: cover;
+  object-fit: cover;
 }
 .board-timeline-card .tag {
   width: 100%;
@@ -3747,9 +3786,7 @@ body[data-theme=dark] .custom-calendar-modal .custom-calendar .custom-calendar-f
 }
 
 .checkbox-item {
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
 }
 
 .checkbox-item input {
@@ -4069,7 +4106,6 @@ body[data-theme=dark] .custom-calendar-modal .custom-calendar .custom-calendar-f
   position: relative;
   margin: 0;
   align-self: flex-start;
-  width: -moz-fit-content;
   width: fit-content;
   max-width: 100%;
 }
@@ -4112,13 +4148,11 @@ body[data-theme=dark] .custom-calendar-modal .custom-calendar .custom-calendar-f
 }
 
 .auth-motif--board {
-  width: -moz-fit-content;
   width: fit-content;
   max-width: 100%;
 }
 
 .auth-motif--web {
-  width: -moz-fit-content;
   width: fit-content;
   max-width: 19rem;
 }
@@ -4590,6 +4624,7 @@ body[data-theme=dark] .custom-calendar-modal .custom-calendar .custom-calendar-f
 .auth-flow-card .modal-body select {
   cursor: pointer;
   background: #F6FBF2;
+  accent-color: #61A039;
 }
 
 .auth-field {
@@ -4700,4 +4735,4 @@ body[data-theme=dark] .custom-calendar-modal .custom-calendar .custom-calendar-f
     transition: none !important;
     transform: none !important;
   }
-}/*# sourceMappingURL=style.css.map */
+}

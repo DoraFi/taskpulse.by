@@ -149,10 +149,16 @@
       ['.checkbox-item .custom-checkbox::after', '/static/source/icons/check.svg'],
       // status select arrow (light cropped in your SCSS)
       ['.tasks-grid .col-status .status-select::after', '/static/source/icons/arrow_light_cropped.svg'],
+      // модалка «Создание задачи»: у <select> иначе после !important на background-image слой получает repeat по умолчанию
+      [
+        '.modal-content.create-task-modal select.create-task-select',
+        '/static/source/icons/arrow_dark_cropped.svg',
+        'background-repeat:no-repeat !important;background-position:right 0.75rem center !important;background-size:0.625rem auto !important;',
+      ],
     ];
 
     const lines = await Promise.all(
-      rules.map(async ([selector, iconPath]) => {
+      rules.map(async ([selector, iconPath, extraDecl]) => {
         const abs = toAbsoluteUrl(iconPath);
         let dataUri = svgDarkDataUriCache.get(abs);
         if (!dataUri) {
@@ -162,7 +168,8 @@
           svgDarkDataUriCache.set(abs, dataUri);
         }
         // Important: keep url(...) quoting
-        return `body[data-theme="dark"] ${selector}{background-image:url("${dataUri}") !important;filter:none !important;}`;
+        const extra = extraDecl || '';
+        return `body[data-theme="dark"] ${selector}{background-image:url("${dataUri}") !important;filter:none !important;${extra}}`;
       })
     );
 

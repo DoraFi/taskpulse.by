@@ -79,13 +79,7 @@
 
     function openModal(overlay) {
         if (overlay.parentElement !== document.body) document.body.appendChild(overlay);
-        overlay.style.position = 'fixed';
-        overlay.style.inset = '0';
-        overlay.style.width = '100vw';
-        overlay.style.height = '100vh';
-        overlay.style.display = 'flex';
-        overlay.style.alignItems = 'center';
-        overlay.style.justifyContent = 'center';
+        /* Не задавать display через style — иначе перебивает CSS и модалка не скрывается при снятии .show */
         overlay.classList.add('show');
         overlay.setAttribute('aria-hidden', 'false');
     }
@@ -93,6 +87,9 @@
     function closeModal(overlay) {
         overlay.classList.remove('show');
         overlay.setAttribute('aria-hidden', 'true');
+        overlay.style.removeProperty('display');
+        overlay.style.removeProperty('align-items');
+        overlay.style.removeProperty('justify-content');
     }
 
     function initModal(overlay) {
@@ -105,10 +102,17 @@
         bindDeps(overlay);
         bindAttachments(overlay);
 
-        overlay.querySelector('#createTaskModalClose')?.addEventListener('click', () => closeModal(overlay));
-        overlay.querySelector('#createTaskModalCancel')?.addEventListener('click', () => closeModal(overlay));
+        overlay.querySelector('#createTaskModalClose')?.addEventListener('click', e => {
+            e.preventDefault();
+            closeModal(overlay);
+        });
+        overlay.querySelector('#createTaskModalCancel')?.addEventListener('click', e => {
+            e.preventDefault();
+            closeModal(overlay);
+        });
         overlay.addEventListener('click', e => {
-            if (e.target === overlay) closeModal(overlay);
+            const panel = e.target.closest('.create-task-modal');
+            if (!panel) closeModal(overlay);
         });
         if (!window.__createTaskModalEsc) {
             window.__createTaskModalEsc = true;

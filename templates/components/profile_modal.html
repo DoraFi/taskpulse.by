@@ -1,0 +1,55 @@
+<div class="modal-overlay" id="profileModal" aria-hidden="true">
+    <div class="modal-content profile-modal" role="dialog" aria-labelledby="profileModalTitle" aria-modal="true">
+        <div class="modal-header">
+            <p class="text-header" id="profileModalTitle">Профиль</p>
+            <button type="button" class="modal-close" id="profileModalClose" aria-label="Закрыть">
+                <img src="/static/source/icons/cross.svg" alt="" width="24" height="24">
+            </button>
+        </div>
+        <div class="modal-body profile-modal__body">
+            <div class="profile-modal__hero">
+                <img class="profile-modal__avatar" src="/static/source/user_img/lev_aksenov.jpg" alt="">
+                <div class="profile-modal__titles">
+                    <p class="text-header">Лев Аксенов</p>
+                    <p class="text-signature">Tech Lead · отдел разработки</p>
+                </div>
+            </div>
+
+            <div class="profile-modal__section">
+                <p class="filter-label">Рабочий e-mail</p>
+                <input type="email" class="filter-input" value="lev.aksenov@taskpulse.by" readonly autocomplete="off">
+            </div>
+
+            <div class="profile-modal__section">
+                <p class="filter-label">Сводка по задачам</p>
+                <div class="profile-modal__stats">
+                    <div class="profile-modal__stat border-dark-1 br-5">
+                        <span class="text-signature">Назначено</span>
+                        <span class="text-header">8</span>
+                    </div>
+                    <div class="profile-modal__stat border-dark-1 br-5">
+                        <span class="text-signature">В работе</span>
+                        <span class="text-header">12</span>
+                    </div>
+                    <div class="profile-modal__stat border-dark-1 br-5">
+                        <span class="text-signature">За неделю</span>
+                        <span class="text-header">5</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-modal__section">
+                <p class="filter-label">Проекты</p>
+                <p class="text-basic">Корпоративный портал, микросервисная платформа, CRM</p>
+            </div>
+
+            <div class="profile-modal__actions gap-24 flex-row">
+                <button type="button" class="button-secondary" disabled title="Скоро">Изменить данные</button>
+                <button type="button" class="button-secondary" disabled title="Скоро">Уведомления</button>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="button-basic" id="profileModalDone">Закрыть</button>
+        </div>
+    </div>
+</div>
