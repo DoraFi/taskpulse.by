@@ -218,64 +218,6 @@
     if (document.getElementById(STYLE_ID)) return;
     const style = document.createElement('style');
     style.id = STYLE_ID;
-    style.textContent = `
-/* suppress enter animations for dynamic operations */
-body.tp-no-enter .cards > *,
-body.tp-no-enter .card {
-  animation: none !important;
-  transition: none !important;
-}
-
-/* also prevent subtle “pop” from container animations/transforms during rerender */
-body.tp-no-enter .app-container{
-  animation: none !important;
-  transition: none !important;
-}
-
-/* Kill app-surface-in re-run when temporary classes are toggled (was a delayed “jump” ~450ms). */
-.app-container{
-  animation: none !important;
-}
-
-/* Hard stop for card enter animations (prevents “page reload” feel on any rerender). */
-.cards > *,
-.card {
-  animation: none !important;
-}
-
-/* Disable any card “jump” on hover/focus while interacting with tasks. */
-.card,
-.card:hover,
-.card:focus-within{
-  transform: none !important;
-  transition: none !important;
-}
-
-/* toast in dark theme */
-body[data-theme="dark"] .toast-notification{
-  background: rgba(246, 251, 242, 0.92) !important;
-  color: #2D3229 !important;
-  border: 1px solid rgba(97, 160, 57, 0.35);
-}
-
-/* modal checkbox text in dark theme */
-body[data-theme="dark"] .modal-content .checkbox-text{
-  color: #F6FBF2 !important;
-}
-
-/* filters inputs in dark theme (tasks modal etc.) */
-body[data-theme="dark"] .modal-content .filter-input{
-  background: rgba(45, 50, 41, 0.35) !important;
-  color: #F6FBF2 !important;
-  border-color: rgba(127, 140, 115, 0.42) !important;
-}
-body[data-theme="dark"] .modal-content .filter-input::placeholder{
-  color: rgba(246, 251, 242, 0.55) !important;
-}
-body[data-theme="dark"] .modal-content .filter-date span{
-  color: rgba(246, 251, 242, 0.7) !important;
-}
-`;
     document.head.appendChild(style);
   }
 

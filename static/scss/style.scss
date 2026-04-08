@@ -1206,6 +1206,260 @@ body[data-theme="dark"] .board-kanban .tasks-grid .col-name {
     }
 }
 
+/* Модалка «Создание задачи» (шапка + /headerCreateTaskBtn) */
+.modal-content.create-task-modal {
+    width: 44vw;
+    height: 92vh;
+    max-height: 92vh;
+    min-height: 0;
+
+    .modal-body.create-task-modal__body {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+    }
+
+    .create-task-field {
+        margin: 0;
+    }
+
+    .create-task-label-plain {
+        display: block;
+        margin-bottom: $space-8;
+    }
+
+    select.create-task-select {
+        width: 22vw;
+        max-width: 22vw;
+        box-sizing: border-box;
+        cursor: pointer;
+        appearance: auto;
+        background-color: $light-light-green;
+        color: $dark-gray;
+        padding: $space-4 $space-16;
+        border: $space-1 solid $light-gray;
+        border-radius: $radius-sm;
+        @extend .text-basic;
+
+        &:focus {
+            outline: none;
+            border-color: $green;
+            box-shadow: 0 0 0 $space-2 rgba($green, 0.1);
+        }
+    }
+
+    .create-task-deps-block {
+        @extend .flex-col;
+        gap: $space-16;
+        padding: $space-16;
+        border-radius: $radius-sm;
+        background: rgba($green, 0.04);
+    }
+
+    .create-task-deps-row {
+        @extend .flex-col;
+        gap: $space-8;
+    }
+
+    .create-task-deps-suggest {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        @extend .flex-col;
+        gap: $space-4;
+
+        &__item {
+            padding: $space-8 $space-12;
+            border-radius: $radius-sm;
+            cursor: pointer;
+            transition: background 0.15s ease;
+
+            &:hover,
+            &:focus-visible {
+                background: $green-transperent-10;
+                outline: none;
+            }
+        }
+
+        &--disabled {
+            opacity: 0.42;
+            pointer-events: none;
+        }
+    }
+
+    /* Диапазон дат — как в модалке фильтров задач */
+    .filter-section .filter-date {
+        width: 100%;
+
+        .filter-input[type="date"] {
+            min-height: 2.75rem;
+            cursor: pointer;
+
+            &::-webkit-calendar-picker-indicator {
+                opacity: 0;
+                cursor: pointer;
+            }
+
+            &::-moz-calendar-picker-indicator {
+                display: none;
+            }
+        }
+    }
+
+    textarea.create-task-desc {
+        display: block;
+        width: 100%;
+        min-height: 40vh;
+        height: 43vh;
+        resize: vertical;
+        box-sizing: border-box;
+        padding: $space-16;
+        border: $space-1 solid $light-gray;
+        border-radius: $radius-sm;
+        @extend .text-basic;
+        background: $light-light-green;
+        transition: all 0.2s ease;
+
+        &:focus {
+            outline: none;
+            border-color: $green;
+            box-shadow: 0 0 0 $space-2 rgba($green, 0.1);
+        }
+
+        &::placeholder {
+            color: rgba($dark-gray, 0.5);
+        }
+    }
+
+    .create-task-attachments {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: $space-16;
+        min-height: 10vh;
+        height: 10vh;
+        padding: $space-12 $space-16;
+        box-sizing: border-box;
+        border-radius: $radius-sm;
+
+        &--drag {
+            background: rgba($green, 0.12);
+        }
+
+        &__hint {
+            margin: 0;
+            text-align: center;
+        }
+
+        .create-task-attachments__btn {
+            flex-shrink: 0;
+        }
+    }
+}
+
+body[data-theme="dark"] .modal-content.create-task-modal textarea.create-task-desc {
+    border-color: $light-light-green;
+    color: $light-light-green;
+    background: $black;
+
+    &::placeholder {
+        color: rgba($light-light-green, 0.45);
+    }
+}
+
+body[data-theme="dark"] .modal-content.create-task-modal .create-task-attachments.border-dark-1 {
+    border-color: $light-light-green;
+}
+
+body[data-theme="dark"] .modal-content.create-task-modal select.create-task-select {
+    background: $black;
+    color: $light-light-green;
+    border-color: $light-light-green;
+
+    &:focus {
+        border-color: $green;
+        box-shadow: 0 0 0 $space-2 rgba($green, 0.18);
+    }
+
+    option {
+        background: $dark-gray;
+        color: $light-light-green;
+    }
+}
+
+body[data-theme="dark"] .modal-content.create-task-modal .create-task-deps-block {
+    background: $black;
+    border-color: $light-light-green;
+}
+
+body[data-theme="dark"] .modal-content.create-task-modal .filter-section .filter-date span {
+    color: rgba($light-light-green, 0.55);
+}
+
+body[data-theme="dark"] .modal-content.create-task-modal .create-task-deps-suggest__item:hover,
+body[data-theme="dark"] .modal-content.create-task-modal .create-task-deps-suggest__item:focus-visible {
+    background: rgba($green, 0.15);
+}
+
+body.tp-no-enter .cards>*,
+body.tp-no-enter .card {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* also prevent subtle “pop” from container animations/transforms during rerender */
+body.tp-no-enter .app-container {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* Kill app-surface-in re-run when temporary classes are toggled (was a delayed “jump” ~450ms). */
+.app-container {
+    animation: none !important;
+}
+
+/* Hard stop for card enter animations (prevents “page reload” feel on any rerender). */
+.cards>*,
+.card {
+    animation: none !important;
+}
+
+/* Disable any card “jump” on hover/focus while interacting with tasks. */
+.card,
+.card:hover,
+.card:focus-within {
+    transform: none !important;
+    transition: none !important;
+}
+
+/* toast in dark theme */
+body[data-theme="dark"] .toast-notification {
+    background: rgba($light-light-green, 0.92) !important;
+    color: #2D3229 !important;
+    border: 1px solid rgba(97, 160, 57, 0.35);
+}
+
+/* modal checkbox text in dark theme */
+body[data-theme="dark"] .modal-content .checkbox-text {
+    color: #F6FBF2 !important;
+}
+
+/* filters inputs in dark theme (tasks modal etc.) */
+body[data-theme="dark"] .modal-content .filter-input {
+    background: $dark-gray !important;
+    color: #F6FBF2 !important;
+    border-color: $light-light-green !important;
+}
+
+body[data-theme="dark"] .modal-content .filter-input::placeholder {
+    color: rgba($light-light-green, 0.55) !important;
+}
+
+body[data-theme="dark"] .modal-content .filter-date span {
+    color: rgba(246, 251, 242, 0.7) !important;
+}
+
 @keyframes fadeInScale {
     from {
         opacity: 0;
@@ -2961,6 +3215,89 @@ body[data-theme="dark"] .kanban-task-item, .board-list .card .list .item {
             margin-top: $space-24;
             border-top: 1px solid $green;
         }
+    }
+}
+
+/* Календарь: полная тёмная тема */
+body[data-theme="dark"] .modal-overlay.custom-calendar-modal {
+    background: rgba($black, 0.65);
+    backdrop-filter: blur($space-4);
+}
+
+body[data-theme="dark"] .custom-calendar-modal .custom-calendar {
+    background: $dark-gray;
+    color: $light-light-green;
+    border: $space-1 solid rgba($green, 0.45);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+
+    .custom-calendar-header {
+        border-bottom: 1px solid rgba($green, 0.35);
+        padding-bottom: $space-16;
+        margin-bottom: $space-16;
+
+        button {
+            color: $light-light-green;
+            background: rgba($black, 0.35);
+
+            &:hover {
+                color: $green;
+                background: rgba($green, 0.15);
+            }
+        }
+
+        .custom-calendar-title {
+            color: $light-light-green;
+        }
+    }
+
+    .custom-calendar-months .custom-calendar-month {
+        .month-header button {
+            color: $green;
+            background: rgba($black, 0.25);
+
+            &:hover {
+                background: rgba($green, 0.15);
+                color: $light-light-green;
+            }
+        }
+
+        .weekdays {
+            color: rgba($light-light-green, 0.55);
+        }
+
+        .days {
+            .day {
+                background: rgba($black, 0.35);
+                color: $light-light-green;
+                border: $space-1 solid transparent;
+
+                &:hover {
+                    background: rgba($green, 0.12);
+                    border-color: rgba($green, 0.35);
+                }
+
+                &.selected-start,
+                &.selected-end {
+                    background: $green;
+                    color: $dark-gray;
+                    border-color: $green;
+                }
+
+                &.in-range {
+                    background: rgba($green, 0.22);
+                    color: $light-light-green;
+                }
+            }
+
+            .other-month {
+                color: rgba($light-light-green, 0.28);
+                background: transparent;
+            }
+        }
+    }
+
+    .custom-calendar-footer {
+        border-top-color: rgba($green, 0.45);
     }
 }
 

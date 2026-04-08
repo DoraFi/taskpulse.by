@@ -1,0 +1,122 @@
+<div class="modal-overlay" id="createTaskModal" aria-hidden="true">
+    <div class="modal-content create-task-modal" role="dialog" aria-labelledby="createTaskModalTitle">
+        <div class="modal-header">
+            <p class="text-header" id="createTaskModalTitle">Создание задачи</p>
+            <button type="button" class="modal-close" id="createTaskModalClose" aria-label="Закрыть">
+                <img src="/static/source/icons/cross.svg" alt="" width="24" height="24">
+            </button>
+        </div>
+        <div class="modal-body create-task-modal__body">
+            <div class="auth-field create-task-field">
+                <label for="createTaskProject">Проект <img class="required-icon" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>
+                <select id="createTaskProject" class="filter-input create-task-select" required>
+                    <option value="" selected disabled>Выберите проект</option>
+                    <option value="Корпоративный портал">Корпоративный портал</option>
+                    <option value="Микросервисная платформа">Микросервисная платформа</option>
+                    <option value="CRM-система">CRM-система</option>
+                </select>
+            </div>
+
+            <div class="auth-field create-task-field">
+                <label for="createTaskName">Наименование задачи <img class="required-icon" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>
+                <input id="createTaskName" type="text" class="filter-input" placeholder="Краткое название" autocomplete="off">
+            </div>
+
+            <div class="auth-field create-task-field">
+                <label for="createTaskDesc">Описание задачи</label>
+                <textarea id="createTaskDesc" class="filter-input create-task-desc" rows="6" placeholder="Опишите задачу"></textarea>
+            </div>
+
+            <div class="auth-field create-task-field">
+                <span class="text-signature create-task-label-plain">Вложения</span>
+                <div class="create-task-attachments border-dark-1 br-5">
+                    <p class="text-basic create-task-attachments__hint">Перетащите сюда файлы или</p>
+                    <button type="button" class="button-basic create-task-attachments__btn">Выберите в проводнике</button>
+                </div>
+            </div>
+
+            <div class="auth-field create-task-field">
+                <label for="createTaskStatus">Статус <img class="required-icon" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>
+                <select id="createTaskStatus" class="filter-input create-task-select" required>
+                    <option value="Новая" selected>Новая</option>
+                    <option value="Назначена">Назначена</option>
+                    <option value="В работе">В работе</option>
+                    <option value="Готово">Готово</option>
+                    <option value="Отложено">Отложено</option>
+                </select>
+            </div>
+
+            <div class="auth-field create-task-field">
+                <label for="createTaskPriority">Приоритет <img class="required-icon" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>
+                <select id="createTaskPriority" class="filter-input create-task-select" required>
+                    <option value="срочно">Срочно</option>
+                    <option value="обычный" selected>Обычный</option>
+                </select>
+            </div>
+
+            <div class="auth-field create-task-field">
+                <label for="createTaskAssignee">Исполнитель</label>
+                <select id="createTaskAssignee" class="filter-input create-task-select">
+                    <option value="" selected>Не назначен</option>
+                    <option value="Лев Аксенов">Лев Аксенов</option>
+                    <option value="Дарья Швед">Дарья Швед</option>
+                    <option value="Ксения Глебко">Ксения Глебко</option>
+                </select>
+            </div>
+
+            <div class="filter-section create-task-field">
+                <label class="filter-label">Срок выполнения</label>
+                <div class="filter-date">
+                    <input type="date" class="filter-input" id="createTaskDeadlineFrom" placeholder="От" autocomplete="off">
+                    <span>—</span>
+                    <input type="date" class="filter-input" id="createTaskDeadlineTo" placeholder="До" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="auth-field create-task-field">
+                <label for="createTaskHours">Время на выполнение (в часах)</label>
+                <input id="createTaskHours" type="number" class="filter-input" min="0" step="0.5" placeholder="Например, 8">
+            </div>
+
+            <div class="auth-field create-task-field">
+                <label for="createTaskSp">Сложность (в story points)</label>
+                <select id="createTaskSp" class="filter-input create-task-select">
+                    <option value="" selected>Не указано</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="5">5</option>
+                    <option value="8">8</option>
+                    <option value="13">13</option>
+                </select>
+            </div>
+
+            <div class="auth-field create-task-field">
+                <span class="text-signature create-task-label-plain">Зависимости</span>
+                <div class="create-task-deps-block border-dark-1 br-5">
+                    <div class="create-task-deps-row">
+                        <label class="text-signature" for="createTaskDepType">Тип зависимости</label>
+                        <select id="createTaskDepType" class="filter-input create-task-select">
+                            <option value="" selected>Нет зависимости</option>
+                            <option value="blocks">Блокирует</option>
+                            <option value="blocked_by">Блокируется</option>
+                            <option value="relates">Связана с</option>
+                        </select>
+                    </div>
+                    <div class="create-task-deps-row">
+                        <label class="text-signature" for="createTaskDepSearch">От чего зависит</label>
+                        <input type="search" id="createTaskDepSearch" class="filter-input" placeholder="Поиск по коду или названию…" autocomplete="off">
+                    </div>
+                    <ul class="create-task-deps-suggest text-basic" aria-label="Подсказки">
+                        <li class="create-task-deps-suggest__item" tabindex="0">WCL-256 — Обновить документацию API</li>
+                        <li class="create-task-deps-suggest__item" tabindex="0">CRM-104 — Импорт контактов</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="button-secondary" id="createTaskModalCancel">Отмена</button>
+            <button type="button" class="button-basic" id="createTaskModalSubmit">Создать</button>
+        </div>
+    </div>
+</div>
