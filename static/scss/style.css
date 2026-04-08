@@ -27,8 +27,12 @@
   color: #F8085C;
 }
 
-.border-dark-1, .form-add-task, .tasks-grid .col-status .status-dropdown, .tabs {
+.border-dark-1, .form-add-task, body:not([data-theme=dark]) .board-list .card .list .item, .tasks-grid .col-status .status-dropdown, .tabs {
   border: 0.0625rem solid #2D3229;
+}
+
+.border-light-1 {
+  border: 0.0625rem solid #F6FBF2;
 }
 
 .border-dark-2, .card {
@@ -237,10 +241,21 @@ ul {
   padding: 0.19rem 1.125rem;
 }
 
-.button-basic, .reset-filters-btn, .button-small {
+.button-basic,
+.reset-filters-btn,
+.button-small {
   background-color: #EEF7E9;
   transition: box-shadow 0.2s ease;
   box-shadow: 0.0625rem 0.0625rem 3px #2D3229;
+}
+
+body[data-theme=dark] .button-basic,
+body[data-theme=dark] .reset-filters-btn,
+body[data-theme=dark] .button-small {
+  color: #F6FBF2;
+  border-color: #F6FBF2;
+  background-color: #282D25;
+  box-shadow: 0.0625rem 0.0625rem 3px #F6FBF2;
 }
 
 .button-basic:hover,
@@ -252,6 +267,20 @@ ul {
 
 .button-secondary {
   background-color: #F6FBF2;
+  cursor: pointer;
+}
+
+body[data-theme=dark] .button-secondary {
+  color: #F6FBF2;
+  border-color: #F6FBF2;
+  background-color: #282D25;
+}
+
+body[data-theme=dark] .button-basic:hover,
+body[data-theme=dark] .reset-filters-btn:hover,
+body[data-theme=dark] .button-small:hover {
+  background-color: #282D25;
+  box-shadow: none;
   cursor: pointer;
 }
 
@@ -274,6 +303,22 @@ ul {
 
 .tab-btn:active {
   transform: translateY(0);
+}
+
+body[data-theme=dark] .tabs {
+  border-color: #F6FBF2;
+}
+
+body[data-theme=dark] .tab-btn {
+  color: #F6FBF2;
+}
+
+body[data-theme=dark] .tab-btn.active {
+  background: rgba(127, 140, 115, 0.4);
+}
+
+body[data-theme=dark] .tab-btn:not(.active):hover {
+  background: rgba(127, 140, 115, 0.3);
 }
 
 .tabs-buttons .tab-btn {
@@ -429,6 +474,180 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+/* =========================
+   Theme toggle (app pages)
+   ========================= */
+.theme-toggle {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.3rem;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.theme-toggle:hover {
+  background: rgba(97, 160, 57, 0.12);
+  transform: translateY(-1px);
+}
+
+.theme-toggle:active {
+  transform: translateY(0);
+}
+
+.theme-toggle__icon {
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), filter 0.35s ease, opacity 0.35s ease;
+  transform-origin: 50% 50%;
+}
+
+.theme-toggle--pulse .theme-toggle__icon {
+  animation: theme-toggle-pulse 0.45s ease;
+}
+
+@keyframes theme-toggle-pulse {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(90deg) scale(0.92);
+  }
+  100% {
+    transform: rotate(180deg) scale(1);
+  }
+}
+body[data-theme=dark] .theme-toggle__icon {
+  transform: rotate(180deg);
+  filter: brightness(1.25) saturate(1.1);
+  opacity: 0.95;
+}
+
+/* Плавная смена темы (ограниченный список, чтобы не “лагало”) */
+body.theme-transition,
+body.theme-transition .header,
+body.theme-transition .app-container,
+body.theme-transition .card,
+body.theme-transition .tabs,
+body.theme-transition .search-panel,
+body.theme-transition aside,
+body.theme-transition .dropdown-menu,
+body.theme-transition .modal-content {
+  transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, filter 0.35s ease;
+}
+
+/* =========================
+   Dark theme overrides
+   (uses your palette)
+   ========================= */
+body[data-theme=dark] {
+  background: #282D25;
+  color: #F6FBF2;
+}
+
+body[data-theme=dark] .header {
+  background: #2D3229;
+  border-bottom-color: rgba(127, 140, 115, 0.1);
+}
+
+body[data-theme=dark] .search-panel {
+  border-color: #F6FBF2;
+}
+
+body[data-theme=dark] .search-panel input {
+  color: #F6FBF2;
+}
+
+body[data-theme=dark] .card {
+  border-color: #F6FBF2;
+}
+
+body[data-theme=dark] .dropdown-menu,
+body[data-theme=dark] .modal-content {
+  background: #2D3229;
+}
+
+body[data-theme=dark] .modal-overlay {
+  background: rgba(246, 251, 242, 0.2);
+}
+
+body[data-theme=dark] .modal-content .modal-header,
+body[data-theme=dark] .dropdown-menu .dropdown-header {
+  border-bottom-color: #61A039;
+}
+
+body[data-theme=dark] .modal-content .modal-footer {
+  border-top-color: #61A039;
+}
+
+body[data-theme=dark] .modal-content .modal-body input {
+  border-color: #F6FBF2;
+  color: #F6FBF2;
+}
+
+body[data-theme=dark] .modal-content .modal-body input:focus {
+  border-color: #61A039;
+  box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.18);
+}
+
+/* aside (левое меню) */
+body[data-theme=dark] aside {
+  background-color: #2D3229;
+  box-shadow: inset -1px 0 0 rgba(127, 140, 115, 0.18);
+}
+
+body[data-theme=dark] aside .item .nav-link:hover {
+  color: #61A039;
+}
+
+body[data-theme=dark] aside .submenu .nav-link {
+  color: #F6FBF2;
+}
+
+body[data-theme=dark] aside .submenu .nav-link.active {
+  color: #61A039;
+}
+
+body[data-theme=dark] .tasks-grid .grid-header {
+  color: #F6FBF2;
+}
+
+body[data-theme=dark] .checkbox-item .custom-checkbox {
+  border-color: #F6FBF2;
+}
+
+body[data-theme=dark] .checkbox-item input[type=checkbox]:checked + .custom-checkbox {
+  border-color: #61A039;
+}
+
+body[data-theme=dark] .form-add-task {
+  background: #2D3229;
+  border-color: #7F8C73;
+}
+
+body[data-theme=dark] .form-add-task input {
+  color: #F6FBF2;
+}
+
+body[data-theme=dark] .form-add-task:hover,
+body[data-theme=dark] .form-add-task:active,
+body[data-theme=dark] .form-add-task:focus-within {
+  background: #282D25;
+  cursor: pointer;
+}
+
+body[data-theme=dark] .tasks-grid .col-priority .priority-normal {
+  color: #EEF7E9;
+}
+
+body[data-theme=dark] .deadline {
+  color: #EEF7E9 !important;
+  background: rgba(127, 140, 115, 0.4) !important;
 }
 
 .h-16 {
@@ -1095,6 +1314,9 @@ aside .submenu .events-grid .col-event .nav-link,
   box-shadow: none;
   background-color: #F6FBF2;
 }
+body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
+  background-color: #2D3229;
+}
 
 .tasks-header {
   width: 100%;
@@ -1167,7 +1389,6 @@ aside .submenu .events-grid .col-event .nav-link,
 }
 .tasks-grid .grid-header {
   color: #2D3229;
-  background: #F6FBF2;
   position: sticky;
   top: 0;
 }
@@ -1923,6 +2144,10 @@ aside .submenu .events-grid .col-event .nav-link,
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
+body:not([data-theme=dark]) .board-list .card .list .item {
+  background: transparent !important;
+}
+
 .board-drag-handle {
   cursor: grab;
   gap: 0.375rem;
@@ -2405,6 +2630,11 @@ aside .submenu .kanban-archive-board .kanban-priority-section.normal button .nav
 .kanban-task-item > span.text-basic-line-through {
   display: block;
   margin-bottom: 0.375rem;
+}
+
+body[data-theme=dark] .kanban-task-item, .board-list .card .list .item {
+  background: #282D25;
+  border-color: #F6FBF2;
 }
 
 .board-list .cards.reports-view,
@@ -2993,6 +3223,7 @@ aside .submenu .kanban-archive-board .kanban-priority-section.normal button .nav
 
 .checkbox-item input {
   pointer-events: auto;
+  display: none !important;
 }
 
 @keyframes auth-gradient-flow {

@@ -23,7 +23,11 @@
             <li><img class="h-32" src="/static/source/icons/settings.svg" alt=""></li>
             <li><img class="h-32" src="/static/source/icons/profile.svg" alt=""></li>
             <li><img class="h-32" src="/static/source/icons/logout.svg" alt=""></li>
-            <li><img class="h-32" src="/static/source/icons/lighttheme.svg" alt=""></li>
+            <li>
+                <button type="button" class="theme-toggle" id="themeToggle" aria-label="Переключить тему">
+                    <img class="h-32 theme-toggle__icon" src="/static/source/icons/lighttheme.svg" alt="" aria-hidden="true">
+                </button>
+            </li>
         </ul>
     </div>
 
@@ -55,6 +59,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="/static/js/loadComponents.js"></script>
     <script src="/static/js/app.js"></script>
+    <script src="/static/js/theme.js"></script>
     <script src="/static/js/board_kanban.js"></script>
 </body>
 

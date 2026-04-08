@@ -35,6 +35,180 @@ body {
     flex-direction: column;
 }
 
+/* =========================
+   Theme toggle (app pages)
+   ========================= */
+.theme-toggle {
+    width: $space-32;
+    height: $space-32;
+    border: none;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: $radius-sm;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.theme-toggle:hover {
+    background: rgba($green, 0.12);
+    transform: translateY(-1px);
+}
+
+.theme-toggle:active {
+    transform: translateY(0);
+}
+
+.theme-toggle__icon {
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), filter 0.35s ease, opacity 0.35s ease;
+    transform-origin: 50% 50%;
+}
+
+.theme-toggle--pulse .theme-toggle__icon {
+    animation: theme-toggle-pulse 0.45s ease;
+}
+
+@keyframes theme-toggle-pulse {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(90deg) scale(0.92); }
+    100% { transform: rotate(180deg) scale(1); }
+}
+
+body[data-theme="dark"] .theme-toggle__icon {
+    transform: rotate(180deg);
+    filter: brightness(1.25) saturate(1.1);
+    opacity: 0.95;
+}
+
+/* Плавная смена темы (ограниченный список, чтобы не “лагало”) */
+body.theme-transition,
+body.theme-transition .header,
+body.theme-transition .app-container,
+body.theme-transition .card,
+body.theme-transition .tabs,
+body.theme-transition .search-panel,
+body.theme-transition aside,
+body.theme-transition .dropdown-menu,
+body.theme-transition .modal-content {
+    transition:
+        background-color 0.35s ease,
+        color 0.35s ease,
+        border-color 0.35s ease,
+        box-shadow 0.35s ease,
+        filter 0.35s ease;
+}
+
+/* =========================
+   Dark theme overrides
+   (uses your palette)
+   ========================= */
+body[data-theme="dark"] {
+    background: $black;
+    color: $light-light-green;
+}
+
+body[data-theme="dark"] .header {
+    background: $dark-gray;
+    border-bottom-color: rgba($light-gray, 0.1);
+}
+
+body[data-theme="dark"] .search-panel {
+    border-color: $light-light-green;
+}
+
+body[data-theme="dark"] .search-panel input {
+    color: $light-light-green;
+}
+
+body[data-theme="dark"] .card {
+    border-color: $light-light-green;
+}
+
+body[data-theme="dark"] .dropdown-menu,
+body[data-theme="dark"] .modal-content {
+    background: $dark-gray;
+}
+
+body[data-theme="dark"] .modal-overlay {
+    background: rgba($light-light-green, 0.2);
+}
+
+body[data-theme="dark"] .modal-content .modal-header,
+body[data-theme="dark"] .dropdown-menu .dropdown-header {
+    border-bottom-color: $green;
+}
+
+body[data-theme="dark"] .modal-content .modal-footer {
+    border-top-color: $green;
+}
+
+body[data-theme="dark"] .modal-content .modal-body input {
+    border-color: $light-light-green;
+    color: $light-light-green;
+}
+
+body[data-theme="dark"] .modal-content .modal-body input:focus {
+    border-color: $green;
+    box-shadow: 0 0 0 $space-2 rgba($green, 0.18);
+}
+
+/* aside (левое меню) */
+body[data-theme="dark"] aside {
+    background-color: $dark-gray;
+    box-shadow: inset -1px 0 0 rgba($light-gray, 0.18);
+}
+
+body[data-theme="dark"] aside .item .nav-link:hover {
+    color: $green;
+}
+
+body[data-theme="dark"] aside .submenu .nav-link {
+    color: $light-light-green;
+}
+
+body[data-theme="dark"] aside .submenu .nav-link.active {
+    color: $green;
+}
+
+body[data-theme="dark"] .tasks-grid .grid-header {
+    color: $light-light-green;
+}
+
+body[data-theme="dark"] .checkbox-item .custom-checkbox {
+    border-color: $light-light-green;
+}
+
+body[data-theme="dark"] .checkbox-item input[type="checkbox"]:checked + .custom-checkbox {
+    border-color: $green;
+}
+
+body[data-theme="dark"] .form-add-task {
+    background: $dark-gray;
+    border-color: $light-gray;
+}
+
+body[data-theme="dark"] .form-add-task input {
+    color: $light-light-green;
+}
+
+body[data-theme="dark"] .form-add-task:hover,
+body[data-theme="dark"] .form-add-task:active,
+body[data-theme="dark"] .form-add-task:focus-within {
+    background: $black;
+    cursor: pointer;
+}
+
+body[data-theme="dark"] .tasks-grid .col-priority .priority-normal {
+    color: $light-green;
+}
+
+body[data-theme="dark"] .deadline {
+    color: $light-green !important;
+    background: rgba($light-gray, 0.4) !important;
+}
+
 .h-16 {
     height: $space-16;
 }
@@ -410,6 +584,12 @@ body {
         box-shadow: none;
         background-color: $light-light-green;
     }
+
+    body[data-theme="dark"] & {
+        > .button-basic[data-tab].active {
+        background-color: $dark-gray;
+        }
+    }
 }
 
 .tasks-header {
@@ -503,7 +683,6 @@ body {
 
     .grid-header {
         color: $dark-gray;
-        background: $light-light-green;
         position: sticky;
         top: 0;
         @extend .text-signature;
@@ -1408,6 +1587,11 @@ body {
     }
 }
 
+body:not([data-theme="dark"]) .board-list .card .list .item{
+    background: transparent !important;
+    @extend .border-dark-1;
+}
+
 .board-drag-handle {
     cursor: grab;
     gap: $space-8;
@@ -1843,6 +2027,11 @@ body {
         display: block;
         margin-bottom: $space-8;
     }
+}
+
+body[data-theme="dark"] .kanban-task-item, .board-list .card .list .item {
+    background: $black;
+    border-color: $light-light-green;
 }
 
 .board-list .cards.reports-view,
@@ -2580,9 +2769,9 @@ body {
 
 .checkbox-item input {
     pointer-events: auto;
+    display: none !important;
 }
 
-// --- Статические экраны входа / онбординга (без привязки к бэкенду) ---
 @keyframes auth-gradient-flow {
     0% {
         background-position: 0% 50%;

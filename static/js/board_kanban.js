@@ -548,6 +548,11 @@ function createKanbanDropdownMenu(board, boardIndex) {
     dropdown.className = 'dropdown-menu border-dark-1 br-5';
     dropdown.id = `actionsMenu-kanban-${boardIndex}`;
     dropdown.dataset.boardId = board.id;
+    const timelineToggle = `
+            <li class="dropdown-item text-basic kanban-timeline-toggle-item" data-action="toggle-timeline-done">
+                <span class="kanban-timeline-toggle-label">Скрыть выполненные (таймлайн)</span>
+            </li>
+        `;
     dropdown.innerHTML = `
         <div class="dropdown-header">
             <p class="text-header">Настройка доски</p>
@@ -562,29 +567,27 @@ function createKanbanDropdownMenu(board, boardIndex) {
             <li class="dropdown-item text-basic" data-action="rename">
                 <span>Переименовать</span>
             </li>
+            <li class="dropdown-item text-basic" data-action="duplicate-board">
+                <span>Дублировать доску</span>
+            </li>
+            <li class="dropdown-item text-basic" data-action="copy-board-link">
+                <span>Скопировать ссылку</span>
+            </li>
             <li class="dropdown-item text-basic" data-action="add-stage">
                 <span>Добавить этап</span>
             </li>
             <li class="dropdown-item text-basic" data-action="table-columns">
                 <span>Колонки таблицы</span>
             </li>
-            <li class="dropdown-item text-basic" data-action="board-description">
-                <span>Описание доски</span>
-            </li>
-            <li class="dropdown-item text-basic" data-action="duplicate-board">
-                <span>Дублировать доску</span>
-            </li>
-            <li class="dropdown-item text-basic" data-action="toggle-timeline-done">
-                <span class="kanban-timeline-toggle-label">Скрыть выполненные (таймлайн)</span>
-            </li>
-            <li class="dropdown-item text-basic" data-action="copy-board-link">
-                <span>Скопировать ссылку</span>
-            </li>
-            <li class="dropdown-item text-basic" data-action="reset-stages">
-                <span>Сбросить этапы</span>
-            </li>
+            ${timelineToggle}
             <li class="dropdown-item text-basic" data-action="board-export-json">
-                <span>Экспорт данных (JSON)</span>
+            <span>Экспорт данных (JSON)</span>
+        </li>
+            <li class="dropdown-item text-basic pink" data-action="archive-board">
+                <span>Архивировать доску</span>
+            </li>
+            <li class="dropdown-item text-basic pink" data-action="reset-stages">
+                <span>Сбросить этапы</span>
             </li>
         </ul>
     `;
@@ -1359,7 +1362,13 @@ function createPrioritySection(board, priorityLabel, priorityKey, tasks, boardIn
         list.dataset.stage = stage;
 
         const stageTasks = tasks.filter(t => t.stage === stage);
-        stageTasks.forEach(t => list.appendChild(createKanbanTaskItem(t)));
+        const sortedStageTasks = [...stageTasks].sort((a, b) => {
+            const ad = a.dueDate ? parseDateBoard(a.dueDate).getTime() : 9999999999999;
+            const bd = b.dueDate ? parseDateBoard(b.dueDate).getTime() : 9999999999999;
+            if (ad !== bd) return ad - bd;
+            return String(a.name || '').localeCompare(String(b.name || ''), 'ru');
+        });
+        sortedStageTasks.forEach(t => list.appendChild(createKanbanTaskItem(t)));
 
         if (stage === 'Очередь') {
             list.appendChild(createKanbanQueueTaskForm(board.id, boardIndex, priorityKey));
@@ -1659,6 +1668,10 @@ function initKanbanEvents() {
     document.querySelectorAll('.board-kanban .kanban-timeline-toggle-label').forEach(el => {
         el.textContent = label;
     });
+    // show/hide the item depending on current view
+    document.querySelectorAll('.board-kanban .kanban-timeline-toggle-item').forEach(el => {
+        el.style.display = currentView === 'timeline' ? '' : 'none';
+    });
 
     initKanbanStagesSortable();
 }
@@ -1880,6 +1893,27 @@ function handleDropdownItemClick(e) {
                 b.description = text;
                 saveKanbanToLocalStorage();
                 showToast('Описание сохранено');
+            }
+        });
+        return;
+    }
+    if (action === 'archive-board') {
+        if (!b) return;
+        showKanbanConfirmModal({
+            title: 'Архивировать доску',
+            message: 'Переместить доску в архив? Задачи и настройки будут сохранены.',
+            confirmLabel: 'Архивировать',
+            danger: true,
+            onConfirm: () => {
+                const archived = JSON.parse(localStorage.getItem('archivedKanbanBoards') || '[]');
+                const tasks = kanbanTasks.filter(t => Number(t.boardId) === Number(b.id));
+                archived.push({ board: { ...b }, tasks, archivedAt: new Date().toISOString() });
+                localStorage.setItem('archivedKanbanBoards', JSON.stringify(archived));
+                kanbanBoards.splice(boardIndex, 1);
+                kanbanTasks = kanbanTasks.filter(t => Number(t.boardId) !== Number(b.id));
+                saveKanbanToLocalStorage();
+                renderCurrentView();
+                showToast('Доска архивирована');
             }
         });
         return;

@@ -1776,23 +1776,23 @@ function createDropdownMenu(board, boardIndex) {
             </button>
         </div>
         <ul>
-            <li class="dropdown-item text-basic" data-action="copy-link">
-                <span>Скопировать ссылку</span>
+            <li class="dropdown-item text-basic" data-action="create-board">
+                <span>Создать доску</span>
             </li>
             <li class="dropdown-item text-basic" data-action="rename">
                 <span>Переименовать</span>
             </li>
-            <li class="dropdown-item text-basic" data-action="add-description">
-                <span>Добавить описание</span>
-            </li>
             <li class="dropdown-item text-basic" data-action="clone">
                 <span>Клонировать доску</span>
             </li>
-            <li class="dropdown-item text-basic pink" data-action="clear">
-                <span>Очистить доску</span>
+            <li class="dropdown-item text-basic" data-action="copy-link">
+                <span>Скопировать ссылку</span>
             </li>
-            <li class="dropdown-item text-basic pink" data-action="delete">
-                <span>Удалить доску</span>
+            <li class="dropdown-item text-basic" data-action="board-export-json">
+                <span>Экспорт данных (JSON)</span>
+            </li>
+            <li class="dropdown-item text-basic pink" data-action="archive-board">
+                <span>Архивировать доску</span>
             </li>
         </ul>
     `;
@@ -2516,24 +2516,69 @@ function handleDropdownItemClick(e) {
     const dropdown = card?.querySelector('.dropdown-menu');
     if (dropdown) dropdown.classList.remove('show');
     switch(action) {
+        case 'create-board':
+            openTextModal({
+                title: 'Новая доска',
+                label: 'Название доски',
+                value: '',
+                submitLabel: 'Создать',
+                onSubmit: (name, close) => {
+                    const n = (name || '').trim();
+                    if (!n) return;
+                    const newBoard = { id: Date.now(), name: n, tasks: [], archivedTasks: [] };
+                    boardsData.push(newBoard);
+                    reorderBoardsForColumnCount();
+                    saveBoardsToLocalStorage();
+                    close();
+                    renderCurrentView();
+                    initBoardEvents();
+                    showToast('Доска создана');
+                }
+            });
+            break;
         case 'copy-link':
             copyBoardLink(boardIndex);
             break;
         case 'rename':
             renameBoard(boardIndex);
             break;
-        case 'add-description':
-            addBoardDescription(boardIndex);
-            break;
         case 'clone':
             cloneBoard(boardIndex);
             break;
-        case 'clear':
-            clearBoard(boardIndex);
+        case 'board-export-json': {
+            const b = boardsData?.[boardIndex];
+            if (!b) break;
+            const payload = { board: b };
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `board-${b.id || boardIndex}.json`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+            showToast('Файл сохранён');
             break;
-        case 'delete':
-            deleteBoard(boardIndex);
+        }
+        case 'archive-board': {
+            openConfirmModal({
+                title: 'Архивировать доску',
+                message: 'Переместить доску в архив? (Её можно будет восстановить позже через localStorage)',
+                confirmLabel: 'Архивировать',
+                danger: true,
+                onConfirm: () => {
+                    const b = boardsData?.[boardIndex];
+                    if (!b) return;
+                    const archivedBoards = JSON.parse(localStorage.getItem('archivedBoards') || '[]');
+                    archivedBoards.push({ ...b, archivedAt: new Date().toISOString() });
+                    localStorage.setItem('archivedBoards', JSON.stringify(archivedBoards));
+                    boardsData.splice(boardIndex, 1);
+                    saveBoardsToLocalStorage();
+                    renderCurrentView();
+                    initBoardEvents();
+                    showToast('Доска архивирована');
+                }
+            });
             break;
+        }
     }
 }
 
@@ -2554,25 +2599,126 @@ function copyBoardLink(boardIndex) {
     });
 }
 
+function openListModal({ title, bodyEl, footerEl }) {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    const content = document.createElement('div');
+    content.className = 'modal-content';
+    content.style.width = '28vw';
+    content.style.height = 'auto';
+    content.style.maxHeight = '70vh';
+    const header = document.createElement('div');
+    header.className = 'modal-header';
+    header.innerHTML = `
+        <p class="text-header">${escapeHtml(title || '')}</p>
+        <button type="button" class="modal-close">
+            <img src="/static/source/icons/cross.svg" alt="Закрыть">
+        </button>
+    `;
+    const body = document.createElement('div');
+    body.className = 'modal-body';
+    body.style.gap = '0.75rem';
+    if (typeof bodyEl === 'string') body.innerHTML = bodyEl;
+    else if (bodyEl) body.appendChild(bodyEl);
+    const footer = document.createElement('div');
+    footer.className = 'modal-footer';
+    if (footerEl) footer.appendChild(footerEl);
+    content.append(header, body, footer);
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add('show'));
+    const close = () => {
+        overlay.classList.remove('show');
+        setTimeout(() => overlay.remove(), 200);
+    };
+    header.querySelector('.modal-close').addEventListener('click', close);
+    overlay.addEventListener('click', e => {
+        if (e.target === overlay) close();
+    });
+    return { overlay, close, body, footer };
+}
+
+function openTextModal({ title, label, value, submitLabel, onSubmit }) {
+    const wrap = document.createElement('div');
+    wrap.style.display = 'flex';
+    wrap.style.flexDirection = 'column';
+    wrap.style.gap = '0.5rem';
+    if (label) {
+        const lb = document.createElement('label');
+        lb.className = 'text-basic';
+        lb.textContent = label;
+        wrap.appendChild(lb);
+    }
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = value || '';
+    wrap.appendChild(input);
+    const footer = document.createElement('div');
+    footer.style.display = 'flex';
+    footer.style.gap = '0.5rem';
+    footer.style.justifyContent = 'flex-end';
+    const btnCancel = document.createElement('button');
+    btnCancel.type = 'button';
+    btnCancel.className = 'button-secondary';
+    btnCancel.textContent = 'Отмена';
+    const btnOk = document.createElement('button');
+    btnOk.type = 'button';
+    btnOk.className = 'button-basic';
+    btnOk.textContent = submitLabel || 'Применить';
+    footer.append(btnCancel, btnOk);
+    const { close } = openListModal({ title, bodyEl: wrap, footerEl: footer });
+    btnCancel.addEventListener('click', close);
+    btnOk.addEventListener('click', () => onSubmit(input.value, close));
+    setTimeout(() => input.focus(), 0);
+}
+
+function openConfirmModal({ title, message, confirmLabel, danger, onConfirm }) {
+    const p = document.createElement('p');
+    p.className = 'text-basic';
+    p.style.margin = '0';
+    p.textContent = message || '';
+    const footer = document.createElement('div');
+    footer.style.display = 'flex';
+    footer.style.gap = '0.5rem';
+    footer.style.justifyContent = 'flex-end';
+    const btnCancel = document.createElement('button');
+    btnCancel.type = 'button';
+    btnCancel.className = 'button-secondary';
+    btnCancel.textContent = 'Отмена';
+    const btnOk = document.createElement('button');
+    btnOk.type = 'button';
+    btnOk.className = danger ? 'button-basic' : 'button-basic';
+    btnOk.textContent = confirmLabel || 'Подтвердить';
+    footer.append(btnCancel, btnOk);
+    const { close } = openListModal({ title, bodyEl: p, footerEl: footer });
+    btnCancel.addEventListener('click', close);
+    btnOk.addEventListener('click', () => {
+        close();
+        if (onConfirm) onConfirm();
+    });
+}
+
 function renameBoard(boardIndex) {
     const board = boardsData[boardIndex];
-    const newName = prompt('Введите новое название доски:', board.name);
-    if (newName && newName.trim()) {
-        board.name = newName.trim();
-        saveBoardsToLocalStorage();
-        renderCurrentView();
-        initBoardEvents();
-        showToast('Доска переименована');
-    }
+    openTextModal({
+        title: 'Переименовать доску',
+        label: 'Название',
+        value: board?.name || '',
+        submitLabel: 'Сохранить',
+        onSubmit: (newName, close) => {
+            if (!newName || !newName.trim()) return;
+            board.name = newName.trim();
+            saveBoardsToLocalStorage();
+            close();
+            renderCurrentView();
+            initBoardEvents();
+            showToast('Доска переименована');
+        }
+    });
 }
 
 function addBoardDescription(boardIndex) {
-    const board = boardsData[boardIndex];
-    const description = prompt('Введите описание доски:', board.description || '');
-    if (description !== null) {
-        board.description = description;
-        showToast('Описание добавлено');
-    }
+    // removed: board description editing is temporarily disabled
 }
 
 function cloneBoard(boardIndex) {
@@ -2589,24 +2735,36 @@ function cloneBoard(boardIndex) {
 }
 
 function clearBoard(boardIndex) {
-    if (confirm('Вы уверены, что хотите очистить доску? Все задачи будут удалены.')) {
-        boardsData[boardIndex].tasks = [];
-        saveBoardsToLocalStorage();
-        renderCurrentView();
-        initBoardEvents();
-        showToast('Доска очищена');
-    }
+    openConfirmModal({
+        title: 'Очистить доску',
+        message: 'Вы уверены, что хотите очистить доску? Все задачи будут удалены.',
+        confirmLabel: 'Очистить',
+        danger: true,
+        onConfirm: () => {
+            boardsData[boardIndex].tasks = [];
+            saveBoardsToLocalStorage();
+            renderCurrentView();
+            initBoardEvents();
+            showToast('Доска очищена');
+        }
+    });
 }
 
 function deleteBoard(boardIndex) {
-    if (confirm('Вы уверены, что хотите удалить доску? Это действие нельзя отменить.')) {
-        boardsData.splice(boardIndex, 1);
-        reorderBoardsForColumnCount();
-        saveBoardsToLocalStorage();
-        renderCurrentView();
-        initBoardEvents();
-        showToast('Доска удалена');
-    }
+    openConfirmModal({
+        title: 'Удалить доску',
+        message: 'Вы уверены, что хотите удалить доску? Это действие нельзя отменить.',
+        confirmLabel: 'Удалить',
+        danger: true,
+        onConfirm: () => {
+            boardsData.splice(boardIndex, 1);
+            reorderBoardsForColumnCount();
+            saveBoardsToLocalStorage();
+            renderCurrentView();
+            initBoardEvents();
+            showToast('Доска удалена');
+        }
+    });
 }
 
 function escapeHtml(str) {

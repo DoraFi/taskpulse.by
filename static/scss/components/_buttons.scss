@@ -14,10 +14,21 @@
     @extend .br-5;
 }
 
-.button-basic, .reset-filters-btn, .button-small {
+.button-basic,
+.reset-filters-btn,
+.button-small {
     background-color: $light-green;
     transition: box-shadow 0.2s ease;
-    box-shadow: $space-1 $space-1 3px $dark-gray; 
+    box-shadow: $space-1 $space-1 3px $dark-gray;
+}
+
+body[data-theme="dark"] .button-basic,
+body[data-theme="dark"] .reset-filters-btn,
+body[data-theme="dark"] .button-small {
+    color: $light-light-green;
+    border-color: $light-light-green;
+    background-color: $black;
+    box-shadow: $space-1 $space-1 3px $light-light-green;
 }
 
 .button-basic:hover,
@@ -29,6 +40,20 @@
 
 .button-secondary {
     background-color: $light-light-green;    
+    cursor: pointer;
+}
+
+body[data-theme="dark"] .button-secondary {
+    color: $light-light-green;
+    border-color: $light-light-green;
+    background-color: $black;
+}
+
+body[data-theme="dark"] .button-basic:hover,
+body[data-theme="dark"] .reset-filters-btn:hover,
+body[data-theme="dark"] .button-small:hover {
+    background-color: $black;
+    box-shadow: none;
     cursor: pointer;
 }
 
@@ -56,6 +81,22 @@
 
 .tab-btn:active {
     transform: translateY(0);
+}
+
+body[data-theme="dark"] .tabs {
+    border-color: $light-light-green;
+}
+
+body[data-theme="dark"] .tab-btn {
+    color: $light-light-green;
+}
+
+body[data-theme="dark"] .tab-btn.active {
+    background: rgba($light-gray, 0.4);
+}
+
+body[data-theme="dark"] .tab-btn:not(.active):hover {
+    background: rgba($light-gray, 0.3);
 }
 
 .tabs-buttons{
