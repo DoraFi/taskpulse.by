@@ -6,11 +6,20 @@
 
     function openModal(overlay) {
         if (overlay.parentElement !== document.body) document.body.appendChild(overlay);
+        resetExitConfirm(overlay);
         overlay.classList.add('show');
         overlay.setAttribute('aria-hidden', 'false');
     }
 
+    function resetExitConfirm(overlay) {
+        const bar = overlay.querySelector('#profileExitConfirmBar');
+        const actions = overlay.querySelector('#profileModalFooterActions');
+        if (bar) bar.hidden = true;
+        if (actions) actions.hidden = false;
+    }
+
     function closeModal(overlay) {
+        resetExitConfirm(overlay);
         overlay.classList.remove('show');
         overlay.setAttribute('aria-hidden', 'true');
         overlay.style.removeProperty('display');
@@ -46,8 +55,20 @@
         });
         overlay.querySelector('#profileModalExitProfile')?.addEventListener('click', e => {
             e.preventDefault();
-            if (!window.confirm('Выйти из профиля? Несохранённые изменения не будут сохранены.')) return;
+            const bar = overlay.querySelector('#profileExitConfirmBar');
+            const actions = overlay.querySelector('#profileModalFooterActions');
+            if (bar) bar.hidden = false;
+            if (actions) actions.hidden = true;
+            queueMicrotask(() => overlay.querySelector('#profileExitConfirmYes')?.focus());
+        });
+        overlay.querySelector('#profileExitConfirmYes')?.addEventListener('click', e => {
+            e.preventDefault();
             closeModal(overlay);
+        });
+        overlay.querySelector('#profileExitConfirmNo')?.addEventListener('click', e => {
+            e.preventDefault();
+            resetExitConfirm(overlay);
+            overlay.querySelector('#profileModalExitProfile')?.focus();
         });
         overlay.querySelector('#profileModalSave')?.addEventListener('click', e => {
             e.preventDefault();

@@ -2227,7 +2227,115 @@ body[data-theme=dark] .modal-content.create-task-modal .create-task-deps-suggest
 .modal-content.profile-modal textarea.profile-modal__bio::placeholder {
   color: rgba(45, 50, 41, 0.5);
 }
-.modal-content.profile-modal .profile-modal__projects {
+.modal-content.profile-modal .profile-modal__footer {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5625rem;
+}
+.modal-content.profile-modal .profile-modal__footer-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.125rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.modal-content.profile-modal .profile-modal__exit-confirm {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 0.75rem;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5625rem 1rem;
+  border-radius: 0.3rem;
+  border: 0.0625rem solid rgba(97, 160, 57, 0.38);
+  background: rgba(97, 160, 57, 0.1);
+  box-shadow: 0 2px 12px rgba(45, 50, 41, 0.06);
+}
+.modal-content.profile-modal .profile-modal__exit-confirm[hidden] {
+  display: none !important;
+}
+.modal-content.profile-modal .profile-modal__exit-question {
+  margin: 0;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.modal-content.profile-modal .profile-modal__exit-links {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.375rem;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.modal-content.profile-modal .profile-modal__exit-dot {
+  color: rgba(45, 50, 41, 0.45);
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+.modal-content.profile-modal .profile-modal__exit-answer {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  color: #2D3229;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+.modal-content.profile-modal .profile-modal__exit-answer:hover, .modal-content.profile-modal .profile-modal__exit-answer:focus-visible {
+  color: #61A039;
+  text-decoration-color: rgba(97, 160, 57, 0.85);
+  outline: none;
+}
+@media (max-width: 520px) {
+  .modal-content.profile-modal .profile-modal__exit-confirm {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+  .modal-content.profile-modal .profile-modal__exit-question {
+    white-space: normal;
+  }
+}
+.modal-content.profile-modal .profile-modal__section--activity .filter-label {
+  margin-bottom: 0.25rem;
+}
+.modal-content.profile-modal .profile-modal__activity-list {
+  list-style: none;
+  margin: 0.375rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5625rem;
+}
+.modal-content.profile-modal .profile-modal__activity-row {
+  display: grid;
+  grid-template-columns: 0.35fr minmax(0, 1fr);
+  gap: 0.75rem 1.125rem;
+  align-items: center;
+  padding: 0.5625rem 0.75rem;
+  margin: 0;
+  border-radius: 0.3rem;
+  border: 0.0625rem solid rgba(97, 160, 57, 0.22);
+  background: rgba(97, 160, 57, 0.05);
+}
+@media (max-width: 520px) {
+  .modal-content.profile-modal .profile-modal__activity-row {
+    grid-template-columns: 1fr;
+    gap: 0.375rem;
+  }
+}
+.modal-content.profile-modal .profile-modal__activity-key {
+  margin: 0;
+  line-height: 1.35;
+}
+.modal-content.profile-modal .profile-modal__activity-value {
   margin: 0;
   line-height: 1.5;
 }
@@ -2285,14 +2393,6 @@ body[data-theme=dark] .modal-content.create-task-modal .create-task-deps-suggest
 .modal-content.profile-modal .profile-modal__password-btn {
   align-self: flex-start;
 }
-.modal-content.profile-modal .profile-modal__activity {
-  margin: 0;
-  padding-left: 1.15rem;
-  line-height: 1.55;
-}
-.modal-content.profile-modal .profile-modal__activity li + li {
-  margin-top: 0.375rem;
-}
 
 body[data-theme=dark] .modal-content.profile-modal .profile-modal__avatar {
   border-color: rgba(246, 251, 242, 0.45);
@@ -2308,9 +2408,36 @@ body[data-theme=dark] .modal-content.profile-modal .profile-modal__password-bloc
   border-color: #F6FBF2;
 }
 
-body[data-theme=dark] .modal-content.profile-modal .profile-modal__section--muted {
-  background: rgba(40, 45, 37, 0.55);
-  border-color: #F6FBF2;
+body[data-theme=dark] .modal-content.profile-modal .profile-modal__exit-confirm {
+  background: rgba(97, 160, 57, 0.16);
+  border-color: rgba(246, 251, 242, 0.45);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.25);
+}
+
+body[data-theme=dark] .modal-content.profile-modal .profile-modal__exit-question {
+  color: #F6FBF2;
+}
+
+body[data-theme=dark] .modal-content.profile-modal .profile-modal__exit-dot {
+  color: rgba(246, 251, 242, 0.5);
+}
+
+body[data-theme=dark] .modal-content.profile-modal .profile-modal__exit-answer {
+  color: #F6FBF2;
+}
+body[data-theme=dark] .modal-content.profile-modal .profile-modal__exit-answer:hover, body[data-theme=dark] .modal-content.profile-modal .profile-modal__exit-answer:focus-visible {
+  color: #61A039;
+  text-decoration-color: rgba(97, 160, 57, 0.95);
+}
+
+body[data-theme=dark] .modal-content.profile-modal .profile-modal__activity-row {
+  background: rgba(97, 160, 57, 0.1);
+  border-color: rgba(246, 251, 242, 0.35);
+}
+
+body[data-theme=dark] .modal-content.profile-modal .profile-modal__activity-key,
+body[data-theme=dark] .modal-content.profile-modal .profile-modal__activity-value {
+  color: #F6FBF2;
 }
 
 body[data-theme=dark] .modal-content.profile-modal .profile-modal__settings-hint {

@@ -1586,7 +1586,128 @@ body[data-theme="dark"] .modal-content.create-task-modal .create-task-deps-sugge
         }
     }
 
-    .profile-modal__projects {
+    .profile-modal__footer {
+        flex-direction: column;
+        align-items: stretch;
+        gap: $space-12;
+    }
+
+    .profile-modal__footer-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: $space-24;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .profile-modal__exit-confirm {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: nowrap;
+        gap: $space-16;
+        width: 100%;
+        box-sizing: border-box;
+        padding: $space-12 $space-20;
+        border-radius: $radius-sm;
+        border: $space-1 solid rgba($green, 0.38);
+        background: rgba($green, 0.1);
+        box-shadow: 0 2px 12px rgba($dark-gray, 0.06);
+    }
+
+    .profile-modal__exit-confirm[hidden] {
+        display: none !important;
+    }
+
+    .profile-modal__exit-question {
+        margin: 0;
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
+    .profile-modal__exit-links {
+        display: inline-flex;
+        flex-direction: row;
+        align-items: center;
+        gap: $space-8;
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
+    .profile-modal__exit-dot {
+        color: rgba($dark-gray, 0.45);
+        user-select: none;
+    }
+
+    .profile-modal__exit-answer {
+        margin: 0;
+        padding: 0;
+        border: none;
+        background: none;
+        font: inherit;
+        cursor: pointer;
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+        color: $dark-gray;
+        transition: color 0.15s ease, text-decoration-color 0.15s ease;
+
+        &:hover,
+        &:focus-visible {
+            color: $green;
+            text-decoration-color: rgba($green, 0.85);
+            outline: none;
+        }
+    }
+
+    @media (max-width: 520px) {
+        .profile-modal__exit-confirm {
+            flex-wrap: wrap;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .profile-modal__exit-question {
+            white-space: normal;
+        }
+    }
+
+    .profile-modal__section--activity .filter-label {
+        margin-bottom: $space-4;
+    }
+
+    .profile-modal__activity-list {
+        list-style: none;
+        margin: $space-8 0 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: $space-12;
+    }
+
+    .profile-modal__activity-row {
+        display: grid;
+        grid-template-columns: max(0.35fr) minmax(0, 1fr);
+        gap: $space-16 $space-24;
+        align-items: center;
+        padding: $space-12 $space-16;
+        margin: 0;
+        border-radius: $radius-sm;
+        border: $space-1 solid rgba($green, 0.22);
+        background: rgba($green, 0.05);
+
+        @media (max-width: 520px) {
+            grid-template-columns: 1fr;
+            gap: $space-8;
+        }
+    }
+
+    .profile-modal__activity-key {
+        margin: 0;
+        line-height: 1.35;
+    }
+
+    .profile-modal__activity-value {
         margin: 0;
         line-height: 1.5;
     }
@@ -1652,16 +1773,6 @@ body[data-theme="dark"] .modal-content.create-task-modal .create-task-deps-sugge
     .profile-modal__password-btn {
         align-self: flex-start;
     }
-
-    .profile-modal__activity {
-        margin: 0;
-        padding-left: 1.15rem;
-        line-height: 1.55;
-
-        li + li {
-            margin-top: $space-8;
-        }
-    }
 }
 
 body[data-theme="dark"] .modal-content.profile-modal .profile-modal__avatar {
@@ -1678,9 +1789,38 @@ body[data-theme="dark"] .modal-content.profile-modal .profile-modal__password-bl
     border-color: $light-light-green;
 }
 
-body[data-theme="dark"] .modal-content.profile-modal .profile-modal__section--muted {
-    background: rgba($black, 0.55);
-    border-color: $light-light-green;
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__exit-confirm {
+    background: rgba($green, 0.16);
+    border-color: rgba($light-light-green, 0.45);
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.25);
+}
+
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__exit-question {
+    color: $light-light-green;
+}
+
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__exit-dot {
+    color: rgba($light-light-green, 0.5);
+}
+
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__exit-answer {
+    color: $light-light-green;
+
+    &:hover,
+    &:focus-visible {
+        color: $green;
+        text-decoration-color: rgba($green, 0.95);
+    }
+}
+
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__activity-row {
+    background: rgba($green, 0.1);
+    border-color: rgba($light-light-green, 0.35);
+}
+
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__activity-key,
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__activity-value {
+    color: $light-light-green;
 }
 
 body[data-theme="dark"] .modal-content.profile-modal .profile-modal__settings-hint {

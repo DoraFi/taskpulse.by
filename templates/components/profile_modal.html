@@ -11,7 +11,7 @@
                 <img class="profile-modal__avatar" src="/static/source/user_img/dar_shved.jpg" alt="">
                 <div class="profile-modal__titles">
                     <p class="text-header">Дарья Швед</p>
-                    <p class="text-signature">Инженер-программист · отдел разработки</p>
+                    <p class="text-signature">Разработчик · отдел разработки</p>
                     <p class="text-basic profile-modal__id">@d.shved · в команде с октября 2024</p>
                 </div>
             </div>
@@ -79,9 +79,22 @@
                 </div>
             </div>
 
-            <div class="profile-modal__section">
+            <div class="profile-modal__section profile-modal__section--card profile-modal__section--activity border-dark-1 br-5">
                 <p class="filter-label">Проекты и роли</p>
-                <p class="text-basic profile-modal__projects">Корпоративный портал — разработка · Микросервисная платформа — код-ревью · CRM — консультации по API</p>
+                <ul class="profile-modal__activity-list">
+                    <li class="profile-modal__activity-row">
+                        <span class="profile-modal__activity-key text-signature">Корпоративный портал</span>
+                        <span class="profile-modal__activity-value text-basic">Разработка</span>
+                    </li>
+                    <li class="profile-modal__activity-row">
+                        <span class="profile-modal__activity-key text-signature">Микросервисная платформа</span>
+                        <span class="profile-modal__activity-value text-basic">Код-ревью</span>
+                    </li>
+                    <li class="profile-modal__activity-row">
+                        <span class="profile-modal__activity-key text-signature">CRM</span>
+                        <span class="profile-modal__activity-value text-basic">Консультации по API</span>
+                    </li>
+                </ul>
             </div>
 
             <div class="profile-modal__section profile-modal__section--card border-dark-1 br-5">
@@ -142,18 +155,37 @@
                 <button type="button" class="button-secondary profile-modal__password-btn" id="profileModalChangePassword">Обновить пароль</button>
             </div>
 
-            <div class="profile-modal__section profile-modal__section--muted border-dark-1 br-5">
+            <div class="profile-modal__section profile-modal__section--card profile-modal__section--activity border-dark-1 br-5">
                 <p class="filter-label">Активность</p>
-                <ul class="text-basic profile-modal__activity">
-                    <li>Последний вход: сегодня, 09:14 · Chrome · Windows</li>
-                    <li>Двухфакторная аутентификация: выключена <span class="text-signature">(включается в «Настройках»)</span></li>
-                    <li>Подключённые календари: не связано</li>
+                <ul class="profile-modal__activity-list">
+                    <li class="profile-modal__activity-row">
+                        <span class="profile-modal__activity-key text-signature">Последний вход</span>
+                        <span class="profile-modal__activity-value text-basic">Сегодня, 09:14 · Chrome · Windows</span>
+                    </li>
+                    <li class="profile-modal__activity-row">
+                        <span class="profile-modal__activity-key text-signature">Двухфакторная защита</span>
+                        <span class="profile-modal__activity-value text-basic">Выключена</span>
+                    </li>
+                    <li class="profile-modal__activity-row">
+                        <span class="profile-modal__activity-key text-signature">Календари</span>
+                        <span class="profile-modal__activity-value text-basic">Не подключены</span>
+                    </li>
                 </ul>
             </div>
         </div>
-        <div class="modal-footer">
-            <button type="button" class="button-secondary" id="profileModalExitProfile">Выйти из профиля</button>
-            <button type="button" class="button-basic" id="profileModalSave">Сохранить изменения</button>
+        <div class="modal-footer profile-modal__footer">
+            <div id="profileExitConfirmBar" class="profile-modal__exit-confirm" role="status" aria-live="polite" hidden>
+                <span class="profile-modal__exit-question text-basic">Выйти из профиля?</span>
+                <span class="profile-modal__exit-links">
+                    <a href="#" class="profile-modal__exit-answer" id="profileExitConfirmYes">Да</a>
+                    <span class="profile-modal__exit-dot" aria-hidden="true">·</span>
+                    <a href="#" class="profile-modal__exit-answer" id="profileExitConfirmNo">Отмена</a>
+                </span>
+            </div>
+            <div class="profile-modal__footer-actions" id="profileModalFooterActions">
+                <button type="button" class="button-secondary" id="profileModalExitProfile">Выйти из профиля</button>
+                <button type="button" class="button-basic" id="profileModalSave">Сохранить изменения</button>
+            </div>
         </div>
     </div>
 </div>
