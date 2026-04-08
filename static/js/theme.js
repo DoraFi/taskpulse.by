@@ -44,9 +44,6 @@
   async function setIconTheme(theme) {
     const imgs = Array.from(document.querySelectorAll('img'))
       .filter((img) => {
-        // theme toggle icon is managed separately by setTheme()
-        if (img.classList.contains('theme-toggle__icon')) return false;
-
         const src = img.getAttribute('src') || '';
         const original = img.dataset.originalSrc || '';
 
@@ -254,13 +251,13 @@ body[data-theme="dark"] .modal-content .filter-date span{
     document.body.dataset.theme = next;
     if (persist) localStorage.setItem(STORAGE_KEY, next);
 
-    // swap icon
+    // sun/moon asset + stable original path for setIconTheme (dark: recolor #2D3229 → #F6FBF2)
     const icon = document.querySelector('#themeToggle .theme-toggle__icon');
     if (icon) {
-      icon.setAttribute(
-        'src',
-        next === 'dark' ? '/static/source/icons/darktheme.svg' : '/static/source/icons/lighttheme.svg'
-      );
+      const path =
+        next === 'dark' ? `${ICONS_PREFIX}darktheme.svg` : `${ICONS_PREFIX}lighttheme.svg`;
+      icon.dataset.originalSrc = path;
+      icon.setAttribute('src', path);
     }
 
     // recolor all app icons (img src="/static/source/icons/*.svg")
