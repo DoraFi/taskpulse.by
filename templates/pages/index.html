@@ -18,13 +18,29 @@
                 <input class="text-basic" type="text" placeholder="Поиск">
             </div>
         </div>
-        <ul class="gap-24 flex-row">
-            <li><img class="h-32" src="/static/source/icons/plus.svg" alt=""></li>
-            <li><img class="h-32" src="/static/source/icons/settings.svg" alt=""></li>
-            <li><img class="h-32" src="/static/source/icons/profile.svg" alt=""></li>
-            <li><img class="h-32" src="/static/source/icons/logout.svg" alt=""></li>
+        <ul class="gap-24 flex-row header-toolbar">
             <li>
-                <button type="button" class="theme-toggle" id="themeToggle" aria-label="Переключить тему">
+                <button type="button" class="header-toolbar__action" aria-label="Создать">
+                    <img class="h-32" src="/static/source/icons/plus.svg" alt="">
+                </button>
+            </li>
+            <li>
+                <button type="button" class="header-toolbar__action" aria-label="Настройки">
+                    <img class="h-32" src="/static/source/icons/settings.svg" alt="">
+                </button>
+            </li>
+            <li>
+                <button type="button" class="header-toolbar__action" aria-label="Профиль">
+                    <img class="h-32" src="/static/source/icons/profile.svg" alt="">
+                </button>
+            </li>
+            <li>
+                <a href="/templates/pages/auth_welcome.html" class="header-toolbar__action" aria-label="Выйти">
+                    <img class="h-32" src="/static/source/icons/logout.svg" alt="">
+                </a>
+            </li>
+            <li>
+                <button type="button" class="theme-toggle header-toolbar__action" id="themeToggle" aria-label="Переключить тему">
                     <img class="h-32 theme-toggle__icon" src="/static/source/icons/lighttheme.svg" alt="" aria-hidden="true">
                 </button>
             </li>

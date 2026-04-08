@@ -104,15 +104,48 @@
     // Pseudo-elements use background-image URLs; filter cannot map colors exactly.
     // We override background-image with recolored SVG data-uris for exact palette mapping.
     const rules = [
-      // arrow_dark_cropped.svg
+      // arrow_dark_cropped.svg (selectors must match or beat SCSS specificity)
       ['.archive-collapse-arrow::before', '/static/source/icons/arrow_dark_cropped.svg'],
-      ['.board-table-card .name::after', '/static/source/icons/arrow_dark_cropped.svg'],
-      ['.board-list .card .list .name::after', '/static/source/icons/arrow_dark_cropped.svg'],
-      ['.kanban-board-card .kanban-stage-col .name::after', '/static/source/icons/arrow_dark_cropped.svg'],
-      ['.kanban-archive-board .kanban-stage-col .name::after', '/static/source/icons/arrow_dark_cropped.svg'],
+      /* Таблица списка: триггер — span.name в ячейке, не внутри .subtasks */
+      ['.board-table-card .tasks-grid .name::after', '/static/source/icons/arrow_dark_cropped.svg'],
+      ['.board-list .card .list .subtasks .name::after', '/static/source/icons/arrow_dark_cropped.svg'],
+      ['.board-list .tasks-grid .name::after', '/static/source/icons/arrow_dark_cropped.svg'],
+      ['.board-timeline-card .subtasks .name::after', '/static/source/icons/arrow_dark_cropped.svg'],
+      ['.board-kanban .tasks-grid .name::after', '/static/source/icons/arrow_dark_cropped.svg'],
+      ['.kanban-board-card .kanban-stage-col .subtasks .name::after', '/static/source/icons/arrow_dark_cropped.svg'],
+      ['.kanban-archive-board .kanban-stage-col .subtasks .name::after', '/static/source/icons/arrow_dark_cropped.svg'],
+      // check.svg — same: beat nested .subtasks-list .custom-checkbox rules from SCSS
+      [
+        '.board-list .card .list .subtasks .subtasks-list .checkbox-item .custom-checkbox::after',
+        '/static/source/icons/check.svg',
+      ],
+      [
+        '.board-list .tasks-grid .subtasks-list .checkbox-item .custom-checkbox::after',
+        '/static/source/icons/check.svg',
+      ],
+      [
+        '.board-table-card .tasks-grid .subtasks-list .checkbox-item .custom-checkbox::after',
+        '/static/source/icons/check.svg',
+      ],
+      [
+        '.board-timeline-card .subtasks .subtasks-list .checkbox-item .custom-checkbox::after',
+        '/static/source/icons/check.svg',
+      ],
+      [
+        '.board-timeline-card .timeline-task-card .checkbox-item .custom-checkbox::after',
+        '/static/source/icons/check.svg',
+      ],
+      [
+        '.board-kanban .tasks-grid .subtasks-list .checkbox-item .custom-checkbox::after',
+        '/static/source/icons/check.svg',
+      ],
+      [
+        '.kanban-board-card .kanban-stage-col .subtasks .subtasks-list .checkbox-item .custom-checkbox::after',
+        '/static/source/icons/check.svg',
+      ],
       // deadline icon
       ['.deadline::before', '/static/source/icons/deadline.svg'],
-      // checkbox checkmark
+      // checkbox checkmark (fallback where no deeper nested rule)
       ['.checkbox-item .custom-checkbox::after', '/static/source/icons/check.svg'],
       // status select arrow (light cropped in your SCSS)
       ['.tasks-grid .col-status .status-select::after', '/static/source/icons/arrow_light_cropped.svg'],

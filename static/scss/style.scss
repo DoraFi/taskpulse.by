@@ -38,26 +38,18 @@ body {
 /* =========================
    Theme toggle (app pages)
    ========================= */
-.theme-toggle {
-    width: $space-32;
-    height: $space-32;
-    border: none;
-    background: transparent;
-    padding: 0;
-    cursor: pointer;
-    display: inline-flex;
+.header-toolbar {
     align-items: center;
-    justify-content: center;
-    border-radius: $radius-sm;
-    transition: transform 0.2s ease;
-}
 
-.theme-toggle:hover {
-    transform: translateY(-1px);
-}
+    &__action {
+        @include header-toolbar-action;
+        color: inherit;
+        text-decoration: none;
 
-.theme-toggle:active {
-    transform: translateY(0);
+        img {
+            display: block;
+        }
+    }
 }
 
 .theme-toggle__icon {
@@ -206,6 +198,89 @@ body[data-theme="dark"] .tasks-grid .col-priority .priority-normal {
 body[data-theme="dark"] .deadline {
     color: $light-green !important;
     background: rgba($light-gray, 0.4) !important;
+}
+
+/* Kanban board: column separators + subtasks (borders/text beat nested .kanban-stage-col rules) */
+body[data-theme="dark"] .kanban-board-card .kanban-stage-sep-line,
+body[data-theme="dark"] .kanban-archive-board .kanban-stage-sep-line {
+    background: $light-light-green;
+}
+
+body[data-theme="dark"] .kanban-board-card .kanban-stage-col .subtasks .checkbox-item {
+    color: $light-light-green;
+}
+
+body[data-theme="dark"] .kanban-board-card .kanban-stage-col .subtasks .checkbox-item .custom-checkbox,
+body[data-theme="dark"] .kanban-board-card .kanban-stage-col .subtasks .subtasks-list .checkbox-item .custom-checkbox {
+    border-color: $light-light-green;
+}
+
+body[data-theme="dark"] .kanban-board-card .kanban-stage-col .subtasks .checkbox-item input[type="checkbox"]:checked + .custom-checkbox {
+    border-color: $green;
+}
+
+/* Подзадачи: список / таблица / таймлайн / канбан-таблица — текст и рамки (перебивают вложенный border) */
+body[data-theme="dark"] .board-list .card .list .subtasks,
+body[data-theme="dark"] .board-table-card .subtasks,
+body[data-theme="dark"] .board-timeline-card .subtasks {
+    color: $light-light-green;
+}
+
+body[data-theme="dark"] .board-list .card .list .subtasks .checkbox-item,
+body[data-theme="dark"] .board-list .card .list .subtasks-list .checkbox-item,
+body[data-theme="dark"] .board-list .tasks-grid .subtasks-list .checkbox-item,
+body[data-theme="dark"] .board-table-card .tasks-grid .subtasks-list .checkbox-item,
+body[data-theme="dark"] .board-table-card .subtasks .checkbox-item,
+body[data-theme="dark"] .board-table-card .subtasks-list .checkbox-item,
+body[data-theme="dark"] .board-timeline-card .subtasks .checkbox-item,
+body[data-theme="dark"] .board-timeline-card .subtasks-list .checkbox-item,
+body[data-theme="dark"] .board-kanban .tasks-grid .subtasks-list .checkbox-item {
+    color: $light-light-green;
+}
+
+body[data-theme="dark"] .board-list .card .list .subtasks .custom-checkbox,
+body[data-theme="dark"] .board-list .card .list .subtasks-list .custom-checkbox,
+body[data-theme="dark"] .board-list .tasks-grid .subtasks-list .custom-checkbox,
+body[data-theme="dark"] .board-table-card .tasks-grid .subtasks-list .custom-checkbox,
+body[data-theme="dark"] .board-table-card .subtasks .subtasks-list .custom-checkbox,
+body[data-theme="dark"] .board-timeline-card .subtasks .subtasks-list .custom-checkbox,
+body[data-theme="dark"] .board-kanban .tasks-grid .subtasks-list .custom-checkbox {
+    border-color: $light-light-green !important;
+}
+
+body[data-theme="dark"] .board-list .card .list .subtasks .checkbox-item input[type="checkbox"]:checked + .custom-checkbox,
+body[data-theme="dark"] .board-list .card .list .subtasks-list .checkbox-item input[type="checkbox"]:checked + .custom-checkbox,
+body[data-theme="dark"] .board-list .tasks-grid .subtasks-list .checkbox-item input[type="checkbox"]:checked + .custom-checkbox,
+body[data-theme="dark"] .board-table-card .tasks-grid .subtasks-list .checkbox-item input[type="checkbox"]:checked + .custom-checkbox,
+body[data-theme="dark"] .board-table-card .subtasks .checkbox-item input[type="checkbox"]:checked + .custom-checkbox,
+body[data-theme="dark"] .board-table-card .subtasks-list .checkbox-item input[type="checkbox"]:checked + .custom-checkbox,
+body[data-theme="dark"] .board-timeline-card .subtasks .checkbox-item input[type="checkbox"]:checked + .custom-checkbox,
+body[data-theme="dark"] .board-timeline-card .subtasks-list .checkbox-item input[type="checkbox"]:checked + .custom-checkbox,
+body[data-theme="dark"] .board-kanban .tasks-grid .subtasks-list .checkbox-item input[type="checkbox"]:checked + .custom-checkbox {
+    border-color: $green !important;
+}
+
+/* Таймлайн: чекбокс архивации задачи + название */
+body[data-theme="dark"] .board-timeline-card .timeline-task-card .checkbox-item {
+    color: $light-light-green;
+}
+
+body[data-theme="dark"] .board-timeline-card .timeline-task-card .custom-checkbox {
+    border-color: $light-light-green !important;
+}
+
+body[data-theme="dark"] .board-timeline-card .timeline-task-card input[type="checkbox"]:checked + .custom-checkbox {
+    border-color: $green !important;
+}
+
+body[data-theme="dark"] .board-timeline-card .timeline-task-card__name {
+    color: $light-light-green;
+}
+
+/* Таблица (список / канбан): колонка названия */
+body[data-theme="dark"] .board-table-card .tasks-grid .col-name,
+body[data-theme="dark"] .board-kanban .tasks-grid .col-name {
+    color: $light-light-green;
 }
 
 .h-16 {

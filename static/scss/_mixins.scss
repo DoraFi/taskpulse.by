@@ -26,3 +26,26 @@
     height: $size;
     border-radius: 50%;
 }
+
+@mixin header-toolbar-action {
+    width: $space-32;
+    height: $space-32;
+    border: none;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: $radius-sm;
+    transition: transform 0.2s ease;
+    box-sizing: border-box;
+
+    &:hover {
+        transform: translateY(-1px);
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+}

@@ -367,7 +367,6 @@ a.button-secondary, .button-basic {
   height: 0.75rem;
   -webkit-appearance: none;
   appearance: none;
-  -webkit-transition: height 0.2s ease;
   transition: height 0.2s ease;
 }
 
@@ -381,7 +380,6 @@ a.button-secondary, .button-basic {
 *::-webkit-scrollbar-thumb {
   background: rgba(97, 160, 57, 0.3);
   backdrop-filter: blur(4px);
-  -webkit-transition: all 0.2s ease;
   transition: all 0.2s ease;
 }
 *::-webkit-scrollbar-thumb:hover {
@@ -433,9 +431,7 @@ a.button-secondary, .button-basic {
   transition: all 0.2s ease;
   position: relative;
   white-space: nowrap;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
   color: #F6FBF2;
 }
 .status.neutral, .tasks-grid .col-status .neutral.status-select {
@@ -479,7 +475,10 @@ body {
 /* =========================
    Theme toggle (app pages)
    ========================= */
-.theme-toggle {
+.header-toolbar {
+  align-items: center;
+}
+.header-toolbar__action {
   width: 1.5rem;
   height: 1.5rem;
   border: none;
@@ -491,14 +490,20 @@ body {
   justify-content: center;
   border-radius: 0.3rem;
   transition: transform 0.2s ease;
+  box-sizing: border-box;
 }
-
-.theme-toggle:hover {
+.header-toolbar__action:hover {
   transform: translateY(-1px);
 }
-
-.theme-toggle:active {
+.header-toolbar__action:active {
   transform: translateY(0);
+}
+.header-toolbar__action {
+  color: inherit;
+  text-decoration: none;
+}
+.header-toolbar__action img {
+  display: block;
 }
 
 .theme-toggle__icon {
@@ -649,6 +654,89 @@ body[data-theme=dark] .deadline {
   background: rgba(127, 140, 115, 0.4) !important;
 }
 
+/* Kanban board: column separators + subtasks (borders/text beat nested .kanban-stage-col rules) */
+body[data-theme=dark] .kanban-board-card .kanban-stage-sep-line,
+body[data-theme=dark] .kanban-archive-board .kanban-stage-sep-line {
+  background: #F6FBF2;
+}
+
+body[data-theme=dark] .kanban-board-card .kanban-stage-col .subtasks .checkbox-item {
+  color: #F6FBF2;
+}
+
+body[data-theme=dark] .kanban-board-card .kanban-stage-col .subtasks .checkbox-item .custom-checkbox,
+body[data-theme=dark] .kanban-board-card .kanban-stage-col .subtasks .subtasks-list .checkbox-item .custom-checkbox {
+  border-color: #F6FBF2;
+}
+
+body[data-theme=dark] .kanban-board-card .kanban-stage-col .subtasks .checkbox-item input[type=checkbox]:checked + .custom-checkbox {
+  border-color: #61A039;
+}
+
+/* Подзадачи: список / таблица / таймлайн / канбан-таблица — текст и рамки (перебивают вложенный border) */
+body[data-theme=dark] .board-list .card .list .subtasks,
+body[data-theme=dark] .board-table-card .subtasks,
+body[data-theme=dark] .board-timeline-card .subtasks {
+  color: #F6FBF2;
+}
+
+body[data-theme=dark] .board-list .card .list .subtasks .checkbox-item,
+body[data-theme=dark] .board-list .card .list .subtasks-list .checkbox-item,
+body[data-theme=dark] .board-list .tasks-grid .subtasks-list .checkbox-item,
+body[data-theme=dark] .board-table-card .tasks-grid .subtasks-list .checkbox-item,
+body[data-theme=dark] .board-table-card .subtasks .checkbox-item,
+body[data-theme=dark] .board-table-card .subtasks-list .checkbox-item,
+body[data-theme=dark] .board-timeline-card .subtasks .checkbox-item,
+body[data-theme=dark] .board-timeline-card .subtasks-list .checkbox-item,
+body[data-theme=dark] .board-kanban .tasks-grid .subtasks-list .checkbox-item {
+  color: #F6FBF2;
+}
+
+body[data-theme=dark] .board-list .card .list .subtasks .custom-checkbox,
+body[data-theme=dark] .board-list .card .list .subtasks-list .custom-checkbox,
+body[data-theme=dark] .board-list .tasks-grid .subtasks-list .custom-checkbox,
+body[data-theme=dark] .board-table-card .tasks-grid .subtasks-list .custom-checkbox,
+body[data-theme=dark] .board-table-card .subtasks .subtasks-list .custom-checkbox,
+body[data-theme=dark] .board-timeline-card .subtasks .subtasks-list .custom-checkbox,
+body[data-theme=dark] .board-kanban .tasks-grid .subtasks-list .custom-checkbox {
+  border-color: #F6FBF2 !important;
+}
+
+body[data-theme=dark] .board-list .card .list .subtasks .checkbox-item input[type=checkbox]:checked + .custom-checkbox,
+body[data-theme=dark] .board-list .card .list .subtasks-list .checkbox-item input[type=checkbox]:checked + .custom-checkbox,
+body[data-theme=dark] .board-list .tasks-grid .subtasks-list .checkbox-item input[type=checkbox]:checked + .custom-checkbox,
+body[data-theme=dark] .board-table-card .tasks-grid .subtasks-list .checkbox-item input[type=checkbox]:checked + .custom-checkbox,
+body[data-theme=dark] .board-table-card .subtasks .checkbox-item input[type=checkbox]:checked + .custom-checkbox,
+body[data-theme=dark] .board-table-card .subtasks-list .checkbox-item input[type=checkbox]:checked + .custom-checkbox,
+body[data-theme=dark] .board-timeline-card .subtasks .checkbox-item input[type=checkbox]:checked + .custom-checkbox,
+body[data-theme=dark] .board-timeline-card .subtasks-list .checkbox-item input[type=checkbox]:checked + .custom-checkbox,
+body[data-theme=dark] .board-kanban .tasks-grid .subtasks-list .checkbox-item input[type=checkbox]:checked + .custom-checkbox {
+  border-color: #61A039 !important;
+}
+
+/* Таймлайн: чекбокс архивации задачи + название */
+body[data-theme=dark] .board-timeline-card .timeline-task-card .checkbox-item {
+  color: #F6FBF2;
+}
+
+body[data-theme=dark] .board-timeline-card .timeline-task-card .custom-checkbox {
+  border-color: #F6FBF2 !important;
+}
+
+body[data-theme=dark] .board-timeline-card .timeline-task-card input[type=checkbox]:checked + .custom-checkbox {
+  border-color: #61A039 !important;
+}
+
+body[data-theme=dark] .board-timeline-card .timeline-task-card__name {
+  color: #F6FBF2;
+}
+
+/* Таблица (список / канбан): колонка названия */
+body[data-theme=dark] .board-table-card .tasks-grid .col-name,
+body[data-theme=dark] .board-kanban .tasks-grid .col-name {
+  color: #F6FBF2;
+}
+
 .h-16 {
   height: 0.75rem;
 }
@@ -719,7 +807,6 @@ body[data-theme=dark] .deadline {
 .app-container .column {
   display: flex;
   flex-direction: column;
-  height: -moz-fit-content;
   height: fit-content;
   padding-bottom: 2.25rem;
 }
@@ -1300,7 +1387,6 @@ aside .submenu .events-grid .col-event .nav-link,
   display: flex;
   gap: 1.125rem;
   padding: 0.375rem 1.125rem;
-  width: -moz-fit-content;
   width: fit-content;
 }
 
@@ -1376,7 +1462,6 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   grid-template-columns: auto 1fr auto auto auto auto auto auto auto auto;
   /* Проект */
   gap: 0.75rem;
-  width: -moz-max-content;
   width: max-content;
   min-width: 100%;
   overflow-x: auto;
@@ -1397,9 +1482,7 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   align-items: center;
   gap: 0.25rem;
   cursor: pointer;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
 }
 .tasks-grid .grid-header > div .header-title {
   display: inline-block;
@@ -1544,7 +1627,6 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
 .tp-table-row-fallback .tasks-grid {
   display: grid;
   gap: 0.75rem;
-  width: -moz-max-content;
   width: max-content;
   min-width: 100%;
   overflow-x: auto;
@@ -1677,9 +1759,6 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.1);
 }
-.modal-content .modal-body input::-moz-placeholder {
-  color: rgba(45, 50, 41, 0.5);
-}
 .modal-content .modal-body input::placeholder {
   color: rgba(45, 50, 41, 0.5);
 }
@@ -1707,9 +1786,6 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.1);
 }
-.modal-content .modal-body .filter-section .filter-input::-moz-placeholder {
-  color: rgba(45, 50, 41, 0.5);
-}
 .modal-content .modal-body .filter-section .filter-input::placeholder {
   color: rgba(45, 50, 41, 0.5);
 }
@@ -1726,8 +1802,7 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
 .modal-content .modal-body .filter-section .filter-range .range-input {
   width: 100%;
   height: 0.375rem;
-  -moz-appearance: none;
-       appearance: none;
+  appearance: none;
   -webkit-appearance: none;
   background: rgba(97, 160, 57, 0.15);
   outline: none;
@@ -1739,7 +1814,6 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   background: #61A039;
   border-radius: 50%;
   cursor: pointer;
-  -webkit-transition: all 0.2s ease;
   transition: all 0.2s ease;
 }
 .modal-content .modal-body .filter-section .filter-range .range-input::-webkit-slider-thumb:hover {
@@ -1926,19 +2000,14 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
 }
 
 .board-list .cards {
-  -moz-column-count: 2;
-       column-count: 2;
-  -moz-column-gap: 2.25rem;
-       column-gap: 2.25rem;
+  column-count: 2;
+  column-gap: 2.25rem;
   flex: 1;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
 }
 .board-list .cards.dragging-active {
   gap: 2.25rem;
-  -moz-column-count: unset;
-       column-count: unset;
+  column-count: unset;
   display: flex;
   flex-wrap: wrap;
 }
@@ -1947,8 +2016,7 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
 }
 .board-list .tables-view.dragging-active,
 .board-list .board-view.dragging-active {
-  -moz-column-count: 1;
-       column-count: 1;
+  column-count: 1;
 }
 .board-list .tables-view.dragging-active .card,
 .board-list .board-view.dragging-active .card {
@@ -1961,14 +2029,11 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   width: 100%;
 }
 .board-list .card {
-  -moz-column-break-inside: avoid;
-       break-inside: avoid;
+  break-inside: avoid;
   margin-bottom: 2.25rem;
   width: 100%;
   transition: transform 0.2s ease;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
 }
 .board-list .card:active {
   cursor: grabbing;
@@ -2013,9 +2078,7 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   gap: 0.5625rem;
   cursor: grab;
   transition: all 0.2s ease;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
   position: relative;
 }
 .board-list .card .list .item:active {
@@ -2157,22 +2220,18 @@ body:not([data-theme=dark]) .board-list .card .list .item {
 }
 
 .board-list .cards.tables-view {
-  -moz-column-count: 1 !important;
-       column-count: 1 !important;
+  column-count: 1 !important;
   display: block;
 }
 
 .board-list .cards.timeline-view {
-  -moz-column-count: 1 !important;
-       column-count: 1 !important;
+  column-count: 1 !important;
   display: block;
 }
 
 .board-kanban .cards {
-  -moz-column-count: 1 !important;
-       column-count: 1 !important;
-  -moz-column-gap: 0;
-       column-gap: 0;
+  column-count: 1 !important;
+  column-gap: 0;
 }
 
 .kanban-board-card,
@@ -2207,7 +2266,6 @@ body:not([data-theme=dark]) .board-list .card .list .item {
 .kanban-board-card[data-kanban-scroll=true] .kanban-stages-row,
 .kanban-archive-board[data-kanban-scroll=true] .kanban-columns-head,
 .kanban-archive-board[data-kanban-scroll=true] .kanban-stages-row {
-  width: -moz-max-content;
   width: max-content;
   gap: 0.75rem;
 }
@@ -2217,7 +2275,6 @@ body:not([data-theme=dark]) .board-list .card .list .item {
 }
 .kanban-board-card[data-kanban-scroll=true] .kanban-priority-section,
 .kanban-archive-board[data-kanban-scroll=true] .kanban-priority-section {
-  width: -moz-fit-content;
   width: fit-content;
   margin-right: 0.0625rem;
 }
@@ -2692,8 +2749,7 @@ body[data-theme=dark] .kanban-task-item, .board-list .card .list .item {
 
 .board-list .cards.reports-view,
 .board-list .cards.archive-view {
-  -moz-column-count: 1 !important;
-       column-count: 1 !important;
+  column-count: 1 !important;
   display: block;
   width: 100%;
 }
@@ -2702,7 +2758,6 @@ body[data-theme=dark] .kanban-task-item, .board-list .card .list .item {
   width: 100%;
 }
 .board-reports-card .tasks-grid-wrapper {
-  width: -moz-fit-content;
   width: fit-content;
 }
 .board-reports-card .reports-summary-grid {
@@ -2936,8 +2991,7 @@ body[data-theme=dark] .kanban-task-item, .board-list .card .list .item {
   width: 1.125rem;
   height: 1.125rem;
   border-radius: 50%;
-  -o-object-fit: cover;
-     object-fit: cover;
+  object-fit: cover;
 }
 .board-timeline-card .tag {
   width: 100%;
@@ -3269,9 +3323,7 @@ body[data-theme=dark] .kanban-task-item, .board-list .card .list .item {
 }
 
 .checkbox-item {
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
 }
 
 .checkbox-item input {
@@ -3591,7 +3643,6 @@ body[data-theme=dark] .kanban-task-item, .board-list .card .list .item {
   position: relative;
   margin: 0;
   align-self: flex-start;
-  width: -moz-fit-content;
   width: fit-content;
   max-width: 100%;
 }
@@ -3634,13 +3685,11 @@ body[data-theme=dark] .kanban-task-item, .board-list .card .list .item {
 }
 
 .auth-motif--board {
-  width: -moz-fit-content;
   width: fit-content;
   max-width: 100%;
 }
 
 .auth-motif--web {
-  width: -moz-fit-content;
   width: fit-content;
   max-width: 19rem;
 }
@@ -4222,4 +4271,6 @@ body[data-theme=dark] .kanban-task-item, .board-list .card .list .item {
     transition: none !important;
     transform: none !important;
   }
-}/*# sourceMappingURL=style.css.map */
+}
+
+/*# sourceMappingURL=style.css.map */
