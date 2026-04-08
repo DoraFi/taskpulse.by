@@ -1,7 +1,3 @@
-/**
- * Статическое поведение для экранов auth / onboarding.
- * Не мешает основному приложению: подключается только на страницах auth_*.html и onboarding_*.html
- */
 (function () {
     document.querySelectorAll('form[data-static-form]').forEach(function (form) {
         form.addEventListener('submit', function (e) {

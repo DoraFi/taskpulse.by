@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TaskPulse — Команда проекта</title>
-    <link rel="icon" type="image/svg+xml" href="/static/source/logo_no_back.svg">
+    <link rel="icon" type="image/svg+xml" href="/static/source/logo_rect.svg">
     <link rel="stylesheet" href="/static/scss/style.css">
 </head>
 
@@ -28,7 +28,7 @@
                 <p class="auth-hero__lead text-basic">Роли и письма — как в рабочем пространстве: все увидят одну доску.</p>
                 <div class="auth-motif auth-motif--web">
                     <div class="auth-motif-web">
-                        <svg class="auth-motif-web__svg" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <svg class="auth-motif-web__svg" viewBox="27 27 146 70" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                             <path class="auth-motif-web__curve" d="M 36 68 C 52 52 76 44 100 40 C 124 44 148 52 164 68" fill="none" />
                             <path class="auth-motif-web__curve" d="M 100 40 Q 100 64 100 88" fill="none" />
                             <path class="auth-motif-web__curve" d="M 36 68 Q 68 78 100 88" fill="none" />
@@ -37,8 +37,7 @@
                             <circle class="auth-motif-web__node" cx="36" cy="68" r="7" />
                             <circle class="auth-motif-web__node auth-motif-web__node--primary" cx="100" cy="38" r="9" />
                             <circle class="auth-motif-web__node" cx="164" cy="68" r="7" />
-                            <circle class="auth-motif-web__node" cx="100" cy="88" r="7" />
-                        </svg>
+                            <circle class="auth-motif-web__node" cx="100" cy="88" r="7" />                  </svg>
                     </div>
                 </div>
             </div>
@@ -46,10 +45,10 @@
 
         <div class="auth-page__panel">
         <div class="modal-content auth-flow-card auth-flow-card--signature">
-            <div class="auth-page__steps">
-                <span class="auth-step-pill auth-step-pill--done">1. Проект</span>
-                <span class="auth-step-pill auth-step-pill--active">2. Команда</span>
-                <span class="auth-step-pill">3. Готово</span>
+            <div class="auth-page__steps auth-steps" style="--steps-total: 3; --step-index: 2;" aria-label="Прогресс: шаг 2 из 3">
+                <div class="auth-steps__bar" aria-hidden="true">
+                    <div class="auth-steps__fill"></div>
+                </div>
             </div>
             <div class="modal-header" style="margin-top: 0;">
                 <p class="text-header">Пригласите команду</p>
@@ -92,7 +91,7 @@
                     </div>
                     <button type="button" class="button-secondary" id="add-invite-row" style="align-self: flex-start;">+ Добавить участника</button>
                     <div class="auth-field">
-                        <label for="invite-message">Сообщение в приглашении <span class="text-signature">(необязательно)</span></label>
+                        <label for="invite-message">Сообщение в приглашении</label>
                         <textarea id="invite-message" name="inviteMessage" rows="2" placeholder="Кратко опишите цели проекта для новых участников"></textarea>
                     </div>
                 </form>

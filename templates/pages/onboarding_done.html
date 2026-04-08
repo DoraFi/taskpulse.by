@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TaskPulse — Готово</title>
-    <link rel="icon" type="image/svg+xml" href="/static/source/logo_no_back.svg">
+    <link rel="icon" type="image/svg+xml" href="/static/source/logo_rect.svg">
     <link rel="stylesheet" href="/static/scss/style.css">
 </head>
 
@@ -44,28 +44,26 @@
                         <path class="auth-pulse-svg__base" d="M0 36 H320" fill="none" stroke="url(#authPulseGradDone)" stroke-width="1.5" />
                         <path class="auth-pulse-svg__beat" d="M0 36 L320 36" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
                     </svg>
-                    <span class="auth-hero__pulse-label text-signature">Ровная линия — готово к работе</span>
                 </div>
             </div>
         </section>
 
         <div class="auth-page__panel">
         <div class="modal-content auth-flow-card auth-flow-card--signature">
-            <div class="auth-page__steps">
-                <span class="auth-step-pill auth-step-pill--done">1. Проект</span>
-                <span class="auth-step-pill auth-step-pill--done">2. Команда</span>
-                <span class="auth-step-pill auth-step-pill--active">3. Готово</span>
+            <div class="auth-page__steps auth-steps" style="--steps-total: 3; --step-index: 3;" aria-label="Прогресс: шаг 3 из 3">
+                <div class="auth-steps__bar" aria-hidden="true">
+                    <div class="auth-steps__fill"></div>
+                </div>
             </div>
             <div class="modal-header" style="margin-top: 0;">
                 <p class="text-header">Всё готово</p>
             </div>
-            <div class="modal-body" style="text-align: center;">
+            <div class="modal-body">
                 <p class="text-basic" style="margin: 0;">Проект создан, приглашения можно дослать позже. Откройте рабочее пространство и выберите представление досок или таблицы.</p>
-                <div class="flex-col" style="gap: 1rem; margin-top: 1.5rem;">
-                    <a class="button-basic" href="/templates/pages/board_kanban.html">Открыть проект (Kanban)</a>
-                    <a class="button-secondary" href="/templates/pages/board_list.html">Открыть проект (Список)</a>
-                    <a class="text-basic" href="/templates/pages/index.html" style="text-decoration: underline;">На главную сводку</a>
-                </div>
+            </div>
+            <div class="modal-footer">
+                <a class="button-secondary" href="/templates/pages/index.html">На главную сводку</a>
+                <a class="button-basic" href="/templates/pages/board_kanban.html">Открыть проект</a>
             </div>
         </div>
         </div>

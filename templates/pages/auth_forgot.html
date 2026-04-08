@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TaskPulse — Восстановление пароля</title>
-    <link rel="icon" type="image/svg+xml" href="/static/source/logo_no_back.svg">
+    <link rel="icon" type="image/svg+xml" href="/static/source/logo_rect.svg">
     <link rel="stylesheet" href="/static/scss/style.css">
 </head>
 
@@ -26,21 +26,23 @@
                     <span class="auth-hero__title-line auth-hero__title-line--accent">по ссылке из письма.</span>
                 </h1>
                 <p class="auth-hero__lead text-basic">Укажите email — отправим одноразовую ссылку: перейдите по ней и задайте новый пароль.</p>
-                <div class="auth-motif auth-motif--recover">
-                    <svg class="auth-motif-shield-svg" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <g class="auth-motif-shield-svg__rings" fill="none" stroke="currentColor" stroke-linecap="round">
-                            <circle cx="100" cy="58" r="52" stroke-width="1" stroke-opacity="0.14" />
-                            <circle cx="100" cy="58" r="62" stroke-width="0.85" stroke-opacity="0.1" />
+                <div class="auth-motif auth-motif--recover" >
+                    <svg class="auth-motif-shield-svg" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" transform="scale(0.8)">
+                        <g class="auth-motif-shield-svg__rings" fill="none" stroke="currentColor" stroke-linecap="round"
+                            transform="translate(60 58) scale(0.92) translate(-100 -58)">
+                            <circle cx="100" cy="58" r="52" stroke-width="1" stroke-opacity="0.14"></circle>
+                            <circle cx="100" cy="58" r="62" stroke-width="0.85" stroke-opacity="0.1"></circle>
                         </g>
-                        <path class="auth-motif-shield-svg__shield" fill="none" stroke="currentColor" stroke-width="2.15"
-                            stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.5"
-                            d="M 100 18 C 118 18 134 28 134 38 L 134 64 C 134 84 100 106 100 106 C 100 106 66 84 66 64 L 66 38 C 66 28 82 18 100 18 Z" />
-                        <path class="auth-motif-shield-svg__shield auth-motif-shield-svg__shield--inner" fill="none" stroke="currentColor"
-                            stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.22"
-                            d="M 100 28 C 112 28 124 34 124 42 L 124 62 C 124 76 100 94 100 94 C 100 94 76 76 76 62 L 76 42 C 76 34 88 28 100 28 Z" />
-                        <path class="auth-motif-shield-svg__check" fill="none" stroke="currentColor" stroke-width="2.25"
-                            stroke-linecap="round" stroke-linejoin="round"
-                            d="M 84 58 L 96 72 L 122 44" />
+                        <g transform="translate(60 58) scale(0.88) translate(-100 -58)">
+                            <path class="auth-motif-shield-svg__shield" fill="none" stroke="currentColor" stroke-width="2.15"
+                                stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.5"
+                                d="M 100 18 C 118 18 134 28 134 38 L 134 64 C 134 84 100 106 100 106 C 100 106 66 84 66 64 L 66 38 C 66 28 82 18 100 18 Z">
+                            </path>
+                        </g>
+                        <g transform="translate(60 58) scale(0.7) translate(-100 -58)">
+                            <path class="auth-motif-shield-svg__check" fill="none" stroke="currentColor" stroke-width="2.9"
+                                stroke-linecap="round" stroke-linejoin="round" d="M 84 58 L 96 72 L 122 44"></path>
+                        </g>
                     </svg>
                 </div>
             </div>
@@ -58,7 +60,7 @@
                 <p class="text-basic" style="margin: 0;">Укажите email — отправим ссылку для сброса пароля.</p>
                 <form class="form-auth" data-static-form action="#" method="post">
                     <div class="auth-field">
-                        <label for="forgot-email">Электронная почта</label>
+                        <label for="forgot-email">Электронная почта <img class="required-icon" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>
                         <input id="forgot-email" name="email" type="email" autocomplete="email" placeholder="you@company.com" required>
                     </div>
                 </form>
