@@ -45,7 +45,11 @@
   border: 0.0625rem solid #7F8C73;
 }
 
-.text-signature, .auth-hint, .auth-field label, .auth-step-pill, .auth-mini-card__text, .form-auth .checkbox-item .checkbox-text, .form-auth .checkbox-item a, .auth-motif-board__head, .auth-hero__eyebrow, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .timeline-due, .board-list .tasks-grid-wrapper > .empty-state, .board-reports-card .reports-stat-label, .kanban-board-card .kanban-stage-col .subtasks .checkbox-text, .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text, .kanban-board-card .kanban-count-chip, .kanban-archive-board .kanban-count-chip, .kanban-board-card .kanban-count-badge, .kanban-archive-board .kanban-count-badge, .board-list .card .list .subtasks .checkbox-text, .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-label, .tasks-grid .grid-header, .legends .legend, .button-small {
+.text-signature, .auth-hint, .auth-field label, .auth-step-pill, .auth-mini-card__text, .form-auth .checkbox-item .checkbox-text,
+.form-auth .checkbox-item a, .auth-motif-board__head, .auth-hero__eyebrow, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .timeline-due, .board-list .tasks-grid-wrapper > .empty-state, .board-reports-card .reports-stat-label, .kanban-board-card .kanban-stage-col .subtasks .checkbox-text,
+.kanban-archive-board .kanban-stage-col .subtasks .checkbox-text, .kanban-board-card .kanban-count-chip,
+.kanban-archive-board .kanban-count-chip, .kanban-board-card .kanban-count-badge,
+.kanban-archive-board .kanban-count-badge, .board-list .card .list .subtasks .checkbox-text, .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-label, .tasks-grid .grid-header, .legends .legend, .button-small {
   font-size: 0.75rem;
   font-weight: 400;
 }
@@ -255,6 +259,8 @@ ul {
   padding: 0.25rem 0.5625rem;
   border: none;
   background: none;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .tab-btn.active {
@@ -263,6 +269,11 @@ ul {
 
 .tab-btn:not(.active):hover {
   background: rgba(97, 160, 57, 0.1);
+  transform: translateY(-1px);
+}
+
+.tab-btn:active {
+  transform: translateY(0);
 }
 
 .tabs-buttons .tab-btn {
@@ -332,7 +343,11 @@ a.button-secondary, .button-basic {
   background: rgba(97, 160, 57, 0.5);
 }
 
-.text-signature, .auth-hint, .auth-field label, .auth-step-pill, .auth-mini-card__text, .form-auth .checkbox-item .checkbox-text, .form-auth .checkbox-item a, .auth-motif-board__head, .auth-hero__eyebrow, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .timeline-due, .board-list .tasks-grid-wrapper > .empty-state, .board-reports-card .reports-stat-label, .kanban-board-card .kanban-stage-col .subtasks .checkbox-text, .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text, .kanban-board-card .kanban-count-chip, .kanban-archive-board .kanban-count-chip, .kanban-board-card .kanban-count-badge, .kanban-archive-board .kanban-count-badge, .board-list .card .list .subtasks .checkbox-text, .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-label, .tasks-grid .grid-header, .legends .legend, .button-small {
+.text-signature, .auth-hint, .auth-field label, .auth-step-pill, .auth-mini-card__text, .form-auth .checkbox-item .checkbox-text,
+.form-auth .checkbox-item a, .auth-motif-board__head, .auth-hero__eyebrow, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .timeline-due, .board-list .tasks-grid-wrapper > .empty-state, .board-reports-card .reports-stat-label, .kanban-board-card .kanban-stage-col .subtasks .checkbox-text,
+.kanban-archive-board .kanban-stage-col .subtasks .checkbox-text, .kanban-board-card .kanban-count-chip,
+.kanban-archive-board .kanban-count-chip, .kanban-board-card .kanban-count-badge,
+.kanban-archive-board .kanban-count-badge, .board-list .card .list .subtasks .checkbox-text, .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-label, .tasks-grid .grid-header, .legends .legend, .button-small {
   font-size: 0.75rem;
   font-weight: 400;
 }
@@ -426,20 +441,28 @@ body {
 
 .br-5, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .day,
 .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .other-month, .custom-calendar-modal .custom-calendar .custom-calendar-header button, .form-add-task, .board-timeline-card .tag .deadline, .board-timeline-card .tag .priority-high,
-.board-timeline-card .tag .priority-normal, .board-timeline-card .tag .executor img, .board-timeline-card .timeline-task-card, .board-timeline-card .timeline-date-chip, .board-archive-section .archive-collapse-toggle .num-of-tasks, .board-reports-card .reports-stat-chip, .kanban-task-item, .kanban-board-card .kanban-stage-col .tag .deadline, .kanban-archive-board .kanban-stage-col .tag .deadline, .kanban-board-card .kanban-stage-col .tag .priority-high,
-.kanban-board-card .kanban-stage-col .tag .priority-normal, .kanban-archive-board .kanban-stage-col .tag .priority-high,
-.kanban-archive-board .kanban-stage-col .tag .priority-normal, .kanban-board-card .kanban-stage-col .tag .executor img, .kanban-archive-board .kanban-stage-col .tag .executor img, .kanban-board-card .kanban-count-chip, .kanban-archive-board .kanban-count-chip, .kanban-board-card .kanban-count-badge, .kanban-archive-board .kanban-count-badge, .board-list .card .list .tag .deadline, .board-list .card .list .tag .priority-high,
+.board-timeline-card .tag .priority-normal, .board-timeline-card .tag .executor img, .board-timeline-card .timeline-task-card, .board-timeline-card .timeline-date-chip, .board-archive-section .archive-collapse-toggle .num-of-tasks, .board-reports-card .reports-stat-chip, .kanban-task-item, .kanban-board-card .kanban-stage-col .tag .deadline,
+.kanban-archive-board .kanban-stage-col .tag .deadline, .kanban-board-card .kanban-stage-col .tag .priority-high,
+.kanban-board-card .kanban-stage-col .tag .priority-normal,
+.kanban-archive-board .kanban-stage-col .tag .priority-high,
+.kanban-archive-board .kanban-stage-col .tag .priority-normal, .kanban-board-card .kanban-stage-col .tag .executor img,
+.kanban-archive-board .kanban-stage-col .tag .executor img, .kanban-board-card .kanban-count-chip,
+.kanban-archive-board .kanban-count-chip, .kanban-board-card .kanban-count-badge,
+.kanban-archive-board .kanban-count-badge, .board-list .card .list .tag .deadline, .board-list .card .list .tag .priority-high,
 .board-list .card .list .tag .priority-normal, .board-list .card .list .tag .executor img, .board-list .card .list .item, .board-list .card .taskheader-count .num-of-tasks, .modal-content .modal-body .filter-section .filter-range .range-input, .tabs, .project-percents, .checkbox-item .custom-checkbox, .button-basic,
 .button-secondary,
 .reset-filters-btn, .button-small, .tab-btn {
   border-radius: 0.3rem;
 }
 
-.br-10, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar, .kanban-board-card .kanban-priority-section.normal, .kanban-archive-board .kanban-priority-section.normal, .kanban-board-card .kanban-priority-section.urgent, .kanban-archive-board .kanban-priority-section.urgent, .dropdown-menu, .card, *::-webkit-scrollbar-track, *::-webkit-scrollbar-thumb {
+.br-10, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar, .kanban-board-card .kanban-priority-section.normal,
+.kanban-archive-board .kanban-priority-section.normal, .kanban-board-card .kanban-priority-section.urgent,
+.kanban-archive-board .kanban-priority-section.urgent, .dropdown-menu, .card, *::-webkit-scrollbar-track, *::-webkit-scrollbar-thumb {
   border-radius: 0.6rem;
 }
 
-.gap-24, .form-auth, .board-list .board-card-collapsible, .board-list .archive-board-body, .dropdown-menu, .card {
+.gap-24, .form-auth, .board-list .board-card-collapsible,
+.board-list .archive-board-body, .dropdown-menu, .card {
   gap: 1.125rem;
 }
 
@@ -457,7 +480,10 @@ body {
   align-items: center;
 }
 
-.flex-col, .board-table-card .subtasks .subtasks-list, .board-table-card .subtasks, .board-list .tasks-grid .subtasks-list, .board-timeline-card .timeline-task-card, .board-timeline-card .timeline-milestone-tasks, .kanban-task-item, .kanban-board-card .kanban-task-list, .kanban-archive-board .kanban-task-list, .kanban-board-card .kanban-stage-col .subtasks .subtasks-list, .kanban-archive-board .kanban-stage-col .subtasks .subtasks-list, .kanban-board-card .kanban-stage-col .subtasks, .kanban-archive-board .kanban-stage-col .subtasks, .board-list .card .list .subtasks .subtasks-list, .board-list .card .list .subtasks, .board-list .card .list .item, .board-list .card .list {
+.flex-col, .board-table-card .subtasks .subtasks-list, .board-table-card .subtasks, .board-list .tasks-grid .subtasks-list, .board-timeline-card .timeline-task-card, .board-timeline-card .timeline-milestone-tasks, .kanban-task-item, .kanban-board-card .kanban-task-list,
+.kanban-archive-board .kanban-task-list, .kanban-board-card .kanban-stage-col .subtasks .subtasks-list,
+.kanban-archive-board .kanban-stage-col .subtasks .subtasks-list, .kanban-board-card .kanban-stage-col .subtasks,
+.kanban-archive-board .kanban-stage-col .subtasks, .board-list .card .list .subtasks .subtasks-list, .board-list .card .list .subtasks, .board-list .card .list .item, .board-list .card .list {
   display: flex;
   flex-direction: column;
 }
@@ -469,6 +495,7 @@ body {
   min-width: 0;
   height: calc(100vh - 1.5rem);
   overflow-y: auto;
+  animation: app-surface-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .app-container .column {
   display: flex;
@@ -477,11 +504,13 @@ body {
   height: fit-content;
   padding-bottom: 2.25rem;
 }
-.app-container .column:first-child, .app-container .team {
+.app-container .column:first-child,
+.app-container .team {
   flex-shrink: 0;
   width: auto;
 }
-.app-container .activ-projects, .app-container .column:last-child {
+.app-container .activ-projects,
+.app-container .column:last-child {
   flex: 1;
   min-width: 0;
 }
@@ -502,6 +531,44 @@ body {
   align-items: start;
   flex-direction: column;
   position: relative;
+  will-change: transform;
+}
+
+/* Стагер появления карточек в контейнере */
+.cards > * {
+  animation: app-card-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.cards > *:nth-child(1) {
+  animation-delay: 40ms;
+}
+
+.cards > *:nth-child(2) {
+  animation-delay: 80ms;
+}
+
+.cards > *:nth-child(3) {
+  animation-delay: 120ms;
+}
+
+.cards > *:nth-child(4) {
+  animation-delay: 160ms;
+}
+
+.cards > *:nth-child(5) {
+  animation-delay: 200ms;
+}
+
+.cards > *:nth-child(6) {
+  animation-delay: 240ms;
+}
+
+.cards > *:nth-child(7) {
+  animation-delay: 280ms;
+}
+
+.cards > *:nth-child(8) {
+  animation-delay: 320ms;
 }
 
 .basic-and-signature {
@@ -559,7 +626,56 @@ body {
 .tasks-to-do-grid .col-task .auth-flow-card .modal-body select,
 .auth-flow-card .modal-body .tasks-to-do-grid .col-task select, .tasks-to-do-grid .col-task .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .tasks-to-do-grid .col-task button, .tasks-to-do-grid .col-task .custom-calendar-modal .custom-calendar, .custom-calendar-modal .tasks-to-do-grid .col-task .custom-calendar, .tasks-to-do-grid .col-task .board-timeline-card .timeline-assignee span, .board-timeline-card .timeline-assignee .tasks-to-do-grid .col-task span, .tasks-to-do-grid .col-task .board-timeline-card .timeline-task-card__name, .board-timeline-card .tasks-to-do-grid .col-task .timeline-task-card__name, .tasks-to-do-grid .col-task .board-timeline-card .timeline-date-chip, .board-timeline-card .tasks-to-do-grid .col-task .timeline-date-chip, .tasks-to-do-grid .col-task .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .tasks-to-do-grid .col-task .filter-input, .tasks-to-do-grid .col-task .modal-content .modal-body input, .modal-content .modal-body .tasks-to-do-grid .col-task input, .tasks-to-do-grid .col-task .tasks-grid .grid-row, .tasks-grid .tasks-to-do-grid .col-task .grid-row, .tasks-to-do-grid .col-task aside .submenu .nav-link, aside .submenu .tasks-to-do-grid .col-task .nav-link, .tasks-to-do-grid .col-task .button-basic,
 .tasks-to-do-grid .col-task .button-secondary,
-.tasks-to-do-grid .col-task .reset-filters-btn, .tasks-to-do-grid .col-task .tab-btn, .tasks-to-do-grid .col-task .text-signature, .tasks-to-do-grid .col-task .auth-hint, .tasks-to-do-grid .col-task .auth-field label, .auth-field .tasks-to-do-grid .col-task label, .tasks-to-do-grid .col-task .auth-step-pill, .tasks-to-do-grid .col-task .auth-mini-card__text, .tasks-to-do-grid .col-task .form-auth .checkbox-item .checkbox-text, .form-auth .checkbox-item .tasks-to-do-grid .col-task .checkbox-text, .tasks-to-do-grid .col-task .form-auth .checkbox-item a, .form-auth .checkbox-item .tasks-to-do-grid .col-task a, .tasks-to-do-grid .col-task .auth-motif-board__head, .tasks-to-do-grid .col-task .auth-hero__eyebrow, .tasks-to-do-grid .col-task .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .tasks-to-do-grid .col-task .weekdays, .tasks-to-do-grid .col-task .board-table-card .subtasks .checkbox-text, .board-table-card .subtasks .tasks-to-do-grid .col-task .checkbox-text, .tasks-to-do-grid .col-task .board-list .tasks-grid .subtasks-list span, .board-list .tasks-grid .subtasks-list .tasks-to-do-grid .col-task span, .tasks-to-do-grid .col-task .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .subtasks .subtasks-list .tasks-to-do-grid .col-task .checkbox-text, .tasks-to-do-grid .col-task .board-timeline-card .timeline-due, .board-timeline-card .tasks-to-do-grid .col-task .timeline-due, .tasks-to-do-grid .col-task .board-list .tasks-grid-wrapper > .empty-state, .board-list .tasks-to-do-grid .col-task .tasks-grid-wrapper > .empty-state, .tasks-to-do-grid .col-task .board-reports-card .reports-stat-label, .board-reports-card .tasks-to-do-grid .col-task .reports-stat-label, .tasks-to-do-grid .col-task .kanban-board-card .kanban-stage-col .subtasks .checkbox-text, .kanban-board-card .kanban-stage-col .subtasks .tasks-to-do-grid .col-task .checkbox-text, .tasks-to-do-grid .col-task .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text, .kanban-archive-board .kanban-stage-col .subtasks .tasks-to-do-grid .col-task .checkbox-text, .tasks-to-do-grid .col-task .kanban-board-card .kanban-count-chip, .kanban-board-card .tasks-to-do-grid .col-task .kanban-count-chip, .tasks-to-do-grid .col-task .kanban-archive-board .kanban-count-chip, .kanban-archive-board .tasks-to-do-grid .col-task .kanban-count-chip, .tasks-to-do-grid .col-task .kanban-board-card .kanban-count-badge, .kanban-board-card .tasks-to-do-grid .col-task .kanban-count-badge, .tasks-to-do-grid .col-task .kanban-archive-board .kanban-count-badge, .kanban-archive-board .tasks-to-do-grid .col-task .kanban-count-badge, .tasks-to-do-grid .col-task .board-list .card .list .subtasks .checkbox-text, .board-list .card .list .subtasks .tasks-to-do-grid .col-task .checkbox-text, .tasks-to-do-grid .col-task .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-range .tasks-to-do-grid .col-task .range-values, .tasks-to-do-grid .col-task .modal-content .modal-body .filter-section .filter-label, .modal-content .modal-body .filter-section .tasks-to-do-grid .col-task .filter-label, .tasks-to-do-grid .col-task .tasks-grid .grid-header, .tasks-grid .tasks-to-do-grid .col-task .grid-header, .tasks-to-do-grid .col-task .legends .legend, .legends .tasks-to-do-grid .col-task .legend, .tasks-to-do-grid .col-task .button-small,
+.tasks-to-do-grid .col-task .reset-filters-btn, .tasks-to-do-grid .col-task .tab-btn,
+.tasks-to-do-grid .col-task .text-signature,
+.tasks-to-do-grid .col-task .auth-hint,
+.tasks-to-do-grid .col-task .auth-field label,
+.auth-field .tasks-to-do-grid .col-task label,
+.tasks-to-do-grid .col-task .auth-step-pill,
+.tasks-to-do-grid .col-task .auth-mini-card__text,
+.tasks-to-do-grid .col-task .form-auth .checkbox-item .checkbox-text,
+.form-auth .checkbox-item .tasks-to-do-grid .col-task .checkbox-text,
+.tasks-to-do-grid .col-task .form-auth .checkbox-item a,
+.form-auth .checkbox-item .tasks-to-do-grid .col-task a,
+.tasks-to-do-grid .col-task .auth-motif-board__head,
+.tasks-to-do-grid .col-task .auth-hero__eyebrow,
+.tasks-to-do-grid .col-task .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays,
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .tasks-to-do-grid .col-task .weekdays,
+.tasks-to-do-grid .col-task .board-table-card .subtasks .checkbox-text,
+.board-table-card .subtasks .tasks-to-do-grid .col-task .checkbox-text,
+.tasks-to-do-grid .col-task .board-list .tasks-grid .subtasks-list span,
+.board-list .tasks-grid .subtasks-list .tasks-to-do-grid .col-task span,
+.tasks-to-do-grid .col-task .board-timeline-card .subtasks .subtasks-list .checkbox-text,
+.board-timeline-card .subtasks .subtasks-list .tasks-to-do-grid .col-task .checkbox-text,
+.tasks-to-do-grid .col-task .board-timeline-card .timeline-due,
+.board-timeline-card .tasks-to-do-grid .col-task .timeline-due,
+.tasks-to-do-grid .col-task .board-list .tasks-grid-wrapper > .empty-state,
+.board-list .tasks-to-do-grid .col-task .tasks-grid-wrapper > .empty-state,
+.tasks-to-do-grid .col-task .board-reports-card .reports-stat-label,
+.board-reports-card .tasks-to-do-grid .col-task .reports-stat-label,
+.tasks-to-do-grid .col-task .kanban-board-card .kanban-stage-col .subtasks .checkbox-text,
+.kanban-board-card .kanban-stage-col .subtasks .tasks-to-do-grid .col-task .checkbox-text,
+.tasks-to-do-grid .col-task .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text,
+.kanban-archive-board .kanban-stage-col .subtasks .tasks-to-do-grid .col-task .checkbox-text,
+.tasks-to-do-grid .col-task .kanban-board-card .kanban-count-chip,
+.kanban-board-card .tasks-to-do-grid .col-task .kanban-count-chip,
+.tasks-to-do-grid .col-task .kanban-archive-board .kanban-count-chip,
+.kanban-archive-board .tasks-to-do-grid .col-task .kanban-count-chip,
+.tasks-to-do-grid .col-task .kanban-board-card .kanban-count-badge,
+.kanban-board-card .tasks-to-do-grid .col-task .kanban-count-badge,
+.tasks-to-do-grid .col-task .kanban-archive-board .kanban-count-badge,
+.kanban-archive-board .tasks-to-do-grid .col-task .kanban-count-badge,
+.tasks-to-do-grid .col-task .board-list .card .list .subtasks .checkbox-text,
+.board-list .card .list .subtasks .tasks-to-do-grid .col-task .checkbox-text,
+.tasks-to-do-grid .col-task .modal-content .modal-body .filter-section .filter-range .range-values,
+.modal-content .modal-body .filter-section .filter-range .tasks-to-do-grid .col-task .range-values,
+.tasks-to-do-grid .col-task .modal-content .modal-body .filter-section .filter-label,
+.modal-content .modal-body .filter-section .tasks-to-do-grid .col-task .filter-label,
+.tasks-to-do-grid .col-task .tasks-grid .grid-header,
+.tasks-grid .tasks-to-do-grid .col-task .grid-header,
+.tasks-to-do-grid .col-task .legends .legend,
+.legends .tasks-to-do-grid .col-task .legend,
+.tasks-to-do-grid .col-task .button-small,
 .tasks-to-do-grid .col-event .text-basic,
 .tasks-to-do-grid .col-event .auth-link-row a,
 .auth-link-row .tasks-to-do-grid .col-event a,
@@ -1035,14 +1151,16 @@ aside .submenu .events-grid .col-event .nav-link,
 
 .tasks-grid {
   display: grid;
-  grid-template-columns: auto 1fr auto auto auto auto auto auto auto auto; /* Проект */
+  grid-template-columns: auto 1fr auto auto auto auto auto auto auto auto;
+  /* Проект */
   gap: 0.75rem;
   width: -moz-max-content;
   width: max-content;
   min-width: 100%;
   overflow-x: auto;
 }
-.tasks-grid .grid-header, .tasks-grid .grid-row {
+.tasks-grid .grid-header,
+.tasks-grid .grid-row {
   display: grid;
   grid-template-columns: subgrid;
   grid-column: 1/-1;
@@ -1211,7 +1329,8 @@ aside .submenu .events-grid .col-event .nav-link,
   overflow-x: auto;
   grid-template-columns: auto auto 1fr auto auto auto !important;
 }
-.tp-table-row-fallback .tasks-grid .grid-header, .tp-table-row-fallback .tasks-grid .grid-row {
+.tp-table-row-fallback .tasks-grid .grid-header,
+.tp-table-row-fallback .tasks-grid .grid-row {
   display: grid;
   grid-template-columns: auto auto 1fr auto auto auto;
   grid-column: 1/-1;
@@ -1441,6 +1560,26 @@ aside .submenu .events-grid .col-event .nav-link,
     opacity: 1;
   }
 }
+@keyframes app-surface-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes app-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(102px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
 .dropdown-menu {
   position: absolute;
   top: 0;
@@ -1585,14 +1724,17 @@ aside .submenu .events-grid .col-event .nav-link,
 .board-list .cards.dragging-active .card {
   width: calc((100% - 2.25rem) / 2);
 }
-.board-list .tables-view.dragging-active, .board-list .board-view.dragging-active {
+.board-list .tables-view.dragging-active,
+.board-list .board-view.dragging-active {
   -moz-column-count: 1;
        column-count: 1;
 }
-.board-list .tables-view.dragging-active .card, .board-list .board-view.dragging-active .card {
+.board-list .tables-view.dragging-active .card,
+.board-list .board-view.dragging-active .card {
   width: 100%;
 }
-.board-list .board-card-collapsible, .board-list .archive-board-body {
+.board-list .board-card-collapsible,
+.board-list .archive-board-body {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -1808,10 +1950,12 @@ aside .submenu .events-grid .col-event .nav-link,
        column-gap: 0;
 }
 
-.kanban-board-card, .kanban-archive-board {
+.kanban-board-card,
+.kanban-archive-board {
   width: 100%;
 }
-.kanban-board-card .kanban-stage-group, .kanban-archive-board .kanban-stage-group {
+.kanban-board-card .kanban-stage-group,
+.kanban-archive-board .kanban-stage-group {
   display: flex;
   align-items: stretch;
   flex: 1;
@@ -1819,50 +1963,60 @@ aside .submenu .events-grid .col-event .nav-link,
   min-width: 0;
 }
 .kanban-board-card .kanban-stage-group .kanban-column-head,
-.kanban-board-card .kanban-stage-group .kanban-stage-col, .kanban-archive-board .kanban-stage-group .kanban-column-head,
+.kanban-board-card .kanban-stage-group .kanban-stage-col,
+.kanban-archive-board .kanban-stage-group .kanban-column-head,
 .kanban-archive-board .kanban-stage-group .kanban-stage-col {
   flex: 1;
   min-width: 0;
 }
-.kanban-board-card .kanban-stage-group .kanban-stage-sep-line, .kanban-archive-board .kanban-stage-group .kanban-stage-sep-line {
+.kanban-board-card .kanban-stage-group .kanban-stage-sep-line,
+.kanban-archive-board .kanban-stage-group .kanban-stage-sep-line {
   align-self: stretch;
 }
-.kanban-board-card[data-kanban-scroll=true] .board-card-collapsible, .kanban-archive-board[data-kanban-scroll=true] .board-card-collapsible {
+.kanban-board-card[data-kanban-scroll=true] .board-card-collapsible,
+.kanban-archive-board[data-kanban-scroll=true] .board-card-collapsible {
   overflow-x: auto;
   overflow-y: visible;
 }
 .kanban-board-card[data-kanban-scroll=true] .kanban-columns-head,
-.kanban-board-card[data-kanban-scroll=true] .kanban-stages-row, .kanban-archive-board[data-kanban-scroll=true] .kanban-columns-head,
+.kanban-board-card[data-kanban-scroll=true] .kanban-stages-row,
+.kanban-archive-board[data-kanban-scroll=true] .kanban-columns-head,
 .kanban-archive-board[data-kanban-scroll=true] .kanban-stages-row {
   width: -moz-max-content;
   width: max-content;
   gap: 0.75rem;
 }
-.kanban-board-card[data-kanban-scroll=true] .kanban-stage-group, .kanban-archive-board[data-kanban-scroll=true] .kanban-stage-group {
+.kanban-board-card[data-kanban-scroll=true] .kanban-stage-group,
+.kanban-archive-board[data-kanban-scroll=true] .kanban-stage-group {
   flex: 0 0 22vw;
 }
-.kanban-board-card[data-kanban-scroll=true] .kanban-priority-section, .kanban-archive-board[data-kanban-scroll=true] .kanban-priority-section {
+.kanban-board-card[data-kanban-scroll=true] .kanban-priority-section,
+.kanban-archive-board[data-kanban-scroll=true] .kanban-priority-section {
   width: -moz-fit-content;
   width: fit-content;
   margin-right: 0.0625rem;
 }
-.kanban-board-card[data-kanban-scroll=true] .kanban-priority-section.normal, .kanban-archive-board[data-kanban-scroll=true] .kanban-priority-section.normal {
+.kanban-board-card[data-kanban-scroll=true] .kanban-priority-section.normal,
+.kanban-archive-board[data-kanban-scroll=true] .kanban-priority-section.normal {
   margin-right: 0.375rem;
 }
-.kanban-board-card .kanban-columns-head, .kanban-archive-board .kanban-columns-head {
+.kanban-board-card .kanban-columns-head,
+.kanban-archive-board .kanban-columns-head {
   display: flex;
   align-items: stretch;
   gap: 0.75rem;
   padding: 0 0.75rem 0.5625rem;
 }
-.kanban-board-card .kanban-column-head, .kanban-archive-board .kanban-column-head {
+.kanban-board-card .kanban-column-head,
+.kanban-archive-board .kanban-column-head {
   display: flex;
   align-items: stretch;
   gap: 0.75rem;
   min-width: 0;
   flex: 1;
 }
-.kanban-board-card .kanban-column-head-inner, .kanban-archive-board .kanban-column-head-inner {
+.kanban-board-card .kanban-column-head-inner,
+.kanban-archive-board .kanban-column-head-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1870,16 +2024,19 @@ aside .submenu .events-grid .col-event .nav-link,
   width: 100%;
   min-width: 0;
 }
-.kanban-board-card .kanban-column-head-inner img, .kanban-archive-board .kanban-column-head-inner img {
+.kanban-board-card .kanban-column-head-inner img,
+.kanban-archive-board .kanban-column-head-inner img {
   height: 1em;
 }
-.kanban-board-card .kanban-column-head-titles, .kanban-archive-board .kanban-column-head-titles {
+.kanban-board-card .kanban-column-head-titles,
+.kanban-archive-board .kanban-column-head-titles {
   display: flex;
   align-items: center;
   gap: 0.375rem;
   min-width: 0;
 }
-.kanban-board-card .kanban-count-badge, .kanban-archive-board .kanban-count-badge {
+.kanban-board-card .kanban-count-badge,
+.kanban-archive-board .kanban-count-badge {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
@@ -1890,7 +2047,8 @@ aside .submenu .events-grid .col-event .nav-link,
   color: #F6FBF2 !important;
   aspect-ratio: 1/1;
 }
-.kanban-board-card .kanban-stage-sep-line, .kanban-archive-board .kanban-stage-sep-line {
+.kanban-board-card .kanban-stage-sep-line,
+.kanban-archive-board .kanban-stage-sep-line {
   width: 0.0625rem;
   flex-shrink: 0;
   align-self: stretch;
@@ -1898,11 +2056,13 @@ aside .submenu .events-grid .col-event .nav-link,
   background: #2D3229;
   border-radius: 0.3rem;
 }
-.kanban-board-card .kanban-priority-section, .kanban-archive-board .kanban-priority-section {
+.kanban-board-card .kanban-priority-section,
+.kanban-archive-board .kanban-priority-section {
   padding: 0.75rem;
   border-top: 0.0625rem solid rgba(45, 50, 41, 0.15);
 }
-.kanban-board-card .kanban-priority-section.urgent, .kanban-archive-board .kanban-priority-section.urgent {
+.kanban-board-card .kanban-priority-section.urgent,
+.kanban-archive-board .kanban-priority-section.urgent {
   background: rgba(248, 8, 92, 0.05);
   border: 0.0625rem solid #F8085C;
 }
@@ -1910,18 +2070,45 @@ aside .submenu .events-grid .col-event .nav-link,
 .kanban-board-card .kanban-priority-section.urgent button .auth-flow-card .modal-body select,
 .auth-flow-card .modal-body .kanban-board-card .kanban-priority-section.urgent button select, .kanban-board-card .kanban-priority-section.urgent button .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .kanban-board-card .kanban-priority-section.urgent button button, .kanban-board-card .kanban-priority-section.urgent button .custom-calendar-modal .custom-calendar, .custom-calendar-modal .kanban-board-card .kanban-priority-section.urgent button .custom-calendar, .kanban-board-card .kanban-priority-section.urgent button .board-timeline-card .timeline-assignee span, .board-timeline-card .timeline-assignee .kanban-board-card .kanban-priority-section.urgent button span, .kanban-board-card .kanban-priority-section.urgent button .board-timeline-card .timeline-task-card__name, .board-timeline-card .kanban-board-card .kanban-priority-section.urgent button .timeline-task-card__name, .kanban-board-card .kanban-priority-section.urgent button .board-timeline-card .timeline-date-chip, .board-timeline-card .kanban-board-card .kanban-priority-section.urgent button .timeline-date-chip, .kanban-board-card .kanban-priority-section.urgent button aside .submenu .nav-link, aside .submenu .kanban-board-card .kanban-priority-section.urgent button .nav-link, .kanban-board-card .kanban-priority-section.urgent button .button-basic,
 .kanban-board-card .kanban-priority-section.urgent button .button-secondary,
-.kanban-board-card .kanban-priority-section.urgent button .reset-filters-btn, .kanban-board-card .kanban-priority-section.urgent button .tab-btn, .kanban-board-card .kanban-priority-section.urgent button .tasks-grid .grid-row, .tasks-grid .kanban-board-card .kanban-priority-section.urgent button .grid-row, .kanban-board-card .kanban-priority-section.urgent button .modal-content .modal-body input, .modal-content .modal-body .kanban-board-card .kanban-priority-section.urgent button input, .kanban-board-card .kanban-priority-section.urgent button .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .kanban-board-card .kanban-priority-section.urgent button .filter-input, .kanban-archive-board .kanban-priority-section.urgent button .text-basic, .kanban-archive-board .kanban-priority-section.urgent button .auth-link-row a, .auth-link-row .kanban-archive-board .kanban-priority-section.urgent button a, .kanban-archive-board .kanban-priority-section.urgent button .auth-flow-card .modal-body textarea, .auth-flow-card .modal-body .kanban-archive-board .kanban-priority-section.urgent button textarea,
+.kanban-board-card .kanban-priority-section.urgent button .reset-filters-btn, .kanban-board-card .kanban-priority-section.urgent button .tab-btn, .kanban-board-card .kanban-priority-section.urgent button .tasks-grid .grid-row, .tasks-grid .kanban-board-card .kanban-priority-section.urgent button .grid-row, .kanban-board-card .kanban-priority-section.urgent button .modal-content .modal-body input, .modal-content .modal-body .kanban-board-card .kanban-priority-section.urgent button input, .kanban-board-card .kanban-priority-section.urgent button .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .kanban-board-card .kanban-priority-section.urgent button .filter-input,
+.kanban-archive-board .kanban-priority-section.urgent button .text-basic,
+.kanban-archive-board .kanban-priority-section.urgent button .auth-link-row a,
+.auth-link-row .kanban-archive-board .kanban-priority-section.urgent button a,
+.kanban-archive-board .kanban-priority-section.urgent button .auth-flow-card .modal-body textarea,
+.auth-flow-card .modal-body .kanban-archive-board .kanban-priority-section.urgent button textarea,
 .kanban-archive-board .kanban-priority-section.urgent button .auth-flow-card .modal-body select,
-.auth-flow-card .modal-body .kanban-archive-board .kanban-priority-section.urgent button select, .kanban-archive-board .kanban-priority-section.urgent button .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .kanban-archive-board .kanban-priority-section.urgent button button, .kanban-archive-board .kanban-priority-section.urgent button .custom-calendar-modal .custom-calendar, .custom-calendar-modal .kanban-archive-board .kanban-priority-section.urgent button .custom-calendar, .kanban-archive-board .kanban-priority-section.urgent button .board-timeline-card .timeline-assignee span, .board-timeline-card .timeline-assignee .kanban-archive-board .kanban-priority-section.urgent button span, .kanban-archive-board .kanban-priority-section.urgent button .board-timeline-card .timeline-task-card__name, .board-timeline-card .kanban-archive-board .kanban-priority-section.urgent button .timeline-task-card__name, .kanban-archive-board .kanban-priority-section.urgent button .board-timeline-card .timeline-date-chip, .board-timeline-card .kanban-archive-board .kanban-priority-section.urgent button .timeline-date-chip, .kanban-archive-board .kanban-priority-section.urgent button aside .submenu .nav-link, aside .submenu .kanban-archive-board .kanban-priority-section.urgent button .nav-link, .kanban-archive-board .kanban-priority-section.urgent button .button-basic,
+.auth-flow-card .modal-body .kanban-archive-board .kanban-priority-section.urgent button select,
+.kanban-archive-board .kanban-priority-section.urgent button .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button,
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .kanban-archive-board .kanban-priority-section.urgent button button,
+.kanban-archive-board .kanban-priority-section.urgent button .custom-calendar-modal .custom-calendar,
+.custom-calendar-modal .kanban-archive-board .kanban-priority-section.urgent button .custom-calendar,
+.kanban-archive-board .kanban-priority-section.urgent button .board-timeline-card .timeline-assignee span,
+.board-timeline-card .timeline-assignee .kanban-archive-board .kanban-priority-section.urgent button span,
+.kanban-archive-board .kanban-priority-section.urgent button .board-timeline-card .timeline-task-card__name,
+.board-timeline-card .kanban-archive-board .kanban-priority-section.urgent button .timeline-task-card__name,
+.kanban-archive-board .kanban-priority-section.urgent button .board-timeline-card .timeline-date-chip,
+.board-timeline-card .kanban-archive-board .kanban-priority-section.urgent button .timeline-date-chip,
+.kanban-archive-board .kanban-priority-section.urgent button aside .submenu .nav-link,
+aside .submenu .kanban-archive-board .kanban-priority-section.urgent button .nav-link,
+.kanban-archive-board .kanban-priority-section.urgent button .button-basic,
 .kanban-archive-board .kanban-priority-section.urgent button .button-secondary,
-.kanban-archive-board .kanban-priority-section.urgent button .reset-filters-btn, .kanban-archive-board .kanban-priority-section.urgent button .tab-btn, .kanban-archive-board .kanban-priority-section.urgent button .tasks-grid .grid-row, .tasks-grid .kanban-archive-board .kanban-priority-section.urgent button .grid-row, .kanban-archive-board .kanban-priority-section.urgent button .modal-content .modal-body input, .modal-content .modal-body .kanban-archive-board .kanban-priority-section.urgent button input, .kanban-archive-board .kanban-priority-section.urgent button .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .kanban-archive-board .kanban-priority-section.urgent button .filter-input {
+.kanban-archive-board .kanban-priority-section.urgent button .reset-filters-btn,
+.kanban-archive-board .kanban-priority-section.urgent button .tab-btn,
+.kanban-archive-board .kanban-priority-section.urgent button .tasks-grid .grid-row,
+.tasks-grid .kanban-archive-board .kanban-priority-section.urgent button .grid-row,
+.kanban-archive-board .kanban-priority-section.urgent button .modal-content .modal-body input,
+.modal-content .modal-body .kanban-archive-board .kanban-priority-section.urgent button input,
+.kanban-archive-board .kanban-priority-section.urgent button .modal-content .modal-body .filter-section .filter-input,
+.modal-content .modal-body .filter-section .kanban-archive-board .kanban-priority-section.urgent button .filter-input {
   color: #F8085C;
   padding: 0;
 }
-.kanban-board-card .kanban-priority-section.urgent .kanban-count-chip, .kanban-archive-board .kanban-priority-section.urgent .kanban-count-chip {
+.kanban-board-card .kanban-priority-section.urgent .kanban-count-chip,
+.kanban-archive-board .kanban-priority-section.urgent .kanban-count-chip {
   background-color: #F8085C;
 }
-.kanban-board-card .kanban-priority-section.normal, .kanban-archive-board .kanban-priority-section.normal {
+.kanban-board-card .kanban-priority-section.normal,
+.kanban-archive-board .kanban-priority-section.normal {
   background: rgba(97, 160, 57, 0.05);
   border: 0.0625rem solid #61A039;
 }
@@ -1929,23 +2116,51 @@ aside .submenu .events-grid .col-event .nav-link,
 .kanban-board-card .kanban-priority-section.normal button .auth-flow-card .modal-body select,
 .auth-flow-card .modal-body .kanban-board-card .kanban-priority-section.normal button select, .kanban-board-card .kanban-priority-section.normal button .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .kanban-board-card .kanban-priority-section.normal button button, .kanban-board-card .kanban-priority-section.normal button .custom-calendar-modal .custom-calendar, .custom-calendar-modal .kanban-board-card .kanban-priority-section.normal button .custom-calendar, .kanban-board-card .kanban-priority-section.normal button .board-timeline-card .timeline-assignee span, .board-timeline-card .timeline-assignee .kanban-board-card .kanban-priority-section.normal button span, .kanban-board-card .kanban-priority-section.normal button .board-timeline-card .timeline-task-card__name, .board-timeline-card .kanban-board-card .kanban-priority-section.normal button .timeline-task-card__name, .kanban-board-card .kanban-priority-section.normal button .board-timeline-card .timeline-date-chip, .board-timeline-card .kanban-board-card .kanban-priority-section.normal button .timeline-date-chip, .kanban-board-card .kanban-priority-section.normal button aside .submenu .nav-link, aside .submenu .kanban-board-card .kanban-priority-section.normal button .nav-link, .kanban-board-card .kanban-priority-section.normal button .button-basic,
 .kanban-board-card .kanban-priority-section.normal button .button-secondary,
-.kanban-board-card .kanban-priority-section.normal button .reset-filters-btn, .kanban-board-card .kanban-priority-section.normal button .tab-btn, .kanban-board-card .kanban-priority-section.normal button .tasks-grid .grid-row, .tasks-grid .kanban-board-card .kanban-priority-section.normal button .grid-row, .kanban-board-card .kanban-priority-section.normal button .modal-content .modal-body input, .modal-content .modal-body .kanban-board-card .kanban-priority-section.normal button input, .kanban-board-card .kanban-priority-section.normal button .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .kanban-board-card .kanban-priority-section.normal button .filter-input, .kanban-archive-board .kanban-priority-section.normal button .text-basic, .kanban-archive-board .kanban-priority-section.normal button .auth-link-row a, .auth-link-row .kanban-archive-board .kanban-priority-section.normal button a, .kanban-archive-board .kanban-priority-section.normal button .auth-flow-card .modal-body textarea, .auth-flow-card .modal-body .kanban-archive-board .kanban-priority-section.normal button textarea,
+.kanban-board-card .kanban-priority-section.normal button .reset-filters-btn, .kanban-board-card .kanban-priority-section.normal button .tab-btn, .kanban-board-card .kanban-priority-section.normal button .tasks-grid .grid-row, .tasks-grid .kanban-board-card .kanban-priority-section.normal button .grid-row, .kanban-board-card .kanban-priority-section.normal button .modal-content .modal-body input, .modal-content .modal-body .kanban-board-card .kanban-priority-section.normal button input, .kanban-board-card .kanban-priority-section.normal button .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .kanban-board-card .kanban-priority-section.normal button .filter-input,
+.kanban-archive-board .kanban-priority-section.normal button .text-basic,
+.kanban-archive-board .kanban-priority-section.normal button .auth-link-row a,
+.auth-link-row .kanban-archive-board .kanban-priority-section.normal button a,
+.kanban-archive-board .kanban-priority-section.normal button .auth-flow-card .modal-body textarea,
+.auth-flow-card .modal-body .kanban-archive-board .kanban-priority-section.normal button textarea,
 .kanban-archive-board .kanban-priority-section.normal button .auth-flow-card .modal-body select,
-.auth-flow-card .modal-body .kanban-archive-board .kanban-priority-section.normal button select, .kanban-archive-board .kanban-priority-section.normal button .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .kanban-archive-board .kanban-priority-section.normal button button, .kanban-archive-board .kanban-priority-section.normal button .custom-calendar-modal .custom-calendar, .custom-calendar-modal .kanban-archive-board .kanban-priority-section.normal button .custom-calendar, .kanban-archive-board .kanban-priority-section.normal button .board-timeline-card .timeline-assignee span, .board-timeline-card .timeline-assignee .kanban-archive-board .kanban-priority-section.normal button span, .kanban-archive-board .kanban-priority-section.normal button .board-timeline-card .timeline-task-card__name, .board-timeline-card .kanban-archive-board .kanban-priority-section.normal button .timeline-task-card__name, .kanban-archive-board .kanban-priority-section.normal button .board-timeline-card .timeline-date-chip, .board-timeline-card .kanban-archive-board .kanban-priority-section.normal button .timeline-date-chip, .kanban-archive-board .kanban-priority-section.normal button aside .submenu .nav-link, aside .submenu .kanban-archive-board .kanban-priority-section.normal button .nav-link, .kanban-archive-board .kanban-priority-section.normal button .button-basic,
+.auth-flow-card .modal-body .kanban-archive-board .kanban-priority-section.normal button select,
+.kanban-archive-board .kanban-priority-section.normal button .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button,
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .kanban-archive-board .kanban-priority-section.normal button button,
+.kanban-archive-board .kanban-priority-section.normal button .custom-calendar-modal .custom-calendar,
+.custom-calendar-modal .kanban-archive-board .kanban-priority-section.normal button .custom-calendar,
+.kanban-archive-board .kanban-priority-section.normal button .board-timeline-card .timeline-assignee span,
+.board-timeline-card .timeline-assignee .kanban-archive-board .kanban-priority-section.normal button span,
+.kanban-archive-board .kanban-priority-section.normal button .board-timeline-card .timeline-task-card__name,
+.board-timeline-card .kanban-archive-board .kanban-priority-section.normal button .timeline-task-card__name,
+.kanban-archive-board .kanban-priority-section.normal button .board-timeline-card .timeline-date-chip,
+.board-timeline-card .kanban-archive-board .kanban-priority-section.normal button .timeline-date-chip,
+.kanban-archive-board .kanban-priority-section.normal button aside .submenu .nav-link,
+aside .submenu .kanban-archive-board .kanban-priority-section.normal button .nav-link,
+.kanban-archive-board .kanban-priority-section.normal button .button-basic,
 .kanban-archive-board .kanban-priority-section.normal button .button-secondary,
-.kanban-archive-board .kanban-priority-section.normal button .reset-filters-btn, .kanban-archive-board .kanban-priority-section.normal button .tab-btn, .kanban-archive-board .kanban-priority-section.normal button .tasks-grid .grid-row, .tasks-grid .kanban-archive-board .kanban-priority-section.normal button .grid-row, .kanban-archive-board .kanban-priority-section.normal button .modal-content .modal-body input, .modal-content .modal-body .kanban-archive-board .kanban-priority-section.normal button input, .kanban-archive-board .kanban-priority-section.normal button .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .kanban-archive-board .kanban-priority-section.normal button .filter-input {
+.kanban-archive-board .kanban-priority-section.normal button .reset-filters-btn,
+.kanban-archive-board .kanban-priority-section.normal button .tab-btn,
+.kanban-archive-board .kanban-priority-section.normal button .tasks-grid .grid-row,
+.tasks-grid .kanban-archive-board .kanban-priority-section.normal button .grid-row,
+.kanban-archive-board .kanban-priority-section.normal button .modal-content .modal-body input,
+.modal-content .modal-body .kanban-archive-board .kanban-priority-section.normal button input,
+.kanban-archive-board .kanban-priority-section.normal button .modal-content .modal-body .filter-section .filter-input,
+.modal-content .modal-body .filter-section .kanban-archive-board .kanban-priority-section.normal button .filter-input {
   color: #61A039;
 }
-.kanban-board-card .kanban-priority-section.normal .kanban-count-chip, .kanban-archive-board .kanban-priority-section.normal .kanban-count-chip {
+.kanban-board-card .kanban-priority-section.normal .kanban-count-chip,
+.kanban-archive-board .kanban-priority-section.normal .kanban-count-chip {
   background-color: #61A039;
 }
-.kanban-board-card .kanban-priority-head, .kanban-archive-board .kanban-priority-head {
+.kanban-board-card .kanban-priority-head,
+.kanban-archive-board .kanban-priority-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 0 0.5625rem;
 }
-.kanban-board-card .kanban-priority-toggle, .kanban-archive-board .kanban-priority-toggle {
+.kanban-board-card .kanban-priority-toggle,
+.kanban-archive-board .kanban-priority-toggle {
   display: inline-flex;
   align-items: center;
   gap: 0.5625rem;
@@ -1955,7 +2170,8 @@ aside .submenu .events-grid .col-event .nav-link,
   margin: 0;
   cursor: pointer;
 }
-.kanban-board-card .kanban-priority-arrow, .kanban-archive-board .kanban-priority-arrow {
+.kanban-board-card .kanban-priority-arrow,
+.kanban-archive-board .kanban-priority-arrow {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1963,7 +2179,8 @@ aside .submenu .events-grid .col-event .nav-link,
   width: 0.75rem;
   height: 0.75rem;
 }
-.kanban-board-card .kanban-priority-arrow::before, .kanban-archive-board .kanban-priority-arrow::before {
+.kanban-board-card .kanban-priority-arrow::before,
+.kanban-archive-board .kanban-priority-arrow::before {
   content: "";
   display: block;
   width: 100%;
@@ -1973,16 +2190,20 @@ aside .submenu .events-grid .col-event .nav-link,
   background-position: center;
   transition: transform 0.2s ease;
 }
-.kanban-board-card .kanban-priority-toggle--urgent .kanban-priority-arrow::before, .kanban-archive-board .kanban-priority-toggle--urgent .kanban-priority-arrow::before {
+.kanban-board-card .kanban-priority-toggle--urgent .kanban-priority-arrow::before,
+.kanban-archive-board .kanban-priority-toggle--urgent .kanban-priority-arrow::before {
   background-image: url("/static/source/icons/arrow_pink_cropped.svg");
 }
-.kanban-board-card .kanban-priority-toggle--normal .kanban-priority-arrow::before, .kanban-archive-board .kanban-priority-toggle--normal .kanban-priority-arrow::before {
+.kanban-board-card .kanban-priority-toggle--normal .kanban-priority-arrow::before,
+.kanban-archive-board .kanban-priority-toggle--normal .kanban-priority-arrow::before {
   background-image: url("/static/source/icons/arrow_green_cropped.svg");
 }
-.kanban-board-card .kanban-priority-toggle.open .kanban-priority-arrow::before, .kanban-archive-board .kanban-priority-toggle.open .kanban-priority-arrow::before {
+.kanban-board-card .kanban-priority-toggle.open .kanban-priority-arrow::before,
+.kanban-archive-board .kanban-priority-toggle.open .kanban-priority-arrow::before {
   transform: rotate(-90deg);
 }
-.kanban-board-card .kanban-count-chip, .kanban-archive-board .kanban-count-chip {
+.kanban-board-card .kanban-count-chip,
+.kanban-archive-board .kanban-count-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1991,41 +2212,50 @@ aside .submenu .events-grid .col-event .nav-link,
   background: #7F8C73;
   color: #F6FBF2;
 }
-.kanban-board-card .kanban-stages-row, .kanban-archive-board .kanban-stages-row {
+.kanban-board-card .kanban-stages-row,
+.kanban-archive-board .kanban-stages-row {
   display: flex;
   align-items: stretch;
   gap: 0.75rem;
   padding-bottom: 0.375rem;
 }
-.kanban-board-card .kanban-stage-col, .kanban-archive-board .kanban-stage-col {
+.kanban-board-card .kanban-stage-col,
+.kanban-archive-board .kanban-stage-col {
   flex: 1;
   min-width: 0;
 }
-.kanban-board-card .kanban-stage-col .subtasks, .kanban-archive-board .kanban-stage-col .subtasks {
+.kanban-board-card .kanban-stage-col .subtasks,
+.kanban-archive-board .kanban-stage-col .subtasks {
   gap: 0.375rem;
 }
-.kanban-board-card .kanban-stage-col .subtasks .count, .kanban-archive-board .kanban-stage-col .subtasks .count {
+.kanban-board-card .kanban-stage-col .subtasks .count,
+.kanban-archive-board .kanban-stage-col .subtasks .count {
   display: flex;
   justify-content: space-between;
 }
-.kanban-board-card .kanban-stage-col .subtasks .subtasks-list, .kanban-archive-board .kanban-stage-col .subtasks .subtasks-list {
+.kanban-board-card .kanban-stage-col .subtasks .subtasks-list,
+.kanban-archive-board .kanban-stage-col .subtasks .subtasks-list {
   gap: 0.25rem;
 }
-.kanban-board-card .kanban-stage-col .subtasks .subtasks-list .custom-checkbox, .kanban-archive-board .kanban-stage-col .subtasks .subtasks-list .custom-checkbox {
+.kanban-board-card .kanban-stage-col .subtasks .subtasks-list .custom-checkbox,
+.kanban-archive-board .kanban-stage-col .subtasks .subtasks-list .custom-checkbox {
   width: 1rem;
   height: 1rem;
   border: 0.125rem solid #2D3229;
 }
-.kanban-board-card .kanban-stage-col .subtasks .subtasks-list .custom-checkbox::after, .kanban-archive-board .kanban-stage-col .subtasks .subtasks-list .custom-checkbox::after {
+.kanban-board-card .kanban-stage-col .subtasks .subtasks-list .custom-checkbox::after,
+.kanban-archive-board .kanban-stage-col .subtasks .subtasks-list .custom-checkbox::after {
   width: 0.5625rem;
   height: 0.375rem;
 }
-.kanban-board-card .kanban-stage-col .subtasks .name, .kanban-archive-board .kanban-stage-col .subtasks .name {
+.kanban-board-card .kanban-stage-col .subtasks .name,
+.kanban-archive-board .kanban-stage-col .subtasks .name {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
 }
-.kanban-board-card .kanban-stage-col .subtasks .name::after, .kanban-archive-board .kanban-stage-col .subtasks .name::after {
+.kanban-board-card .kanban-stage-col .subtasks .name::after,
+.kanban-archive-board .kanban-stage-col .subtasks .name::after {
   content: "";
   display: inline-block;
   height: 1em;
@@ -2037,35 +2267,43 @@ aside .submenu .events-grid .col-event .nav-link,
   flex-shrink: 0;
   transition: transform 0.2s ease;
 }
-.kanban-board-card .kanban-stage-col .subtasks .name.open::after, .kanban-archive-board .kanban-stage-col .subtasks .name.open::after {
+.kanban-board-card .kanban-stage-col .subtasks .name.open::after,
+.kanban-archive-board .kanban-stage-col .subtasks .name.open::after {
   transform: rotate(-90deg);
 }
-.kanban-board-card .kanban-stage-col .subtasks .progress-line, .kanban-archive-board .kanban-stage-col .subtasks .progress-line {
+.kanban-board-card .kanban-stage-col .subtasks .progress-line,
+.kanban-archive-board .kanban-stage-col .subtasks .progress-line {
   display: flex;
   width: 100%;
 }
-.kanban-board-card .kanban-stage-col .subtasks .progress-line .completed, .kanban-archive-board .kanban-stage-col .subtasks .progress-line .completed {
+.kanban-board-card .kanban-stage-col .subtasks .progress-line .completed,
+.kanban-archive-board .kanban-stage-col .subtasks .progress-line .completed {
   border-bottom: 0.19rem solid #61A039;
 }
-.kanban-board-card .kanban-stage-col .subtasks .progress-line .todo, .kanban-archive-board .kanban-stage-col .subtasks .progress-line .todo {
+.kanban-board-card .kanban-stage-col .subtasks .progress-line .todo,
+.kanban-archive-board .kanban-stage-col .subtasks .progress-line .todo {
   border-bottom: 0.19rem solid rgba(127, 140, 115, 0.5);
 }
-.kanban-board-card .kanban-stage-col .tag, .kanban-archive-board .kanban-stage-col .tag {
+.kanban-board-card .kanban-stage-col .tag,
+.kanban-archive-board .kanban-stage-col .tag {
   width: 100%;
   display: flex;
   justify-content: flex-end;
   align-items: stretch;
   gap: 0.75rem;
 }
-.kanban-board-card .kanban-stage-col .tag .executor, .kanban-archive-board .kanban-stage-col .tag .executor {
+.kanban-board-card .kanban-stage-col .tag .executor,
+.kanban-archive-board .kanban-stage-col .tag .executor {
   display: flex;
   align-items: center;
 }
-.kanban-board-card .kanban-stage-col .tag .executor img, .kanban-archive-board .kanban-stage-col .tag .executor img {
+.kanban-board-card .kanban-stage-col .tag .executor img,
+.kanban-archive-board .kanban-stage-col .tag .executor img {
   height: calc(1em + 0.75rem);
 }
 .kanban-board-card .kanban-stage-col .tag .priority-high,
-.kanban-board-card .kanban-stage-col .tag .priority-normal, .kanban-archive-board .kanban-stage-col .tag .priority-high,
+.kanban-board-card .kanban-stage-col .tag .priority-normal,
+.kanban-archive-board .kanban-stage-col .tag .priority-high,
 .kanban-archive-board .kanban-stage-col .tag .priority-normal {
   display: flex;
   justify-content: center;
@@ -2074,13 +2312,16 @@ aside .submenu .events-grid .col-event .nav-link,
   width: calc(1em + 0.75rem);
   color: #F6FBF2;
 }
-.kanban-board-card .kanban-stage-col .tag .priority-high, .kanban-archive-board .kanban-stage-col .tag .priority-high {
+.kanban-board-card .kanban-stage-col .tag .priority-high,
+.kanban-archive-board .kanban-stage-col .tag .priority-high {
   background-color: #F8085C;
 }
-.kanban-board-card .kanban-stage-col .tag .priority-normal, .kanban-archive-board .kanban-stage-col .tag .priority-normal {
+.kanban-board-card .kanban-stage-col .tag .priority-normal,
+.kanban-archive-board .kanban-stage-col .tag .priority-normal {
   background-color: rgba(97, 160, 57, 0.5);
 }
-.kanban-board-card .kanban-stage-col .tag .deadline, .kanban-archive-board .kanban-stage-col .tag .deadline {
+.kanban-board-card .kanban-stage-col .tag .deadline,
+.kanban-archive-board .kanban-stage-col .tag .deadline {
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -2091,7 +2332,8 @@ aside .submenu .events-grid .col-event .nav-link,
   color: #7F8C73;
   background: rgba(97, 160, 57, 0.15);
 }
-.kanban-board-card .kanban-stage-col .tag .deadline::before, .kanban-archive-board .kanban-stage-col .tag .deadline::before {
+.kanban-board-card .kanban-stage-col .tag .deadline::before,
+.kanban-archive-board .kanban-stage-col .tag .deadline::before {
   content: "";
   display: inline-block;
   width: 1em;
@@ -2102,42 +2344,52 @@ aside .submenu .events-grid .col-event .nav-link,
   background-position: center;
   flex-shrink: 0;
 }
-.kanban-board-card .kanban-task-list, .kanban-archive-board .kanban-task-list {
+.kanban-board-card .kanban-task-list,
+.kanban-archive-board .kanban-task-list {
   gap: 0.75rem;
   min-height: 2.25rem;
 }
-.kanban-board-card .kanban-tables-body, .kanban-archive-board .kanban-tables-body {
+.kanban-board-card .kanban-tables-body,
+.kanban-archive-board .kanban-tables-body {
   gap: 0.5625rem;
 }
-.kanban-board-card .kanban-table-add-task-footer, .kanban-archive-board .kanban-table-add-task-footer {
+.kanban-board-card .kanban-table-add-task-footer,
+.kanban-archive-board .kanban-table-add-task-footer {
   margin-top: 0.375rem;
 }
-.kanban-board-card .grid-row, .kanban-archive-board .grid-row {
+.kanban-board-card .grid-row,
+.kanban-archive-board .grid-row {
   padding: 0.25rem 0;
 }
-.kanban-board-card .kanban-divider, .kanban-archive-board .kanban-divider {
+.kanban-board-card .kanban-divider,
+.kanban-archive-board .kanban-divider {
   height: 0.0625rem;
   background: rgba(97, 160, 57, 0.5);
 }
-.kanban-board-card .kanban-stage-table, .kanban-archive-board .kanban-stage-table {
+.kanban-board-card .kanban-stage-table,
+.kanban-archive-board .kanban-stage-table {
   padding: 0 0 0.75rem;
 }
-.kanban-board-card .kanban-stage-table-head, .kanban-archive-board .kanban-stage-table-head {
+.kanban-board-card .kanban-stage-table-head,
+.kanban-archive-board .kanban-stage-table-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0.5625rem 0;
 }
-.kanban-board-card .kanban-stage-table-head img, .kanban-archive-board .kanban-stage-table-head img {
+.kanban-board-card .kanban-stage-table-head img,
+.kanban-archive-board .kanban-stage-table-head img {
   height: 1.125rem;
 }
-.kanban-board-card .kanban-stage-table-head-main, .kanban-archive-board .kanban-stage-table-head-main {
+.kanban-board-card .kanban-stage-table-head-main,
+.kanban-archive-board .kanban-stage-table-head-main {
   display: flex;
   align-items: center;
   gap: 0.375rem;
   min-width: 0;
 }
-.kanban-board-card .tasks-grid.kanban-tasks-grid, .kanban-archive-board .tasks-grid.kanban-tasks-grid {
+.kanban-board-card .tasks-grid.kanban-tasks-grid,
+.kanban-archive-board .tasks-grid.kanban-tasks-grid {
   grid-template-columns: auto 1fr auto auto auto !important;
 }
 
@@ -3385,7 +3637,8 @@ aside .submenu .events-grid .col-event .nav-link,
 .form-auth .checkbox-item .checkbox-text:hover a {
   color: #61A039;
 }
-.form-auth .checkbox-item:hover .checkbox-text, .form-auth .checkbox-item:hover a {
+.form-auth .checkbox-item:hover .checkbox-text,
+.form-auth .checkbox-item:hover a {
   color: #61A039;
 }
 
@@ -3677,5 +3930,12 @@ aside .submenu .events-grid .col-event .nav-link,
   }
   .auth-motif-shield-svg__check {
     stroke-opacity: 0.55 !important;
+  }
+  .app-container,
+  .card,
+  .cards > * {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
   }
 }/*# sourceMappingURL=style.css.map */

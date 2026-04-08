@@ -29,7 +29,7 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    justify-content:flex-start;
+    justify-content: flex-start;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -74,14 +74,15 @@ body {
     flex-direction: column;
 }
 
-.app-container{
+.app-container {
     padding: $space-48 $space-64;
-    flex: 1; 
+    flex: 1;
     display: flex;
     min-width: 0;
     height: calc(100vh - $space-32);
     overflow-y: auto;
     @extend .gap-32;
+    animation: app-surface-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 
     .column {
         display: flex;
@@ -91,14 +92,16 @@ body {
         padding-bottom: $space-48;
     }
 
-    .column:first-child, .team {
+    .column:first-child,
+    .team {
         flex-shrink: 0;
         width: auto;
     }
 
-    .activ-projects, .column:last-child {
+    .activ-projects,
+    .column:last-child {
         flex: 1;
-        min-width: 0; 
+        min-width: 0;
     }
 
     &::-webkit-scrollbar {
@@ -111,13 +114,51 @@ body {
     -ms-overflow-style: none;
 }
 
-.card{
+.card {
     padding: $space-32;
     @extend .border-dark-2;
     @extend .br-10;
     @extend .gap-24;
     @include flex-start(column);
     position: relative;
+    will-change: transform;
+}
+
+/* Стагер появления карточек в контейнере */
+.cards>* {
+    animation: app-card-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.cards>*:nth-child(1) {
+    animation-delay: 40ms;
+}
+
+.cards>*:nth-child(2) {
+    animation-delay: 80ms;
+}
+
+.cards>*:nth-child(3) {
+    animation-delay: 120ms;
+}
+
+.cards>*:nth-child(4) {
+    animation-delay: 160ms;
+}
+
+.cards>*:nth-child(5) {
+    animation-delay: 200ms;
+}
+
+.cards>*:nth-child(6) {
+    animation-delay: 240ms;
+}
+
+.cards>*:nth-child(7) {
+    animation-delay: 280ms;
+}
+
+.cards>*:nth-child(8) {
+    animation-delay: 320ms;
 }
 
 .basic-and-signature {
@@ -164,7 +205,8 @@ body {
             gap: $space-2;
         }
 
-        .text-basic, .text-signature {
+        .text-basic,
+        .text-signature {
             @include ellipsis-single-line(100%);
         }
     }
@@ -190,7 +232,7 @@ body {
     }
 
     .todo {
-        @extend .bg-light-gray;   
+        @extend .bg-light-gray;
     }
 
     .done,
@@ -233,8 +275,9 @@ body {
 .status-online {
     position: relative;
     display: inline-block;
+
     img {
-        display: block;   
+        display: block;
     }
 
     &:after {
@@ -246,7 +289,7 @@ body {
         aspect-ratio: 1 / 1;
         background-color: $green;
         border-radius: 50%;
-        pointer-events: none;   
+        pointer-events: none;
     }
 }
 
@@ -303,7 +346,7 @@ body {
     width: 100%;
 
     .grid-row {
-        display: contents; 
+        display: contents;
     }
 
     .col-task {
@@ -363,9 +406,9 @@ body {
     align-items: center;
     flex-wrap: wrap;
 
-    > .button-basic[data-tab].active {
+    >.button-basic[data-tab].active {
         box-shadow: none;
-        background-color: $light-light-green;    
+        background-color: $light-light-green;
     }
 }
 
@@ -425,23 +468,34 @@ body {
 
 .tasks-grid {
     display: grid;
-        grid-template-columns:
-        auto        /* ID */
-        1fr         /* Наименование - занимает всё доступное место */
-        auto        /* Статус */
-        auto        /* Срок */
-        auto        /* Приоритет */
-        auto        /* Сложность */
-        auto        /* Время */
-        auto        /* Исполнитель */
-        auto        /* Создатель */
-        auto;       /* Проект */
+    grid-template-columns:
+        auto
+        /* ID */
+        1fr
+        /* Наименование - занимает всё доступное место */
+        auto
+        /* Статус */
+        auto
+        /* Срок */
+        auto
+        /* Приоритет */
+        auto
+        /* Сложность */
+        auto
+        /* Время */
+        auto
+        /* Исполнитель */
+        auto
+        /* Создатель */
+        auto;
+    /* Проект */
     gap: $space-16;
     width: max-content;
     min-width: 100%;
     overflow-x: auto;
 
-    .grid-header, .grid-row{
+    .grid-header,
+    .grid-row {
         display: grid;
         grid-template-columns: subgrid;
         grid-column: 1 / -1;
@@ -460,11 +514,11 @@ body {
             gap: $space-4;
             cursor: pointer;
             user-select: none;
-    
+
             .header-title {
                 display: inline-block;
             }
-    
+
             .sort-icon {
                 display: inline-flex;
                 align-items: center;
@@ -473,7 +527,7 @@ body {
                 height: $space-16;
                 opacity: 0;
                 transition: opacity 0.2s ease;
-    
+
                 img {
                     width: $space-16;
                     height: $space-16;
@@ -481,22 +535,22 @@ body {
                     transition: transform 0.2s ease;
                 }
             }
-    
+
             &:hover .sort-icon {
                 opacity: 0.5;
             }
-    
+
             &.sort-asc .sort-icon {
                 opacity: 1;
-    
+
                 img {
                     transform: rotate(0deg);
                 }
             }
-    
+
             &.sort-desc .sort-icon {
                 opacity: 1;
-    
+
                 img {
                     transform: rotate(180deg);
                 }
@@ -627,7 +681,7 @@ body {
             img {
                 width: $space-32;
                 height: $space-32;
-                border-radius: 50%;           
+                border-radius: 50%;
             }
         }
     }
@@ -647,7 +701,8 @@ body {
         // Дублируем значение из `.board-list .tasks-grid` чтобы клон выглядел 1-в-1.
         grid-template-columns: auto auto 1fr auto auto auto !important;
 
-        .grid-header, .grid-row {
+        .grid-header,
+        .grid-row {
             display: grid;
             // В fallback-клоне не полагаемся на subgrid (может не примениться вне исходного контекста),
             // поэтому задаём колонки явно.
@@ -706,7 +761,7 @@ body {
     background: rgba($dark-gray, 0.3);
     backdrop-filter: blur($space-2);
     display: none;
-    justify-content: center; 
+    justify-content: center;
     align-items: center;
     z-index: 2000;
 
@@ -724,7 +779,7 @@ body {
     display: flex;
     flex-direction: column;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    animation: fadeInScale 0.3s ease; 
+    animation: fadeInScale 0.3s ease;
 
     .modal-header {
         display: flex;
@@ -800,7 +855,7 @@ body {
                 color: rgba($dark-gray, 0.5);
             }
         }
-    
+
         scrollbar-width: none;
         -ms-overflow-style: none;
 
@@ -895,7 +950,7 @@ body {
                 }
             }
         }
-    }     
+    }
 }
 
 @keyframes fadeInScale {
@@ -920,6 +975,29 @@ body {
     }
 }
 
+@keyframes app-surface-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes app-card-in {
+    from {
+        opacity: 0;
+        transform: translateY(102px) scale(0.99);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
 
 
 .dropdown-menu {
@@ -966,11 +1044,11 @@ body {
             justify-content: center;
             transition: all 0.2s ease;
             border-radius: $radius-sm;
-        
+
             &:hover {
                 transform: scale(0.9);
             }
-        
+
             img {
                 display: block;
                 width: $space-24;
@@ -1000,7 +1078,7 @@ body {
 
         &.pink:hover {
             background: rgba($pink, 0.1);
-            color: $pink;   
+            color: $pink;
         }
     }
 }
@@ -1076,7 +1154,7 @@ body {
         &.dragging-active {
             gap: $space-48;
             column-count: unset;
-            display: flex;      
+            display: flex;
             flex-wrap: wrap;
 
             .card {
@@ -1085,8 +1163,9 @@ body {
         }
     }
 
-    .tables-view, .board-view{
-        &.dragging-active {      
+    .tables-view,
+    .board-view {
+        &.dragging-active {
             column-count: 1;
 
             .card {
@@ -1095,7 +1174,8 @@ body {
         }
     }
 
-    .board-card-collapsible, .archive-board-body{
+    .board-card-collapsible,
+    .archive-board-body {
         display: flex;
         flex-direction: column;
         width: 100%;
@@ -1112,17 +1192,17 @@ body {
         &:active {
             cursor: grabbing;
         }
-        
+
         &.dragging {
             opacity: 0.5;
             cursor: grabbing;
         }
-        
+
         &.drag-over {
             transform: translateY($space-16);
             transition: transform 0.2s ease;
         }
-        
+
         &.task-drag-over {
             background: rgba($green, 0.1);
             border: 2px dashed $green;
@@ -1169,13 +1249,13 @@ body {
                 &:active {
                     cursor: grabbing;
                 }
-                
+
                 &.task-dragging {
                     opacity: 0.5;
                     cursor: grabbing;
                     transform: scale(0.98);
                 }
-                
+
                 &.task-drag-over {
                     transform: translateY(8px);
                     border: 2px dashed $green;
@@ -1320,7 +1400,7 @@ body {
         border: 2px dashed $green;
         transform: scale(0.98);
     }
-    
+
     .sortable-drag {
         opacity: 0.7;
         transform: rotate(2deg);
@@ -1354,7 +1434,8 @@ body {
     }
 }
 
-.kanban-board-card, .kanban-archive-board {
+.kanban-board-card,
+.kanban-archive-board {
     width: 100%;
 
     // Каждая колонка этапа + её разделитель живут в .kanban-stage-group
@@ -1472,7 +1553,7 @@ body {
             border: $space-1 solid $pink;
             @extend .br-10;
 
-            button .text-basic{
+            button .text-basic {
                 color: $pink;
                 padding: 0;
             }
@@ -1487,7 +1568,7 @@ body {
             border: $space-1 solid $green;
             @extend .br-10;
 
-            button .text-basic{
+            button .text-basic {
                 color: $green;
             }
 
@@ -1642,17 +1723,17 @@ body {
             justify-content: flex-end;
             align-items: stretch;
             gap: $space-16;
-    
+
             .executor {
                 display: flex;
                 align-items: center;
-    
+
                 img {
                     height: calc(1em + $space-8 * 2);
                     @extend .br-5;
                 }
             }
-    
+
             .priority-high,
             .priority-normal {
                 @extend .br-5;
@@ -1663,15 +1744,15 @@ body {
                 width: calc(1em + $space-8 * 2);
                 color: $light-light-green;
             }
-    
+
             .priority-high {
                 background-color: $pink;
             }
-    
+
             .priority-normal {
                 background-color: rgba($green, 0.5);
             }
-    
+
             .deadline {
                 display: flex;
                 flex-direction: row;
@@ -1683,7 +1764,7 @@ body {
                 color: $light-gray;
                 background: rgba($green, 0.15);
                 @extend .br-5;
-    
+
                 &::before {
                     content: '';
                     display: inline-block;
@@ -1705,11 +1786,11 @@ body {
         min-height: $space-48;
     }
 
-    .kanban-tables-body{
+    .kanban-tables-body {
         gap: $space-12;
     }
 
-    .kanban-table-add-task-footer{
+    .kanban-table-add-task-footer {
         margin-top: $space-8;
     }
 
@@ -1737,7 +1818,7 @@ body {
         }
     }
 
-    .kanban-stage-table-head-main{
+    .kanban-stage-table-head-main {
         display: flex;
         align-items: center;
         gap: 0.375rem;
@@ -1813,11 +1894,7 @@ body {
 
 .tasks-grid.reports-assignee-grid {
     grid-template-columns:
-        auto
-        auto
-        auto
-        auto
-        auto !important;
+        auto auto auto auto auto !important;
 
     .grid-row {
         padding: $space-4;
@@ -1847,12 +1924,7 @@ body {
 
 .tasks-grid.reports-kanban-grid {
     grid-template-columns:
-        minmax(8rem, 1.2fr)
-        auto
-        auto
-        auto
-        auto
-        auto !important;
+        minmax(8rem, 1.2fr) auto auto auto auto auto !important;
 
     .col-board {
         min-width: 0;
@@ -1968,7 +2040,7 @@ body {
     }
 }
 
-.board-list .tasks-grid-wrapper > .empty-state {
+.board-list .tasks-grid-wrapper>.empty-state {
     padding: $space-24 $space-16;
     @extend .text-signature;
 }
@@ -2217,7 +2289,7 @@ body {
     }
 }
 
-.board-list .tasks-grid{
+.board-list .tasks-grid {
     grid-template-columns: auto auto 1fr auto auto auto !important;
 
     .name {
@@ -2268,12 +2340,12 @@ body {
     }
 }
 
-.table-rows{
+.table-rows {
     display: contents;
 }
 
 .board-table-card {
-    .board-table-container{
+    .board-table-container {
         width: 100%;
     }
 
@@ -2287,7 +2359,7 @@ body {
         }
 
         .subtasks-list {
-            @extend .flex-col,;
+            @extend .flex-col, ;
             gap: $space-4;
 
             .custom-checkbox {
@@ -2331,7 +2403,7 @@ body {
     }
 }
 
-.form-add-task{
+.form-add-task {
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -2349,7 +2421,7 @@ body {
         height: $space-24;
     }
 
-    .tag{
+    .tag {
         display: none;
         justify-content: flex-end;
         align-items: center;
@@ -2515,24 +2587,29 @@ body {
     0% {
         background-position: 0% 50%;
     }
+
     50% {
         background-position: 100% 50%;
     }
+
     100% {
         background-position: 0% 50%;
     }
 }
 
 @keyframes auth-blob-a {
+
     0%,
     100% {
         transform: translate(0, 0) scale(1);
         opacity: 0.55;
     }
+
     33% {
         transform: translate(8%, -6%) scale(1.08);
         opacity: 0.7;
     }
+
     66% {
         transform: translate(-5%, 4%) scale(0.92);
         opacity: 0.5;
@@ -2540,11 +2617,13 @@ body {
 }
 
 @keyframes auth-blob-b {
+
     0%,
     100% {
         transform: translate(0, 0) scale(1);
         opacity: 0.45;
     }
+
     50% {
         transform: translate(-10%, 8%) scale(1.12);
         opacity: 0.65;
@@ -2557,11 +2636,13 @@ body {
         transform: translateY(28px) scale(0.94);
         filter: blur(10px);
     }
+
     70% {
         opacity: 1;
         transform: translateY(-4px) scale(1.01);
         filter: blur(0);
     }
+
     100% {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -2570,20 +2651,24 @@ body {
 }
 
 @keyframes auth-step-glow {
+
     0%,
     100% {
         box-shadow: 0 0 0 0 rgba($green, 0.35);
     }
+
     50% {
         box-shadow: 0 0 0 6px rgba($green, 0.12);
     }
 }
 
 @keyframes auth-logo-nudge {
+
     0%,
     100% {
         transform: translateY(0);
     }
+
     50% {
         transform: translateY(-3px);
     }
@@ -2596,13 +2681,11 @@ body {
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
-    background: linear-gradient(
-        125deg,
-        $light-light-green 0%,
-        rgba($green, 0.12) 35%,
-        lighten($light-light-green, 2%) 55%,
-        rgba($green, 0.08) 100%
-    );
+    background: linear-gradient(125deg,
+            $light-light-green 0%,
+            rgba($green, 0.12) 35%,
+            lighten($light-light-green, 2%) 55%,
+            rgba($green, 0.08) 100%);
     background-size: 220% 220%;
     animation: auth-gradient-flow 18s ease-in-out infinite;
 
@@ -2704,19 +2787,23 @@ body {
     0% {
         stroke-dashoffset: 380;
     }
+
     50% {
         stroke-dashoffset: 0;
     }
+
     100% {
         stroke-dashoffset: -380;
     }
 }
 
 @keyframes auth-mini-card-drift {
+
     0%,
     100% {
         transform: translateY(0) rotate(-0.5deg);
     }
+
     50% {
         transform: translateY(-10px) rotate(0.5deg);
     }
@@ -2726,16 +2813,19 @@ body {
     0% {
         background-position: 0% 50%;
     }
+
     100% {
         background-position: 200% 50%;
     }
 }
 
 @keyframes auth-shimmer-text {
+
     0%,
     100% {
         background-position: 0% 50%;
     }
+
     50% {
         background-position: 100% 50%;
     }
@@ -3164,6 +3254,7 @@ body {
 }
 
 @keyframes auth-motif-unlock {
+
     0%,
     100% {
         transform: scale(1);
@@ -3181,6 +3272,7 @@ body {
 }
 
 @keyframes auth-motif-key {
+
     0%,
     100% {
         transform: rotate(-6deg);
@@ -3192,6 +3284,7 @@ body {
 }
 
 @keyframes auth-motif-profile-lift {
+
     0%,
     100% {
         transform: translateY(0);
@@ -3209,6 +3302,7 @@ body {
 }
 
 @keyframes auth-motif-shield-check {
+
     0%,
     100% {
         stroke-opacity: 0.48;
@@ -3220,6 +3314,7 @@ body {
 }
 
 @keyframes auth-motif-board-pulse {
+
     0%,
     100% {
         opacity: 0.65;
@@ -3239,6 +3334,7 @@ body {
 }
 
 @keyframes auth-motif-node {
+
     0%,
     100% {
         opacity: 1;
@@ -3254,27 +3350,30 @@ body {
     flex-direction: column;
     @extend .gap-24;
 
-    .checkbox-item{
+    .checkbox-item {
         input {
             display: none;
         }
 
-        .checkbox-text, a{
+        .checkbox-text,
+        a {
             @extend .text-signature;
         }
 
         .checkbox-text:hover {
             color: $green;
 
-            a{
+            a {
                 color: $green;
             }
         }
     }
 
     .checkbox-item:hover {
-        .checkbox-text, a{
-                color: $green;
+
+        .checkbox-text,
+        a {
+            color: $green;
         }
     }
 }
@@ -3381,14 +3480,12 @@ body {
         top: 0;
         height: 4px;
         border-radius: $radius-md $radius-md 0 0;
-        background: linear-gradient(
-            90deg,
-            rgba($green, 0.4),
-            $green,
-            rgba($dark-gray, 0.35),
-            $green,
-            rgba($green, 0.5)
-        );
+        background: linear-gradient(90deg,
+                rgba($green, 0.4),
+                $green,
+                rgba($dark-gray, 0.35),
+                $green,
+                rgba($green, 0.5));
         background-size: 200% 100%;
         animation: auth-border-flow 5s linear infinite;
     }
@@ -3577,6 +3674,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
     .auth-page,
     .auth-page::before,
     .auth-page::after,
@@ -3624,5 +3722,13 @@ body {
 
     .auth-motif-shield-svg__check {
         stroke-opacity: 0.55 !important;
+    }
+
+    .app-container,
+    .card,
+    .cards>* {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
     }
 }

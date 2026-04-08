@@ -38,6 +38,11 @@
     @extend .br-5;
     border: none;
     background: none;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .tab-btn.active {
@@ -46,6 +51,11 @@
 
 .tab-btn:not(.active):hover {
     background: $green-transperent-10;
+    transform: translateY(-1px);
+}
+
+.tab-btn:active {
+    transform: translateY(0);
 }
 
 .tabs-buttons{
