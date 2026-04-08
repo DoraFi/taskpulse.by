@@ -50,7 +50,7 @@
 }
 
 .text-signature, .auth-hint, .auth-field label, .auth-step-pill, .auth-mini-card__text, .form-auth .checkbox-item .checkbox-text,
-.form-auth .checkbox-item a, .auth-motif-board__head, .auth-hero__eyebrow, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .timeline-due, .board-list .tasks-grid-wrapper > .empty-state, .board-reports-card .reports-stat-label, .kanban-board-card .kanban-stage-col .subtasks .checkbox-text,
+.form-auth .checkbox-item a, .auth-motif-board__head, .auth-hero__eyebrow, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .timeline-due, .board-list .tasks-grid-wrapper > .empty-state, .board-reports-card .reports-stat-label, .kanban-stage-group.sortable-fallback .kanban-count-badge, .kanban-board-card .kanban-stage-col .subtasks .checkbox-text,
 .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text, .kanban-board-card .kanban-count-chip,
 .kanban-archive-board .kanban-count-chip, .kanban-board-card .kanban-count-badge,
 .kanban-archive-board .kanban-count-badge, .board-list .card .list .subtasks .checkbox-text, .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-label, .tasks-grid .grid-header, .legends .legend, .button-small {
@@ -387,7 +387,7 @@ a.button-secondary, .button-basic {
 }
 
 .text-signature, .auth-hint, .auth-field label, .auth-step-pill, .auth-mini-card__text, .form-auth .checkbox-item .checkbox-text,
-.form-auth .checkbox-item a, .auth-motif-board__head, .auth-hero__eyebrow, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .timeline-due, .board-list .tasks-grid-wrapper > .empty-state, .board-reports-card .reports-stat-label, .kanban-board-card .kanban-stage-col .subtasks .checkbox-text,
+.form-auth .checkbox-item a, .auth-motif-board__head, .auth-hero__eyebrow, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .timeline-due, .board-list .tasks-grid-wrapper > .empty-state, .board-reports-card .reports-stat-label, .kanban-stage-group.sortable-fallback .kanban-count-badge, .kanban-board-card .kanban-stage-col .subtasks .checkbox-text,
 .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text, .kanban-board-card .kanban-count-chip,
 .kanban-archive-board .kanban-count-chip, .kanban-board-card .kanban-count-badge,
 .kanban-archive-board .kanban-count-badge, .board-list .card .list .subtasks .checkbox-text, .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-label, .tasks-grid .grid-header, .legends .legend, .button-small {
@@ -748,7 +748,7 @@ body[data-theme=dark] .board-kanban .tasks-grid .col-name {
 .br-5, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .day,
 .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .other-month, .custom-calendar-modal .custom-calendar .custom-calendar-header button, .form-add-task, .board-timeline-card .tag .deadline, .board-timeline-card .tag .priority-high,
 .board-timeline-card .tag .priority-normal, .board-timeline-card .tag .executor img, .board-timeline-card .timeline-task-card, .board-timeline-card .timeline-date-chip, .board-archive-section .archive-collapse-toggle .num-of-tasks, .board-reports-card .reports-stat-chip, .kanban-task-item.sortable-fallback .tag .deadline, .kanban-task-item.sortable-fallback .tag .priority-high,
-.kanban-task-item.sortable-fallback .tag .priority-normal, .kanban-task-item.sortable-fallback .tag .executor img, .kanban-task-item, .kanban-board-card .kanban-stage-col .tag .deadline,
+.kanban-task-item.sortable-fallback .tag .priority-normal, .kanban-task-item.sortable-fallback .tag .executor img, .kanban-task-item, .kanban-stage-group.sortable-fallback .kanban-count-badge, .kanban-board-card .kanban-stage-col .tag .deadline,
 .kanban-archive-board .kanban-stage-col .tag .deadline, .kanban-board-card .kanban-stage-col .tag .priority-high,
 .kanban-board-card .kanban-stage-col .tag .priority-normal,
 .kanban-archive-board .kanban-stage-col .tag .priority-high,
@@ -959,6 +959,8 @@ body[data-theme=dark] .board-kanban .tasks-grid .col-name {
 .board-list .tasks-to-do-grid .col-task .tasks-grid-wrapper > .empty-state,
 .tasks-to-do-grid .col-task .board-reports-card .reports-stat-label,
 .board-reports-card .tasks-to-do-grid .col-task .reports-stat-label,
+.tasks-to-do-grid .col-task .kanban-stage-group.sortable-fallback .kanban-count-badge,
+.kanban-stage-group.sortable-fallback .tasks-to-do-grid .col-task .kanban-count-badge,
 .tasks-to-do-grid .col-task .kanban-board-card .kanban-stage-col .subtasks .checkbox-text,
 .kanban-board-card .kanban-stage-col .subtasks .tasks-to-do-grid .col-task .checkbox-text,
 .tasks-to-do-grid .col-task .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text,
@@ -1037,6 +1039,8 @@ aside .submenu .tasks-to-do-grid .col-event .nav-link,
 .board-list .tasks-to-do-grid .col-event .tasks-grid-wrapper > .empty-state,
 .tasks-to-do-grid .col-event .board-reports-card .reports-stat-label,
 .board-reports-card .tasks-to-do-grid .col-event .reports-stat-label,
+.tasks-to-do-grid .col-event .kanban-stage-group.sortable-fallback .kanban-count-badge,
+.kanban-stage-group.sortable-fallback .tasks-to-do-grid .col-event .kanban-count-badge,
 .tasks-to-do-grid .col-event .kanban-board-card .kanban-stage-col .subtasks .checkbox-text,
 .kanban-board-card .kanban-stage-col .subtasks .tasks-to-do-grid .col-event .checkbox-text,
 .tasks-to-do-grid .col-event .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text,
@@ -1115,6 +1119,8 @@ aside .submenu .events-grid .col-task .nav-link,
 .board-list .events-grid .col-task .tasks-grid-wrapper > .empty-state,
 .events-grid .col-task .board-reports-card .reports-stat-label,
 .board-reports-card .events-grid .col-task .reports-stat-label,
+.events-grid .col-task .kanban-stage-group.sortable-fallback .kanban-count-badge,
+.kanban-stage-group.sortable-fallback .events-grid .col-task .kanban-count-badge,
 .events-grid .col-task .kanban-board-card .kanban-stage-col .subtasks .checkbox-text,
 .kanban-board-card .kanban-stage-col .subtasks .events-grid .col-task .checkbox-text,
 .events-grid .col-task .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text,
@@ -1193,6 +1199,8 @@ aside .submenu .events-grid .col-event .nav-link,
 .board-list .events-grid .col-event .tasks-grid-wrapper > .empty-state,
 .events-grid .col-event .board-reports-card .reports-stat-label,
 .board-reports-card .events-grid .col-event .reports-stat-label,
+.events-grid .col-event .kanban-stage-group.sortable-fallback .kanban-count-badge,
+.kanban-stage-group.sortable-fallback .events-grid .col-event .kanban-count-badge,
 .events-grid .col-event .kanban-board-card .kanban-stage-col .subtasks .checkbox-text,
 .kanban-board-card .kanban-stage-col .subtasks .events-grid .col-event .checkbox-text,
 .events-grid .col-event .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text,
@@ -2673,6 +2681,62 @@ aside .submenu .kanban-archive-board .kanban-priority-section.normal button .nav
 .kanban-board-card .tasks-grid.kanban-tasks-grid,
 .kanban-archive-board .tasks-grid.kanban-tasks-grid {
   grid-template-columns: auto 1fr auto auto auto !important;
+}
+
+/* Этапы: fallback на body — без предков .kanban-board-card (см. initKanbanDnD + fallbackOnBody) */
+.kanban-stage-group.sortable-fallback {
+  display: flex;
+  align-items: stretch;
+  gap: 0.75rem;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.kanban-stage-group.sortable-fallback .kanban-column-head {
+  display: flex;
+  align-items: stretch;
+  gap: 0.75rem;
+  min-width: 0;
+  flex: 1;
+}
+.kanban-stage-group.sortable-fallback .kanban-column-head-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
+}
+.kanban-stage-group.sortable-fallback .kanban-column-head-inner img {
+  height: 1em;
+}
+.kanban-stage-group.sortable-fallback .kanban-column-head-titles {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 0;
+}
+.kanban-stage-group.sortable-fallback .kanban-count-badge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.375rem;
+  height: 1.125rem;
+  background: #7F8C73;
+  color: #F6FBF2 !important;
+  aspect-ratio: 1/1;
+}
+.kanban-stage-group.sortable-fallback .kanban-stage-sep-line {
+  width: 0.0625rem;
+  flex-shrink: 0;
+  align-self: stretch;
+  min-height: 0.75rem;
+  background: #2D3229;
+  border-radius: 0.3rem;
+}
+
+body[data-theme=dark] .kanban-stage-group.sortable-fallback .kanban-stage-sep-line {
+  background: #F6FBF2;
 }
 
 .kanban-task-item {
@@ -4272,5 +4336,3 @@ body[data-theme=dark] .kanban-task-item, .board-list .card .list .item {
     transform: none !important;
   }
 }
-
-/*# sourceMappingURL=style.css.map */

@@ -2088,6 +2088,70 @@ body:not([data-theme="dark"]) .board-list .card .list .item{
     }
 }
 
+/* Этапы: fallback на body — без предков .kanban-board-card (см. initKanbanDnD + fallbackOnBody) */
+.kanban-stage-group.sortable-fallback {
+    display: flex;
+    align-items: stretch;
+    gap: $space-16;
+    min-width: 0;
+    box-sizing: border-box;
+
+    .kanban-column-head {
+        display: flex;
+        align-items: stretch;
+        gap: $space-16;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .kanban-column-head-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: $space-16;
+        width: 100%;
+        min-width: 0;
+
+        img {
+            height: 1em;
+        }
+    }
+
+    .kanban-column-head-titles {
+        display: flex;
+        align-items: center;
+        gap: $space-8;
+        min-width: 0;
+    }
+
+    .kanban-count-badge {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: $space-8;
+        height: $space-24;
+        background: $light-gray;
+        @extend .br-5;
+        @extend .text-signature;
+        color: $light-light-green !important;
+        aspect-ratio: 1/1;
+    }
+
+    .kanban-stage-sep-line {
+        width: $space-1;
+        flex-shrink: 0;
+        align-self: stretch;
+        min-height: $space-16;
+        background: $dark-gray;
+        border-radius: $radius-sm;
+    }
+}
+
+body[data-theme="dark"] .kanban-stage-group.sortable-fallback .kanban-stage-sep-line {
+    background: $light-light-green;
+}
+
 .kanban-task-item {
     cursor: grab;
     width: 100%;

@@ -1693,7 +1693,8 @@
                 draggable: '.kanban-stage-group',
                 handle: '.kanban-column-head-inner',
                 forceFallback: true,
-                fallbackOnBody: false,
+                // Как у задач: клон на body — fixed-позиция следует курсору внутри горизонтального scroll.
+                fallbackOnBody: true,
                 fallbackTolerance: 3,
                 ghostClass: '',
                 dragClass: '',
