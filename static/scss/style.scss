@@ -4399,11 +4399,23 @@ body[data-theme="dark"] .custom-calendar-modal .custom-calendar {
 
 .checkbox-item {
     user-select: none;
+    position: relative;
 }
 
 .checkbox-item input {
     pointer-events: auto;
-    display: none !important;
+    /* Don't use display:none: label click won't toggle in some browsers.
+       Keep it accessible but visually hidden; custom checkbox is the UI. */
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
 }
 
 @keyframes auth-gradient-flow {
