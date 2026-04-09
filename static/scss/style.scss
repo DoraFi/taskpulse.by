@@ -866,8 +866,8 @@ body[data-theme="dark"] .board-kanban .tasks-grid .col-name {
         }
 
         .status-dropdown {
-            position: fixed;
-            top: 100%;
+            position: absolute;
+            top: calc(100% + 6px);
             left: 0;
             background: white;
             border-radius: $radius-sm;

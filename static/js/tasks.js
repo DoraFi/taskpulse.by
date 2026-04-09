@@ -163,14 +163,21 @@ function handleStatusClick(e) {
     e.stopPropagation();
     const select = e.currentTarget;
     const dropdown = select.nextElementSibling;
-    const rect = select.getBoundingClientRect();
-    dropdown.style.position = 'fixed';
-    dropdown.style.top = `${rect.bottom + window.scrollY}px`;
-    dropdown.style.left = `${rect.left + window.scrollX}px`;
     document.querySelectorAll('.status-dropdown').forEach(d => {
         if (d !== dropdown) d.classList.remove('show');
     });
-    dropdown.classList.toggle('show');
+
+    const nextOpen = !dropdown.classList.contains('show');
+    dropdown.classList.toggle('show', nextOpen);
+    if (!nextOpen) return;
+
+    // Safer than `fixed`: keep it anchored to the status cell.
+    // `.col-status` already has `position: relative` in CSS.
+    dropdown.style.position = 'absolute';
+    dropdown.style.top = 'calc(100% + 6px)';
+    dropdown.style.left = '0';
+    dropdown.style.right = 'auto';
+    dropdown.style.bottom = 'auto';
 }
 
 function handleOptionClick(e) {
