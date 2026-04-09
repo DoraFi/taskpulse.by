@@ -28,3 +28,16 @@
         background: transparent;
     }
 }
+
+body[data-theme="dark"] .header {
+    background: $dark-gray;
+    border-bottom-color: rgba($light-gray, 0.1);
+}
+
+body[data-theme="dark"] .search-panel {
+    border-color: $light-light-green;
+}
+
+body[data-theme="dark"] .search-panel input {
+    color: $light-light-green;
+}

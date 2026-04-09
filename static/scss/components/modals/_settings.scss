@@ -1,0 +1,379 @@
+/* Settings modal */
+
+/* Модалка «Настройки» — шире профиля, слева меню разделов */
+.modal-content.settings-modal {
+    width: min(76rem, 96vw);
+    max-width: 96vw;
+    height: 92vh;
+    max-height: 92vh;
+    min-height: 0;
+
+    .settings-modal__header {
+        flex-shrink: 0;
+    }
+
+    .settings-modal__shell {
+        display: flex;
+        flex-direction: row;
+        flex: 1 1 auto;
+        min-height: 0;
+        margin: $space-24 $space-48;
+        border: $space-1 solid rgba($green, 0.32);
+        border-radius: $radius-sm;
+        overflow: hidden;
+        background: rgba($green, 0.04);
+    }
+
+    .settings-modal__nav {
+        flex: 0 0 14.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: $space-4;
+        padding: $space-16;
+        border-right: $space-1 solid rgba($green, 0.28);
+        background: rgba($light-light-green, 0.9);
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .settings-modal__nav-item {
+        display: block;
+        width: 100%;
+        margin: 0;
+        padding: $space-12 $space-16;
+        border: none;
+        border-radius: $radius-sm;
+        background: transparent;
+        text-align: left;
+        cursor: pointer;
+        color: $dark-gray;
+        transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+        @extend .text-basic;
+
+        &:hover,
+        &:focus-visible {
+            background: rgba($green, 0.1);
+            outline: none;
+        }
+
+        &.is-active {
+            background: rgba($green, 0.18);
+            color: $dark-gray;
+            font-weight: 600;
+        }
+    }
+
+    .settings-modal__panels {
+        flex: 1;
+        min-width: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+        padding: $space-24 $space-32;
+        background: $light-light-green;
+    }
+
+    /* IMPORTANT: keep only one panel visible.
+       `display:flex` below would otherwise override native `[hidden]{display:none}`. */
+    .settings-modal__panel[hidden] {
+        display: none !important;
+    }
+
+    .settings-modal__panel {
+        display: flex;
+        flex-direction: column;
+        gap: $space-24;
+    }
+
+    .settings-modal__panel-title {
+        margin: 0;
+        font-size: 1.125rem;
+    }
+
+    .settings-modal__lead {
+        margin: 0;
+        line-height: 1.45;
+        max-width: 42rem;
+    }
+
+    .settings-modal__grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: $space-16 $space-24;
+
+        @media (max-width: 640px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .settings-modal__field {
+        margin: 0;
+
+        input.filter-input {
+            all: unset;
+            box-sizing: border-box;
+            width: 100%;
+            padding: $space-4 $space-16;
+            border: $space-1 solid $light-gray;
+            border-radius: $radius-sm;
+            @extend .text-basic;
+            transition: all 0.2s ease;
+
+            &:focus {
+                outline: none;
+                border-color: $green;
+                box-shadow: 0 0 0 $space-2 rgba($green, 0.1);
+            }
+
+            &::placeholder {
+                color: rgba($dark-gray, 0.5);
+            }
+        }
+
+        &--max {
+            max-width: 28rem;
+        }
+    }
+
+    .settings-modal__field .filter-input {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    select.create-task-select.settings-modal__select--full {
+        @include tp-select-skin(100%, 100%);
+    }
+
+    .settings-modal__hint {
+        margin: 0;
+        padding: $space-12 $space-16;
+        line-height: 1.45;
+        background: rgba($green, 0.07);
+    }
+
+    .settings-modal__section-card {
+        padding: $space-16;
+        background: rgba($green, 0.05);
+
+        .filter-label {
+            font-weight: 500;
+        }
+
+        span.checkbox-text {
+            font-weight: 400;
+        }
+    }
+
+    .settings-modal__p {
+        margin: 0 0 $space-12;
+        line-height: 1.5;
+    }
+
+    .settings-modal__notify-list {
+        display: flex;
+        flex-direction: column;
+        gap: $space-12;
+        margin-top: $space-8;
+    }
+
+    .settings-modal__notify-row.checkbox-item {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+        gap: $space-12;
+        cursor: pointer;
+    }
+
+    .settings-modal__notify-row .checkbox-text {
+        flex: 1;
+        min-width: 0;
+        order: 1;
+    }
+
+    .settings-modal__notify-row .custom-checkbox {
+        order: 2;
+        flex-shrink: 0;
+    }
+
+    .settings-modal__session-list {
+        list-style: none;
+        margin: $space-8 0 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: $space-12;
+    }
+
+    .settings-modal__session-row {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: $space-16;
+        padding: $space-16;
+        background: rgba($green, 0.05);
+    }
+
+    .settings-modal__session-device {
+        margin: 0 0 $space-4;
+    }
+
+    .settings-modal__session-badge {
+        flex-shrink: 0;
+    }
+
+    .settings-modal__session-revoke {
+        flex-shrink: 0;
+    }
+
+    .settings-modal__integration-card {
+        padding: $space-16;
+        background: rgba($green, 0.05);
+
+        & + & {
+            margin-top: $space-16;
+        }
+    }
+
+    .settings-modal__integration-title {
+        margin: 0 0 $space-8;
+        font-weight: 600;
+    }
+
+    .settings-modal__integration-card .button-basic,
+    .settings-modal__integration-card .button-secondary {
+        margin-top: $space-12;
+    }
+
+    .settings-modal__links {
+        line-height: 1.7;
+        @extend .text-signature;
+    }
+
+    .settings-modal__inline-link {
+        color: $green;
+        text-decoration: underline;
+        text-underline-offset: 0.15em;
+
+        &:hover,
+        &:focus-visible {
+            color: darken($green, 8%);
+            outline: none;
+        }
+    }
+
+    .settings-modal__danger-zone {
+        padding: $space-16;
+        background: rgba($pink, 0.06);
+        border-color: rgba($pink, 0.35) !important;
+    }
+
+    .settings-modal__footer {
+        flex-shrink: 0;
+        margin-top: 0;
+    }
+
+    @media (max-width: 768px) {
+        .settings-modal__shell {
+            flex-direction: column;
+            margin: 0 $space-24;
+        }
+
+        .settings-modal__nav {
+            flex: 0 0 auto;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            overflow-y: hidden;
+            border-right: none;
+            border-bottom: $space-1 solid rgba($green, 0.28);
+            gap: $space-8;
+            padding: $space-12;
+        }
+
+        .settings-modal__nav-item {
+            flex: 0 0 auto;
+            white-space: nowrap;
+            box-shadow: none;
+
+            &.is-active {
+                box-shadow: inset 0 -3px 0 $green;
+            }
+        }
+
+        .settings-modal__panels {
+            padding: $space-16 $space-20;
+        }
+
+        .modal-header.settings-modal__header,
+        .modal-footer.settings-modal__footer {
+            margin-left: $space-24;
+            margin-right: $space-24;
+        }
+    }
+}
+
+body[data-theme="dark"] .modal-content.settings-modal .settings-modal__shell {
+    background: rgba($black, 0.35);
+    border-color: rgba($light-light-green, 0.35);
+}
+
+body[data-theme="dark"] .modal-content.settings-modal .settings-modal__nav {
+    background: $black;
+    border-right-color: rgba($light-light-green, 0.35);
+}
+
+body[data-theme="dark"] .modal-content.settings-modal .settings-modal__nav-item {
+    color: $light-light-green;
+
+    &:hover,
+    &:focus-visible {
+        background: rgba($green, 0.2);
+    }
+
+    &.is-active {
+        background: rgba($green, 0.22);
+        color: $light-light-green;
+    }
+}
+
+body[data-theme="dark"] .modal-content.settings-modal .settings-modal__panels {
+    background: $dark-gray;
+}
+
+body[data-theme="dark"] .modal-content.settings-modal .settings-modal__hint {
+    background: rgba($green, 0.14);
+    color: rgba($light-light-green, 0.92);
+}
+
+body[data-theme="dark"] .modal-content.settings-modal .settings-modal__section-card,
+body[data-theme="dark"] .modal-content.settings-modal .settings-modal__session-row,
+body[data-theme="dark"] .modal-content.settings-modal .settings-modal__integration-card {
+    background: $black;
+    border-color: $light-light-green;
+}
+
+body[data-theme="dark"] .modal-content.settings-modal select.create-task-select.settings-modal__select--full {
+    @include tp-select-skin-dark();
+}
+
+body[data-theme="dark"] .modal-content.settings-modal .settings-modal__inline-link {
+    color: $green;
+
+    &:hover,
+    &:focus-visible {
+        color: lighten($green, 8%);
+    }
+}
+
+body[data-theme="dark"] .modal-content.settings-modal .settings-modal__danger-zone {
+    background: rgba($pink, 0.12);
+    border-color: rgba($pink, 0.45) !important;
+}
+
+@media (max-width: 768px) {
+    body[data-theme="dark"] .modal-content.settings-modal .settings-modal__nav {
+        border-bottom-color: rgba($light-light-green, 0.35);
+    }
+}
+

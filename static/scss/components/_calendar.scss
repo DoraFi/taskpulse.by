@@ -1,0 +1,215 @@
+.custom-calendar-modal {
+    .custom-calendar {
+        background: $light-light-green;
+        padding: $space-48;
+        max-width: 90vw;
+        font-family: inherit;
+        @extend .text-basic, .br-10;
+
+        .custom-calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: $space-24;
+
+            button {
+                background: none;
+                border: none;
+                cursor: pointer;
+                @extend .text-header, .br-5;
+                color: $dark-gray;
+                width: $space-48;
+                height: $space-48;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s;
+
+                &:hover {
+                    color: $green;
+                    background: rgba($green, 0.1);
+                }
+            }
+
+            .custom-calendar-title {
+                @extend .text-header;
+                color: $dark-gray;
+            }
+        }
+
+        .custom-calendar-months {
+            display: flex;
+            @extend .gap-32;
+            justify-content: center;
+            flex-wrap: wrap;
+
+            .custom-calendar-month {
+                flex: 1;
+
+                .month-header {
+                    text-align: center;
+                    margin-bottom: $space-16;
+
+                    button {
+                        background: none;
+                        border: none;
+                        font-weight: 500;
+                        @extend .text-basic, .br-10;
+                        cursor: pointer;
+                        color: $green;
+                        padding: $space-4 $space-24;
+                        transition: all 0.2s;
+
+                        &:hover {
+                            background: rgba($green, 0.1);
+                        }
+                    }
+                }
+
+                .weekdays {
+                    display: grid;
+                    grid-template-columns: repeat(7, 1fr);
+                    text-align: center;
+                    color: $light-gray;
+                    margin-bottom: $space-12;
+                    @extend .text-signature;
+                }
+
+                .days {
+                    display: grid;
+                    grid-template-columns: repeat(7, 1fr);
+                    gap: $space-8;
+
+                    .day,
+                    .other-month {
+                        text-align: center;
+                        padding: $space-12;
+                        aspect-ratio: 1/1;
+                        cursor: pointer;
+                        @extend .br-5;
+                        transition: all 0.2s;
+                    }
+
+                    .day {
+                        background: $light-light-green;
+
+                        &:hover {
+                            background: rgba($green, 0.1);
+                        }
+
+                        &.selected-start,
+                        &.selected-end {
+                            background: $green;
+                            color: $light-light-green;
+                        }
+
+                        &.in-range {
+                            background: rgba($green, 0.15);
+                        }
+                    }
+
+                    .other-month {
+                        color: lighten($light-gray, 20%);
+                        cursor: default;
+
+                        &:hover {
+                            background: none;
+                        }
+                    }
+                }
+            }
+        }
+
+        .custom-calendar-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: $space-16;
+            padding-top: $space-16;
+            margin-top: $space-24;
+            border-top: 1px solid $green;
+        }
+    }
+}
+
+body[data-theme="dark"] .modal-overlay.custom-calendar-modal {
+    background: rgba($black, 0.65);
+    backdrop-filter: blur($space-4);
+}
+
+body[data-theme="dark"] .custom-calendar-modal .custom-calendar {
+    background: $dark-gray;
+    color: $light-light-green;
+    border: $space-1 solid rgba($green, 0.45);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+
+    .custom-calendar-header {
+        border-bottom: 1px solid rgba($green, 0.35);
+        padding-bottom: $space-16;
+        margin-bottom: $space-16;
+
+        button {
+            color: $light-light-green;
+            background: rgba($black, 0.35);
+
+            &:hover {
+                color: $green;
+                background: rgba($green, 0.15);
+            }
+        }
+
+        .custom-calendar-title {
+            color: $light-light-green;
+        }
+    }
+
+    .custom-calendar-months .custom-calendar-month {
+        .month-header button {
+            color: $green;
+            background: rgba($black, 0.25);
+
+            &:hover {
+                background: rgba($green, 0.15);
+                color: $light-light-green;
+            }
+        }
+
+        .weekdays {
+            color: rgba($light-light-green, 0.55);
+        }
+
+        .days {
+            .day {
+                background: rgba($black, 0.35);
+                color: $light-light-green;
+                border: $space-1 solid transparent;
+
+                &:hover {
+                    background: rgba($green, 0.12);
+                    border-color: rgba($green, 0.35);
+                }
+
+                &.selected-start,
+                &.selected-end {
+                    background: $green;
+                    color: $dark-gray;
+                    border-color: $green;
+                }
+
+                &.in-range {
+                    background: rgba($green, 0.22);
+                    color: $light-light-green;
+                }
+            }
+
+            .other-month {
+                color: rgba($light-light-green, 0.28);
+                background: transparent;
+            }
+        }
+    }
+
+    .custom-calendar-footer {
+        border-top-color: rgba($green, 0.45);
+    }
+}
+

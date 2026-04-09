@@ -1,0 +1,29 @@
+/* Motion/animation guards */
+
+body.tp-no-enter .cards>*,
+body.tp-no-enter .card {
+    animation: none !important;
+    transition: none !important;
+}
+
+body.tp-no-enter .app-container {
+    animation: none !important;
+    transition: none !important;
+}
+
+.app-container {
+    animation: none !important;
+}
+
+.cards>*,
+.card {
+    animation: none !important;
+}
+
+.card,
+.card:hover,
+.card:focus-within {
+    transform: none !important;
+    transition: none !important;
+}
+

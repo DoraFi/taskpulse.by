@@ -1,0 +1,253 @@
+/* Base modal system */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba($dark-gray, 0.3);
+    backdrop-filter: blur($space-2);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+
+    &.show {
+        display: flex;
+        animation: fadeIn 0.2s ease;
+    }
+}
+
+.modal-content {
+    width: 45vw;
+    height: 95vh;
+    background: var(--tp-surface);
+    border-radius: $radius-md;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--tp-shadow-1);
+    animation: fadeInScale 0.3s ease;
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin: $space-48 $space-48 0;
+        padding-bottom: $space-16;
+        border-bottom: 1px solid var(--tp-accent);
+
+        .modal-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: $space-4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            border-radius: $radius-sm;
+
+            &:hover {
+                transform: scale(0.9);
+            }
+
+            img {
+                display: block;
+                width: $space-24;
+                height: $space-24;
+            }
+        }
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: $space-24;
+        align-items: center;
+        margin: 0 $space-48 $space-48;
+        padding-top: $space-16;
+        border-top: 1px solid var(--tp-accent);
+    }
+
+    .modal-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: $space-24;
+        overflow-y: auto;
+        padding: $space-24 $space-48;
+
+        &::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+
+        input {
+            all: unset;
+            box-sizing: border-box;
+            width: 100%;
+            padding: $space-4 $space-16;
+            border: $space-1 solid $light-gray;
+            border-radius: $radius-sm;
+            @extend .text-basic;
+            transition: all 0.2s ease;
+
+            &:focus {
+                outline: none;
+                border-color: $green;
+                box-shadow: 0 0 0 $space-2 rgba($green, 0.1);
+            }
+
+            &::placeholder {
+                color: rgba($dark-gray, 0.5);
+            }
+        }
+
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+
+        .filter-section {
+            &:last-child {
+                margin-bottom: 0;
+            }
+
+            .filter-label {
+                display: block;
+                @extend .text-signature;
+                margin-bottom: $space-8;
+            }
+
+            .filter-input {
+                width: 100%;
+                padding: $space-16 $space-16;
+                border: $space-1 solid $light-gray;
+                border-radius: $radius-sm;
+                @extend .text-basic;
+                transition: all 0.2s ease;
+
+                &:focus {
+                    outline: none;
+                    border-color: $green;
+                    color: $green;
+                    box-shadow: 0 0 0 $space-2 rgba($green, 0.1);
+                }
+
+                &::placeholder {
+                    color: rgba($dark-gray, 0.5);
+                }
+            }
+
+            .filter-checkbox-group {
+                display: flex;
+                flex-wrap: wrap;
+                gap: $space-8;
+                flex-direction: column;
+            }
+
+            .filter-range {
+                .range-values {
+                    display: flex;
+                    justify-content: space-between;
+                    @extend .text-signature;
+                }
+
+                .range-input {
+                    width: 100%;
+                    height: $space-8;
+                    appearance: none;
+                    -webkit-appearance: none;
+                    background: rgba($green, 0.15);
+                    outline: none;
+                    @extend .br-5;
+
+                    &::-webkit-slider-thumb {
+                        -webkit-appearance: none;
+                        width: $space-16;
+                        height: $space-16;
+                        background: $green;
+                        border-radius: 50%;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+
+                        &:hover {
+                            transform: scale(1.2);
+                        }
+                    }
+                }
+
+                .range-selected {
+                    margin-top: $space-8;
+                    font-size: $font-size-sm;
+                    color: $green;
+                }
+            }
+
+            .filter-date {
+                display: flex;
+                align-items: center;
+                gap: $space-16;
+
+                .filter-input {
+                    flex: 1;
+                    background-color: $light-light-green;
+                }
+
+                span {
+                    color: $dark-gray;
+                }
+            }
+        }
+    }
+}
+
+body[data-theme="dark"] .modal-overlay {
+    background: rgba($light-light-green, 0.2);
+}
+
+body[data-theme="dark"] .modal-content {
+    background: $dark-gray;
+}
+
+body[data-theme="dark"] .modal-content .modal-header,
+body[data-theme="dark"] .modal-content .modal-footer {
+    border-bottom-color: $green;
+}
+
+body[data-theme="dark"] .modal-content .modal-footer {
+    border-bottom-color: transparent;
+    border-top-color: $green;
+}
+
+body[data-theme="dark"] .modal-content .modal-header {
+    border-top-color: transparent;
+}
+
+body[data-theme="dark"] .modal-content .modal-body input {
+    border-color: $light-light-green;
+    color: $light-light-green;
+}
+
+body[data-theme="dark"] .modal-content .modal-body input:focus {
+    border-color: $green;
+    box-shadow: 0 0 0 $space-2 rgba($green, 0.18);
+}
+
+body[data-theme="dark"] .modal-content .checkbox-text {
+    color: #F6FBF2 !important;
+}
+
+body[data-theme="dark"] .modal-content .filter-input {
+    background: $dark-gray !important;
+    color: #F6FBF2 !important;
+    border-color: $light-light-green !important;
+}
+
+body[data-theme="dark"] .modal-content .filter-input::placeholder {
+    color: rgba($light-light-green, 0.55) !important;
+}
+
+body[data-theme="dark"] .modal-content .filter-date span {
+    color: rgba(246, 251, 242, 0.7) !important;
+}
+

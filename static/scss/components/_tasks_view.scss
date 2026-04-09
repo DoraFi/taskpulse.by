@@ -1,0 +1,304 @@
+/*ЗАДАЧИ*/
+.tabs {
+    display: flex;
+    gap: $space-24;
+    padding: $space-8 $space-24;
+    @extend .br-5;
+    @extend .border-dark-1;
+    width: fit-content;
+}
+
+.tabs-buttons {
+    display: flex;
+    gap: $space-24;
+    align-items: center;
+    flex-wrap: wrap;
+
+    >.button-basic[data-tab].active {
+        box-shadow: none;
+        background-color: $light-light-green;
+    }
+
+    body[data-theme="dark"] & {
+        > .button-basic[data-tab].active {
+            background-color: $dark-gray;
+        }
+    }
+}
+
+.tasks-grid-wrapper {
+    overflow-x: auto;
+    width: 100%;
+}
+
+.tasks-grid {
+    display: grid;
+    grid-template-columns:
+        auto
+        /* ID */
+        1fr
+        /* Наименование - занимает всё доступное место */
+        auto
+        /* Статус */
+        auto
+        /* Срок */
+        auto
+        /* Приоритет */
+        auto
+        /* Сложность */
+        auto
+        /* Время */
+        auto
+        /* Исполнитель */
+        auto
+        /* Создатель */
+        auto;
+    /* Проект */
+    gap: $space-16;
+    width: max-content;
+    min-width: 100%;
+    overflow-x: auto;
+
+    .grid-header,
+    .grid-row {
+        display: grid;
+        grid-template-columns: subgrid;
+        grid-column: 1 / -1;
+    }
+
+    .grid-header {
+        color: $dark-gray;
+        position: sticky;
+        top: 0;
+        @extend .text-signature;
+
+        >div {
+            display: flex;
+            align-items: center;
+            gap: $space-4;
+            cursor: pointer;
+            user-select: none;
+
+            .header-title {
+                display: inline-block;
+            }
+
+            .sort-icon {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: $space-16;
+                height: $space-16;
+                opacity: 0;
+                transition: opacity 0.2s ease;
+
+                img {
+                    width: $space-16;
+                    height: $space-16;
+                    display: block;
+                    transition: transform 0.2s ease;
+                }
+            }
+
+            &:hover .sort-icon {
+                opacity: 0.5;
+            }
+
+            &.sort-asc .sort-icon {
+                opacity: 1;
+
+                img {
+                    transform: rotate(0deg);
+                }
+            }
+
+            &.sort-desc .sort-icon {
+                opacity: 1;
+
+                img {
+                    transform: rotate(180deg);
+                }
+            }
+        }
+    }
+
+    .grid-row {
+        padding: $space-16 0;
+        align-items: center;
+        transition: all 0.2s ease;
+        @extend .text-basic;
+
+        &.dragging-active {
+            opacity: 0.6;
+            cursor: grabbing;
+            background: rgba($green, 0.05);
+        }
+
+        &:hover {
+            background: $green-transperent-10;
+        }
+    }
+
+    .col-name {
+        .task-name {
+            @include ellipsis-single-line(100%);
+        }
+    }
+
+    .col-status {
+        position: relative;
+
+        .status-select {
+            @extend .status;
+            gap: $space-8;
+
+            &::after {
+                content: "";
+                display: inline-block;
+                width: $space-16;
+                height: $space-8;
+                transition: transform 0.3s ease;
+                transform-origin: center center;
+                background-image: url('/static/source/icons/arrow_light_cropped.svg');
+                background-size: contain;
+                background-repeat: no-repeat;
+            }
+        }
+
+        .status-dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            background: white;
+            border-radius: $radius-sm;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            min-width: 120px;
+            @extend .border-dark-1;
+
+            &.show {
+                display: flex;
+            }
+
+            .status-option {
+                padding: $space-8 $space-24;
+                cursor: pointer;
+                transition: all 0.2s ease;
+
+                &:hover {
+                    background: $light-gray-transperent;
+                }
+
+                &.neutral {
+                    color: $dark-gray;
+                }
+
+                &.inprocess {
+                    color: $green;
+                }
+
+                &.done {
+                    color: $dark-green;
+                }
+
+                &.exit {
+                    color: $pink;
+                }
+            }
+        }
+    }
+
+    .col-due-date,
+    .col-created-date {
+        white-space: nowrap;
+
+        .overdue {
+            color: $pink;
+            font-weight: 500;
+        }
+    }
+
+    .col-priority {
+        .priority-high {
+            color: $pink;
+            font-weight: 500;
+        }
+
+        .priority-normal {
+            color: $dark-gray;
+        }
+    }
+
+    .col-time {
+        white-space: nowrap;
+    }
+
+    .col-creator,
+    .col-assignee {
+        min-width: 0;
+
+        .user-img-text {
+            height: $space-32;
+
+            img {
+                width: $space-32;
+                height: $space-32;
+                border-radius: 50%;
+            }
+        }
+    }
+
+    body[data-theme="dark"] & .grid-header {
+        color: $light-light-green;
+    }
+
+    body[data-theme="dark"] & .col-priority .priority-normal {
+        color: $light-green;
+    }
+}
+
+body[data-theme="dark"] .deadline {
+    color: $light-green !important;
+    background: rgba($light-gray, 0.4) !important;
+}
+
+.tp-table-row-fallback {
+    .tasks-grid {
+        display: grid;
+        gap: $space-16;
+        width: max-content;
+        min-width: 100%;
+        overflow-x: auto;
+
+        grid-template-columns: auto auto 1fr auto auto auto !important;
+
+        .grid-header,
+        .grid-row {
+            display: grid;
+            grid-template-columns: auto auto 1fr auto auto auto;
+            grid-column: 1 / -1;
+        }
+
+        .grid-row {
+            padding: $space-16 0;
+            align-items: center;
+            transition: all 0.2s ease;
+            @extend .text-basic;
+        }
+    }
+}
+
+.tp-table-row-fallback.grid-row {
+    display: grid;
+    grid-template-columns: auto auto 1fr auto auto auto;
+    gap: $space-16;
+    align-items: center;
+    padding: $space-16 0;
+}
+
+.tasks-footer {
+    display: flex;
+    justify-content: flex-end;
+}

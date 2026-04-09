@@ -63,3 +63,15 @@ ul {
         color: $green;
     }
 }
+
+body[data-theme="dark"] .checkbox-item {
+    color: var(--tp-text);
+}
+
+body[data-theme="dark"] .checkbox-item .custom-checkbox {
+    border-color: $light-light-green;
+}
+
+body[data-theme="dark"] .checkbox-item input[type="checkbox"]:checked + .custom-checkbox {
+    border-color: $green;
+}

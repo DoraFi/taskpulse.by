@@ -1,0 +1,62 @@
+.card {
+    padding: $space-32;
+    @extend .border-dark-2;
+    @extend .br-10;
+    @extend .gap-24;
+    @include flex-start(column);
+    position: relative;
+    will-change: transform;
+}
+
+body[data-theme="dark"] .card {
+    border-color: $light-light-green;
+}
+
+/* Стагер появления карточек в контейнере */
+.cards>* {
+    animation: app-card-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.cards>*:nth-child(1) {
+    animation-delay: 40ms;
+}
+
+.cards>*:nth-child(2) {
+    animation-delay: 80ms;
+}
+
+.cards>*:nth-child(3) {
+    animation-delay: 120ms;
+}
+
+.cards>*:nth-child(4) {
+    animation-delay: 160ms;
+}
+
+.cards>*:nth-child(5) {
+    animation-delay: 200ms;
+}
+
+.cards>*:nth-child(6) {
+    animation-delay: 240ms;
+}
+
+.cards>*:nth-child(7) {
+    animation-delay: 280ms;
+}
+
+.cards>*:nth-child(8) {
+    animation-delay: 320ms;
+}
+
+@keyframes app-card-in {
+    from {
+        opacity: 0;
+        transform: translateY(102px) scale(0.99);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}

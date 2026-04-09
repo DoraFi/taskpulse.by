@@ -1,0 +1,360 @@
+/* Profile modal */
+
+/* Модалка «Профиль» — те же габариты, что у «Создание задачи» */
+.modal-content.profile-modal {
+    width: 44vw;
+    height: 92vh;
+    max-height: 92vh;
+    min-height: 0;
+
+    .modal-body.profile-modal__body {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: $space-24;
+        padding-top: $space-24;
+    }
+
+    .profile-modal__hero {
+        display: flex;
+        align-items: center;
+        gap: $space-24;
+    }
+
+    .profile-modal__avatar {
+        width: 5.5rem;
+        height: 5.5rem;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: $space-1 solid rgba($green, 0.4);
+    }
+
+    .profile-modal__titles {
+        min-width: 0;
+    }
+
+    .profile-modal__id {
+        margin: $space-8 0 0;
+        opacity: 0.85;
+    }
+
+    .profile-modal__settings-hint {
+        margin: 0;
+        padding: $space-12 $space-16;
+        border-radius: $radius-sm;
+        background: rgba($green, 0.06);
+        line-height: 1.45;
+    }
+
+    .profile-modal__section {
+        display: flex;
+        flex-direction: column;
+        gap: $space-8;
+    }
+
+    .profile-modal__section--card {
+        padding: $space-16;
+        background: rgba($green, 0.04);
+    }
+
+    .profile-modal__section--muted {
+        padding: $space-16;
+    }
+
+    .profile-modal__section-lead {
+        margin: 0 0 $space-8;
+        line-height: 1.4;
+    }
+
+    .profile-modal__grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: $space-16 $space-24;
+
+        @media (max-width: 720px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .profile-modal__grid--password {
+        margin-top: $space-8;
+    }
+
+    .profile-modal__field {
+        margin: 0;
+
+        &--full {
+            grid-column: 1 / -1;
+        }
+    }
+
+    .profile-modal__field .filter-input {
+        width: 100%;
+        box-sizing: border-box;
+        background-color: $light-light-green;
+    }
+
+    /* Как select в «Создание задачи», ширина — на всю колонку сетки профиля */
+    select.create-task-select.profile-modal__select--full {
+        @include tp-select-skin(100%, 100%);
+    }
+
+    /* Как textarea описания в «Создание задачи», высота — компактная для профиля */
+    textarea.profile-modal__bio {
+        @include tp-textarea-skin(6.5rem, 7.5rem);
+        max-height: min(28vh, 14rem);
+    }
+
+    .profile-modal__footer {
+        flex-direction: column;
+        align-items: stretch;
+        gap: $space-12;
+    }
+
+    .profile-modal__footer-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: $space-24;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .profile-modal__exit-confirm {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: nowrap;
+        gap: $space-16;
+        width: 100%;
+        box-sizing: border-box;
+        padding: $space-12 $space-20;
+        border-radius: $radius-sm;
+        border: $space-1 solid rgba($green, 0.38);
+        background: rgba($green, 0.1);
+        box-shadow: 0 2px 12px rgba($dark-gray, 0.06);
+    }
+
+    .profile-modal__exit-confirm[hidden] {
+        display: none !important;
+    }
+
+    .profile-modal__exit-question {
+        margin: 0;
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
+    .profile-modal__exit-links {
+        display: inline-flex;
+        flex-direction: row;
+        align-items: center;
+        gap: $space-8;
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
+    .profile-modal__exit-dot {
+        color: rgba($dark-gray, 0.45);
+        user-select: none;
+    }
+
+    .profile-modal__exit-answer {
+        margin: 0;
+        padding: 0;
+        border: none;
+        background: none;
+        font: inherit;
+        cursor: pointer;
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+        color: $dark-gray;
+        transition: color 0.15s ease, text-decoration-color 0.15s ease;
+
+        &:hover,
+        &:focus-visible {
+            color: $green;
+            text-decoration-color: rgba($green, 0.85);
+            outline: none;
+        }
+    }
+
+    @media (max-width: 520px) {
+        .profile-modal__exit-confirm {
+            flex-wrap: wrap;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .profile-modal__exit-question {
+            white-space: normal;
+        }
+    }
+
+    .profile-modal__section--activity .filter-label {
+        margin-bottom: $space-4;
+    }
+
+    .profile-modal__activity-list {
+        list-style: none;
+        margin: $space-8 0 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: $space-12;
+    }
+
+    .profile-modal__activity-row {
+        display: grid;
+        grid-template-columns: max(0.35fr) minmax(0, 1fr);
+        gap: $space-16 $space-24;
+        align-items: center;
+        padding: $space-12 $space-16;
+        margin: 0;
+        border-radius: $radius-sm;
+        border: $space-1 solid rgba($green, 0.22);
+        background: rgba($green, 0.05);
+
+        @media (max-width: 520px) {
+            grid-template-columns: 1fr;
+            gap: $space-8;
+        }
+    }
+
+    .profile-modal__activity-key {
+        margin: 0;
+        line-height: 1.35;
+    }
+
+    .profile-modal__activity-value {
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    .profile-modal__stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: $space-12;
+
+        @media (max-width: 900px) {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    .profile-modal__stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: $space-4;
+        padding: $space-12 $space-8;
+        text-align: center;
+        background: rgba($green, 0.06);
+    }
+
+    .profile-modal__notify-list {
+        display: flex;
+        flex-direction: column;
+        gap: $space-12;
+        margin-top: $space-8;
+    }
+
+    .profile-modal__notify-row.checkbox-item {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+        gap: $space-12;
+        cursor: pointer;
+    }
+
+    .profile-modal__notify-row .checkbox-text {
+        flex: 1;
+        min-width: 0;
+        order: 1;
+    }
+
+    .profile-modal__notify-row .custom-checkbox {
+        order: 2;
+        flex-shrink: 0;
+    }
+
+    .profile-modal__password-block {
+        padding: $space-16;
+        background: rgba($green, 0.04);
+    }
+
+    .profile-modal__password-hint {
+        margin: $space-12 0 $space-16;
+        line-height: 1.4;
+    }
+
+    .profile-modal__password-btn {
+        align-self: flex-start;
+    }
+}
+
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__avatar {
+    border-color: rgba($light-light-green, 0.45);
+}
+
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__stat {
+    background: rgba($green, 0.12);
+}
+
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__section--card,
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__password-block {
+    background: $black;
+    border-color: $light-light-green;
+}
+
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__exit-confirm {
+    background: rgba($green, 0.16);
+    border-color: rgba($light-light-green, 0.45);
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.25);
+}
+
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__exit-question {
+    color: $light-light-green;
+}
+
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__exit-dot {
+    color: rgba($light-light-green, 0.5);
+}
+
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__exit-answer {
+    color: $light-light-green;
+
+    &:hover,
+    &:focus-visible {
+        color: $green;
+        text-decoration-color: rgba($green, 0.95);
+    }
+}
+
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__activity-row {
+    background: rgba($green, 0.1);
+    border-color: rgba($light-light-green, 0.35);
+}
+
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__activity-key,
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__activity-value {
+    color: $light-light-green;
+}
+
+body[data-theme="dark"] .modal-content.profile-modal .profile-modal__settings-hint {
+    background: rgba($green, 0.14);
+    color: rgba($light-light-green, 0.92);
+}
+
+body[data-theme="dark"] .modal-content.profile-modal select.create-task-select.profile-modal__select--full {
+    @include tp-select-skin-dark();
+}
+
+body[data-theme="dark"] .modal-content.profile-modal textarea.profile-modal__bio {
+    @include tp-textarea-skin-dark();
+}
+

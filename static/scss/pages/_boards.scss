@@ -1,0 +1,1563 @@
+/* Boards: list / kanban / timeline / reports / archive */
+
+/* NOTE: extracted from `style.scss` without visual changes. */
+
+.board-list {
+    .cards {
+        column-count: 2;
+        column-gap: $space-48;
+        flex: 1;
+        user-select: none;
+
+        &.dragging-active {
+            gap: $space-48;
+            column-count: unset;
+            display: flex;
+            flex-wrap: wrap;
+
+            .card {
+                width: calc((100% - $space-48) / 2);
+            }
+        }
+    }
+
+    .tables-view,
+    .board-view {
+        &.dragging-active {
+            column-count: 1;
+
+            .card {
+                width: 100%;
+            }
+        }
+    }
+
+    .board-card-collapsible,
+    .archive-board-body {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        @extend .gap-24;
+    }
+
+    .card {
+        break-inside: avoid;
+        margin-bottom: $space-48;
+        width: 100%;
+        transition: transform 0.2s ease;
+        user-select: none;
+
+        &:active {
+            cursor: grabbing;
+        }
+
+        &.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        &.drag-over {
+            transform: translateY($space-16);
+            transition: transform 0.2s ease;
+        }
+
+        &.task-drag-over {
+            background: rgba($green, 0.1);
+            border: 2px dashed $green;
+            transform: scale(1.01);
+        }
+
+        .taskheader-count {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: $space-16;
+            width: 100%;
+
+            .num-of-tasks {
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+                padding: $space-8;
+                height: $space-32;
+                background: $light-gray;
+                @extend .br-5;
+                @extend .text-subheader;
+                color: $light-light-green !important;
+            }
+        }
+
+        .list {
+            width: 100%;
+            @extend .flex-col;
+            gap: $space-16;
+
+            .item {
+                width: 100%;
+                padding: $space-16 $space-24;
+                @extend .border-gray-1, .br-5;
+                @extend .flex-col;
+                gap: $space-12;
+                cursor: grab;
+                transition: all 0.2s ease;
+                user-select: none;
+                position: relative;
+
+                &:active {
+                    cursor: grabbing;
+                }
+
+                &.task-dragging {
+                    opacity: 0.5;
+                    cursor: grabbing;
+                    transform: scale(0.98);
+                }
+
+                &.task-drag-over {
+                    transform: translateY(8px);
+                    border: 2px dashed $green;
+                    background: rgba($green, 0.05);
+                    transition: transform 0.2s ease;
+                }
+            }
+
+            .subtasks {
+                @extend .flex-col;
+                gap: $space-8;
+
+                .count {
+                    display: flex;
+                    justify-content: space-between;
+                }
+
+                .subtasks-list {
+                    @include tp-subtasks-list-skin();
+                }
+
+                .checkbox-text {
+                    @extend .text-signature;
+                }
+
+                .name {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: $space-4;
+
+                    &::after {
+                        content: '';
+                        display: inline-block;
+                        height: 1em;
+                        aspect-ratio: 2/3;
+                        background-image: url('/static/source/icons/arrow_dark_cropped.svg');
+                        background-size: contain;
+                        background-repeat: no-repeat;
+                        background-position: center;
+                        flex-shrink: 0;
+                        transition: transform 0.2s ease;
+                    }
+
+                    &.open::after {
+                        transform: rotate(-90deg);
+                    }
+                }
+
+                .progress-line {
+                    display: flex;
+                    width: 100%;
+
+                    .completed {
+                        border-bottom: $space-3 solid $green;
+                    }
+
+                    .todo {
+                        border-bottom: $space-3 solid rgba($light-gray, 0.5);
+                    }
+                }
+            }
+
+            body[data-theme="dark"] .board-list .card .list .subtasks {
+                color: $light-light-green;
+            }
+
+            body[data-theme="dark"] .board-list .card .list .subtasks .checkbox-item,
+            body[data-theme="dark"] .board-list .card .list .subtasks-list .checkbox-item {
+                color: $light-light-green;
+            }
+
+            body[data-theme="dark"] .board-list .card .list .subtasks .custom-checkbox,
+            body[data-theme="dark"] .board-list .card .list .subtasks-list .custom-checkbox {
+                border-color: $light-light-green !important;
+            }
+
+            body[data-theme="dark"] .board-list .card .list .subtasks .checkbox-item input[type="checkbox"]:checked + .custom-checkbox,
+            body[data-theme="dark"] .board-list .card .list .subtasks-list .checkbox-item input[type="checkbox"]:checked + .custom-checkbox {
+                border-color: $green !important;
+            }
+
+            .tag {
+                width: 100%;
+                display: flex;
+                justify-content: flex-end;
+                align-items: stretch;
+                gap: $space-16;
+
+                .executor {
+                    display: flex;
+                    align-items: center;
+
+                    img {
+                        height: calc(1em + $space-8 * 2);
+                        @extend .br-5;
+                    }
+                }
+
+                .priority-high,
+                .priority-normal {
+                    @extend .br-5;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: calc(1em + $space-8 * 2);
+                    width: calc(1em + $space-8 * 2);
+                    color: $light-light-green;
+                }
+
+                .priority-high {
+                    background-color: $pink;
+                }
+
+                .priority-normal {
+                    background-color: rgba($green, 0.5);
+                }
+
+                .deadline {
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: center;
+                    align-items: center;
+                    padding: $space-4 $space-16;
+                    height: calc(1em + $space-8 * 2);
+                    gap: $space-8;
+                    color: $light-gray;
+                    background: rgba($green, 0.15);
+                    @extend .br-5;
+
+                    &::before {
+                        content: '';
+                        display: inline-block;
+                        width: 1em;
+                        height: 1em;
+                        background-image: url('/static/source/icons/deadline.svg');
+                        background-size: contain;
+                        background-repeat: no-repeat;
+                        background-position: center;
+                        flex-shrink: 0;
+                    }
+                }
+            }
+        }
+    }
+
+    .sortable-ghost {
+        opacity: 0.4;
+        background: rgba($green, 0.1);
+        border: 2px dashed $green;
+        transform: scale(0.98);
+    }
+
+    .sortable-drag {
+        opacity: 0.7;
+        transform: rotate(2deg);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+}
+
+body:not([data-theme="dark"]) .board-list .card .list .item {
+    background: transparent !important;
+    @extend .border-dark-1;
+}
+
+.board-drag-handle {
+    cursor: grab;
+    gap: $space-8;
+
+    &:active {
+        cursor: grabbing;
+    }
+}
+
+.board-list .cards.tables-view {
+    column-count: 1 !important;
+    display: block;
+}
+
+.board-list .cards.timeline-view {
+    column-count: 1 !important;
+    display: block;
+}
+
+.board-kanban {
+    .cards {
+        column-count: 1 !important;
+        column-gap: 0;
+    }
+}
+
+.kanban-board-card,
+.kanban-archive-board {
+    width: 100%;
+
+    // Каждая колонка этапа + её разделитель живут в .kanban-stage-group
+    .kanban-stage-group {
+        display: flex;
+        align-items: stretch;
+        flex: 1;
+        gap: $space-16;
+        min-width: 0;
+
+        .kanban-column-head,
+        .kanban-stage-col {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .kanban-stage-sep-line {
+            align-self: stretch;
+        }
+    }
+
+    &[data-kanban-scroll="true"] {
+        .board-card-collapsible {
+            // Скролл внутри доски, ширина карточки не меняется
+            overflow-x: auto;
+            overflow-y: visible;
+        }
+
+        .kanban-columns-head,
+        .kanban-stages-row {
+            width: max-content;
+            gap: $space-16;
+        }
+
+        .kanban-stage-group {
+            flex: 0 0 22vw;
+        }
+
+        .kanban-priority-section {
+            width: fit-content;
+            margin-right: $space-1;
+        }
+
+        .kanban-priority-section.normal {
+            margin: 0 $space-8 $space-8 0;
+        }
+    }
+
+    .kanban-columns-head {
+        display: flex;
+        align-items: stretch;
+        gap: $space-16;
+        padding: 0 $space-16 $space-12;
+    }
+
+    .kanban-column-head {
+        display: flex;
+        align-items: stretch;
+        gap: $space-16;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .kanban-column-head-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: $space-16;
+        width: 100%;
+        min-width: 0;
+
+        img {
+            height: 1em;
+        }
+    }
+
+    .kanban-column-head-titles {
+        display: flex;
+        align-items: center;
+        gap: $space-8;
+        min-width: 0;
+    }
+
+    .kanban-count-badge {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: $space-8;
+        height: $space-24;
+        background: $light-gray;
+        @extend .br-5;
+        @extend .text-signature;
+        color: $light-light-green !important;
+        aspect-ratio: 1/1;
+    }
+
+    .kanban-stage-sep-line {
+        width: $space-1;
+        flex-shrink: 0;
+        align-self: stretch;
+        min-height: $space-16;
+        background: $dark-gray;
+        border-radius: $radius-sm;
+    }
+
+    body[data-theme="dark"] & {
+        .kanban-stage-sep-line {
+            background: $light-light-green;
+        }
+    }
+
+    .kanban-priority-section {
+        padding: $space-16;
+        border-top: $space-1 solid rgba($dark-gray, 0.15);
+
+        &.urgent {
+            background: rgba($pink, 0.05);
+            border: $space-1 solid $pink;
+            @extend .br-10;
+
+            button .text-basic {
+                color: $pink;
+                padding: 0;
+            }
+
+            .kanban-count-chip {
+                background-color: $pink;
+            }
+        }
+
+        &.normal {
+            background: rgba($green, 0.05);
+            border: $space-1 solid $green;
+            @extend .br-10;
+
+            button .text-basic {
+                color: $green;
+            }
+
+            .kanban-count-chip {
+                background-color: $green;
+            }
+        }
+    }
+
+    .kanban-priority-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 0 $space-12;
+    }
+
+    .kanban-priority-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: $space-12;
+        border: none;
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .kanban-priority-arrow {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: $space-16;
+        height: $space-16;
+
+        &::before {
+            content: '';
+            display: block;
+            width: 100%;
+            height: 100%;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            transition: transform 0.2s ease;
+        }
+    }
+
+    .kanban-priority-toggle--urgent .kanban-priority-arrow::before {
+        background-image: url('/static/source/icons/arrow_pink_cropped.svg');
+    }
+
+    .kanban-priority-toggle--normal .kanban-priority-arrow::before {
+        background-image: url('/static/source/icons/arrow_green_cropped.svg');
+    }
+
+    .kanban-priority-toggle.open .kanban-priority-arrow::before {
+        transform: rotate(-90deg);
+    }
+
+    .kanban-count-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 $space-8;
+        height: $space-24;
+        background: $light-gray;
+        color: $light-light-green;
+        @extend .br-5;
+        @extend .text-signature;
+    }
+
+    .kanban-stages-row {
+        display: flex;
+        align-items: stretch;
+        gap: $space-16;
+        padding-bottom: $space-8;
+    }
+
+    .kanban-stage-col {
+        flex: 1;
+        min-width: 0;
+
+        .subtasks {
+            @extend .flex-col;
+            gap: $space-8;
+
+            .count {
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .subtasks-list {
+                @include tp-subtasks-list-skin();
+            }
+
+            .checkbox-text {
+                @extend .text-signature;
+            }
+
+            .name {
+                display: inline-flex;
+                align-items: center;
+                gap: $space-4;
+
+                &::after {
+                    content: '';
+                    display: inline-block;
+                    height: 1em;
+                    aspect-ratio: 2/3;
+                    background-image: url('/static/source/icons/arrow_dark_cropped.svg');
+                    background-size: contain;
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    flex-shrink: 0;
+                    transition: transform 0.2s ease;
+                }
+
+                &.open::after {
+                    transform: rotate(-90deg);
+                }
+            }
+
+            .progress-line {
+                display: flex;
+                width: 100%;
+
+                .completed {
+                    border-bottom: $space-3 solid $green;
+                }
+
+                .todo {
+                    border-bottom: $space-3 solid rgba($light-gray, 0.5);
+                }
+            }
+        }
+
+        body[data-theme="dark"] .kanban-board-card .kanban-stage-col .subtasks .checkbox-item {
+            color: $light-light-green;
+        }
+
+        body[data-theme="dark"] .kanban-board-card .kanban-stage-col .subtasks .checkbox-item .custom-checkbox,
+        body[data-theme="dark"] .kanban-board-card .kanban-stage-col .subtasks .subtasks-list .checkbox-item .custom-checkbox {
+            border-color: $light-light-green;
+        }
+
+        body[data-theme="dark"] .kanban-board-card .kanban-stage-col .subtasks .checkbox-item input[type="checkbox"]:checked + .custom-checkbox {
+            border-color: $green;
+        }
+
+        .tag {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            align-items: stretch;
+            gap: $space-16;
+
+            .executor {
+                display: flex;
+                align-items: center;
+
+                img {
+                    height: calc(1em + $space-8 * 2);
+                    @extend .br-5;
+                }
+            }
+
+            .priority-high,
+            .priority-normal {
+                @extend .br-5;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: calc(1em + $space-8 * 2);
+                width: calc(1em + $space-8 * 2);
+                color: $light-light-green;
+            }
+
+            .priority-high {
+                background-color: $pink;
+            }
+
+            .priority-normal {
+                background-color: rgba($green, 0.5);
+            }
+
+            .deadline {
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+                padding: $space-4 $space-16;
+                height: calc(1em + $space-8 * 2);
+                gap: $space-8;
+                color: $light-gray;
+                background: rgba($green, 0.15);
+                @extend .br-5;
+
+                &::before {
+                    content: '';
+                    display: inline-block;
+                    width: 1em;
+                    height: 1em;
+                    background-image: url('/static/source/icons/deadline.svg');
+                    background-size: contain;
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    flex-shrink: 0;
+                }
+            }
+        }
+    }
+}
+
+/* Board header collapse controls (archive section toggle) */
+.tasks-header {
+    width: 100%;
+}
+
+.board-header-left {
+    display: flex;
+    align-items: center;
+    gap: $space-12;
+    flex: 1;
+    min-width: 0;
+}
+
+.board-list .tasks-header .board-section-collapse-toggle {
+    flex-shrink: 0;
+    padding: 0;
+    margin: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.board-list .tasks-header .archive-collapse-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: $space-24;
+    height: $space-24;
+
+    &::before {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 100%;
+        background-image: url('/static/source/icons/arrow_dark_cropped.svg');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        transition: transform 0.2s ease;
+    }
+}
+
+.board-list .tasks-header .board-section-collapse-toggle.open .archive-collapse-arrow::before {
+    transform: rotate(-90deg);
+}
+
+/* Kanban stage fallback on body (DnD) */
+/* Этапы: fallback на body — без предков .kanban-board-card (см. initKanbanDnD + fallbackOnBody) */
+.kanban-stage-group.sortable-fallback {
+    display: flex;
+    align-items: stretch;
+    gap: $space-16;
+    min-width: 0;
+    box-sizing: border-box;
+
+    .kanban-column-head {
+        display: flex;
+        align-items: stretch;
+        gap: $space-16;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .kanban-column-head-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: $space-16;
+        width: 100%;
+        min-width: 0;
+
+        img {
+            height: 1em;
+        }
+    }
+
+    .kanban-column-head-titles {
+        display: flex;
+        align-items: center;
+        gap: $space-8;
+        min-width: 0;
+    }
+
+    .kanban-count-badge {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: $space-8;
+        height: $space-24;
+        background: $light-gray;
+        @extend .br-5;
+        @extend .text-signature;
+        color: $light-light-green !important;
+        aspect-ratio: 1/1;
+    }
+
+    .kanban-stage-sep-line {
+        width: $space-1;
+        flex-shrink: 0;
+        align-self: stretch;
+        min-height: $space-16;
+        background: $dark-gray;
+        border-radius: $radius-sm;
+    }
+}
+
+body[data-theme="dark"] .kanban-stage-group.sortable-fallback .kanban-stage-sep-line {
+    background: $light-light-green;
+}
+
+/* Kanban: task item fallback/ghost rules */
+.kanban-task-item {
+    cursor: grab;
+    width: 100%;
+    padding: $space-16 $space-24;
+    @extend .border-gray-1, .br-5, .bg-light-light-green;
+    @extend .flex-col;
+    gap: $space-12;
+
+    >span.text-basic,
+    >span.text-basic-line-through {
+        display: block;
+        margin-bottom: $space-8;
+    }
+}
+
+/* Sortable fallback ghost is appended to body — loses .kanban-stage-col ancestor for .tag rules */
+.kanban-task-item.sortable-fallback .tag {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: stretch;
+    gap: $space-16;
+
+    .executor {
+        display: flex;
+        align-items: center;
+
+        img {
+            height: calc(1em + $space-8 * 2);
+            @extend .br-5;
+        }
+    }
+
+    .priority-high,
+    .priority-normal {
+        @extend .br-5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: calc(1em + $space-8 * 2);
+        width: calc(1em + $space-8 * 2);
+        color: $light-light-green;
+    }
+
+    .priority-high {
+        background-color: $pink;
+    }
+
+    .priority-normal {
+        background-color: rgba($green, 0.5);
+    }
+
+    .deadline {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        padding: $space-4 $space-16;
+        height: calc(1em + $space-8 * 2);
+        gap: $space-8;
+        color: $light-gray;
+        background: rgba($green, 0.15);
+        @extend .br-5;
+
+        &::before {
+            content: '';
+            display: inline-block;
+            width: 1em;
+            height: 1em;
+            background-image: url('/static/source/icons/deadline.svg');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            flex-shrink: 0;
+        }
+    }
+}
+
+body[data-theme="dark"] .kanban-task-item, .board-list .card .list .item {
+    background: $black;
+    border-color: $light-light-green;
+}
+
+/* Reports view */
+.board-list .cards.reports-view,
+.board-list .cards.archive-view {
+    column-count: 1 !important;
+    display: block;
+    width: 100%;
+}
+
+.board-reports-card {
+    width: 100%;
+
+    .tasks-grid-wrapper {
+        width: fit-content;
+
+        .tasks-grid {
+            margin-bottom: $space-8;
+        }
+    }
+
+    .reports-summary-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $space-16;
+        margin-bottom: $space-8;
+        color: $light-light-green;
+    }
+
+    .reports-stat-chip {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: $space-12 $space-16;
+        background: $light-gray;
+        @extend .br-5;
+        min-width: 7.5rem;
+    }
+
+    .reports-stat-value {
+        font-size: 1.5rem;
+        @extend .text-header;
+    }
+
+    .reports-stat-label {
+        @extend .text-signature;
+    }
+
+    .reports-hint {
+        margin: 0;
+        max-width: 48rem;
+    }
+}
+
+.tasks-grid.reports-assignee-grid {
+    grid-template-columns:
+        auto auto auto auto auto !important;
+
+    .grid-row {
+        padding: $space-4;
+    }
+
+    .col-member {
+        min-width: 0;
+
+        .user-img-text {
+            height: $space-48;
+
+            img {
+                width: $space-48;
+                height: $space-48;
+                border-radius: 50%;
+            }
+        }
+    }
+
+    .col-archived,
+    .col-active,
+    .col-total,
+    .col-rate {
+        white-space: nowrap;
+    }
+}
+
+.tasks-grid.reports-kanban-grid {
+    grid-template-columns:
+        minmax(8rem, 1.2fr) auto auto auto auto auto !important;
+
+    .col-board {
+        min-width: 0;
+    }
+
+    .col-wip,
+    .col-done,
+    .col-urgent,
+    .col-lead,
+    .col-load {
+        white-space: nowrap;
+    }
+}
+
+/* Archive section */
+.board-kanban .board-archive-section .tasks-grid.archive-tasks-grid {
+    grid-template-columns: auto 1fr auto auto auto auto !important;
+}
+
+.board-archive-section {
+    width: 100%;
+
+    .archive-board-head {
+        padding: 0;
+
+        button {
+            padding: 0;
+        }
+    }
+
+    .archive-collapse-toggle {
+        display: flex;
+        align-items: center;
+        gap: $space-12;
+        flex: 1;
+        min-width: 0;
+        width: 100%;
+        padding: $space-8 0;
+        margin: 0;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        text-align: left;
+        font: inherit;
+        color: inherit;
+
+        .archive-board-title {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .num-of-tasks {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: $space-8;
+            height: $space-32;
+            background: $light-gray;
+            @extend .br-5;
+            @extend .text-subheader;
+            color: $light-light-green !important;
+        }
+    }
+
+    .archive-collapse-arrow {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 1.5em;
+        height: 1.5em;
+
+        &::before {
+            content: '';
+            display: block;
+            width: 100%;
+            height: 100%;
+            background-image: url('/static/source/icons/arrow_dark_cropped.svg');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            transition: transform 0.2s ease;
+        }
+    }
+
+    .archive-collapse-toggle.open .archive-collapse-arrow::before {
+        transform: rotate(-90deg);
+    }
+
+    .archive-board-body {
+        padding: 0 0 $space-16;
+    }
+}
+
+.board-list .tasks-grid.archive-tasks-grid {
+    grid-template-columns: auto 1fr auto auto auto auto auto !important;
+}
+
+.board-list .tasks-grid .archive-row-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $space-8;
+    align-items: center;
+    margin-right: $space-3;
+}
+
+.board-list .tasks-grid .col-dueDate {
+    white-space: nowrap;
+
+    .overdue {
+        color: $pink;
+        font-weight: 500;
+    }
+}
+
+.board-list .tasks-grid-wrapper>.empty-state {
+    padding: $space-24 $space-16;
+    @extend .text-signature;
+}
+
+/* Timeline view */
+.board-timeline-card {
+    .timeline-board {
+        width: 100%;
+        padding: 0 0 $space-16;
+    }
+
+    .timeline-track {
+        position: relative;
+        margin-left: $space-8;
+        padding-left: $space-32;
+        border-left: 2px solid rgba($green, 0.35);
+    }
+
+    .timeline-milestone {
+        position: relative;
+        padding-bottom: $space-24;
+
+        &:last-child {
+            padding-bottom: 0;
+        }
+    }
+
+    .timeline-node {
+        position: absolute;
+        left: calc(-1 * #{$space-32} - 5px);
+        top: $space-16;
+        width: $space-12;
+        height: $space-12;
+        border-radius: 50%;
+        background: $green;
+        border: 2px solid $light-light-green;
+        box-shadow: 0 0 0 1px rgba($green, 0.4);
+    }
+
+    .timeline-date-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: $space-4 $space-12;
+        margin-bottom: $space-12;
+        background: $light-gray;
+        @extend .br-5;
+        @extend .text-basic;
+        color: $light-light-green !important;
+    }
+
+    .timeline-milestone-tasks {
+        @extend .flex-col;
+        gap: $space-12;
+    }
+
+    .timeline-task-card {
+        width: 100%;
+        padding: $space-16 $space-24;
+        @extend .border-gray-1, .br-5;
+        @extend .flex-col;
+        gap: $space-12;
+    }
+
+    .timeline-task-card__row {
+        display: flex;
+        align-items: flex-start;
+        gap: $space-12;
+    }
+
+    .timeline-task-card__name {
+        @extend .text-basic;
+        flex: 1;
+        min-width: 0;
+        word-break: break-word;
+    }
+
+    .timeline-task-card__meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: $space-12;
+        justify-content: flex-end;
+    }
+
+    .timeline-due {
+        @extend .text-signature;
+        white-space: nowrap;
+
+        &.overdue {
+            color: $pink;
+            font-weight: 500;
+        }
+    }
+
+    .timeline-assignee {
+        display: flex;
+        align-items: center;
+        gap: $space-8;
+
+        img {
+            width: $space-24;
+            height: $space-24;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        span {
+            @extend .text-basic;
+        }
+    }
+
+    body[data-theme="dark"] & .timeline-task-card .checkbox-item {
+        color: $light-light-green;
+    }
+
+    body[data-theme="dark"] & .timeline-task-card .custom-checkbox {
+        border-color: $light-light-green !important;
+    }
+
+    body[data-theme="dark"] & .timeline-task-card input[type="checkbox"]:checked + .custom-checkbox {
+        border-color: $green !important;
+    }
+
+    body[data-theme="dark"] & .timeline-task-card__name {
+        color: $light-light-green;
+    }
+}
+
+.board-timeline-card {
+    .tag {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+        align-items: stretch;
+        gap: $space-16;
+
+        .executor {
+            display: flex;
+            align-items: center;
+
+            img {
+                height: calc(1em + $space-8 * 2);
+                @extend .br-5;
+            }
+        }
+
+        .priority-high,
+        .priority-normal {
+            @extend .br-5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: calc(1em + $space-8 * 2);
+            width: calc(1em + $space-8 * 2);
+            color: $light-light-green;
+        }
+
+        .priority-high {
+            background-color: $pink;
+        }
+
+        .priority-normal {
+            background-color: rgba($green, 0.5);
+        }
+
+        .deadline {
+            display: flex;
+            align-items: center;
+            gap: $space-8;
+            padding: $space-4 $space-16;
+            height: calc(1em + $space-8 * 2);
+            color: $light-gray;
+            background: rgba($green, 0.15);
+            @extend .br-5;
+
+            &::before {
+                content: '';
+                display: inline-block;
+                width: 1em;
+                height: 1em;
+                background-image: url('/static/source/icons/deadline.svg');
+                background-size: contain;
+                background-repeat: no-repeat;
+                background-position: center;
+                flex-shrink: 0;
+            }
+        }
+    }
+
+    // Стили для подзадач (как в досках)
+    .subtasks {
+        display: flex;
+        flex-direction: column;
+        gap: $space-8;
+
+        .count {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .name {
+            display: inline-flex;
+            align-items: center;
+            gap: $space-8;
+            cursor: pointer;
+
+            &::after {
+                content: '';
+                display: inline-block;
+                height: 1em;
+                aspect-ratio: 2/3;
+                background-image: url('/static/source/icons/arrow_dark_cropped.svg');
+                background-size: contain;
+                background-repeat: no-repeat;
+                background-position: center;
+                flex-shrink: 0;
+                transition: transform 0.2s ease;
+            }
+
+            &.open::after {
+                transform: rotate(-90deg);
+            }
+        }
+
+        .progress-line {
+            display: flex;
+            width: 100%;
+            height: $space-3;
+
+            .completed {
+                background-color: $green;
+                border-radius: $radius-sm 0 0 $radius-sm;
+            }
+
+            .todo {
+                background-color: rgba($light-gray, 0.5);
+                border-radius: 0 $radius-sm $radius-sm 0;
+            }
+        }
+
+        .subtasks-list {
+            display: flex;
+            flex-direction: column;
+            gap: $space-4;
+
+            .custom-checkbox {
+                width: $space-20;
+                height: $space-20;
+                border: $space-2 solid $dark-gray;
+                border-radius: $radius-sm;
+
+                &::after {
+                    width: $space-12;
+                    height: $space-8;
+                }
+            }
+
+            .checkbox-text {
+                @extend .text-signature;
+            }
+        }
+
+        body[data-theme="dark"] & .subtasks {
+            color: $light-light-green;
+        }
+
+        body[data-theme="dark"] & .subtasks .checkbox-item,
+        body[data-theme="dark"] & .subtasks-list .checkbox-item {
+            color: $light-light-green;
+        }
+
+        body[data-theme="dark"] & .subtasks .subtasks-list .custom-checkbox {
+            border-color: $light-light-green !important;
+        }
+
+        body[data-theme="dark"] & .subtasks .checkbox-item input[type="checkbox"]:checked + .custom-checkbox,
+        body[data-theme="dark"] & .subtasks-list .checkbox-item input[type="checkbox"]:checked + .custom-checkbox {
+            border-color: $green !important;
+        }
+    }
+}
+
+/* Board list: table grid specifics */
+.board-list .tasks-grid {
+    grid-template-columns: auto auto 1fr auto auto auto !important;
+
+    .name {
+        display: inline-flex;
+        align-items: center;
+        gap: $space-8;
+
+        &::after {
+            content: '';
+            display: inline-block;
+            height: 1em;
+            aspect-ratio: 2/3;
+            background-image: url('/static/source/icons/arrow_dark_cropped.svg');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+
+        &.open::after {
+            transform: rotate(-90deg);
+        }
+    }
+
+    .subtasks-list {
+        @extend .flex-col;
+        gap: $space-4;
+
+        .custom-checkbox {
+            width: $space-20;
+            height: $space-20;
+            border: $space-2 solid $dark-gray;
+
+            &::after {
+                width: $space-12;
+                height: $space-8;
+            }
+        }
+
+        span {
+            @extend .text-signature;
+        }
+    }
+
+    body[data-theme="dark"] .board-list .tasks-grid .subtasks-list .checkbox-item {
+        color: $light-light-green;
+    }
+
+    body[data-theme="dark"] .board-list .tasks-grid .subtasks-list .custom-checkbox {
+        border-color: $light-light-green !important;
+    }
+
+    body[data-theme="dark"] .board-list .tasks-grid .subtasks-list .checkbox-item input[type="checkbox"]:checked + .custom-checkbox {
+        border-color: $green !important;
+    }
+
+    .grid-row.subtasks-open {
+        align-items: flex-start;
+    }
+}
+
+body[data-theme="dark"] .board-kanban .tasks-grid .subtasks-list .checkbox-item {
+    color: $light-light-green;
+}
+
+body[data-theme="dark"] .board-kanban .tasks-grid .subtasks-list .custom-checkbox {
+    border-color: $light-light-green !important;
+}
+
+body[data-theme="dark"] .board-kanban .tasks-grid .subtasks-list .checkbox-item input[type="checkbox"]:checked + .custom-checkbox {
+    border-color: $green !important;
+}
+
+body[data-theme="dark"] .board-kanban .tasks-grid .col-name {
+    color: $light-light-green;
+}
+
+.table-rows {
+    display: contents;
+}
+
+.board-table-card {
+    .board-table-container {
+        width: 100%;
+    }
+
+    .subtasks {
+        @extend .flex-col;
+        gap: $space-8;
+
+        .count {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .subtasks-list {
+            @extend .flex-col, ;
+            gap: $space-4;
+
+            .custom-checkbox {
+                width: $space-20;
+                height: $space-20;
+                border: $space-2 solid $dark-gray;
+
+                &::after {
+                    width: $space-12;
+                    height: $space-8;
+                }
+            }
+        }
+
+        .checkbox-text {
+            @extend .text-signature;
+        }
+
+        .name {
+            display: inline-flex;
+            align-items: center;
+            gap: $space-4;
+
+            &::after {
+                content: '';
+                display: inline-block;
+                height: 0.75em;
+                aspect-ratio: 2/3;
+                background-image: url('/static/source/icons/arrow_dark_cropped.svg');
+                background-size: contain;
+                background-repeat: no-repeat;
+                background-position: center;
+                flex-shrink: 0;
+                transition: transform 0.2s ease;
+            }
+
+            &.open::after {
+                transform: rotate(-90deg);
+            }
+        }
+    }
+}
+
+body[data-theme="dark"] .board-table-card .subtasks {
+    color: $light-light-green;
+}
+
+body[data-theme="dark"] .board-table-card .tasks-grid .subtasks-list .checkbox-item,
+body[data-theme="dark"] .board-table-card .subtasks .checkbox-item,
+body[data-theme="dark"] .board-table-card .subtasks-list .checkbox-item {
+    color: $light-light-green;
+}
+
+body[data-theme="dark"] .board-table-card .tasks-grid .subtasks-list .custom-checkbox,
+body[data-theme="dark"] .board-table-card .subtasks .subtasks-list .custom-checkbox {
+    border-color: $light-light-green !important;
+}
+
+body[data-theme="dark"] .board-table-card .tasks-grid .subtasks-list .checkbox-item input[type="checkbox"]:checked + .custom-checkbox,
+body[data-theme="dark"] .board-table-card .subtasks .checkbox-item input[type="checkbox"]:checked + .custom-checkbox,
+body[data-theme="dark"] .board-table-card .subtasks-list .checkbox-item input[type="checkbox"]:checked + .custom-checkbox {
+    border-color: $green !important;
+}
+
+body[data-theme="dark"] .board-table-card .tasks-grid .col-name {
+    color: $light-light-green;
+}
+
+/* Add task row */
+.form-add-task {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: $space-8;
+    padding: $space-8 $space-24;
+    @extend .border-dark-1, .br-5, .bg-light-green;
+
+    input {
+        all: unset;
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    img {
+        height: $space-24;
+    }
+
+    .tag {
+        display: none;
+        justify-content: flex-end;
+        align-items: center;
+        gap: $space-16;
+        transition: display 0.2s ease;
+    }
+
+    &:hover,
+    &:active,
+    &:focus-within {
+        background-color: $light-light-green;
+    }
+}
+
+body[data-theme="dark"] .form-add-task {
+    background: $dark-gray;
+    border-color: $light-gray;
+}
+
+body[data-theme="dark"] .form-add-task input {
+    color: $light-light-green;
+}
+
+body[data-theme="dark"] .form-add-task:hover,
+body[data-theme="dark"] .form-add-task:active,
+body[data-theme="dark"] .form-add-task:focus-within {
+    background: $black;
+    cursor: pointer;
+}
+
+.assignee-option {
+    cursor: pointer;
+}

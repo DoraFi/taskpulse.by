@@ -100,3 +100,20 @@ aside {
         transition: opacity 0.2s ease;
     }
 }
+
+body[data-theme="dark"] aside {
+    background-color: $dark-gray;
+    box-shadow: inset -1px 0 0 rgba($light-gray, 0.18);
+}
+
+body[data-theme="dark"] aside .item .nav-link:hover {
+    color: $green;
+}
+
+body[data-theme="dark"] aside .submenu .nav-link {
+    color: $light-light-green;
+}
+
+body[data-theme="dark"] aside .submenu .nav-link.active {
+    color: $green;
+}

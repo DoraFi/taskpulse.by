@@ -1,0 +1,145 @@
+/* Create task modal */
+
+/* Модалка «Создание задачи» (шапка + /headerCreateTaskBtn) */
+.modal-content.create-task-modal {
+    width: 44vw;
+    height: 92vh;
+    max-height: 92vh;
+    min-height: 0;
+
+    .modal-body.create-task-modal__body {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+    }
+
+    .create-task-field {
+        margin: 0;
+    }
+
+    .create-task-label-plain {
+        display: block;
+        margin-bottom: $space-8;
+    }
+
+    /* Нативная стрелка select игнорирует padding — убираем её и рисуем свою (как у кастомного дропдауна) */
+    select.create-task-select {
+        @include tp-select-skin(22vw, 22vw);
+    }
+
+    .create-task-deps-block {
+        @extend .flex-col;
+        gap: $space-16;
+        padding: $space-16;
+        border-radius: $radius-sm;
+        background: rgba($green, 0.04);
+    }
+
+    .create-task-deps-row {
+        @extend .flex-col;
+        gap: $space-8;
+    }
+
+    .create-task-deps-suggest {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        @extend .flex-col;
+        gap: $space-4;
+
+        &__item {
+            padding: $space-8 $space-12;
+            border-radius: $radius-sm;
+            cursor: pointer;
+            transition: background 0.15s ease;
+
+            &:hover,
+            &:focus-visible {
+                background: $green-transperent-10;
+                outline: none;
+            }
+        }
+
+        &--disabled {
+            opacity: 0.42;
+            pointer-events: none;
+        }
+    }
+
+    /* Диапазон дат — как в модалке фильтров задач */
+    .filter-section .filter-date {
+        width: 100%;
+
+        .filter-input[type="date"] {
+            min-height: 2.75rem;
+            cursor: pointer;
+
+            &::-webkit-calendar-picker-indicator {
+                opacity: 0;
+                cursor: pointer;
+            }
+
+            &::-moz-calendar-picker-indicator {
+                display: none;
+            }
+        }
+    }
+
+    textarea.create-task-desc {
+        @include tp-textarea-skin(40vh, 43vh);
+    }
+
+    .create-task-attachments {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: $space-16;
+        min-height: 10vh;
+        height: 10vh;
+        padding: $space-12 $space-16;
+        box-sizing: border-box;
+        border-radius: $radius-sm;
+
+        &--drag {
+            background: rgba($green, 0.12);
+        }
+
+        &__hint {
+            margin: 0;
+            text-align: center;
+        }
+
+        .create-task-attachments__btn {
+            flex-shrink: 0;
+        }
+    }
+}
+
+body[data-theme="dark"] .modal-content.create-task-modal textarea.create-task-desc {
+    @include tp-textarea-skin-dark();
+}
+
+body[data-theme="dark"] .modal-content.create-task-modal .create-task-attachments.border-dark-1 {
+    border-color: $light-light-green;
+}
+
+/* Тёмная тема: запасная стрелка + явный repeat/position/size (!important), иначе при override background-image слой тайлится */
+body[data-theme="dark"] .modal-content.create-task-modal select.create-task-select {
+    @include tp-select-skin-dark();
+}
+
+body[data-theme="dark"] .modal-content.create-task-modal .create-task-deps-block {
+    background: $black;
+    border-color: $light-light-green;
+}
+
+body[data-theme="dark"] .modal-content.create-task-modal .filter-section .filter-date span {
+    color: rgba($light-light-green, 0.55);
+}
+
+body[data-theme="dark"] .modal-content.create-task-modal .create-task-deps-suggest__item:hover,
+body[data-theme="dark"] .modal-content.create-task-modal .create-task-deps-suggest__item:focus-visible {
+    background: rgba($green, 0.15);
+}
+

@@ -1,0 +1,92 @@
+/* Dropdown menu (status etc.) */
+
+.dropdown-menu {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 16vw;
+    background: $light-light-green;
+    @extend .br-10;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    display: none;
+    overflow: hidden;
+    animation: fadeInScale 0.2s ease;
+    display: none;
+    flex-direction: column;
+    @extend .gap-24;
+    padding-bottom: $space-24;
+
+    &.show {
+        display: flex;
+    }
+
+    .dropdown-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: $space-32 $space-32 0;
+        padding-bottom: $space-16;
+        border-bottom: 1px solid $green;
+
+        .text-header {
+            margin: 0;
+            font-size: $font-size-md;
+        }
+
+        .dropdown-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: $space-4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            border-radius: $radius-sm;
+
+            &:hover {
+                transform: scale(0.9);
+            }
+
+            img {
+                display: block;
+                width: $space-24;
+                aspect-ratio: 1 / 1;
+            }
+        }
+    }
+
+    ul {
+        list-style: none;
+        margin: 0;
+        padding: $space-8 0;
+        display: flex;
+        flex-direction: column;
+        gap: $space-4;
+    }
+
+    .dropdown-item {
+        padding: $space-4 $space-32;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background: $green-transperent-10;
+            color: $green;
+        }
+
+        &.pink:hover {
+            background: rgba($pink, 0.1);
+            color: $pink;
+        }
+    }
+}
+
+body[data-theme="dark"] .dropdown-menu {
+    background: $dark-gray;
+}
+
+body[data-theme="dark"] .dropdown-menu .dropdown-header {
+    border-bottom-color: $green;
+}

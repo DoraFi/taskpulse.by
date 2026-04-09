@@ -1,0 +1,26 @@
+.toast-notification {
+    position: fixed;
+    bottom: $space-32;
+    left: 50%;
+    transform: translateX(-50%) translateY(12vh);
+    background: $dark-gray;
+    color: $light-light-green;
+    padding: $space-12 $space-24;
+    border-radius: $radius-md;
+    font-size: $font-size-bs;
+    z-index: 2002;
+    opacity: 0;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+
+    &.show {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+}
+
+body[data-theme="dark"] .toast-notification {
+    background: rgba($light-light-green, 0.92) !important;
+    color: #2D3229 !important;
+    border: 1px solid rgba(97, 160, 57, 0.35);
+}

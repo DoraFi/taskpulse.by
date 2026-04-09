@@ -1,0 +1,41 @@
+/* Print styles */
+
+@media print {
+
+    .header,
+    aside,
+    .tabs,
+    .info,
+    .tasks-footer,
+    .modal-overlay,
+    .dropdown-menu {
+        display: none !important;
+    }
+
+    .app-container {
+        padding: 0 !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    .card {
+        border: none !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+
+    .tasks-grid {
+        grid-template-columns: repeat(10, auto) !important;
+
+        .grid-header {
+            background: $light-gray !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .status-select::after {
+            display: none !important;
+        }
+    }
+}
+

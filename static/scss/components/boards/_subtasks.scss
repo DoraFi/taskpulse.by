@@ -1,0 +1,19 @@
+/* Shared subtasks widget skin (board-list / kanban / table/timeline) */
+
+@mixin tp-subtasks-list-skin() {
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+
+    .custom-checkbox {
+        width: $space-20;
+        height: $space-20;
+        border: $space-2 solid $dark-gray;
+
+        &::after {
+            width: $space-12;
+            height: $space-8;
+        }
+    }
+}
+

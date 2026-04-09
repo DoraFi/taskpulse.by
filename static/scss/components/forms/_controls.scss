@@ -1,0 +1,91 @@
+/* Shared form control skins (reduce duplication across modals) */
+
+@mixin tp-select-skin($w: 100%, $maxW: 100%) {
+    $chevron-w: 0.625rem;
+    $chevron-inset: $space-16;
+
+    width: $w;
+    max-width: $maxW;
+    box-sizing: border-box;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    accent-color: $green;
+    color: $dark-gray;
+    padding: $space-4 $space-16;
+    padding-right: calc(#{$chevron-inset} + #{$chevron-w} + #{$space-8});
+    border: $space-1 solid $light-gray;
+    border-radius: $radius-sm;
+    @extend .text-basic;
+    background-color: $light-light-green;
+    background-image: url('/static/source/icons/arrow_dark_cropped.svg');
+    background-repeat: no-repeat;
+    background-position: right $chevron-inset center;
+    background-size: $chevron-w auto;
+
+    &::-ms-expand {
+        display: none;
+    }
+
+    &:focus {
+        outline: none;
+        border-color: $green;
+        box-shadow: 0 0 0 $space-2 rgba($green, 0.1);
+    }
+}
+
+@mixin tp-select-skin-dark() {
+    background-color: $black;
+    background-image: url('/static/source/icons/arrow_light_cropped.svg');
+    background-repeat: no-repeat !important;
+    background-position: right $space-16 center !important;
+    background-size: 0.625rem auto !important;
+    color: $light-light-green;
+    border-color: $light-light-green;
+
+    &:focus {
+        border-color: $green;
+        box-shadow: 0 0 0 $space-2 rgba($green, 0.18);
+    }
+
+    option {
+        background: $dark-gray;
+        color: $light-light-green;
+    }
+}
+
+@mixin tp-textarea-skin($minH: 6rem, $h: 8rem) {
+    display: block;
+    width: 100%;
+    min-height: $minH;
+    height: $h;
+    resize: vertical;
+    box-sizing: border-box;
+    padding: $space-16;
+    border: $space-1 solid $light-gray;
+    border-radius: $radius-sm;
+    @extend .text-basic;
+    background: $light-light-green;
+    transition: all 0.2s ease;
+
+    &:focus {
+        outline: none;
+        border-color: $green;
+        box-shadow: 0 0 0 $space-2 rgba($green, 0.1);
+    }
+
+    &::placeholder {
+        color: rgba($dark-gray, 0.5);
+    }
+}
+
+@mixin tp-textarea-skin-dark() {
+    border-color: $light-light-green;
+    color: $light-light-green;
+    background: $black;
+
+    &::placeholder {
+        color: rgba($light-light-green, 0.45);
+    }
+}
+
