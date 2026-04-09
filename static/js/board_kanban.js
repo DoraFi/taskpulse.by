@@ -1148,7 +1148,7 @@
     }
 
     function subtasksReadOnly(stage) {
-        return stage === 'Очередь' || stage === 'Готово';
+        return stage === 'Готово';
     }
 
     function createSubtasksBlockKanban(task, stage) {

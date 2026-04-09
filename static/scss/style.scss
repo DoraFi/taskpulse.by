@@ -4399,13 +4399,21 @@ body[data-theme="dark"] .custom-calendar-modal .custom-calendar {
 
 .checkbox-item {
     user-select: none;
-    position: relative;
 }
 
 .checkbox-item input {
     pointer-events: auto;
-    /* Don't use display:none: label click won't toggle in some browsers.
-       Keep it accessible but visually hidden; custom checkbox is the UI. */
+    display: none !important;
+}
+
+.kanban-board-card .subtasks .checkbox-item,
+.board-kanban .tasks-grid .subtasks-list .checkbox-item {
+    position: relative;
+}
+
+.kanban-board-card .subtasks .checkbox-item input[type="checkbox"],
+.board-kanban .tasks-grid .subtasks-list .checkbox-item input[type="checkbox"] {
+    display: block !important;
     position: absolute;
     opacity: 0;
     width: 1px;
