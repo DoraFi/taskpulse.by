@@ -2,7 +2,7 @@
   "boards": [
     {
       "id": 1,
-      "name": "Наименование проекта",
+      "name": "TaskPulse — Диплом",
       "stages": ["Очередь", "В работе", "Готово"],
       "tasksSource": "/static/data/kanban_tasks.json",
       "archivedTasks": [
@@ -36,7 +36,7 @@
     },
     {
       "id": 2,
-      "name": "Мобильное приложение — MVP",
+      "name": "TaskPulse Mobile — MVP",
       "stages": ["Очередь", "В работе", "Тестирование", "Готово"],
       "tasksSource": "/static/data/kanban_tasks_board2.json",
       "archivedTasks": [
@@ -50,6 +50,13 @@
           "archivedDate": "2026-03-15T16:00:00.000Z"
         }
       ]
+    },
+    {
+      "id": 3,
+      "name": "TaskPulse — Интеграции и релиз",
+      "stages": ["Очередь", "В работе", "Тестирование", "Готово"],
+      "tasksSource": "/static/data/kanban_tasks.json",
+      "archivedTasks": []
     }
   ]
 }

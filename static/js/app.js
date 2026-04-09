@@ -67,3 +67,46 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Dev helper: reset all demo tables/state back to /static/data/*.json
+// Usage in console: window.tpResetDemoData()
+(function () {
+    if (window.tpResetDemoData) return;
+
+    window.tpResetDemoData = function tpResetDemoData({ reload = true } = {}) {
+        try {
+            // Tasks page UI state
+            localStorage.removeItem('tasksVisibleColumns');
+
+            // Board list state
+            localStorage.removeItem('boardsData');
+            localStorage.removeItem('archivedBoards');
+            localStorage.removeItem('boardListArchiveCollapsed');
+            localStorage.removeItem('boardListBoardSectionCollapsed');
+
+            // Kanban state
+            localStorage.removeItem('kanbanBoardsData');
+            localStorage.removeItem('kanbanDataVersion');
+            localStorage.removeItem('kanbanBoardCollapsed');
+            localStorage.removeItem('kanbanSectionCollapsed');
+            localStorage.removeItem('kanbanTimelineShowDone');
+            localStorage.removeItem('archivedKanbanBoards');
+
+            // Per-board kanban table columns (dynamic keys)
+            for (let i = localStorage.length - 1; i >= 0; i--) {
+                const key = localStorage.key(i);
+                if (!key) continue;
+                if (key.startsWith('kanbanTableCols_')) localStorage.removeItem(key);
+            }
+
+            // Left menu collapse/expand
+            localStorage.removeItem('submenusState');
+
+            if (reload) window.location.reload();
+            return true;
+        } catch (e) {
+            console.error(e);
+            return false;
+        }
+    };
+})();

@@ -3387,6 +3387,10 @@ body[data-theme="dark"] .kanban-task-item, .board-list .card .list .item {
 
     .tasks-grid-wrapper {
         width: fit-content;
+
+        .tasks-grid{
+            margin-bottom: $space-8;
+        }
     }
 
     .reports-summary-grid {
