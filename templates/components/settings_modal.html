@@ -1,0 +1,234 @@
+<div class="modal-overlay" id="settingsModal" aria-hidden="true">
+    <div class="modal-content settings-modal" role="dialog" aria-labelledby="settingsModalTitle" aria-modal="true">
+        <div class="modal-header settings-modal__header">
+            <p class="text-header" id="settingsModalTitle">Настройки</p>
+            <button type="button" class="modal-close" id="settingsModalClose" aria-label="Закрыть">
+                <img src="/static/source/icons/cross.svg" alt="" width="24" height="24">
+            </button>
+        </div>
+
+        <div class="settings-modal__shell">
+            <nav class="settings-modal__nav" id="settingsModalNav" aria-label="Разделы настроек">
+                <button type="button" class="settings-modal__nav-item is-active" data-settings-panel="general" id="settingsNav-general" aria-controls="settings-panel-general" aria-selected="true">Общие</button>
+                <button type="button" class="settings-modal__nav-item" data-settings-panel="notifications" id="settingsNav-notifications" aria-controls="settings-panel-notifications" aria-selected="false">Уведомления</button>
+                <button type="button" class="settings-modal__nav-item" data-settings-panel="appearance" id="settingsNav-appearance" aria-controls="settings-panel-appearance" aria-selected="false">Внешний вид</button>
+                <button type="button" class="settings-modal__nav-item" data-settings-panel="security" id="settingsNav-security" aria-controls="settings-panel-security" aria-selected="false">Безопасность</button>
+                <button type="button" class="settings-modal__nav-item" data-settings-panel="integrations" id="settingsNav-integrations" aria-controls="settings-panel-integrations" aria-selected="false">Интеграции</button>
+                <button type="button" class="settings-modal__nav-item" data-settings-panel="team" id="settingsNav-team" aria-controls="settings-panel-team" aria-selected="false">Команда и доступ</button>
+                <button type="button" class="settings-modal__nav-item" data-settings-panel="data" id="settingsNav-data" aria-controls="settings-panel-data" aria-selected="false">Данные</button>
+            </nav>
+
+            <div class="settings-modal__panels">
+                <section id="settings-panel-general" class="settings-modal__panel" role="tabpanel" aria-labelledby="settingsNav-general" aria-hidden="false">
+                    <div class="header-signature">
+                        <h2 class="settings-modal__panel-title text-header">Общие</h2>
+                        <p class="text-signature settings-modal__lead">Язык интерфейса, форматы даты и времени, первая неделя в календаре</p>
+                    </div>
+                    <div class="settings-modal__grid">
+                        <div class="auth-field settings-modal__field">
+                            <label for="settingsLang">Язык интерфейса</label>
+                            <select id="settingsLang" class="filter-input create-task-select settings-modal__select--full">
+                                <option value="ru" selected>Русский</option>
+                                <option value="be">Беларуская</option>
+                                <option value="en">English</option>
+                            </select>
+                        </div>
+                        <div class="auth-field settings-modal__field">
+                            <label for="settingsWeekStart">Первый день недели</label>
+                            <select id="settingsWeekStart" class="filter-input create-task-select settings-modal__select--full">
+                                <option value="mon" selected>Понедельник</option>
+                                <option value="sun">Воскресенье</option>
+                            </select>
+                        </div>
+                        <div class="auth-field settings-modal__field">
+                            <label for="settingsDateFormat">Формат даты</label>
+                            <select id="settingsDateFormat" class="filter-input create-task-select settings-modal__select--full">
+                                <option value="ddmmyyyy" selected>ДД.ММ.ГГГГ</option>
+                                <option value="mmddyyyy">ММ/ДД/ГГГГ</option>
+                                <option value="yyyymmdd">ГГГГ-ММ-ДД</option>
+                            </select>
+                        </div>
+                        <div class="auth-field settings-modal__field">
+                            <label for="settingsTimeFormat">Формат времени</label>
+                            <select id="settingsTimeFormat" class="filter-input create-task-select settings-modal__select--full">
+                                <option value="24" selected>24 часа</option>
+                                <option value="12">12 часов (AM/PM)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="settings-modal__hint text-signature border-dark-1 br-5">Часовой пояс задаётся в профиле пользователя.</div>
+                </section>
+
+                <section id="settings-panel-notifications" class="settings-modal__panel" role="tabpanel" aria-labelledby="settingsNav-notifications" hidden aria-hidden="true">
+                    <div class="header-signature">
+                        <h2 class="settings-modal__panel-title text-header">Уведомления</h2>
+                        <p class="text-signature settings-modal__lead">Глобальные правила для рабочего пространства (личные — в профиле)</p>
+                    </div>
+                    <div class="settings-modal__section-card border-dark-1 br-5">
+                        <p class="filter-label">Каналы</p>
+                        <div class="settings-modal__notify-list">
+                            <label class="settings-modal__notify-row checkbox-item">
+                                <input type="checkbox" checked>
+                                <span class="custom-checkbox"></span>
+                                <span class="checkbox-text">E-mail от TaskPulse</span>
+                            </label>
+                            <label class="settings-modal__notify-row checkbox-item">
+                                <input type="checkbox" checked>
+                                <span class="custom-checkbox"></span>
+                                <span class="checkbox-text">Браузерные уведомления (если разрешено)</span>
+                            </label>
+                            <label class="settings-modal__notify-row checkbox-item">
+                                <input type="checkbox">
+                                <span class="custom-checkbox"></span>
+                                <span class="checkbox-text">Ежедневная сводка по команде</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="settings-modal__section-card border-dark-1 br-5">
+                        <p class="filter-label">События</p>
+                        <div class="settings-modal__notify-list">
+                            <label class="settings-modal__notify-row checkbox-item">
+                                <input type="checkbox" checked>
+                                <span class="custom-checkbox"></span>
+                                <span class="checkbox-text">Новые задачи в общих проектах</span>
+                            </label>
+                            <label class="settings-modal__notify-row checkbox-item">
+                                <input type="checkbox" checked>
+                                <span class="custom-checkbox"></span>
+                                <span class="checkbox-text">Изменения на досках, где я участник</span>
+                            </label>
+                            <label class="settings-modal__notify-row checkbox-item">
+                                <input type="checkbox" checked>
+                                <span class="custom-checkbox"></span>
+                                <span class="checkbox-text">Комментарии в задачах, где я исполнитель</span>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="settings-panel-appearance" class="settings-modal__panel" role="tabpanel" aria-labelledby="settingsNav-appearance" hidden aria-hidden="true">
+                    <div class="header-signature">
+                        <h2 class="settings-modal__panel-title text-header">Внешний вид</h2>
+                        <p class="text-signature settings-modal__lead">Тема оформления; боковое меню. Быстро переключить тему можно кнопкой в шапке</p>
+                    </div>
+                    <div class="auth-field settings-modal__field settings-modal__field--max">
+                        <label for="settingsTheme">Тема оформления</label>
+                        <select id="settingsTheme" class="filter-input create-task-select settings-modal__select--full">
+                            <option value="light">Светлая</option>
+                            <option value="dark">Тёмная</option>
+                            <option value="system">Как в системе</option>
+                        </select>
+                    </div>
+                    <div class="auth-field settings-modal__field settings-modal__field--max">
+                        <label for="settingsSidebar">Боковое меню</label>
+                        <select id="settingsSidebar" class="filter-input create-task-select settings-modal__select--full">
+                            <option value="expanded" selected>Развёрнуто по умолчанию</option>
+                            <option value="collapsed">Свёрнуто по умолчанию</option>
+                        </select>
+                    </div>
+                </section>
+
+                <section id="settings-panel-security" class="settings-modal__panel" role="tabpanel" aria-labelledby="settingsNav-security" hidden aria-hidden="true">
+                    <div class="header-signature">
+                        <h2 class="settings-modal__panel-title text-header">Безопасность</h2>
+                        <p class="text-signature settings-modal__lead">Сессии и двухфакторная защита аккаунта</p>
+                    </div>
+                    <div class="settings-modal__section-card border-dark-1 br-5">
+                        <p class="filter-label">Двухфакторная аутентификация</p>
+                        <p class="text-signature settings-modal__p">Добавьте второй фактор входа для защиты от несанкционированного доступа.</p>
+                        <button type="button" class="button-secondary" disabled title="Скоро">Настроить 2FA</button>
+                    </div>
+                    <p class="filter-label">Активные сессии</p>
+                    <ul class="settings-modal__session-list">
+                        <li class="settings-modal__session-row border-dark-1 br-5">
+                            <div>
+                                <p class="text-basic settings-modal__session-device">Это устройство · Chrome · Windows</p>
+                                <p class="text-signature">Минск · сегодня, 09:14</p>
+                            </div>
+                            <span class="text-signature settings-modal__session-badge">Текущая</span>
+                        </li>
+                        <li class="settings-modal__session-row border-dark-1 br-5">
+                            <div>
+                                <p class="text-basic settings-modal__session-device">Safari · macOS</p>
+                                <p class="text-signature">Вчера, 18:02</p>
+                            </div>
+                            <button type="button" class="button-secondary settings-modal__session-revoke" disabled title="Скоро">Завершить</button>
+                        </li>
+                    </ul>
+                </section>
+
+                <section id="settings-panel-integrations" class="settings-modal__panel" role="tabpanel" aria-labelledby="settingsNav-integrations" hidden aria-hidden="true">
+                    <div class="header-signature">
+                        <h2 class="settings-modal__panel-title text-header">Интеграции</h2>
+                        <p class="text-signature settings-modal__lead">Подключение внешних сервисов к рабочему пространству</p>
+                    </div>
+                    <div class="settings-modal__integration-card border-dark-1 br-5">
+                        <p class="text-basic settings-modal__integration-title">Google Calendar</p>
+                        <p class="text-signature">Синхронизация дедлайнов задач с календарём</p>
+                        <button type="button" class="button-secondary" disabled title="Скоро">Подключить</button>
+                    </div>
+                    <div class="settings-modal__integration-card border-dark-1 br-5">
+                        <p class="text-basic settings-modal__integration-title">Slack</p>
+                        <p class="text-signature">Уведомления о событиях в выбранный канал</p>
+                        <div class="auth-field settings-modal__field settings-modal__field--max">
+                            <label for="settingsSlackWebhook">Webhook URL</label>
+                            <input id="settingsSlackWebhook" type="url" class="filter-input" placeholder="https://hooks.slack.com/..." disabled>
+                        </div>
+                    </div>
+                    <div class="settings-modal__integration-card border-dark-1 br-5">
+                        <p class="text-basic settings-modal__integration-title">Вход по SSO</p>
+                        <p class="text-signature">Корпоративный SAML / OIDC — для организаций</p>
+                        <button type="button" class="button-secondary" disabled title="Скоро">Запросить подключение</button>
+                    </div>
+                </section>
+
+                <section id="settings-panel-team" class="settings-modal__panel" role="tabpanel" aria-labelledby="settingsNav-team" hidden aria-hidden="true">
+                    <div class="header-signature">
+                        <h2 class="settings-modal__panel-title text-header">Команда и доступ</h2>
+                        <p class="text-signature settings-modal__lead">Организация и ваши права в пространстве TaskPulse</p>
+                    </div>
+                    <div class="settings-modal__grid">
+                        <div class="auth-field settings-modal__field">
+                            <label for="settingsOrg">Организация</label>
+                            <input id="settingsOrg" type="text" class="filter-input" value="ООО «Пульс Задач»" readonly>
+                        </div>
+                        <div class="auth-field settings-modal__field">
+                            <label for="settingsRole">Ваша роль</label>
+                            <input id="settingsRole" type="text" class="filter-input" value="Участник команды" readonly>
+                        </div>
+                    </div>
+                    <div class="header-signature">
+                        <p class="filter-label">Быстрые ссылки</p>
+                        <ul class="text-basic settings-modal__links">
+                            <li><a href="#" class="settings-modal__inline-link">Роли и права в организации</a></li>
+                            <li><a href="#" class="settings-modal__inline-link">Журнал действий</a></li>
+                            <li><a href="#" class="settings-modal__inline-link">Пригласить участника</a></li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section id="settings-panel-data" class="settings-modal__panel" role="tabpanel" aria-labelledby="settingsNav-data" hidden aria-hidden="true">
+                    <div class="header-signature">
+                        <h2 class="settings-modal__panel-title text-header">Данные</h2>
+                        <p class="text-signature settings-modal__lead">Экспорт и хранение информации</p>
+                    </div>
+                    <div class="settings-modal__section-card border-dark-1 br-5">
+                        <p class="filter-label">Экспорт</p>
+                        <p class="text-signature settings-modal__p">Выгрузка задач и комментариев в JSON или CSV (архив по проектам).</p>
+                        <button type="button" class="button-secondary" id="settingsExportBtn">Запросить экспорт</button>
+                    </div>
+                    <div class="settings-modal__danger-zone border-dark-1 br-5">
+                        <p class="filter-label">Опасная зона</p>
+                        <p class="text-signature settings-modal__p">Удаление аккаунта необратимо. Перед этим завершите активные проекты.</p>
+                        <button type="button" class="button-secondary" disabled title="Скоро">Удалить аккаунт</button>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <div class="modal-footer settings-modal__footer">
+            <button type="button" class="button-secondary" id="settingsModalCloseFooter">Закрыть</button>
+            <button type="button" class="button-basic" id="settingsModalSave">Сохранить</button>
+        </div>
+    </div>
+</div>

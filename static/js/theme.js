@@ -283,5 +283,22 @@
   }
 
   document.addEventListener('DOMContentLoaded', init);
+
+  window.tpGetThemeMode = function tpGetThemeMode() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved === 'light' || saved === 'dark') return saved;
+    return 'system';
+  };
+
+  window.tpSetThemeMode = function tpSetThemeMode(mode) {
+    if (mode === 'system') {
+      localStorage.removeItem(STORAGE_KEY);
+      setTheme(getPreferredTheme(), { persist: false });
+      return;
+    }
+    if (mode === 'light' || mode === 'dark') {
+      setTheme(mode, { persist: true });
+    }
+  };
 })();
 
