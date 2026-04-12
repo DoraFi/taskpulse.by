@@ -976,7 +976,6 @@ function createTimelineTaskCard(task, boardIndex) {
     card.className = 'timeline-task-card';
     card.dataset.taskId = task.id;
 
-    // Верхняя строка: чекбокс + название
     const row = document.createElement('div');
     row.className = 'timeline-task-card__row';
 
@@ -1005,12 +1004,10 @@ function createTimelineTaskCard(task, boardIndex) {
     row.appendChild(nameSpan);
     card.appendChild(row);
 
-    // Подзадачи (если есть) – используем стандартный createSubtasksBlock
     if (task.subtasks && task.subtasks.length > 0) {
         card.appendChild(createSubtasksBlock(task));
     }
 
-    // Блок тегов (исполнитель, приоритет, дедлайн) – такой же, как в досках
     const tagBlock = createTagBlock(task);
     if (tagBlock) {
         card.appendChild(tagBlock);
@@ -1812,9 +1809,7 @@ function initTableRowsSortable() {
             clone.style.setProperty('display', 'grid', 'important');
             if (gridCols) clone.style.setProperty('grid-template-columns', gridCols, 'important');
         } else {
-            // Для drag-элемента (это сама .grid-row) задаём grid напрямую, без subgrid.
             clone.style.setProperty('display', 'grid');
-            // В списке используется укороченная схема колонок (см. `.board-list .tasks-grid` в scss)
             clone.style.setProperty('grid-template-columns', 'auto auto 1fr auto auto auto');
             clone.style.setProperty('gap', '0.75rem');
             clone.style.setProperty('padding', '0');
@@ -1877,7 +1872,6 @@ function initTableRowsSortable() {
             const tick = () => {
                 const fb = container._listTableRowDragEl || document.querySelector(`.${TABLE_ROW_FALLBACK_CLASS}`);
                 if (!fb) return;
-                // Дожимаем контекстный HTML, чтобы селекторы таблицы работали в body
                 if (container._listTableRowCtxHtml && fb.innerHTML !== container._listTableRowCtxHtml) {
                     fb.innerHTML = container._listTableRowCtxHtml;
                 }
@@ -1911,7 +1905,6 @@ function initTableRowsSortable() {
             },
             handle: '.grid-row',
             draggable: '.grid-row',
-            // Визуал строки не должен меняться
             ghostClass: '',
             dragClass: '',
             forceFallback: true,
@@ -1921,18 +1914,14 @@ function initTableRowsSortable() {
             onClone(evt) {
                 container._listTableRowDragEl = evt.clone;
                 evt.clone?.classList?.add(TABLE_ROW_FALLBACK_CLASS);
-                // Sortable может "очищать" fallback-элемент, поэтому храним HTML строки и дожимаем в RAF
                 container._listTableRowCtxHtml = buildFallbackRowInnerHtml(evt.item);
-                // Первичный "прогрев" (на случай, если контекстные стили уже достаточны)
                 evt.clone.innerHTML = container._listTableRowCtxHtml;
-                // Убираем фон/рамки контейнера, оставляем позиционирование Sortable
                 evt.clone.style.setProperty('background', 'transparent');
                 evt.clone.style.setProperty('border', 'none');
                 evt.clone.style.setProperty('padding', '0');
                 evt.clone.style.setProperty('display', 'grid');
                 evt.clone.style.setProperty('box-sizing', 'border-box');
                 evt.clone.style.setProperty('pointer-events', 'none');
-                // Дальше RAF будет дожимать computed-стили на реальный drag-элемент
                 applyTableRowComputedStylesToClone(evt.item, evt.clone, { isFallback: true });
             },
             onStart: function(evt) {
@@ -2003,10 +1992,8 @@ function initTaskSortable(container, boardId) {
     let __dragging = false;
     let __dragFallbackHtml = '';
     let __dragFallbackWidth = '';
-    // Старый механизм копирования computed-стилей больше не используем
 
     const buildKanbanCloneHtmlForTask = (task) => {
-        // Для канбан-стилей нужен контекст .kanban-board-card .kanban-stage-col ...
         const stageCol = document.createElement('div');
         stageCol.className = 'kanban-stage-col';
 
@@ -2069,8 +2056,6 @@ function initTaskSortable(container, boardId) {
             if (!__dragging) return;
             const fb = document.querySelector('.sortable-fallback');
             if (fb) {
-                // Sortable может перекидывать/менять классы у fallback в процессе, поэтому дожимаем каждый кадр.
-                // Для kanban-стилей нужен .kanban-board-card предок.
                 fb.classList.add('kanban-board-card');
                 if (__dragFallbackWidth) fb.style.width = __dragFallbackWidth;
                 fb.style.boxSizing = 'border-box';
@@ -2099,12 +2084,9 @@ function initTaskSortable(container, boardId) {
         group: { name: 'tasks', pull: true, put: true },
         handle: '.item',
         draggable: '.item',
-        // В board_list эти классы дают пунктир/рамки — не используем
         ghostClass: '',
         dragClass: '',
-        // chosenClass тоже не используем: он может "гасить" стили/overlay на fallback
         chosenClass: '',
-        // Чтобы клон НЕ отставал в multi-column layout, рисуем fallback на body
         forceFallback: true,
         fallbackOnBody: true,
         fallbackTolerance: 0,
@@ -2121,7 +2103,6 @@ function initTaskSortable(container, boardId) {
             const taskId = parseInt(item.dataset.taskId);
             if (!taskId) return;
 
-            // Найти задачу по id во всех досках
             let task = null;
             for (const b of boardsData) {
                 const t = (b.tasks || []).find(x => x && x.id === taskId);
@@ -2132,7 +2113,6 @@ function initTaskSortable(container, boardId) {
             }
             if (!task) return;
 
-            // Собрать DOM как в board_kanban (структура + scss-селекторы через предков)
             const kanbanCard = document.createElement('div');
             kanbanCard.className = 'item kanban-task-item';
             kanbanCard.dataset.taskId = task.id;
@@ -2161,7 +2141,6 @@ function initTaskSortable(container, boardId) {
                 kanbanCard.appendChild(subtasksBlock);
             }
 
-            // Tag как в Kanban: только исполнитель и срок (без приоритета)
             const hasAssignee = task.assignee && String(task.assignee).trim();
             const hasDueDate = task.dueDate && String(task.dueDate).trim();
             if (hasAssignee || hasDueDate) {
@@ -2182,7 +2161,6 @@ function initTaskSortable(container, boardId) {
                 kanbanCard.appendChild(tag);
             }
 
-            // Как в board_kanban: добавляем kanban-контекст, от которого завязаны стили tag/subtasks
             const scopeCard = document.createElement('div');
             scopeCard.className = 'kanban-board-card';
             const scopeCol = document.createElement('div');
@@ -2190,8 +2168,6 @@ function initTaskSortable(container, boardId) {
             scopeCol.appendChild(kanbanCard);
             scopeCard.appendChild(scopeCol);
 
-            // Подготовить fallback-контент. Sortable создаёт .sortable-fallback в body и иногда трогает DOM,
-            // поэтому финально дожимаем через startFallbackSync() каждый кадр.
             __dragFallbackHtml = scopeCard.innerHTML;
             __dragFallbackWidth = `${item.getBoundingClientRect().width}px`;
 
@@ -2715,10 +2691,6 @@ function renameBoard(boardIndex) {
             showToast('Доска переименована');
         }
     });
-}
-
-function addBoardDescription(boardIndex) {
-    // removed: board description editing is temporarily disabled
 }
 
 function cloneBoard(boardIndex) {

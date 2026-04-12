@@ -33,7 +33,6 @@
         });
     }
 
-    // Лёгкий параллакс для блока приветствия (только если пользователь не просит меньше движения)
     var root = document.querySelector('[data-auth-parallax-root]');
     if (root && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         var layers = root.querySelectorAll('[data-auth-parallax]');

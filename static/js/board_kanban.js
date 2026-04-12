@@ -1411,8 +1411,6 @@
             filter: '.form-add-task',
             preventOnFilter: false,
             forceFallback: true,
-            // Board view: lists sit inside horizontally scrollable `.board-card-collapsible`;
-            // keep the drag clone on `body` so fixed positioning tracks the cursor (Sortable default for nested scroll).
             fallbackOnBody: true,
             fallbackTolerance: 3,
             ghostClass: 'task-dragging',
@@ -1670,7 +1668,6 @@
         document.querySelectorAll('.board-kanban .kanban-timeline-toggle-label').forEach(el => {
             el.textContent = label;
         });
-        // show/hide the item depending on current view
         document.querySelectorAll('.board-kanban .kanban-timeline-toggle-item').forEach(el => {
             el.style.display = currentView === 'timeline' ? '' : 'none';
         });
@@ -1693,7 +1690,6 @@
                 draggable: '.kanban-stage-group',
                 handle: '.kanban-column-head-inner',
                 forceFallback: true,
-                // Как у задач: клон на body — fixed-позиция следует курсору внутри горизонтального scroll.
                 fallbackOnBody: true,
                 fallbackTolerance: 3,
                 ghostClass: '',
@@ -2103,6 +2099,14 @@
 
         table.appendChild(rowsContainer);
         tableWrapper.appendChild(table);
+
+        if (stageName === 'Очередь') {
+            const queueForms = document.createElement('div');
+            queueForms.className = 'kanban-stage-table-queue-forms';
+            queueForms.appendChild(createKanbanQueueTaskForm(board.id, boardIndex, 'normal'));
+            tableWrapper.appendChild(queueForms);
+        }
+
         wrap.appendChild(tableWrapper);
         return wrap;
     }

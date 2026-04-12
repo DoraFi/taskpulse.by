@@ -35,25 +35,7 @@
         }
 
         .dropdown-close {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: $space-4;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            border-radius: $radius-sm;
-
-            &:hover {
-                transform: scale(0.9);
-            }
-
-            img {
-                display: block;
-                width: $space-24;
-                aspect-ratio: 1 / 1;
-            }
+            @extend %tp-overlay-icon-dismiss;
         }
     }
 

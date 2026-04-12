@@ -19,6 +19,10 @@
   background: #7F8C73;
 }
 
+.bg-dark-gray {
+  background: #2D3229;
+}
+
 .light-gray {
   color: #7F8C73;
 }
@@ -49,10 +53,9 @@
   border: 0.0625rem solid #7F8C73;
 }
 
-.text-signature, .tasks-grid .grid-header, .legends .legend, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .timeline-due, .board-list .tasks-grid-wrapper > .empty-state, .board-reports-card .reports-stat-label, .kanban-stage-group.sortable-fallback .kanban-count-badge, .kanban-board-card .kanban-stage-col .subtasks .checkbox-text,
+.text-signature, .tasks-grid .grid-header, .legends .legend, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .timeline-due, .board-list .tasks-grid-wrapper > .empty-state, .board-reports-card .reports-stat-label, .kanban-board-card .kanban-stage-col .subtasks .checkbox-text,
 .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text, .kanban-board-card .kanban-count-chip,
-.kanban-archive-board .kanban-count-chip, .kanban-board-card .kanban-count-badge,
-.kanban-archive-board .kanban-count-badge, .board-list .card .list .subtasks .checkbox-text, .auth-hint, .auth-field label, .auth-step-pill, .auth-mini-card__text, .form-auth .checkbox-item .checkbox-text,
+.kanban-archive-board .kanban-count-chip, .board-list .card .list .subtasks .checkbox-text, .auth-hint, .auth-field label, .auth-step-pill, .auth-mini-card__text, .form-auth .checkbox-item .checkbox-text,
 .form-auth .checkbox-item a, .auth-motif-board__head, .auth-hero__eyebrow, .modal-content.settings-modal .settings-modal__links, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-label, .button-small {
   font-size: 0.75rem;
   font-weight: 400;
@@ -408,6 +411,7 @@ body[data-theme=dark] .search-panel input {
   height: 0.75rem;
   -webkit-appearance: none;
   appearance: none;
+  -webkit-transition: height 0.2s ease;
   transition: height 0.2s ease;
 }
 
@@ -420,16 +424,16 @@ body[data-theme=dark] .search-panel input {
 *::-webkit-scrollbar-thumb {
   background: rgba(97, 160, 57, 0.3);
   backdrop-filter: blur(4px);
+  -webkit-transition: all 0.2s ease;
   transition: all 0.2s ease;
 }
 *::-webkit-scrollbar-thumb:hover {
   background: rgba(97, 160, 57, 0.5);
 }
 
-.text-signature, .tasks-grid .grid-header, .legends .legend, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .timeline-due, .board-list .tasks-grid-wrapper > .empty-state, .board-reports-card .reports-stat-label, .kanban-stage-group.sortable-fallback .kanban-count-badge, .kanban-board-card .kanban-stage-col .subtasks .checkbox-text,
+.text-signature, .tasks-grid .grid-header, .legends .legend, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .timeline-due, .board-list .tasks-grid-wrapper > .empty-state, .board-reports-card .reports-stat-label, .kanban-board-card .kanban-stage-col .subtasks .checkbox-text,
 .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text, .kanban-board-card .kanban-count-chip,
-.kanban-archive-board .kanban-count-chip, .kanban-board-card .kanban-count-badge,
-.kanban-archive-board .kanban-count-badge, .board-list .card .list .subtasks .checkbox-text, .auth-hint, .auth-field label, .auth-step-pill, .auth-mini-card__text, .form-auth .checkbox-item .checkbox-text,
+.kanban-archive-board .kanban-count-chip, .board-list .card .list .subtasks .checkbox-text, .auth-hint, .auth-field label, .auth-step-pill, .auth-mini-card__text, .form-auth .checkbox-item .checkbox-text,
 .form-auth .checkbox-item a, .auth-motif-board__head, .auth-hero__eyebrow, .modal-content.settings-modal .settings-modal__links, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-label, .button-small {
   font-size: 0.75rem;
   font-weight: 400;
@@ -471,7 +475,9 @@ body[data-theme=dark] .search-panel input {
   transition: all 0.2s ease;
   position: relative;
   white-space: nowrap;
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
   color: #F6FBF2;
 }
 .status.neutral, .tasks-grid .col-status .neutral.status-select {
@@ -485,6 +491,28 @@ body[data-theme=dark] .search-panel input {
 }
 .status.exit, .tasks-grid .col-status .exit.status-select {
   background: #F8085C;
+}
+
+/* Modal / dropdown: shared dismiss control */
+.dropdown-menu .dropdown-header .dropdown-close, .modal-content .modal-header .modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  border-radius: 0.3rem;
+}
+.dropdown-menu .dropdown-header .dropdown-close:hover, .modal-content .modal-header .modal-close:hover {
+  transform: scale(0.9);
+}
+.dropdown-menu .dropdown-header .dropdown-close img, .modal-content .modal-header .modal-close img {
+  display: block;
+  width: 1.125rem;
+  height: 1.125rem;
+  aspect-ratio: 1/1;
 }
 
 /* Base modal system */
@@ -524,25 +552,6 @@ body[data-theme=dark] .search-panel input {
   padding-bottom: 0.75rem;
   border-bottom: 1px solid var(--tp-accent);
 }
-.modal-content .modal-header .modal-close {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  border-radius: 0.3rem;
-}
-.modal-content .modal-header .modal-close:hover {
-  transform: scale(0.9);
-}
-.modal-content .modal-header .modal-close img {
-  display: block;
-  width: 1.125rem;
-  height: 1.125rem;
-}
 .modal-content .modal-footer {
   display: flex;
   justify-content: flex-end;
@@ -578,6 +587,9 @@ body[data-theme=dark] .search-panel input {
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.1);
 }
+.modal-content .modal-body input::-moz-placeholder {
+  color: rgba(45, 50, 41, 0.5);
+}
 .modal-content .modal-body input::placeholder {
   color: rgba(45, 50, 41, 0.5);
 }
@@ -605,6 +617,9 @@ body[data-theme=dark] .search-panel input {
   color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.1);
 }
+.modal-content .modal-body .filter-section .filter-input::-moz-placeholder {
+  color: rgba(45, 50, 41, 0.5);
+}
 .modal-content .modal-body .filter-section .filter-input::placeholder {
   color: rgba(45, 50, 41, 0.5);
 }
@@ -621,7 +636,8 @@ body[data-theme=dark] .search-panel input {
 .modal-content .modal-body .filter-section .filter-range .range-input {
   width: 100%;
   height: 0.375rem;
-  appearance: none;
+  -moz-appearance: none;
+       appearance: none;
   -webkit-appearance: none;
   background: rgba(97, 160, 57, 0.15);
   outline: none;
@@ -633,6 +649,7 @@ body[data-theme=dark] .search-panel input {
   background: #61A039;
   border-radius: 50%;
   cursor: pointer;
+  -webkit-transition: all 0.2s ease;
   transition: all 0.2s ease;
 }
 .modal-content .modal-body .filter-section .filter-range .range-input::-webkit-slider-thumb:hover {
@@ -698,6 +715,10 @@ body[data-theme=dark] .modal-content .filter-input {
   border-color: #F6FBF2 !important;
 }
 
+body[data-theme=dark] .modal-content .filter-input::-moz-placeholder {
+  color: rgba(246, 251, 242, 0.55) !important;
+}
+
 body[data-theme=dark] .modal-content .filter-input::placeholder {
   color: rgba(246, 251, 242, 0.55) !important;
 }
@@ -737,25 +758,6 @@ body[data-theme=dark] .modal-content .filter-date span {
   margin: 0;
   font-size: 1.25rem;
 }
-.dropdown-menu .dropdown-header .dropdown-close {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  border-radius: 0.3rem;
-}
-.dropdown-menu .dropdown-header .dropdown-close:hover {
-  transform: scale(0.9);
-}
-.dropdown-menu .dropdown-header .dropdown-close img {
-  display: block;
-  width: 1.125rem;
-  aspect-ratio: 1/1;
-}
 .dropdown-menu ul {
   list-style: none;
   margin: 0;
@@ -788,7 +790,9 @@ body[data-theme=dark] .dropdown-menu .dropdown-header {
 
 /* Checkbox skin + special cases (kanban subtasks) */
 .checkbox-item {
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
 }
 
 .checkbox-item input {
@@ -1016,7 +1020,8 @@ body[data-theme=dark] .custom-calendar-modal .custom-calendar .custom-calendar-f
   max-width: 22vw;
   box-sizing: border-box;
   cursor: pointer;
-  appearance: none;
+  -moz-appearance: none;
+       appearance: none;
   -webkit-appearance: none;
   accent-color: #61A039;
   color: #2D3229;
@@ -1102,6 +1107,9 @@ body[data-theme=dark] .custom-calendar-modal .custom-calendar .custom-calendar-f
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.1);
 }
+.modal-content.create-task-modal textarea.create-task-desc::-moz-placeholder {
+  color: rgba(45, 50, 41, 0.5);
+}
 .modal-content.create-task-modal textarea.create-task-desc::placeholder {
   color: rgba(45, 50, 41, 0.5);
 }
@@ -1132,6 +1140,9 @@ body[data-theme=dark] .modal-content.create-task-modal textarea.create-task-desc
   border-color: #F6FBF2;
   color: #F6FBF2;
   background: #282D25;
+}
+body[data-theme=dark] .modal-content.create-task-modal textarea.create-task-desc::-moz-placeholder {
+  color: rgba(246, 251, 242, 0.45);
 }
 body[data-theme=dark] .modal-content.create-task-modal textarea.create-task-desc::placeholder {
   color: rgba(246, 251, 242, 0.45);
@@ -1200,7 +1211,8 @@ body[data-theme=dark] .modal-content.create-task-modal .create-task-deps-suggest
   width: 5.5rem;
   height: 5.5rem;
   border-radius: 50%;
-  object-fit: cover;
+  -o-object-fit: cover;
+     object-fit: cover;
   flex-shrink: 0;
   border: 0.0625rem solid rgba(97, 160, 57, 0.4);
 }
@@ -1266,7 +1278,8 @@ body[data-theme=dark] .modal-content.create-task-modal .create-task-deps-suggest
   max-width: 100%;
   box-sizing: border-box;
   cursor: pointer;
-  appearance: none;
+  -moz-appearance: none;
+       appearance: none;
   -webkit-appearance: none;
   accent-color: #61A039;
   color: #2D3229;
@@ -1308,6 +1321,9 @@ body[data-theme=dark] .modal-content.create-task-modal .create-task-deps-suggest
   outline: none;
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.1);
+}
+.modal-content.profile-modal textarea.profile-modal__bio::-moz-placeholder {
+  color: rgba(45, 50, 41, 0.5);
 }
 .modal-content.profile-modal textarea.profile-modal__bio::placeholder {
   color: rgba(45, 50, 41, 0.5);
@@ -1360,7 +1376,9 @@ body[data-theme=dark] .modal-content.create-task-modal .create-task-deps-suggest
 }
 .modal-content.profile-modal .profile-modal__exit-dot {
   color: rgba(45, 50, 41, 0.45);
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
 }
 .modal-content.profile-modal .profile-modal__exit-answer {
   margin: 0;
@@ -1554,6 +1572,9 @@ body[data-theme=dark] .modal-content.profile-modal textarea.profile-modal__bio {
   color: #F6FBF2;
   background: #282D25;
 }
+body[data-theme=dark] .modal-content.profile-modal textarea.profile-modal__bio::-moz-placeholder {
+  color: rgba(246, 251, 242, 0.45);
+}
 body[data-theme=dark] .modal-content.profile-modal textarea.profile-modal__bio::placeholder {
   color: rgba(246, 251, 242, 0.45);
 }
@@ -1670,6 +1691,9 @@ body[data-theme=dark] .modal-content.profile-modal textarea.profile-modal__bio::
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.1);
 }
+.modal-content.settings-modal .settings-modal__field input.filter-input::-moz-placeholder {
+  color: rgba(45, 50, 41, 0.5);
+}
 .modal-content.settings-modal .settings-modal__field input.filter-input::placeholder {
   color: rgba(45, 50, 41, 0.5);
 }
@@ -1685,7 +1709,8 @@ body[data-theme=dark] .modal-content.profile-modal textarea.profile-modal__bio::
   max-width: 100%;
   box-sizing: border-box;
   cursor: pointer;
-  appearance: none;
+  -moz-appearance: none;
+       appearance: none;
   -webkit-appearance: none;
   accent-color: #61A039;
   color: #2D3229;
@@ -2431,6 +2456,7 @@ body[data-theme=dark] .project-card__arrow {
   position: relative;
   margin: 0;
   align-self: flex-start;
+  width: -moz-fit-content;
   width: fit-content;
   max-width: 100%;
 }
@@ -2473,11 +2499,13 @@ body[data-theme=dark] .project-card__arrow {
 }
 
 .auth-motif--board {
+  width: -moz-fit-content;
   width: fit-content;
   max-width: 100%;
 }
 
 .auth-motif--web {
+  width: -moz-fit-content;
   width: fit-content;
   max-width: 19rem;
 }
@@ -3122,17 +3150,175 @@ body.tp-no-enter .app-container {
     display: none !important;
   }
 }
-/* Boards: list / kanban / timeline / reports / archive */
-/* NOTE: extracted from `style.scss` without visual changes. */
+/* Board UI: @extend-only placeholders (task row tag strip, chevrons, progress bar) */
+.board-list .tasks-grid .name::after, .board-timeline-card .subtasks .name::after, .kanban-board-card .kanban-stage-col .subtasks .name::after,
+.kanban-archive-board .kanban-stage-col .subtasks .name::after, .board-list .card .list .subtasks .name::after {
+  content: "";
+  display: inline-block;
+  height: 1em;
+  aspect-ratio: 2/3;
+  background-image: url("/static/source/icons/arrow_dark_cropped.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.board-table-card .subtasks .name::after {
+  content: "";
+  display: inline-block;
+  height: 0.75em;
+  aspect-ratio: 2/3;
+  background-image: url("/static/source/icons/arrow_dark_cropped.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.kanban-board-card .kanban-stage-col .subtasks .progress-line,
+.kanban-archive-board .kanban-stage-col .subtasks .progress-line, .board-list .card .list .subtasks .progress-line {
+  display: flex;
+  width: 100%;
+}
+.kanban-board-card .kanban-stage-col .subtasks .progress-line .completed,
+.kanban-archive-board .kanban-stage-col .subtasks .progress-line .completed, .board-list .card .list .subtasks .progress-line .completed {
+  border-bottom: 0.19rem solid #61A039;
+}
+.kanban-board-card .kanban-stage-col .subtasks .progress-line .todo,
+.kanban-archive-board .kanban-stage-col .subtasks .progress-line .todo, .board-list .card .list .subtasks .progress-line .todo {
+  border-bottom: 0.19rem solid rgba(127, 140, 115, 0.5);
+}
+
+.board-timeline-card .tag, .kanban-task-item.sortable-fallback .tag, .kanban-board-card .kanban-stage-col .tag,
+.kanban-archive-board .kanban-stage-col .tag, .board-list .card .list .tag {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: stretch;
+  gap: 0.75rem;
+}
+
+.board-timeline-card .tag .executor, .kanban-task-item.sortable-fallback .tag .executor, .kanban-board-card .kanban-stage-col .tag .executor,
+.kanban-archive-board .kanban-stage-col .tag .executor, .board-list .card .list .tag .executor {
+  display: flex;
+  align-items: center;
+}
+.board-timeline-card .tag .executor img, .kanban-task-item.sortable-fallback .tag .executor img, .kanban-board-card .kanban-stage-col .tag .executor img,
+.kanban-archive-board .kanban-stage-col .tag .executor img, .board-list .card .list .tag .executor img {
+  height: calc(1em + 0.75rem);
+  border-radius: 0.3rem;
+}
+
+.board-timeline-card .tag .priority-high,
+.board-timeline-card .tag .priority-normal, .kanban-task-item.sortable-fallback .tag .priority-high,
+.kanban-task-item.sortable-fallback .tag .priority-normal, .kanban-board-card .kanban-stage-col .tag .priority-high,
+.kanban-board-card .kanban-stage-col .tag .priority-normal,
+.kanban-archive-board .kanban-stage-col .tag .priority-high,
+.kanban-archive-board .kanban-stage-col .tag .priority-normal, .board-list .card .list .tag .priority-high,
+.board-list .card .list .tag .priority-normal {
+  border-radius: 0.3rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(1em + 0.75rem);
+  width: calc(1em + 0.75rem);
+  color: #F6FBF2;
+}
+
+.kanban-task-item.sortable-fallback .tag .deadline, .kanban-board-card .kanban-stage-col .tag .deadline,
+.kanban-archive-board .kanban-stage-col .tag .deadline, .board-list .card .list .tag .deadline {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  height: calc(1em + 0.75rem);
+  gap: 0.375rem;
+  color: #7F8C73;
+  background: rgba(97, 160, 57, 0.15);
+  border-radius: 0.3rem;
+}
+.kanban-task-item.sortable-fallback .tag .deadline::before, .kanban-board-card .kanban-stage-col .tag .deadline::before,
+.kanban-archive-board .kanban-stage-col .tag .deadline::before, .board-list .card .list .tag .deadline::before {
+  content: "";
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  background-image: url("/static/source/icons/deadline.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  flex-shrink: 0;
+}
+
+/* Таймлайн: без явного justify-content (как в исходной вёрстке) */
+.board-timeline-card .tag .deadline {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  height: calc(1em + 0.75rem);
+  color: #7F8C73;
+  background: rgba(97, 160, 57, 0.15);
+  border-radius: 0.3rem;
+}
+.board-timeline-card .tag .deadline::before {
+  content: "";
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  background-image: url("/static/source/icons/deadline.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  flex-shrink: 0;
+}
+
+.kanban-stage-group.sortable-fallback .kanban-count-badge, .kanban-board-card .kanban-count-badge,
+.kanban-archive-board .kanban-count-badge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.375rem;
+  height: 1.125rem;
+  background: #7F8C73;
+  border-radius: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #F6FBF2 !important;
+  aspect-ratio: 1/1;
+}
+
+.board-archive-section .archive-collapse-arrow::before, .board-list .tasks-header .archive-collapse-arrow::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-image: url("/static/source/icons/arrow_dark_cropped.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  transition: transform 0.2s ease;
+}
+
 .board-list .cards {
-  column-count: 2;
-  column-gap: 2.25rem;
+  -moz-column-count: 2;
+       column-count: 2;
+  -moz-column-gap: 2.25rem;
+       column-gap: 2.25rem;
   flex: 1;
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
 }
 .board-list .cards.dragging-active {
   gap: 2.25rem;
-  column-count: unset;
+  -moz-column-count: unset;
+       column-count: unset;
   display: flex;
   flex-wrap: wrap;
 }
@@ -3141,7 +3327,8 @@ body.tp-no-enter .app-container {
 }
 .board-list .tables-view.dragging-active,
 .board-list .board-view.dragging-active {
-  column-count: 1;
+  -moz-column-count: 1;
+       column-count: 1;
 }
 .board-list .tables-view.dragging-active .card,
 .board-list .board-view.dragging-active .card {
@@ -3154,11 +3341,14 @@ body.tp-no-enter .app-container {
   width: 100%;
 }
 .board-list .card {
-  break-inside: avoid;
+  -moz-column-break-inside: avoid;
+       break-inside: avoid;
   margin-bottom: 2.25rem;
   width: 100%;
   transition: transform 0.2s ease;
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
 }
 .board-list .card:active {
   cursor: grabbing;
@@ -3203,7 +3393,9 @@ body.tp-no-enter .app-container {
   gap: 0.5625rem;
   cursor: grab;
   transition: all 0.2s ease;
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
   position: relative;
 }
 .board-list .card .list .item:active {
@@ -3246,30 +3438,8 @@ body.tp-no-enter .app-container {
   align-items: center;
   gap: 0.25rem;
 }
-.board-list .card .list .subtasks .name::after {
-  content: "";
-  display: inline-block;
-  height: 1em;
-  aspect-ratio: 2/3;
-  background-image: url("/static/source/icons/arrow_dark_cropped.svg");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  flex-shrink: 0;
-  transition: transform 0.2s ease;
-}
 .board-list .card .list .subtasks .name.open::after {
   transform: rotate(-90deg);
-}
-.board-list .card .list .subtasks .progress-line {
-  display: flex;
-  width: 100%;
-}
-.board-list .card .list .subtasks .progress-line .completed {
-  border-bottom: 0.19rem solid #61A039;
-}
-.board-list .card .list .subtasks .progress-line .todo {
-  border-bottom: 0.19rem solid rgba(127, 140, 115, 0.5);
 }
 .board-list .card .list body[data-theme=dark] .board-list .card .list .subtasks {
   color: #F6FBF2;
@@ -3286,56 +3456,11 @@ body.tp-no-enter .app-container {
 .board-list .card .list body[data-theme=dark] .board-list .card .list .subtasks-list .checkbox-item input[type=checkbox]:checked + .custom-checkbox {
   border-color: #61A039 !important;
 }
-.board-list .card .list .tag {
-  width: 100%;
-  display: flex;
-  justify-content: flex-end;
-  align-items: stretch;
-  gap: 0.75rem;
-}
-.board-list .card .list .tag .executor {
-  display: flex;
-  align-items: center;
-}
-.board-list .card .list .tag .executor img {
-  height: calc(1em + 0.75rem);
-}
-.board-list .card .list .tag .priority-high,
-.board-list .card .list .tag .priority-normal {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: calc(1em + 0.75rem);
-  width: calc(1em + 0.75rem);
-  color: #F6FBF2;
-}
 .board-list .card .list .tag .priority-high {
   background-color: #F8085C;
 }
 .board-list .card .list .tag .priority-normal {
   background-color: rgba(97, 160, 57, 0.5);
-}
-.board-list .card .list .tag .deadline {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  padding: 0.25rem 0.75rem;
-  height: calc(1em + 0.75rem);
-  gap: 0.375rem;
-  color: #7F8C73;
-  background: rgba(97, 160, 57, 0.15);
-}
-.board-list .card .list .tag .deadline::before {
-  content: "";
-  display: inline-block;
-  width: 1em;
-  height: 1em;
-  background-image: url("/static/source/icons/deadline.svg");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  flex-shrink: 0;
 }
 .board-list .sortable-ghost {
   opacity: 0.4;
@@ -3362,18 +3487,22 @@ body:not([data-theme=dark]) .board-list .card .list .item {
 }
 
 .board-list .cards.tables-view {
-  column-count: 1 !important;
+  -moz-column-count: 1 !important;
+       column-count: 1 !important;
   display: block;
 }
 
 .board-list .cards.timeline-view {
-  column-count: 1 !important;
+  -moz-column-count: 1 !important;
+       column-count: 1 !important;
   display: block;
 }
 
 .board-kanban .cards {
-  column-count: 1 !important;
-  column-gap: 0;
+  -moz-column-count: 1 !important;
+       column-count: 1 !important;
+  -moz-column-gap: 0;
+       column-gap: 0;
 }
 
 .kanban-board-card,
@@ -3408,6 +3537,7 @@ body:not([data-theme=dark]) .board-list .card .list .item {
 .kanban-board-card[data-kanban-scroll=true] .kanban-stages-row,
 .kanban-archive-board[data-kanban-scroll=true] .kanban-columns-head,
 .kanban-archive-board[data-kanban-scroll=true] .kanban-stages-row {
+  width: -moz-max-content;
   width: max-content;
   gap: 0.75rem;
 }
@@ -3417,6 +3547,7 @@ body:not([data-theme=dark]) .board-list .card .list .item {
 }
 .kanban-board-card[data-kanban-scroll=true] .kanban-priority-section,
 .kanban-archive-board[data-kanban-scroll=true] .kanban-priority-section {
+  width: -moz-fit-content;
   width: fit-content;
   margin-right: 0.0625rem;
 }
@@ -3458,18 +3589,6 @@ body:not([data-theme=dark]) .board-list .card .list .item {
   align-items: center;
   gap: 0.375rem;
   min-width: 0;
-}
-.kanban-board-card .kanban-count-badge,
-.kanban-archive-board .kanban-count-badge {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.375rem;
-  height: 1.125rem;
-  background: #7F8C73;
-  color: #F6FBF2 !important;
-  aspect-ratio: 1/1;
 }
 .kanban-board-card .kanban-stage-sep-line,
 .kanban-archive-board .kanban-stage-sep-line {
@@ -3675,6 +3794,20 @@ aside .submenu .kanban-archive-board .kanban-priority-section.normal button .nav
   gap: 0.75rem;
   padding-bottom: 0.375rem;
 }
+.kanban-board-card,
+.kanban-archive-board {
+  /* Колонка канбана: карточки + форма — отступ только над формой (после задач) */
+}
+.kanban-board-card .kanban-task-list,
+.kanban-archive-board .kanban-task-list {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.kanban-board-card .kanban-task-list > .form-add-task:not(:first-child),
+.kanban-archive-board .kanban-task-list > .form-add-task:not(:first-child) {
+  margin-top: 0.75rem;
+}
 .kanban-board-card .kanban-stage-col,
 .kanban-archive-board .kanban-stage-col {
   flex: 1;
@@ -3712,35 +3845,9 @@ aside .submenu .kanban-archive-board .kanban-priority-section.normal button .nav
   align-items: center;
   gap: 0.25rem;
 }
-.kanban-board-card .kanban-stage-col .subtasks .name::after,
-.kanban-archive-board .kanban-stage-col .subtasks .name::after {
-  content: "";
-  display: inline-block;
-  height: 1em;
-  aspect-ratio: 2/3;
-  background-image: url("/static/source/icons/arrow_dark_cropped.svg");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  flex-shrink: 0;
-  transition: transform 0.2s ease;
-}
 .kanban-board-card .kanban-stage-col .subtasks .name.open::after,
 .kanban-archive-board .kanban-stage-col .subtasks .name.open::after {
   transform: rotate(-90deg);
-}
-.kanban-board-card .kanban-stage-col .subtasks .progress-line,
-.kanban-archive-board .kanban-stage-col .subtasks .progress-line {
-  display: flex;
-  width: 100%;
-}
-.kanban-board-card .kanban-stage-col .subtasks .progress-line .completed,
-.kanban-archive-board .kanban-stage-col .subtasks .progress-line .completed {
-  border-bottom: 0.19rem solid #61A039;
-}
-.kanban-board-card .kanban-stage-col .subtasks .progress-line .todo,
-.kanban-archive-board .kanban-stage-col .subtasks .progress-line .todo {
-  border-bottom: 0.19rem solid rgba(127, 140, 115, 0.5);
 }
 .kanban-board-card .kanban-stage-col body[data-theme=dark] .kanban-board-card .kanban-stage-col .subtasks .checkbox-item,
 .kanban-archive-board .kanban-stage-col body[data-theme=dark] .kanban-board-card .kanban-stage-col .subtasks .checkbox-item {
@@ -3756,34 +3863,6 @@ aside .submenu .kanban-archive-board .kanban-priority-section.normal button .nav
 .kanban-archive-board .kanban-stage-col body[data-theme=dark] .kanban-board-card .kanban-stage-col .subtasks .checkbox-item input[type=checkbox]:checked + .custom-checkbox {
   border-color: #61A039;
 }
-.kanban-board-card .kanban-stage-col .tag,
-.kanban-archive-board .kanban-stage-col .tag {
-  width: 100%;
-  display: flex;
-  justify-content: flex-end;
-  align-items: stretch;
-  gap: 0.75rem;
-}
-.kanban-board-card .kanban-stage-col .tag .executor,
-.kanban-archive-board .kanban-stage-col .tag .executor {
-  display: flex;
-  align-items: center;
-}
-.kanban-board-card .kanban-stage-col .tag .executor img,
-.kanban-archive-board .kanban-stage-col .tag .executor img {
-  height: calc(1em + 0.75rem);
-}
-.kanban-board-card .kanban-stage-col .tag .priority-high,
-.kanban-board-card .kanban-stage-col .tag .priority-normal,
-.kanban-archive-board .kanban-stage-col .tag .priority-high,
-.kanban-archive-board .kanban-stage-col .tag .priority-normal {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: calc(1em + 0.75rem);
-  width: calc(1em + 0.75rem);
-  color: #F6FBF2;
-}
 .kanban-board-card .kanban-stage-col .tag .priority-high,
 .kanban-archive-board .kanban-stage-col .tag .priority-high {
   background-color: #F8085C;
@@ -3792,31 +3871,6 @@ aside .submenu .kanban-archive-board .kanban-priority-section.normal button .nav
 .kanban-archive-board .kanban-stage-col .tag .priority-normal {
   background-color: rgba(97, 160, 57, 0.5);
 }
-.kanban-board-card .kanban-stage-col .tag .deadline,
-.kanban-archive-board .kanban-stage-col .tag .deadline {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  padding: 0.25rem 0.75rem;
-  height: calc(1em + 0.75rem);
-  gap: 0.375rem;
-  color: #7F8C73;
-  background: rgba(97, 160, 57, 0.15);
-}
-.kanban-board-card .kanban-stage-col .tag .deadline::before,
-.kanban-archive-board .kanban-stage-col .tag .deadline::before {
-  content: "";
-  display: inline-block;
-  width: 1em;
-  height: 1em;
-  background-image: url("/static/source/icons/deadline.svg");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  flex-shrink: 0;
-}
-
 /* Board header collapse controls (archive section toggle) */
 .tasks-header {
   width: 100%;
@@ -3850,18 +3904,6 @@ aside .submenu .kanban-archive-board .kanban-priority-section.normal button .nav
   width: 1.125rem;
   height: 1.125rem;
 }
-.board-list .tasks-header .archive-collapse-arrow::before {
-  content: "";
-  display: block;
-  width: 100%;
-  height: 100%;
-  background-image: url("/static/source/icons/arrow_dark_cropped.svg");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  transition: transform 0.2s ease;
-}
-
 .board-list .tasks-header .board-section-collapse-toggle.open .archive-collapse-arrow::before {
   transform: rotate(-90deg);
 }
@@ -3899,17 +3941,6 @@ aside .submenu .kanban-archive-board .kanban-priority-section.normal button .nav
   gap: 0.375rem;
   min-width: 0;
 }
-.kanban-stage-group.sortable-fallback .kanban-count-badge {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.375rem;
-  height: 1.125rem;
-  background: #7F8C73;
-  color: #F6FBF2 !important;
-  aspect-ratio: 1/1;
-}
 .kanban-stage-group.sortable-fallback .kanban-stage-sep-line {
   width: 0.0625rem;
   flex-shrink: 0;
@@ -3939,58 +3970,12 @@ body[data-theme=dark] .kanban-stage-group.sortable-fallback .kanban-stage-sep-li
 }
 
 /* Sortable fallback ghost is appended to body — loses .kanban-stage-col ancestor for .tag rules */
-.kanban-task-item.sortable-fallback .tag {
-  width: 100%;
-  display: flex;
-  justify-content: flex-end;
-  align-items: stretch;
-  gap: 0.75rem;
-}
-.kanban-task-item.sortable-fallback .tag .executor {
-  display: flex;
-  align-items: center;
-}
-.kanban-task-item.sortable-fallback .tag .executor img {
-  height: calc(1em + 0.75rem);
-}
-.kanban-task-item.sortable-fallback .tag .priority-high,
-.kanban-task-item.sortable-fallback .tag .priority-normal {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: calc(1em + 0.75rem);
-  width: calc(1em + 0.75rem);
-  color: #F6FBF2;
-}
 .kanban-task-item.sortable-fallback .tag .priority-high {
   background-color: #F8085C;
 }
 .kanban-task-item.sortable-fallback .tag .priority-normal {
   background-color: rgba(97, 160, 57, 0.5);
 }
-.kanban-task-item.sortable-fallback .tag .deadline {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  padding: 0.25rem 0.75rem;
-  height: calc(1em + 0.75rem);
-  gap: 0.375rem;
-  color: #7F8C73;
-  background: rgba(97, 160, 57, 0.15);
-}
-.kanban-task-item.sortable-fallback .tag .deadline::before {
-  content: "";
-  display: inline-block;
-  width: 1em;
-  height: 1em;
-  background-image: url("/static/source/icons/deadline.svg");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  flex-shrink: 0;
-}
-
 body[data-theme=dark] .kanban-task-item, .board-list .card .list .item {
   background: #282D25;
   border-color: #F6FBF2;
@@ -3999,7 +3984,8 @@ body[data-theme=dark] .kanban-task-item, .board-list .card .list .item {
 /* Reports view */
 .board-list .cards.reports-view,
 .board-list .cards.archive-view {
-  column-count: 1 !important;
+  -moz-column-count: 1 !important;
+       column-count: 1 !important;
   display: block;
   width: 100%;
 }
@@ -4008,6 +3994,7 @@ body[data-theme=dark] .kanban-task-item, .board-list .card .list .item {
   width: 100%;
 }
 .board-reports-card .tasks-grid-wrapper {
+  width: -moz-fit-content;
   width: fit-content;
 }
 .board-reports-card .tasks-grid-wrapper .tasks-grid {
@@ -4126,17 +4113,6 @@ body[data-theme=dark] .kanban-task-item, .board-list .card .list .item {
   width: 1.5em;
   height: 1.5em;
 }
-.board-archive-section .archive-collapse-arrow::before {
-  content: "";
-  display: block;
-  width: 100%;
-  height: 100%;
-  background-image: url("/static/source/icons/arrow_dark_cropped.svg");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  transition: transform 0.2s ease;
-}
 .board-archive-section .archive-collapse-toggle.open .archive-collapse-arrow::before {
   transform: rotate(-90deg);
 }
@@ -4246,7 +4222,8 @@ body[data-theme=dark] .kanban-task-item, .board-list .card .list .item {
   width: 1.125rem;
   height: 1.125rem;
   border-radius: 50%;
-  object-fit: cover;
+  -o-object-fit: cover;
+     object-fit: cover;
 }
 body[data-theme=dark] .board-timeline-card .timeline-task-card .checkbox-item {
   color: #F6FBF2;
@@ -4261,54 +4238,11 @@ body[data-theme=dark] .board-timeline-card .timeline-task-card__name {
   color: #F6FBF2;
 }
 
-.board-timeline-card .tag {
-  width: 100%;
-  display: flex;
-  justify-content: flex-end;
-  align-items: stretch;
-  gap: 0.75rem;
-}
-.board-timeline-card .tag .executor {
-  display: flex;
-  align-items: center;
-}
-.board-timeline-card .tag .executor img {
-  height: calc(1em + 0.75rem);
-}
-.board-timeline-card .tag .priority-high,
-.board-timeline-card .tag .priority-normal {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: calc(1em + 0.75rem);
-  width: calc(1em + 0.75rem);
-  color: #F6FBF2;
-}
 .board-timeline-card .tag .priority-high {
   background-color: #F8085C;
 }
 .board-timeline-card .tag .priority-normal {
   background-color: rgba(97, 160, 57, 0.5);
-}
-.board-timeline-card .tag .deadline {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.25rem 0.75rem;
-  height: calc(1em + 0.75rem);
-  color: #7F8C73;
-  background: rgba(97, 160, 57, 0.15);
-}
-.board-timeline-card .tag .deadline::before {
-  content: "";
-  display: inline-block;
-  width: 1em;
-  height: 1em;
-  background-image: url("/static/source/icons/deadline.svg");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  flex-shrink: 0;
 }
 .board-timeline-card .subtasks {
   display: flex;
@@ -4325,18 +4259,6 @@ body[data-theme=dark] .board-timeline-card .timeline-task-card__name {
   align-items: center;
   gap: 0.375rem;
   cursor: pointer;
-}
-.board-timeline-card .subtasks .name::after {
-  content: "";
-  display: inline-block;
-  height: 1em;
-  aspect-ratio: 2/3;
-  background-image: url("/static/source/icons/arrow_dark_cropped.svg");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  flex-shrink: 0;
-  transition: transform 0.2s ease;
 }
 .board-timeline-card .subtasks .name.open::after {
   transform: rotate(-90deg);
@@ -4391,22 +4313,12 @@ body[data-theme=dark] .board-timeline-card .subtasks .subtasks .checkbox-item in
   align-items: center;
   gap: 0.375rem;
 }
-.board-list .tasks-grid .name::after {
-  content: "";
-  display: inline-block;
-  height: 1em;
-  aspect-ratio: 2/3;
-  background-image: url("/static/source/icons/arrow_dark_cropped.svg");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  flex-shrink: 0;
-  transition: transform 0.2s ease;
-}
 .board-list .tasks-grid .name.open::after {
   transform: rotate(-90deg);
 }
 .board-list .tasks-grid .subtasks-list {
+  display: flex;
+  flex-direction: column;
   gap: 0.25rem;
 }
 .board-list .tasks-grid .subtasks-list .custom-checkbox {
@@ -4462,6 +4374,8 @@ body[data-theme=dark] .board-kanban .tasks-grid .col-name {
   justify-content: space-between;
 }
 .board-table-card .subtasks .subtasks-list {
+  display: flex;
+  flex-direction: column;
   gap: 0.25rem;
 }
 .board-table-card .subtasks .subtasks-list .custom-checkbox {
@@ -4477,18 +4391,6 @@ body[data-theme=dark] .board-kanban .tasks-grid .col-name {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-}
-.board-table-card .subtasks .name::after {
-  content: "";
-  display: inline-block;
-  height: 0.75em;
-  aspect-ratio: 2/3;
-  background-image: url("/static/source/icons/arrow_dark_cropped.svg");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  flex-shrink: 0;
-  transition: transform 0.2s ease;
 }
 .board-table-card .subtasks .name.open::after {
   transform: rotate(-90deg);
@@ -4537,6 +4439,8 @@ body[data-theme=dark] .board-table-card .tasks-grid .col-name {
 }
 .form-add-task .tag {
   display: none;
+  width: 100%;
+  box-sizing: border-box;
   justify-content: flex-end;
   align-items: center;
   gap: 0.75rem;
@@ -4564,6 +4468,62 @@ body[data-theme=dark] .form-add-task:focus-within {
 
 .assignee-option {
   cursor: pointer;
+}
+
+/* Канбан: таблица по этапам (tables-view) */
+.kanban-board-card .kanban-stage-table {
+  width: 100%;
+  min-width: 0;
+}
+
+.kanban-board-card .kanban-stage-table-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
+  padding: 0 0 0.5625rem;
+  box-sizing: border-box;
+}
+
+.kanban-board-card .kanban-stage-table-head-main {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 0;
+  flex: 1;
+}
+.kanban-board-card .kanban-stage-table-head-main .text-basic, .kanban-board-card .kanban-stage-table-head-main .tasks-grid .grid-row, .tasks-grid .kanban-board-card .kanban-stage-table-head-main .grid-row, .kanban-board-card .kanban-stage-table-head-main aside .submenu .nav-link, aside .submenu .kanban-board-card .kanban-stage-table-head-main .nav-link, .kanban-board-card .kanban-stage-table-head-main .button-basic,
+.kanban-board-card .kanban-stage-table-head-main .button-secondary,
+.kanban-board-card .kanban-stage-table-head-main .reset-filters-btn, .kanban-board-card .kanban-stage-table-head-main .tab-btn, .kanban-board-card .kanban-stage-table-head-main .modal-content .modal-body input, .modal-content .modal-body .kanban-board-card .kanban-stage-table-head-main input, .kanban-board-card .kanban-stage-table-head-main .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .kanban-board-card .kanban-stage-table-head-main .filter-input, .kanban-board-card .kanban-stage-table-head-main .custom-calendar-modal .custom-calendar, .custom-calendar-modal .kanban-board-card .kanban-stage-table-head-main .custom-calendar, .kanban-board-card .kanban-stage-table-head-main .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .kanban-board-card .kanban-stage-table-head-main button, .kanban-board-card .kanban-stage-table-head-main .modal-content.create-task-modal select.create-task-select, .modal-content.create-task-modal .kanban-board-card .kanban-stage-table-head-main select.create-task-select, .kanban-board-card .kanban-stage-table-head-main .modal-content.create-task-modal textarea.create-task-desc, .modal-content.create-task-modal .kanban-board-card .kanban-stage-table-head-main textarea.create-task-desc, .kanban-board-card .kanban-stage-table-head-main .modal-content.profile-modal select.create-task-select.profile-modal__select--full, .modal-content.profile-modal .kanban-board-card .kanban-stage-table-head-main select.create-task-select.profile-modal__select--full, .kanban-board-card .kanban-stage-table-head-main .modal-content.profile-modal textarea.profile-modal__bio, .modal-content.profile-modal .kanban-board-card .kanban-stage-table-head-main textarea.profile-modal__bio, .kanban-board-card .kanban-stage-table-head-main .modal-content.settings-modal .settings-modal__nav-item, .modal-content.settings-modal .kanban-board-card .kanban-stage-table-head-main .settings-modal__nav-item, .kanban-board-card .kanban-stage-table-head-main .modal-content.settings-modal .settings-modal__field input.filter-input, .modal-content.settings-modal .settings-modal__field .kanban-board-card .kanban-stage-table-head-main input.filter-input, .kanban-board-card .kanban-stage-table-head-main .modal-content.settings-modal select.create-task-select.settings-modal__select--full, .modal-content.settings-modal .kanban-board-card .kanban-stage-table-head-main select.create-task-select.settings-modal__select--full, .kanban-board-card .kanban-stage-table-head-main .auth-flow-card .modal-body textarea, .auth-flow-card .modal-body .kanban-board-card .kanban-stage-table-head-main textarea,
+.kanban-board-card .kanban-stage-table-head-main .auth-flow-card .modal-body select,
+.auth-flow-card .modal-body .kanban-board-card .kanban-stage-table-head-main select, .kanban-board-card .kanban-stage-table-head-main .auth-link-row a, .auth-link-row .kanban-board-card .kanban-stage-table-head-main a, .kanban-board-card .kanban-stage-table-head-main .board-timeline-card .timeline-date-chip, .board-timeline-card .kanban-board-card .kanban-stage-table-head-main .timeline-date-chip, .kanban-board-card .kanban-stage-table-head-main .board-timeline-card .timeline-task-card__name, .board-timeline-card .kanban-board-card .kanban-stage-table-head-main .timeline-task-card__name, .kanban-board-card .kanban-stage-table-head-main .board-timeline-card .timeline-assignee span, .board-timeline-card .timeline-assignee .kanban-board-card .kanban-stage-table-head-main span {
+  display: block;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  min-width: 0;
+}
+
+.kanban-board-card .kanban-stage-table-head .info {
+  flex-shrink: 0;
+}
+.kanban-board-card .kanban-stage-table-head .info img {
+  display: block;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.kanban-board-card .kanban-stage-table-queue-forms {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  margin-top: 0.75rem;
+  box-sizing: border-box;
 }
 
 * {
@@ -4706,17 +4666,8 @@ body[data-theme=dark] {
 .br-5, .tabs, .project-percents, .checkbox-item .custom-checkbox, .button-basic,
 .button-secondary,
 .reset-filters-btn, .button-small, .tab-btn, .modal-content .modal-body .filter-section .filter-range .range-input, .custom-calendar-modal .custom-calendar .custom-calendar-header button, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .day,
-.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .other-month, .board-list .card .taskheader-count .num-of-tasks, .board-list .card .list .item, .board-list .card .list .tag .executor img, .board-list .card .list .tag .priority-high,
-.board-list .card .list .tag .priority-normal, .board-list .card .list .tag .deadline, .kanban-board-card .kanban-count-badge,
-.kanban-archive-board .kanban-count-badge, .kanban-board-card .kanban-count-chip,
-.kanban-archive-board .kanban-count-chip, .kanban-board-card .kanban-stage-col .tag .executor img,
-.kanban-archive-board .kanban-stage-col .tag .executor img, .kanban-board-card .kanban-stage-col .tag .priority-high,
-.kanban-board-card .kanban-stage-col .tag .priority-normal,
-.kanban-archive-board .kanban-stage-col .tag .priority-high,
-.kanban-archive-board .kanban-stage-col .tag .priority-normal, .kanban-board-card .kanban-stage-col .tag .deadline,
-.kanban-archive-board .kanban-stage-col .tag .deadline, .kanban-stage-group.sortable-fallback .kanban-count-badge, .kanban-task-item, .kanban-task-item.sortable-fallback .tag .executor img, .kanban-task-item.sortable-fallback .tag .priority-high,
-.kanban-task-item.sortable-fallback .tag .priority-normal, .kanban-task-item.sortable-fallback .tag .deadline, .board-reports-card .reports-stat-chip, .board-archive-section .archive-collapse-toggle .num-of-tasks, .board-timeline-card .timeline-date-chip, .board-timeline-card .timeline-task-card, .board-timeline-card .tag .executor img, .board-timeline-card .tag .priority-high,
-.board-timeline-card .tag .priority-normal, .board-timeline-card .tag .deadline, .form-add-task {
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .other-month, .board-list .card .taskheader-count .num-of-tasks, .board-list .card .list .item, .kanban-board-card .kanban-count-chip,
+.kanban-archive-board .kanban-count-chip, .kanban-task-item, .board-reports-card .reports-stat-chip, .board-archive-section .archive-collapse-toggle .num-of-tasks, .board-timeline-card .timeline-date-chip, .board-timeline-card .timeline-task-card, .form-add-task {
   border-radius: 0.3rem;
 }
 
@@ -4746,7 +4697,7 @@ body[data-theme=dark] {
 }
 
 .flex-col, .modal-content.create-task-modal .create-task-deps-block, .modal-content.create-task-modal .create-task-deps-row, .modal-content.create-task-modal .create-task-deps-suggest, .board-list .card .list, .board-list .card .list .item, .board-list .card .list .subtasks, .kanban-board-card .kanban-stage-col .subtasks,
-.kanban-archive-board .kanban-stage-col .subtasks, .kanban-task-item, .board-timeline-card .timeline-milestone-tasks, .board-timeline-card .timeline-task-card, .board-list .tasks-grid .subtasks-list, .board-table-card .subtasks, .board-table-card .subtasks .subtasks-list {
+.kanban-archive-board .kanban-stage-col .subtasks, .kanban-task-item, .board-timeline-card .timeline-milestone-tasks, .board-timeline-card .timeline-task-card, .board-table-card .subtasks {
   display: flex;
   flex-direction: column;
 }
@@ -4763,6 +4714,7 @@ body[data-theme=dark] {
 .app-container .column {
   display: flex;
   flex-direction: column;
+  height: -moz-fit-content;
   height: fit-content;
   padding-bottom: 2.25rem;
 }
@@ -4936,10 +4888,6 @@ body[data-theme=dark] .card {
 .tasks-to-do-grid .col-task .auth-hint,
 .tasks-to-do-grid .col-task .board-list .card .list .subtasks .checkbox-text,
 .board-list .card .list .subtasks .tasks-to-do-grid .col-task .checkbox-text,
-.tasks-to-do-grid .col-task .kanban-board-card .kanban-count-badge,
-.kanban-board-card .tasks-to-do-grid .col-task .kanban-count-badge,
-.tasks-to-do-grid .col-task .kanban-archive-board .kanban-count-badge,
-.kanban-archive-board .tasks-to-do-grid .col-task .kanban-count-badge,
 .tasks-to-do-grid .col-task .kanban-board-card .kanban-count-chip,
 .kanban-board-card .tasks-to-do-grid .col-task .kanban-count-chip,
 .tasks-to-do-grid .col-task .kanban-archive-board .kanban-count-chip,
@@ -4948,8 +4896,6 @@ body[data-theme=dark] .card {
 .kanban-board-card .kanban-stage-col .subtasks .tasks-to-do-grid .col-task .checkbox-text,
 .tasks-to-do-grid .col-task .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text,
 .kanban-archive-board .kanban-stage-col .subtasks .tasks-to-do-grid .col-task .checkbox-text,
-.tasks-to-do-grid .col-task .kanban-stage-group.sortable-fallback .kanban-count-badge,
-.kanban-stage-group.sortable-fallback .tasks-to-do-grid .col-task .kanban-count-badge,
 .tasks-to-do-grid .col-task .board-reports-card .reports-stat-label,
 .board-reports-card .tasks-to-do-grid .col-task .reports-stat-label,
 .tasks-to-do-grid .col-task .board-list .tasks-grid-wrapper > .empty-state,
@@ -5034,10 +4980,6 @@ aside .submenu .tasks-to-do-grid .col-event .nav-link,
 .tasks-to-do-grid .col-event .auth-hint,
 .tasks-to-do-grid .col-event .board-list .card .list .subtasks .checkbox-text,
 .board-list .card .list .subtasks .tasks-to-do-grid .col-event .checkbox-text,
-.tasks-to-do-grid .col-event .kanban-board-card .kanban-count-badge,
-.kanban-board-card .tasks-to-do-grid .col-event .kanban-count-badge,
-.tasks-to-do-grid .col-event .kanban-archive-board .kanban-count-badge,
-.kanban-archive-board .tasks-to-do-grid .col-event .kanban-count-badge,
 .tasks-to-do-grid .col-event .kanban-board-card .kanban-count-chip,
 .kanban-board-card .tasks-to-do-grid .col-event .kanban-count-chip,
 .tasks-to-do-grid .col-event .kanban-archive-board .kanban-count-chip,
@@ -5046,8 +4988,6 @@ aside .submenu .tasks-to-do-grid .col-event .nav-link,
 .kanban-board-card .kanban-stage-col .subtasks .tasks-to-do-grid .col-event .checkbox-text,
 .tasks-to-do-grid .col-event .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text,
 .kanban-archive-board .kanban-stage-col .subtasks .tasks-to-do-grid .col-event .checkbox-text,
-.tasks-to-do-grid .col-event .kanban-stage-group.sortable-fallback .kanban-count-badge,
-.kanban-stage-group.sortable-fallback .tasks-to-do-grid .col-event .kanban-count-badge,
 .tasks-to-do-grid .col-event .board-reports-card .reports-stat-label,
 .board-reports-card .tasks-to-do-grid .col-event .reports-stat-label,
 .tasks-to-do-grid .col-event .board-list .tasks-grid-wrapper > .empty-state,
@@ -5132,10 +5072,6 @@ aside .submenu .events-grid .col-task .nav-link,
 .events-grid .col-task .auth-hint,
 .events-grid .col-task .board-list .card .list .subtasks .checkbox-text,
 .board-list .card .list .subtasks .events-grid .col-task .checkbox-text,
-.events-grid .col-task .kanban-board-card .kanban-count-badge,
-.kanban-board-card .events-grid .col-task .kanban-count-badge,
-.events-grid .col-task .kanban-archive-board .kanban-count-badge,
-.kanban-archive-board .events-grid .col-task .kanban-count-badge,
 .events-grid .col-task .kanban-board-card .kanban-count-chip,
 .kanban-board-card .events-grid .col-task .kanban-count-chip,
 .events-grid .col-task .kanban-archive-board .kanban-count-chip,
@@ -5144,8 +5080,6 @@ aside .submenu .events-grid .col-task .nav-link,
 .kanban-board-card .kanban-stage-col .subtasks .events-grid .col-task .checkbox-text,
 .events-grid .col-task .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text,
 .kanban-archive-board .kanban-stage-col .subtasks .events-grid .col-task .checkbox-text,
-.events-grid .col-task .kanban-stage-group.sortable-fallback .kanban-count-badge,
-.kanban-stage-group.sortable-fallback .events-grid .col-task .kanban-count-badge,
 .events-grid .col-task .board-reports-card .reports-stat-label,
 .board-reports-card .events-grid .col-task .reports-stat-label,
 .events-grid .col-task .board-list .tasks-grid-wrapper > .empty-state,
@@ -5230,10 +5164,6 @@ aside .submenu .events-grid .col-event .nav-link,
 .events-grid .col-event .auth-hint,
 .events-grid .col-event .board-list .card .list .subtasks .checkbox-text,
 .board-list .card .list .subtasks .events-grid .col-event .checkbox-text,
-.events-grid .col-event .kanban-board-card .kanban-count-badge,
-.kanban-board-card .events-grid .col-event .kanban-count-badge,
-.events-grid .col-event .kanban-archive-board .kanban-count-badge,
-.kanban-archive-board .events-grid .col-event .kanban-count-badge,
 .events-grid .col-event .kanban-board-card .kanban-count-chip,
 .kanban-board-card .events-grid .col-event .kanban-count-chip,
 .events-grid .col-event .kanban-archive-board .kanban-count-chip,
@@ -5242,8 +5172,6 @@ aside .submenu .events-grid .col-event .nav-link,
 .kanban-board-card .kanban-stage-col .subtasks .events-grid .col-event .checkbox-text,
 .events-grid .col-event .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text,
 .kanban-archive-board .kanban-stage-col .subtasks .events-grid .col-event .checkbox-text,
-.events-grid .col-event .kanban-stage-group.sortable-fallback .kanban-count-badge,
-.kanban-stage-group.sortable-fallback .events-grid .col-event .kanban-count-badge,
 .events-grid .col-event .board-reports-card .reports-stat-label,
 .board-reports-card .events-grid .col-event .reports-stat-label,
 .events-grid .col-event .board-list .tasks-grid-wrapper > .empty-state,
@@ -5427,6 +5355,7 @@ aside .submenu .events-grid .col-event .nav-link,
   display: flex;
   gap: 1.125rem;
   padding: 0.375rem 1.125rem;
+  width: -moz-fit-content;
   width: fit-content;
 }
 
@@ -5454,6 +5383,7 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   grid-template-columns: auto 1fr auto auto auto auto auto auto auto auto;
   /* Проект */
   gap: 0.75rem;
+  width: -moz-max-content;
   width: max-content;
   min-width: 100%;
   overflow-x: auto;
@@ -5474,7 +5404,9 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   align-items: center;
   gap: 0.25rem;
   cursor: pointer;
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
 }
 .tasks-grid .grid-header > div .header-title {
   display: inline-block;
@@ -5630,6 +5562,7 @@ body[data-theme=dark] .deadline {
 .tp-table-row-fallback .tasks-grid {
   display: grid;
   gap: 0.75rem;
+  width: -moz-max-content;
   width: max-content;
   min-width: 100%;
   overflow-x: auto;
@@ -5725,6 +5658,4 @@ body[data-theme=dark] .toast-notification {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-/*# sourceMappingURL=style.css.map */
+}/*# sourceMappingURL=style.css.map */

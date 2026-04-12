@@ -130,9 +130,7 @@ function handleNavigationClick(e) {
     loadPage(url);
 }
 
-// --- Функция загрузки внешних скриптов ---
 async function loadExternalScript(src) {
-    // Проверяем, не загружен ли уже этот скрипт (по src)
     const absoluteSrc = new URL(src, window.location.origin).href;
     const exists = Array.from(document.querySelectorAll('script[src]'))
         .some(s => new URL(s.src, window.location.origin).href === absoluteSrc);
@@ -141,7 +139,6 @@ async function loadExternalScript(src) {
         return true;
     }
     
-    // Проверяем, не загружен ли скрипт через window (для модулей)
     if (src.includes('board_list') && window.initBoardListPage) {
         console.log(`Скрипт ${src} уже инициализирован через window`);
         return true;
@@ -175,7 +172,6 @@ async function loadExternalScript(src) {
     });
 }
 
-// --- Функция загрузки внешних стилей ---
 async function loadExternalStylesheet(href) {
     if (!href) return true;
     const absoluteHref = new URL(href, window.location.origin).href;
@@ -219,7 +215,6 @@ async function loadPage(url) {
         if (newContent) {
             const currentContent = document.querySelector('.app-container');
             if (currentContent) {
-                // 1) Подтягиваем стили из head целевой страницы (если их нет на текущей)
                 const stylesheets = doc.querySelectorAll('link[rel="stylesheet"][href]');
                 for (const link of stylesheets) {
                     const href = link.getAttribute('href');
@@ -227,7 +222,6 @@ async function loadPage(url) {
                     await loadExternalStylesheet(href);
                 }
 
-                // Загружаем внешние скрипты только если их функции не определены
                 const externalScripts = doc.querySelectorAll('script[src]');
                 
                 for (const script of externalScripts) {
@@ -236,8 +230,6 @@ async function loadPage(url) {
                         continue;
                     }
                     
-                    // 2) Скрипты грузим по факту наличия в DOM, а для страниц дополнительно
-                    // проверяем, инициализирована ли уже их глобальная функция.
                     const isPageScript =
                         src.includes('board_list') ||
                         src.includes('board_kanban') ||
@@ -250,8 +242,6 @@ async function loadPage(url) {
                         (src.includes('tasks') && window.initTasksPage) ||
                         (src.includes('index') && window.initIndexPage);
 
-                    // Для сторонних библиотек (например SortableJS CDN) нет window-флага,
-                    // поэтому грузим их всегда, если их ещё нет в DOM.
                     if (!isPageScript || !alreadyInited) {
                         await loadExternalScript(src);
                     } else {
@@ -271,7 +261,6 @@ async function loadPage(url) {
                     
                     executeInlineScripts(currentContent);
                     
-                    // Вызываем инициализаторы для разных страниц
                     if (currentContent.querySelector('#tasks-grid') && typeof window.initTasksPage === 'function') {
                         console.log('Вызов initTasksPage');
                         window.initTasksPage();
@@ -282,10 +271,6 @@ async function loadPage(url) {
                         window.initIndexPage();
                     }
 
-                    // Инициализаторы досок вызываем строго по текущему DOM,
-                    // иначе состояния разных страниц начинают конфликтовать.
-                    // Важно: `.board-list` / `.board-kanban` — это классы самого `.app-container`,
-                    // поэтому проверяем classList, а не querySelector по потомкам.
                     const isBoardList = currentContent.classList.contains('board-list') && !currentContent.classList.contains('board-kanban');
                     const isBoardKanban = currentContent.classList.contains('board-kanban');
 

@@ -1,0 +1,144 @@
+/* Board UI: @extend-only placeholders (task row tag strip, chevrons, progress bar) */
+
+%tp-board-name-chevron-after {
+    content: '';
+    display: inline-block;
+    height: 1em;
+    aspect-ratio: 2 / 3;
+    background-image: url('/static/source/icons/arrow_dark_cropped.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+%tp-board-name-chevron-after--sm {
+    content: '';
+    display: inline-block;
+    height: 0.75em;
+    aspect-ratio: 2 / 3;
+    background-image: url('/static/source/icons/arrow_dark_cropped.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+%tp-subtasks-progress-line-rows {
+    display: flex;
+    width: 100%;
+
+    .completed {
+        border-bottom: $space-3 solid $green;
+    }
+
+    .todo {
+        border-bottom: $space-3 solid rgba($light-gray, 0.5);
+    }
+}
+
+%tp-board-tag-shell {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: stretch;
+    gap: $space-16;
+}
+
+%tp-board-tag-executor {
+    display: flex;
+    align-items: center;
+
+    img {
+        height: calc(1em + $space-8 * 2);
+        border-radius: $radius-sm;
+    }
+}
+
+%tp-board-tag-priority-shared {
+    border-radius: $radius-sm;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(1em + $space-8 * 2);
+    width: calc(1em + $space-8 * 2);
+    color: $light-light-green;
+}
+
+%tp-board-tag-deadline {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: $space-4 $space-16;
+    height: calc(1em + $space-8 * 2);
+    gap: $space-8;
+    color: $light-gray;
+    background: rgba($green, 0.15);
+    border-radius: $radius-sm;
+
+    &::before {
+        content: '';
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+        background-image: url('/static/source/icons/deadline.svg');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        flex-shrink: 0;
+    }
+}
+
+/* Таймлайн: без явного justify-content (как в исходной вёрстке) */
+%tp-board-timeline-tag-deadline {
+    display: flex;
+    align-items: center;
+    gap: $space-8;
+    padding: $space-4 $space-16;
+    height: calc(1em + $space-8 * 2);
+    color: $light-gray;
+    background: rgba($green, 0.15);
+    border-radius: $radius-sm;
+
+    &::before {
+        content: '';
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+        background-image: url('/static/source/icons/deadline.svg');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        flex-shrink: 0;
+    }
+}
+
+%tp-kanban-count-badge {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: $space-8;
+    height: $space-24;
+    background: $light-gray;
+    border-radius: $radius-sm;
+    font-size: $font-size-sm;
+    font-weight: 400;
+    color: $light-light-green !important;
+    aspect-ratio: 1 / 1;
+}
+
+%tp-archive-collapse-arrow-before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-image: url('/static/source/icons/arrow_dark_cropped.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: transform 0.2s ease;
+}

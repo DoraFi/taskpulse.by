@@ -1,4 +1,3 @@
-// static/js/tasks.js
 let tasksData = [];
 
 async function loadTasks() {
@@ -171,8 +170,6 @@ function handleStatusClick(e) {
     dropdown.classList.toggle('show', nextOpen);
     if (!nextOpen) return;
 
-    // Safer than `fixed`: keep it anchored to the status cell.
-    // `.col-status` already has `position: relative` in CSS.
     dropdown.style.position = 'absolute';
     dropdown.style.top = 'calc(100% + 6px)';
     dropdown.style.left = '0';
@@ -243,7 +240,6 @@ function escapeHtml(str) {
         .replace(/'/g, '&#39;');
 }
 
-// --- Модалка фильтров ---
 let filterModal, closeModalBtn, applyFiltersBtn, cancelFiltersBtn, complexityRange, complexityValue, resetFiltersBtn;
 
 function initFilters() {
@@ -256,7 +252,6 @@ function initFilters() {
     resetFiltersBtn = document.getElementById('resetFiltersBtn');
 
     if (filterModal) {
-        // Ensure full-screen overlay and proper centering (avoid parent transforms)
         if (filterModal.parentElement !== document.body) {
             document.body.appendChild(filterModal);
         }
@@ -306,7 +301,6 @@ function initFilters() {
             }
         });
 
-        // Hook custom calendar (same modal class as in board_list/kanban)
         const dateInputs = Array.from(document.querySelectorAll('.filter-date input'));
         if (dateInputs.length === 2) {
             const [dateFrom, dateTo] = dateInputs;
@@ -326,7 +320,6 @@ function initFilters() {
 
             [dateFrom, dateTo].forEach(inp => {
                 inp.addEventListener('click', (e) => {
-                    // Replace native picker with our modal calendar
                     e.preventDefault();
                     e.stopPropagation();
                     openRangeCalendar();
@@ -491,7 +484,6 @@ function resetAllFilters() {
     }
 }
 
-// --- Табы ---
 function initTabs() {
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.removeEventListener('click', handleTabClick);
@@ -509,7 +501,6 @@ function handleTabClick(e) {
     }
 }
 
-// --- Колонки и сортировка ---
 let visibleColumns = {
     id: true,
     name: true,
@@ -706,7 +697,6 @@ function updateTasksWithSort(filteredTasks) {
     setTimeout(() => updateNameColumnMaxWidth(), 0);
 }
 
-// --- Модалка настройки колонок ---
 function showColumnsModal() {
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
@@ -791,7 +781,6 @@ function getColumnsCheckboxes() {
     `).join('');
 }
 
-// --- Печать и ссылка ---
 function printTable() {
     window.print();
 }
@@ -829,7 +818,6 @@ function showToast(message) {
     }, 2000);
 }
 
-// --- Инициализация дополнительных элементов ---
 function initMoreActions() {
     const moreActionsBtn = document.getElementById('moreActionsBtn');
     const actionsMenu = document.getElementById('actionsMenu');
@@ -863,7 +851,6 @@ function initMoreActions() {
     }
 }
 
-// --- Главная функция инициализации страницы задач ---
 function initTasksPage() {
     console.log('initTasksPage вызван');
     loadColumnsState();
@@ -874,7 +861,6 @@ function initTasksPage() {
     window.addEventListener('resize', () => updateNameColumnMaxWidth());
 }
 
-// Запуск при загрузке
 document.addEventListener('DOMContentLoaded', initTasksPage);
 
 console.log('tasks.js загружен, initTasksPage определена:', typeof window.initTasksPage);

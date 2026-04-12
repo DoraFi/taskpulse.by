@@ -8,6 +8,7 @@
 @import 'components/header';
 @import 'components/scrollbar';
 @import 'components/statuses';
+@import 'components/extends_overlays';
 @import 'components/modal';
 @import 'components/dropdown';
 @import 'components/checkbox';
@@ -21,6 +22,7 @@
 @import 'pages/auth';
 @import 'util/motion_guards';
 @import 'util/print';
+@import 'components/boards/extends';
 @import 'pages/boards';
 
 

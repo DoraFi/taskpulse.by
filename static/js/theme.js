@@ -1,13 +1,12 @@
-// static/js/theme.js
 (function () {
   const STORAGE_KEY = 'tp_theme';
   const THEMES = /** @type {const} */ (['light', 'dark']);
   const ICONS_PREFIX = '/static/source/icons/';
 
   /** @type {Map<string, string>} */
-  const svgSourceCache = new Map(); // original svg text by absolute src
+  const svgSourceCache = new Map();
   /** @type {Map<string, string>} */
-  const svgDarkDataUriCache = new Map(); // dark data-uri by absolute src
+  const svgDarkDataUriCache = new Map(); 
 
   function toAbsoluteUrl(src) {
     try {
@@ -18,15 +17,10 @@
   }
 
   function encodeSvgDataUri(svgText) {
-    // keep it simple: encode as UTF-8 URI component
     return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgText)}`;
   }
 
   function applyDarkPalette(svgText) {
-    // exact mapping requested:
-    // #2D3229 -> #F6FBF2
-    // #7F8C73 -> #EEF7E9
-    // Also handles optional alpha suffix (#RRGGBBAA) and any case.
     return svgText
       .replace(/#2d3229([0-9a-f]{2})?\b/gi, (_m, a) => `#F6FBF2${a || ''}`)
       .replace(/#7f8c73([0-9a-f]{2})?\b/gi, (_m, a) => `#EEF7E9${a || ''}`);
@@ -47,14 +41,12 @@
         const src = img.getAttribute('src') || '';
         const original = img.dataset.originalSrc || '';
 
-        // pick up both: untouched icons (src=.../icons/*.svg) and already-recolored ones (data-original-src set)
         const isIconsSrc = src.startsWith(ICONS_PREFIX) && src.toLowerCase().endsWith('.svg');
         const isAlreadyProcessed = original.startsWith(ICONS_PREFIX) && original.toLowerCase().endsWith('.svg');
         return isIconsSrc || isAlreadyProcessed;
       });
 
     if (theme !== 'dark') {
-      // restore originals
       for (const img of imgs) {
         const original = img.dataset.originalSrc;
         if (original) img.setAttribute('src', original);
@@ -62,7 +54,6 @@
       return;
     }
 
-    // dark: rewrite & swap to data-uris
     await Promise.all(
       imgs.map(async (img) => {
         const src = img.getAttribute('src') || '';
@@ -101,12 +92,8 @@
       return;
     }
 
-    // Pseudo-elements use background-image URLs; filter cannot map colors exactly.
-    // We override background-image with recolored SVG data-uris for exact palette mapping.
     const rules = [
-      // arrow_dark_cropped.svg (selectors must match or beat SCSS specificity)
       ['.archive-collapse-arrow::before', '/static/source/icons/arrow_dark_cropped.svg'],
-      /* Таблица списка: триггер — span.name в ячейке, не внутри .subtasks */
       ['.board-table-card .tasks-grid .name::after', '/static/source/icons/arrow_dark_cropped.svg'],
       ['.board-list .card .list .subtasks .name::after', '/static/source/icons/arrow_dark_cropped.svg'],
       ['.board-list .tasks-grid .name::after', '/static/source/icons/arrow_dark_cropped.svg'],
@@ -114,7 +101,6 @@
       ['.board-kanban .tasks-grid .name::after', '/static/source/icons/arrow_dark_cropped.svg'],
       ['.kanban-board-card .kanban-stage-col .subtasks .name::after', '/static/source/icons/arrow_dark_cropped.svg'],
       ['.kanban-archive-board .kanban-stage-col .subtasks .name::after', '/static/source/icons/arrow_dark_cropped.svg'],
-      // check.svg — same: beat nested .subtasks-list .custom-checkbox rules from SCSS
       [
         '.board-list .card .list .subtasks .subtasks-list .checkbox-item .custom-checkbox::after',
         '/static/source/icons/check.svg',
@@ -143,13 +129,9 @@
         '.kanban-board-card .kanban-stage-col .subtasks .subtasks-list .checkbox-item .custom-checkbox::after',
         '/static/source/icons/check.svg',
       ],
-      // deadline icon
       ['.deadline::before', '/static/source/icons/deadline.svg'],
-      // checkbox checkmark (fallback where no deeper nested rule)
       ['.checkbox-item .custom-checkbox::after', '/static/source/icons/check.svg'],
-      // status select arrow (light cropped in your SCSS)
       ['.tasks-grid .col-status .status-select::after', '/static/source/icons/arrow_light_cropped.svg'],
-      // модалка «Создание задачи»: у <select> иначе после !important на background-image слой получает repeat по умолчанию
       [
         '.modal-content.create-task-modal select.create-task-select',
         '/static/source/icons/arrow_dark_cropped.svg',
@@ -167,7 +149,6 @@
           dataUri = encodeSvgDataUri(darkText);
           svgDarkDataUriCache.set(abs, dataUri);
         }
-        // Important: keep url(...) quoting
         const extra = extraDecl || '';
         return `body[data-theme="dark"] ${selector}{background-image:url("${dataUri}") !important;filter:none !important;${extra}}`;
       })
@@ -200,7 +181,6 @@
     };
 
     const obs = new MutationObserver((mutations) => {
-      // React to added nodes only (tabs swapping cards, etc.)
       for (const m of mutations) {
         if (m.type === 'childList' && m.addedNodes && m.addedNodes.length) {
           schedule();
@@ -210,7 +190,6 @@
     });
 
     obs.observe(document.body, { childList: true, subtree: true });
-    // initial run for pages that render after DOMContentLoaded
     schedule();
   }
 
@@ -233,7 +212,6 @@
     document.body.dataset.theme = next;
     if (persist) localStorage.setItem(STORAGE_KEY, next);
 
-    // sun/moon asset + stable original path for setIconTheme (dark: recolor #2D3229 → #F6FBF2)
     const icon = document.querySelector('#themeToggle .theme-toggle__icon');
     if (icon) {
       const path =
@@ -242,12 +220,9 @@
       icon.setAttribute('src', path);
     }
 
-    // recolor all app icons (img src="/static/source/icons/*.svg")
-    // Do not block theme switch; run async.
     setIconTheme(next).catch(() => {});
     setPseudoElementIconTheme(next).catch(() => {});
 
-    // короткий “переход” для фона/карточек/текста
     document.body.classList.add('theme-transition');
     window.clearTimeout(setTheme._t);
     setTheme._t = window.setTimeout(() => {
@@ -260,11 +235,9 @@
     const next = current === 'dark' ? 'light' : 'dark';
     setTheme(next, { persist: true });
 
-    // микро-анимация иконки
     const btn = document.getElementById('themeToggle');
     if (btn) {
       btn.classList.remove('theme-toggle--pulse');
-      // reflow for restart
       void btn.offsetWidth;
       btn.classList.add('theme-toggle--pulse');
     }

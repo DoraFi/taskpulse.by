@@ -1,7 +1,3 @@
-/* Boards: list / kanban / timeline / reports / archive */
-
-/* NOTE: extracted from `style.scss` without visual changes. */
-
 .board-list {
     .cards {
         column-count: 2;
@@ -145,16 +141,7 @@
                     gap: $space-4;
 
                     &::after {
-                        content: '';
-                        display: inline-block;
-                        height: 1em;
-                        aspect-ratio: 2/3;
-                        background-image: url('/static/source/icons/arrow_dark_cropped.svg');
-                        background-size: contain;
-                        background-repeat: no-repeat;
-                        background-position: center;
-                        flex-shrink: 0;
-                        transition: transform 0.2s ease;
+                        @extend %tp-board-name-chevron-after;
                     }
 
                     &.open::after {
@@ -163,16 +150,7 @@
                 }
 
                 .progress-line {
-                    display: flex;
-                    width: 100%;
-
-                    .completed {
-                        border-bottom: $space-3 solid $green;
-                    }
-
-                    .todo {
-                        border-bottom: $space-3 solid rgba($light-gray, 0.5);
-                    }
+                    @extend %tp-subtasks-progress-line-rows;
                 }
             }
 
@@ -196,31 +174,15 @@
             }
 
             .tag {
-                width: 100%;
-                display: flex;
-                justify-content: flex-end;
-                align-items: stretch;
-                gap: $space-16;
+                @extend %tp-board-tag-shell;
 
                 .executor {
-                    display: flex;
-                    align-items: center;
-
-                    img {
-                        height: calc(1em + $space-8 * 2);
-                        @extend .br-5;
-                    }
+                    @extend %tp-board-tag-executor;
                 }
 
                 .priority-high,
                 .priority-normal {
-                    @extend .br-5;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    height: calc(1em + $space-8 * 2);
-                    width: calc(1em + $space-8 * 2);
-                    color: $light-light-green;
+                    @extend %tp-board-tag-priority-shared;
                 }
 
                 .priority-high {
@@ -232,28 +194,7 @@
                 }
 
                 .deadline {
-                    display: flex;
-                    flex-direction: row;
-                    justify-content: center;
-                    align-items: center;
-                    padding: $space-4 $space-16;
-                    height: calc(1em + $space-8 * 2);
-                    gap: $space-8;
-                    color: $light-gray;
-                    background: rgba($green, 0.15);
-                    @extend .br-5;
-
-                    &::before {
-                        content: '';
-                        display: inline-block;
-                        width: 1em;
-                        height: 1em;
-                        background-image: url('/static/source/icons/deadline.svg');
-                        background-size: contain;
-                        background-repeat: no-repeat;
-                        background-position: center;
-                        flex-shrink: 0;
-                    }
+                    @extend %tp-board-tag-deadline;
                 }
             }
         }
@@ -308,7 +249,6 @@ body:not([data-theme="dark"]) .board-list .card .list .item {
 .kanban-archive-board {
     width: 100%;
 
-    // Каждая колонка этапа + её разделитель живут в .kanban-stage-group
     .kanban-stage-group {
         display: flex;
         align-items: stretch;
@@ -329,7 +269,6 @@ body:not([data-theme="dark"]) .board-list .card .list .item {
 
     &[data-kanban-scroll="true"] {
         .board-card-collapsible {
-            // Скролл внутри доски, ширина карточки не меняется
             overflow-x: auto;
             overflow-y: visible;
         }
@@ -390,17 +329,7 @@ body:not([data-theme="dark"]) .board-list .card .list .item {
     }
 
     .kanban-count-badge {
-        flex-shrink: 0;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: $space-8;
-        height: $space-24;
-        background: $light-gray;
-        @extend .br-5;
-        @extend .text-signature;
-        color: $light-light-green !important;
-        aspect-ratio: 1/1;
+        @extend %tp-kanban-count-badge;
     }
 
     .kanban-stage-sep-line {
@@ -521,6 +450,17 @@ body:not([data-theme="dark"]) .board-list .card .list .item {
         padding-bottom: $space-8;
     }
 
+    /* Колонка канбана: карточки + форма — отступ только над формой (после задач) */
+    .kanban-task-list {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .kanban-task-list > .form-add-task:not(:first-child) {
+        margin-top: $space-16;
+    }
+
     .kanban-stage-col {
         flex: 1;
         min-width: 0;
@@ -548,16 +488,7 @@ body:not([data-theme="dark"]) .board-list .card .list .item {
                 gap: $space-4;
 
                 &::after {
-                    content: '';
-                    display: inline-block;
-                    height: 1em;
-                    aspect-ratio: 2/3;
-                    background-image: url('/static/source/icons/arrow_dark_cropped.svg');
-                    background-size: contain;
-                    background-repeat: no-repeat;
-                    background-position: center;
-                    flex-shrink: 0;
-                    transition: transform 0.2s ease;
+                    @extend %tp-board-name-chevron-after;
                 }
 
                 &.open::after {
@@ -566,16 +497,7 @@ body:not([data-theme="dark"]) .board-list .card .list .item {
             }
 
             .progress-line {
-                display: flex;
-                width: 100%;
-
-                .completed {
-                    border-bottom: $space-3 solid $green;
-                }
-
-                .todo {
-                    border-bottom: $space-3 solid rgba($light-gray, 0.5);
-                }
+                @extend %tp-subtasks-progress-line-rows;
             }
         }
 
@@ -593,31 +515,15 @@ body:not([data-theme="dark"]) .board-list .card .list .item {
         }
 
         .tag {
-            width: 100%;
-            display: flex;
-            justify-content: flex-end;
-            align-items: stretch;
-            gap: $space-16;
+            @extend %tp-board-tag-shell;
 
             .executor {
-                display: flex;
-                align-items: center;
-
-                img {
-                    height: calc(1em + $space-8 * 2);
-                    @extend .br-5;
-                }
+                @extend %tp-board-tag-executor;
             }
 
             .priority-high,
             .priority-normal {
-                @extend .br-5;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: calc(1em + $space-8 * 2);
-                width: calc(1em + $space-8 * 2);
-                color: $light-light-green;
+                @extend %tp-board-tag-priority-shared;
             }
 
             .priority-high {
@@ -629,28 +535,7 @@ body:not([data-theme="dark"]) .board-list .card .list .item {
             }
 
             .deadline {
-                display: flex;
-                flex-direction: row;
-                justify-content: center;
-                align-items: center;
-                padding: $space-4 $space-16;
-                height: calc(1em + $space-8 * 2);
-                gap: $space-8;
-                color: $light-gray;
-                background: rgba($green, 0.15);
-                @extend .br-5;
-
-                &::before {
-                    content: '';
-                    display: inline-block;
-                    width: 1em;
-                    height: 1em;
-                    background-image: url('/static/source/icons/deadline.svg');
-                    background-size: contain;
-                    background-repeat: no-repeat;
-                    background-position: center;
-                    flex-shrink: 0;
-                }
+                @extend %tp-board-tag-deadline;
             }
         }
     }
@@ -690,15 +575,7 @@ body:not([data-theme="dark"]) .board-list .card .list .item {
     height: $space-24;
 
     &::before {
-        content: '';
-        display: block;
-        width: 100%;
-        height: 100%;
-        background-image: url('/static/source/icons/arrow_dark_cropped.svg');
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center;
-        transition: transform 0.2s ease;
+        @extend %tp-archive-collapse-arrow-before;
     }
 }
 
@@ -744,17 +621,7 @@ body:not([data-theme="dark"]) .board-list .card .list .item {
     }
 
     .kanban-count-badge {
-        flex-shrink: 0;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: $space-8;
-        height: $space-24;
-        background: $light-gray;
-        @extend .br-5;
-        @extend .text-signature;
-        color: $light-light-green !important;
-        aspect-ratio: 1/1;
+        @extend %tp-kanban-count-badge;
     }
 
     .kanban-stage-sep-line {
@@ -789,31 +656,15 @@ body[data-theme="dark"] .kanban-stage-group.sortable-fallback .kanban-stage-sep-
 
 /* Sortable fallback ghost is appended to body — loses .kanban-stage-col ancestor for .tag rules */
 .kanban-task-item.sortable-fallback .tag {
-    width: 100%;
-    display: flex;
-    justify-content: flex-end;
-    align-items: stretch;
-    gap: $space-16;
+    @extend %tp-board-tag-shell;
 
     .executor {
-        display: flex;
-        align-items: center;
-
-        img {
-            height: calc(1em + $space-8 * 2);
-            @extend .br-5;
-        }
+        @extend %tp-board-tag-executor;
     }
 
     .priority-high,
     .priority-normal {
-        @extend .br-5;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: calc(1em + $space-8 * 2);
-        width: calc(1em + $space-8 * 2);
-        color: $light-light-green;
+        @extend %tp-board-tag-priority-shared;
     }
 
     .priority-high {
@@ -825,28 +676,7 @@ body[data-theme="dark"] .kanban-stage-group.sortable-fallback .kanban-stage-sep-
     }
 
     .deadline {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-        padding: $space-4 $space-16;
-        height: calc(1em + $space-8 * 2);
-        gap: $space-8;
-        color: $light-gray;
-        background: rgba($green, 0.15);
-        @extend .br-5;
-
-        &::before {
-            content: '';
-            display: inline-block;
-            width: 1em;
-            height: 1em;
-            background-image: url('/static/source/icons/deadline.svg');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            flex-shrink: 0;
-        }
+        @extend %tp-board-tag-deadline;
     }
 }
 
@@ -1014,15 +844,7 @@ body[data-theme="dark"] .kanban-task-item, .board-list .card .list .item {
         height: 1.5em;
 
         &::before {
-            content: '';
-            display: block;
-            width: 100%;
-            height: 100%;
-            background-image: url('/static/source/icons/arrow_dark_cropped.svg');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            transition: transform 0.2s ease;
+            @extend %tp-archive-collapse-arrow-before;
         }
     }
 
@@ -1187,31 +1009,15 @@ body[data-theme="dark"] .kanban-task-item, .board-list .card .list .item {
 
 .board-timeline-card {
     .tag {
-        width: 100%;
-        display: flex;
-        justify-content: flex-end;
-        align-items: stretch;
-        gap: $space-16;
+        @extend %tp-board-tag-shell;
 
         .executor {
-            display: flex;
-            align-items: center;
-
-            img {
-                height: calc(1em + $space-8 * 2);
-                @extend .br-5;
-            }
+            @extend %tp-board-tag-executor;
         }
 
         .priority-high,
         .priority-normal {
-            @extend .br-5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: calc(1em + $space-8 * 2);
-            width: calc(1em + $space-8 * 2);
-            color: $light-light-green;
+            @extend %tp-board-tag-priority-shared;
         }
 
         .priority-high {
@@ -1223,30 +1029,10 @@ body[data-theme="dark"] .kanban-task-item, .board-list .card .list .item {
         }
 
         .deadline {
-            display: flex;
-            align-items: center;
-            gap: $space-8;
-            padding: $space-4 $space-16;
-            height: calc(1em + $space-8 * 2);
-            color: $light-gray;
-            background: rgba($green, 0.15);
-            @extend .br-5;
-
-            &::before {
-                content: '';
-                display: inline-block;
-                width: 1em;
-                height: 1em;
-                background-image: url('/static/source/icons/deadline.svg');
-                background-size: contain;
-                background-repeat: no-repeat;
-                background-position: center;
-                flex-shrink: 0;
-            }
+            @extend %tp-board-timeline-tag-deadline;
         }
     }
 
-    // Стили для подзадач (как в досках)
     .subtasks {
         display: flex;
         flex-direction: column;
@@ -1265,16 +1051,7 @@ body[data-theme="dark"] .kanban-task-item, .board-list .card .list .item {
             cursor: pointer;
 
             &::after {
-                content: '';
-                display: inline-block;
-                height: 1em;
-                aspect-ratio: 2/3;
-                background-image: url('/static/source/icons/arrow_dark_cropped.svg');
-                background-size: contain;
-                background-repeat: no-repeat;
-                background-position: center;
-                flex-shrink: 0;
-                transition: transform 0.2s ease;
+                @extend %tp-board-name-chevron-after;
             }
 
             &.open::after {
@@ -1350,16 +1127,7 @@ body[data-theme="dark"] .kanban-task-item, .board-list .card .list .item {
         gap: $space-8;
 
         &::after {
-            content: '';
-            display: inline-block;
-            height: 1em;
-            aspect-ratio: 2/3;
-            background-image: url('/static/source/icons/arrow_dark_cropped.svg');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            flex-shrink: 0;
-            transition: transform 0.2s ease;
+            @extend %tp-board-name-chevron-after;
         }
 
         &.open::after {
@@ -1368,19 +1136,7 @@ body[data-theme="dark"] .kanban-task-item, .board-list .card .list .item {
     }
 
     .subtasks-list {
-        @extend .flex-col;
-        gap: $space-4;
-
-        .custom-checkbox {
-            width: $space-20;
-            height: $space-20;
-            border: $space-2 solid $dark-gray;
-
-            &::after {
-                width: $space-12;
-                height: $space-8;
-            }
-        }
+        @include tp-subtasks-list-skin();
 
         span {
             @extend .text-signature;
@@ -1439,19 +1195,7 @@ body[data-theme="dark"] .board-kanban .tasks-grid .col-name {
         }
 
         .subtasks-list {
-            @extend .flex-col, ;
-            gap: $space-4;
-
-            .custom-checkbox {
-                width: $space-20;
-                height: $space-20;
-                border: $space-2 solid $dark-gray;
-
-                &::after {
-                    width: $space-12;
-                    height: $space-8;
-                }
-            }
+            @include tp-subtasks-list-skin();
         }
 
         .checkbox-text {
@@ -1464,16 +1208,7 @@ body[data-theme="dark"] .board-kanban .tasks-grid .col-name {
             gap: $space-4;
 
             &::after {
-                content: '';
-                display: inline-block;
-                height: 0.75em;
-                aspect-ratio: 2/3;
-                background-image: url('/static/source/icons/arrow_dark_cropped.svg');
-                background-size: contain;
-                background-repeat: no-repeat;
-                background-position: center;
-                flex-shrink: 0;
-                transition: transform 0.2s ease;
+                @extend %tp-board-name-chevron-after--sm;
             }
 
             &.open::after {
@@ -1529,6 +1264,8 @@ body[data-theme="dark"] .board-table-card .tasks-grid .col-name {
 
     .tag {
         display: none;
+        width: 100%;
+        box-sizing: border-box;
         justify-content: flex-end;
         align-items: center;
         gap: $space-16;
@@ -1560,4 +1297,53 @@ body[data-theme="dark"] .form-add-task:focus-within {
 
 .assignee-option {
     cursor: pointer;
+}
+
+/* Канбан: таблица по этапам (tables-view) */
+.kanban-board-card .kanban-stage-table {
+    width: 100%;
+    min-width: 0;
+}
+
+.kanban-board-card .kanban-stage-table-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $space-16;
+    width: 100%;
+    min-width: 0;
+    padding: 0 0 $space-12;
+    box-sizing: border-box;
+}
+
+.kanban-board-card .kanban-stage-table-head-main {
+    display: flex;
+    align-items: center;
+    gap: $space-8;
+    min-width: 0;
+    flex: 1;
+
+    .text-basic {
+        @include ellipsis-single-line(100%);
+        min-width: 0;
+    }
+}
+
+.kanban-board-card .kanban-stage-table-head .info {
+    flex-shrink: 0;
+
+    img {
+        display: block;
+        width: $space-24;
+        height: $space-24;
+    }
+}
+
+.kanban-board-card .kanban-stage-table-queue-forms {
+    display: flex;
+    flex-direction: column;
+    gap: $space-16;
+    width: 100%;
+    margin-top: $space-16;
+    box-sizing: border-box;
 }
