@@ -1,4 +1,3 @@
-@charset "UTF-8";
 .bg-dark-green, .project .done {
   background: #2A4D14;
 }
@@ -493,7 +492,6 @@ body[data-theme=dark] .search-panel input {
   background: #F8085C;
 }
 
-/* Modal / dropdown: shared dismiss control */
 .dropdown-menu .dropdown-header .dropdown-close, .modal-content .modal-header .modal-close {
   background: none;
   border: none;
@@ -515,7 +513,6 @@ body[data-theme=dark] .search-panel input {
   aspect-ratio: 1/1;
 }
 
-/* Base modal system */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -727,7 +724,6 @@ body[data-theme=dark] .modal-content .filter-date span {
   color: rgba(246, 251, 242, 0.7) !important;
 }
 
-/* Dropdown menu (status etc.) */
 .dropdown-menu {
   position: absolute;
   top: 0;
@@ -788,7 +784,6 @@ body[data-theme=dark] .dropdown-menu .dropdown-header {
   border-bottom-color: #61A039;
 }
 
-/* Checkbox skin + special cases (kanban subtasks) */
 .checkbox-item {
   -webkit-user-select: none;
      -moz-user-select: none;
@@ -800,8 +795,6 @@ body[data-theme=dark] .dropdown-menu .dropdown-header {
   display: none !important;
 }
 
-/* Kanban subtasks: keep input functional but invisible.
-   Global display:none stays to avoid inputs showing in modals. */
 .kanban-board-card .subtasks .checkbox-item,
 .board-kanban .tasks-grid .subtasks-list .checkbox-item {
   position: relative;
@@ -990,10 +983,6 @@ body[data-theme=dark] .custom-calendar-modal .custom-calendar .custom-calendar-f
   border-top-color: rgba(97, 160, 57, 0.45);
 }
 
-/* Shared form control skins (reduce duplication across modals) */
-/* Shared subtasks widget skin (board-list / kanban / table/timeline) */
-/* Create task modal */
-/* Модалка «Создание задачи» (шапка + /headerCreateTaskBtn) */
 .modal-content.create-task-modal {
   width: 44vw;
   height: 92vh;
@@ -1011,9 +1000,6 @@ body[data-theme=dark] .custom-calendar-modal .custom-calendar .custom-calendar-f
 .modal-content.create-task-modal .create-task-label-plain {
   display: block;
   margin-bottom: 0.375rem;
-}
-.modal-content.create-task-modal {
-  /* Нативная стрелка select игнорирует padding — убираем её и рисуем свою (как у кастомного дропдауна) */
 }
 .modal-content.create-task-modal select.create-task-select {
   width: 22vw;
@@ -1072,9 +1058,6 @@ body[data-theme=dark] .custom-calendar-modal .custom-calendar .custom-calendar-f
   opacity: 0.42;
   pointer-events: none;
 }
-.modal-content.create-task-modal {
-  /* Диапазон дат — как в модалке фильтров задач */
-}
 .modal-content.create-task-modal .filter-section .filter-date {
   width: 100%;
 }
@@ -1120,7 +1103,6 @@ body[data-theme=dark] .custom-calendar-modal .custom-calendar .custom-calendar-f
   justify-content: center;
   gap: 0.75rem;
   min-height: 10vh;
-  height: 10vh;
   padding: 0.5625rem 0.75rem;
   box-sizing: border-box;
   border-radius: 0.3rem;
@@ -1152,7 +1134,6 @@ body[data-theme=dark] .modal-content.create-task-modal .create-task-attachments.
   border-color: #F6FBF2;
 }
 
-/* Тёмная тема: запасная стрелка + явный repeat/position/size (!important), иначе при override background-image слой тайлится */
 body[data-theme=dark] .modal-content.create-task-modal select.create-task-select {
   background-color: #282D25;
   background-image: url("/static/source/icons/arrow_light_cropped.svg");
@@ -1185,8 +1166,6 @@ body[data-theme=dark] .modal-content.create-task-modal .create-task-deps-suggest
   background: rgba(97, 160, 57, 0.15);
 }
 
-/* Profile modal */
-/* Модалка «Профиль» — те же габариты, что у «Создание задачи» */
 .modal-content.profile-modal {
   width: 44vw;
   height: 92vh;
@@ -1270,9 +1249,6 @@ body[data-theme=dark] .modal-content.create-task-modal .create-task-deps-suggest
   box-sizing: border-box;
   background-color: #F6FBF2;
 }
-.modal-content.profile-modal {
-  /* Как select в «Создание задачи», ширина — на всю колонку сетки профиля */
-}
 .modal-content.profile-modal select.create-task-select.profile-modal__select--full {
   width: 100%;
   max-width: 100%;
@@ -1300,9 +1276,6 @@ body[data-theme=dark] .modal-content.create-task-modal .create-task-deps-suggest
   outline: none;
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.1);
-}
-.modal-content.profile-modal {
-  /* Как textarea описания в «Создание задачи», высота — компактная для профиля */
 }
 .modal-content.profile-modal textarea.profile-modal__bio {
   display: block;
@@ -1579,8 +1552,6 @@ body[data-theme=dark] .modal-content.profile-modal textarea.profile-modal__bio::
   color: rgba(246, 251, 242, 0.45);
 }
 
-/* Settings modal */
-/* Модалка «Настройки» — шире профиля, слева меню разделов */
 .modal-content.settings-modal {
   width: min(76rem, 96vw);
   max-width: 96vw;
@@ -1642,10 +1613,6 @@ body[data-theme=dark] .modal-content.profile-modal textarea.profile-modal__bio::
   overflow-y: auto;
   padding: 1.125rem 1.5rem;
   background: #F6FBF2;
-}
-.modal-content.settings-modal {
-  /* IMPORTANT: keep only one panel visible.
-     `display:flex` below would otherwise override native `[hidden]{display:none}`. */
 }
 .modal-content.settings-modal .settings-modal__panel[hidden] {
   display: none !important;
@@ -1943,7 +1910,6 @@ body[data-theme=dark] .modal-content.settings-modal .settings-modal__danger-zone
     border-bottom-color: rgba(246, 251, 242, 0.35);
   }
 }
-/* Projects page cards + hero */
 .projects-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3089,7 +3055,6 @@ body[data-theme=dark] .project-card__arrow {
     transform: none !important;
   }
 }
-/* Motion/animation guards */
 body.tp-no-enter .cards > *,
 body.tp-no-enter .card {
   animation: none !important;
@@ -3117,7 +3082,6 @@ body.tp-no-enter .app-container {
   transition: none !important;
 }
 
-/* Print styles */
 @media print {
   .header,
   aside,
@@ -3150,7 +3114,6 @@ body.tp-no-enter .app-container {
     display: none !important;
   }
 }
-/* Board UI: @extend-only placeholders (task row tag strip, chevrons, progress bar) */
 .board-list .tasks-grid .name::after, .board-timeline-card .subtasks .name::after, .kanban-board-card .kanban-stage-col .subtasks .name::after,
 .kanban-archive-board .kanban-stage-col .subtasks .name::after, .board-list .card .list .subtasks .name::after {
   content: "";
@@ -3254,7 +3217,6 @@ body.tp-no-enter .app-container {
   flex-shrink: 0;
 }
 
-/* Таймлайн: без явного justify-content (как в исходной вёрстке) */
 .board-timeline-card .tag .deadline {
   display: flex;
   align-items: center;
@@ -3794,10 +3756,6 @@ aside .submenu .kanban-archive-board .kanban-priority-section.normal button .nav
   gap: 0.75rem;
   padding-bottom: 0.375rem;
 }
-.kanban-board-card,
-.kanban-archive-board {
-  /* Колонка канбана: карточки + форма — отступ только над формой (после задач) */
-}
 .kanban-board-card .kanban-task-list,
 .kanban-archive-board .kanban-task-list {
   display: flex;
@@ -3871,7 +3829,6 @@ aside .submenu .kanban-archive-board .kanban-priority-section.normal button .nav
 .kanban-archive-board .kanban-stage-col .tag .priority-normal {
   background-color: rgba(97, 160, 57, 0.5);
 }
-/* Board header collapse controls (archive section toggle) */
 .tasks-header {
   width: 100%;
 }
@@ -3908,8 +3865,6 @@ aside .submenu .kanban-archive-board .kanban-priority-section.normal button .nav
   transform: rotate(-90deg);
 }
 
-/* Kanban stage fallback on body (DnD) */
-/* Этапы: fallback на body — без предков .kanban-board-card (см. initKanbanDnD + fallbackOnBody) */
 .kanban-stage-group.sortable-fallback {
   display: flex;
   align-items: stretch;
@@ -3954,7 +3909,6 @@ body[data-theme=dark] .kanban-stage-group.sortable-fallback .kanban-stage-sep-li
   background: #F6FBF2;
 }
 
-/* Kanban: task item fallback/ghost rules */
 .kanban-task-item {
   cursor: grab;
   width: 100%;
@@ -3969,7 +3923,6 @@ body[data-theme=dark] .kanban-stage-group.sortable-fallback .kanban-stage-sep-li
   margin-bottom: 0.375rem;
 }
 
-/* Sortable fallback ghost is appended to body — loses .kanban-stage-col ancestor for .tag rules */
 .kanban-task-item.sortable-fallback .tag .priority-high {
   background-color: #F8085C;
 }
@@ -3981,7 +3934,6 @@ body[data-theme=dark] .kanban-task-item, .board-list .card .list .item {
   border-color: #F6FBF2;
 }
 
-/* Reports view */
 .board-list .cards.reports-view,
 .board-list .cards.archive-view {
   -moz-column-count: 1 !important;
@@ -4061,7 +4013,6 @@ body[data-theme=dark] .kanban-task-item, .board-list .card .list .item {
   white-space: nowrap;
 }
 
-/* Archive section */
 .board-kanban .board-archive-section .tasks-grid.archive-tasks-grid {
   grid-template-columns: auto 1fr auto auto auto auto !important;
 }
@@ -4144,7 +4095,6 @@ body[data-theme=dark] .kanban-task-item, .board-list .card .list .item {
   padding: 1.125rem 0.75rem;
 }
 
-/* Timeline view */
 .board-timeline-card .timeline-board {
   width: 100%;
   padding: 0 0 0.75rem;
@@ -4304,7 +4254,6 @@ body[data-theme=dark] .board-timeline-card .subtasks .subtasks .checkbox-item in
   border-color: #61A039 !important;
 }
 
-/* Board list: table grid specifics */
 .board-list .tasks-grid {
   grid-template-columns: auto auto 1fr auto auto auto !important;
 }
@@ -4421,7 +4370,6 @@ body[data-theme=dark] .board-table-card .tasks-grid .col-name {
   color: #F6FBF2;
 }
 
-/* Add task row */
 .form-add-task {
   width: 100%;
   display: flex;
@@ -4470,7 +4418,6 @@ body[data-theme=dark] .form-add-task:focus-within {
   cursor: pointer;
 }
 
-/* Канбан: таблица по этапам (tables-view) */
 .kanban-board-card .kanban-stage-table {
   width: 100%;
   min-width: 0;
@@ -4524,6 +4471,185 @@ body[data-theme=dark] .form-add-task:focus-within {
   width: 100%;
   margin-top: 0.75rem;
   box-sizing: border-box;
+}
+
+.task-detail-sheet.modal-content.create-task-modal {
+  width: -moz-fit-content;
+  width: fit-content;
+  max-width: 98vw;
+  height: auto;
+  max-height: 92vh;
+  min-height: 0;
+  margin: 0 auto;
+}
+.task-detail-sheet .modal-body.create-task-modal__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.task-detail-sheet .task-detail-static__grid {
+  display: grid;
+  grid-template-columns: 30vw 20vw 20vw;
+  align-items: stretch;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.task-detail-sheet .task-detail-static__col-side, .task-detail-sheet .task-detail-static__col-meta, .task-detail-sheet .task-detail-static__col-main {
+  min-width: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+}
+.task-detail-sheet .task-detail-static__col-main {
+  grid-column: 1;
+  width: 30vw;
+  max-width: 30vw;
+}
+.task-detail-sheet .task-detail-static__col-main > .auth-field:not(.task-detail-static__desc-wrap),
+.task-detail-sheet .task-detail-static__col-main > .filter-section {
+  flex-shrink: 0;
+}
+.task-detail-sheet .task-detail-static__col-meta {
+  grid-column: 2;
+  width: 20vw;
+  max-width: 20vw;
+}
+.task-detail-sheet .task-detail-static__col-meta > .auth-field,
+.task-detail-sheet .task-detail-static__col-meta > .filter-section {
+  flex-shrink: 0;
+}
+.task-detail-sheet .task-detail-static__col-side {
+  grid-column: 3;
+  width: 20vw;
+  max-width: 20vw;
+}
+.task-detail-sheet .task-detail-static__col-side > .auth-field {
+  flex-shrink: 0;
+}
+.task-detail-sheet .task-detail-static__col-main .auth-field,
+.task-detail-sheet .task-detail-static__col-main .filter-section,
+.task-detail-sheet .task-detail-static__col-meta .auth-field,
+.task-detail-sheet .task-detail-static__col-meta .filter-section,
+.task-detail-sheet .task-detail-static__col-side .auth-field,
+.task-detail-sheet .task-detail-static__col-side .filter-section {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.task-detail-sheet .task-detail-static__col-main .filter-input,
+.task-detail-sheet .task-detail-static__col-main select.create-task-select,
+.task-detail-sheet .task-detail-static__col-main textarea.create-task-desc,
+.task-detail-sheet .task-detail-static__col-main .create-task-attachments,
+.task-detail-sheet .task-detail-static__col-main .create-task-deps-block,
+.task-detail-sheet .task-detail-static__col-meta .filter-input,
+.task-detail-sheet .task-detail-static__col-meta select.create-task-select,
+.task-detail-sheet .task-detail-static__col-meta textarea.create-task-desc,
+.task-detail-sheet .task-detail-static__col-meta .create-task-attachments,
+.task-detail-sheet .task-detail-static__col-meta .create-task-deps-block,
+.task-detail-sheet .task-detail-static__col-side .filter-input,
+.task-detail-sheet .task-detail-static__col-side select.create-task-select,
+.task-detail-sheet .task-detail-static__col-side textarea.create-task-desc,
+.task-detail-sheet .task-detail-static__col-side .create-task-attachments,
+.task-detail-sheet .task-detail-static__col-side .create-task-deps-block {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.task-detail-sheet .task-detail-static__col-main .create-task-deps-row,
+.task-detail-sheet .task-detail-static__col-meta .create-task-deps-row,
+.task-detail-sheet .task-detail-static__col-side .create-task-deps-row {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.task-detail-sheet .task-detail-static__col-main .create-task-attachments__btn,
+.task-detail-sheet .task-detail-static__col-meta .create-task-attachments__btn,
+.task-detail-sheet .task-detail-static__col-side .create-task-attachments__btn {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.task-detail-sheet .task-detail-static__col-main .create-task-deps-suggest,
+.task-detail-sheet .task-detail-static__col-meta .create-task-deps-suggest,
+.task-detail-sheet .task-detail-static__col-side .create-task-deps-suggest {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.task-detail-sheet .task-detail-static__desc-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+}
+.task-detail-sheet textarea.create-task-desc {
+  flex: 1 1 auto;
+  min-height: 6rem;
+  height: auto !important;
+  max-height: none !important;
+  resize: none;
+  box-sizing: border-box;
+}
+.task-detail-sheet select.create-task-select {
+  width: 100%;
+  max-width: 100%;
+}
+.task-detail-sheet .task-detail-static__dates {
+  width: 100%;
+  max-width: 100%;
+}
+.task-detail-sheet .task-detail-static__dates .filter-date.task-detail-static__filter-date {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  width: 100%;
+  max-width: 100%;
+  flex-wrap: nowrap;
+}
+.task-detail-sheet .task-detail-static__dates .filter-date.task-detail-static__filter-date .filter-input[type=date] {
+  flex: 0 1 10rem;
+  max-width: 42%;
+  min-width: 0;
+  min-height: 2.75rem;
+  cursor: pointer;
+}
+.task-detail-sheet .task-detail-static__dates .filter-date.task-detail-static__filter-date .filter-input[type=date]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  cursor: pointer;
+}
+.task-detail-sheet .task-detail-static__dates .filter-date.task-detail-static__filter-date .filter-input[type=date]::-moz-calendar-picker-indicator {
+  display: none;
+}
+.task-detail-sheet .task-detail-static__dates .filter-date.task-detail-static__filter-date span {
+  flex-shrink: 0;
+}
+
+body[data-theme=dark] .task-detail-sheet.modal-content.create-task-modal textarea.create-task-desc {
+  border-color: #F6FBF2;
+  color: #F6FBF2;
+  background: #282D25;
+}
+body[data-theme=dark] .task-detail-sheet.modal-content.create-task-modal textarea.create-task-desc::-moz-placeholder {
+  color: rgba(246, 251, 242, 0.45);
+}
+body[data-theme=dark] .task-detail-sheet.modal-content.create-task-modal textarea.create-task-desc::placeholder {
+  color: rgba(246, 251, 242, 0.45);
+}
+body[data-theme=dark] .task-detail-sheet.modal-content.create-task-modal textarea.create-task-desc {
+  flex: 1 1 auto;
+  min-height: 6rem;
+  height: auto !important;
+  max-height: none !important;
+  resize: none;
 }
 
 * {
@@ -4752,7 +4878,6 @@ body[data-theme=dark] .card {
   border-color: #F6FBF2;
 }
 
-/* Стагер появления карточек в контейнере */
 .cards > * {
   animation: app-card-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -4829,7 +4954,6 @@ body[data-theme=dark] .card {
   border-radius: 50%;
 }
 
-/* Задачи to do*/
 .tasks-to-do-grid,
 .events-grid {
   display: grid;
@@ -5197,7 +5321,6 @@ aside .submenu .events-grid .col-event .nav-link,
   white-space: nowrap;
 }
 
-/* активные проекты*/
 .project {
   gap: 0.75rem;
   display: flex;
@@ -5234,7 +5357,6 @@ aside .submenu .events-grid .col-event .nav-link,
   border-radius: 50%;
 }
 
-/* команда */
 .status-online {
   position: relative;
   display: inline-block;
@@ -5263,7 +5385,6 @@ aside .submenu .events-grid .col-event .nav-link,
   vertical-align: middle;
 }
 
-/*активность команды*/
 #chartRoot .mc-grid {
   stroke: rgba(127, 140, 115, 0.231372549);
   stroke-width: 1;
@@ -5296,7 +5417,6 @@ aside .submenu .events-grid .col-event .nav-link,
   stroke-width: 3;
 }
 
-/*последние действия*/
 .last-actions-grid {
   display: grid;
   grid-template-columns: auto 1fr auto auto;
@@ -5350,7 +5470,6 @@ aside .submenu .events-grid .col-event .nav-link,
   white-space: nowrap;
 }
 
-/*ЗАДАЧИ*/
 .tabs {
   display: flex;
   gap: 1.125rem;
@@ -5381,7 +5500,6 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
 .tasks-grid {
   display: grid;
   grid-template-columns: auto 1fr auto auto auto auto auto auto auto auto;
-  /* Проект */
   gap: 0.75rem;
   width: -moz-max-content;
   width: max-content;

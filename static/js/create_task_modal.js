@@ -79,7 +79,6 @@
 
     function openModal(overlay) {
         if (overlay.parentElement !== document.body) document.body.appendChild(overlay);
-        /* Не задавать display через style — иначе перебивает CSS и модалка не скрывается при снятии .show */
         overlay.classList.add('show');
         overlay.setAttribute('aria-hidden', 'false');
     }
@@ -123,7 +122,6 @@
         }
 
         overlay.querySelector('#createTaskModalSubmit')?.addEventListener('click', () => {
-            /* макет: создание задачи не выполняется */
             closeModal(overlay);
         });
     }

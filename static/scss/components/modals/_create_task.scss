@@ -1,6 +1,3 @@
-/* Create task modal */
-
-/* Модалка «Создание задачи» (шапка + /headerCreateTaskBtn) */
 .modal-content.create-task-modal {
     width: 44vw;
     height: 92vh;
@@ -22,7 +19,6 @@
         margin-bottom: $space-8;
     }
 
-    /* Нативная стрелка select игнорирует padding — убираем её и рисуем свою (как у кастомного дропдауна) */
     select.create-task-select {
         @include tp-select-skin(22vw, 22vw);
     }
@@ -66,7 +62,6 @@
         }
     }
 
-    /* Диапазон дат — как в модалке фильтров задач */
     .filter-section .filter-date {
         width: 100%;
 
@@ -96,7 +91,6 @@
         justify-content: center;
         gap: $space-16;
         min-height: 10vh;
-        height: 10vh;
         padding: $space-12 $space-16;
         box-sizing: border-box;
         border-radius: $radius-sm;
@@ -124,7 +118,6 @@ body[data-theme="dark"] .modal-content.create-task-modal .create-task-attachment
     border-color: $light-light-green;
 }
 
-/* Тёмная тема: запасная стрелка + явный repeat/position/size (!important), иначе при override background-image слой тайлится */
 body[data-theme="dark"] .modal-content.create-task-modal select.create-task-select {
     @include tp-select-skin-dark();
 }

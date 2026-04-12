@@ -450,7 +450,6 @@ body:not([data-theme="dark"]) .board-list .card .list .item {
         padding-bottom: $space-8;
     }
 
-    /* Колонка канбана: карточки + форма — отступ только над формой (после задач) */
     .kanban-task-list {
         display: flex;
         flex-direction: column;
@@ -541,7 +540,6 @@ body:not([data-theme="dark"]) .board-list .card .list .item {
     }
 }
 
-/* Board header collapse controls (archive section toggle) */
 .tasks-header {
     width: 100%;
 }
@@ -583,8 +581,6 @@ body:not([data-theme="dark"]) .board-list .card .list .item {
     transform: rotate(-90deg);
 }
 
-/* Kanban stage fallback on body (DnD) */
-/* Этапы: fallback на body — без предков .kanban-board-card (см. initKanbanDnD + fallbackOnBody) */
 .kanban-stage-group.sortable-fallback {
     display: flex;
     align-items: stretch;
@@ -638,7 +634,6 @@ body[data-theme="dark"] .kanban-stage-group.sortable-fallback .kanban-stage-sep-
     background: $light-light-green;
 }
 
-/* Kanban: task item fallback/ghost rules */
 .kanban-task-item {
     cursor: grab;
     width: 100%;
@@ -654,7 +649,6 @@ body[data-theme="dark"] .kanban-stage-group.sortable-fallback .kanban-stage-sep-
     }
 }
 
-/* Sortable fallback ghost is appended to body — loses .kanban-stage-col ancestor for .tag rules */
 .kanban-task-item.sortable-fallback .tag {
     @extend %tp-board-tag-shell;
 
@@ -685,7 +679,6 @@ body[data-theme="dark"] .kanban-task-item, .board-list .card .list .item {
     border-color: $light-light-green;
 }
 
-/* Reports view */
 .board-list .cards.reports-view,
 .board-list .cards.archive-view {
     column-count: 1 !important;
@@ -784,7 +777,6 @@ body[data-theme="dark"] .kanban-task-item, .board-list .card .list .item {
     }
 }
 
-/* Archive section */
 .board-kanban .board-archive-section .tasks-grid.archive-tasks-grid {
     grid-template-columns: auto 1fr auto auto auto auto !important;
 }
@@ -883,7 +875,6 @@ body[data-theme="dark"] .kanban-task-item, .board-list .card .list .item {
     @extend .text-signature;
 }
 
-/* Timeline view */
 .board-timeline-card {
     .timeline-board {
         width: 100%;
@@ -1117,7 +1108,6 @@ body[data-theme="dark"] .kanban-task-item, .board-list .card .list .item {
     }
 }
 
-/* Board list: table grid specifics */
 .board-list .tasks-grid {
     grid-template-columns: auto auto 1fr auto auto auto !important;
 
@@ -1243,7 +1233,6 @@ body[data-theme="dark"] .board-table-card .tasks-grid .col-name {
     color: $light-light-green;
 }
 
-/* Add task row */
 .form-add-task {
     width: 100%;
     display: flex;
@@ -1299,7 +1288,6 @@ body[data-theme="dark"] .form-add-task:focus-within {
     cursor: pointer;
 }
 
-/* Канбан: таблица по этапам (tables-view) */
 .kanban-board-card .kanban-stage-table {
     width: 100%;
     min-width: 0;

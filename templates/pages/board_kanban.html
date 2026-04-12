@@ -72,11 +72,134 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="taskDetailModal" aria-hidden="true">
+        <div class="modal-content create-task-modal task-detail-sheet" role="dialog" aria-modal="true" aria-labelledby="taskDetailTitle">
+            <div class="modal-header">
+                <p class="text-header" id="taskDetailTitle">Задача</p>
+                <button type="button" class="modal-close" id="taskDetailModalClose" aria-label="Закрыть">
+                    <img src="/static/source/icons/cross.svg" alt="" width="24" height="24">
+                </button>
+            </div>
+            <div class="modal-body create-task-modal__body">
+                <div class="task-detail-static__grid">
+                    <div class="task-detail-static__col-main">
+                        <div class="auth-field create-task-field">
+                            <label for="taskDetailProject">Проект <img class="required-icon" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>
+                            <select id="taskDetailProject" class="filter-input create-task-select" required>
+                                <option value="Корпоративный портал">Корпоративный портал</option>
+                                <option value="Микросервисная платформа">Микросервисная платформа</option>
+                                <option value="CRM-система">CRM-система</option>
+                            </select>
+                        </div>
+                        <div class="auth-field create-task-field">
+                            <label for="taskDetailName">Наименование задачи <img class="required-icon" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>
+                            <input id="taskDetailName" type="text" class="filter-input" autocomplete="off">
+                        </div>
+                        <div class="auth-field create-task-field task-detail-static__desc-wrap">
+                            <label for="taskDetailDesc">Описание задачи</label>
+                            <textarea id="taskDetailDesc" class="filter-input create-task-desc" rows="1" placeholder="Опишите задачу"></textarea>
+                        </div>
+                    </div>
+                    <div class="task-detail-static__col-meta">
+                        <div class="auth-field create-task-field">
+                            <label for="taskDetailStatus">Статус <img class="required-icon" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>
+                            <select id="taskDetailStatus" class="filter-input create-task-select" required>
+                                <option value="Новая">Новая</option>
+                                <option value="Назначена">Назначена</option>
+                                <option value="В работе">В работе</option>
+                                <option value="Готово">Готово</option>
+                                <option value="Отложено">Отложено</option>
+                            </select>
+                        </div>
+                        <div class="auth-field create-task-field">
+                            <label for="taskDetailPriority">Приоритет <img class="required-icon" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>
+                            <select id="taskDetailPriority" class="filter-input create-task-select" required>
+                                <option value="срочно">Срочно</option>
+                                <option value="обычный">Обычный</option>
+                            </select>
+                        </div>
+                        <div class="auth-field create-task-field">
+                            <label for="taskDetailAssignee">Исполнитель</label>
+                            <select id="taskDetailAssignee" class="filter-input create-task-select">
+                                <option value="">Не назначен</option>
+                                <option value="Лев Аксенов">Лев Аксенов</option>
+                                <option value="Дарья Швед">Дарья Швед</option>
+                                <option value="Ксения Глебко">Ксения Глебко</option>
+                                <option value="Полина Ильючик">Полина Ильючик</option>
+                                <option value="Оксана Кветко">Оксана Кветко</option>
+                            </select>
+                        </div>
+                        <div class="auth-field create-task-field">
+                            <label for="taskDetailHours">Время на выполнение (в часах)</label>
+                            <input id="taskDetailHours" type="number" class="filter-input" min="0" step="0.5" placeholder="Например, 8">
+                        </div>
+                        <div class="auth-field create-task-field">
+                            <label for="taskDetailSp">Сложность (в story points)</label>
+                            <select id="taskDetailSp" class="filter-input create-task-select">
+                                <option value="">Не указано</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="5">5</option>
+                                <option value="8">8</option>
+                                <option value="13">13</option>
+                            </select>
+                        </div>
+                        <div class="filter-section create-task-field task-detail-static__dates">
+                            <label class="filter-label">Срок выполнения</label>
+                            <div class="filter-date task-detail-static__filter-date">
+                                <input type="date" class="filter-input" id="taskDetailDeadlineFrom" autocomplete="off">
+                                <span>—</span>
+                                <input type="date" class="filter-input" id="taskDetailDeadlineTo" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="task-detail-static__col-side">
+                        <div class="auth-field create-task-field">
+                            <span class="text-signature create-task-label-plain">Зависимости</span>
+                            <div class="create-task-deps-block border-dark-1 br-5">
+                                <div class="create-task-deps-row">
+                                    <label class="text-signature" for="taskDetailDepType">Тип зависимости</label>
+                                    <select id="taskDetailDepType" class="filter-input create-task-select">
+                                        <option value="">Нет зависимости</option>
+                                        <option value="blocks">Блокирует</option>
+                                        <option value="blocked_by">Блокируется</option>
+                                        <option value="relates">Связана с</option>
+                                    </select>
+                                </div>
+                                <div class="create-task-deps-row">
+                                    <label class="text-signature" for="taskDetailDepSearch">От чего зависит</label>
+                                    <input type="search" id="taskDetailDepSearch" class="filter-input" placeholder="Поиск по коду или названию…" autocomplete="off">
+                                </div>
+                                <ul class="create-task-deps-suggest text-basic" aria-label="Подсказки">
+                                    <li class="create-task-deps-suggest__item" tabindex="0">1002 — API авторизации</li>
+                                    <li class="create-task-deps-suggest__item" tabindex="0">1001 — Планирование архитектуры</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="auth-field create-task-field">
+                            <span class="text-signature create-task-label-plain">Вложения</span>
+                            <div class="create-task-attachments border-dark-1 br-5">
+                                <p class="text-basic create-task-attachments__hint">Перетащите сюда файлы или</p>
+                                <button type="button" class="button-basic create-task-attachments__btn">Выберите в проводнике</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="button-secondary" id="taskDetailFooterClose">Закрыть</button>
+                <button type="button" class="button-basic" id="taskDetailSaveBtn">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="/static/js/loadComponents.js"></script>
     <script src="/static/js/app.js"></script>
     <script src="/static/js/theme.js"></script>
     <script src="/static/js/custom_calendar_range.js"></script>
+    <script src="/static/js/task_detail_modal.js"></script>
     <script src="/static/js/create_task_modal.js"></script>
     <script src="/static/js/profile_modal.js"></script>
     <script src="/static/js/settings_modal.js"></script>

@@ -1,4 +1,3 @@
-/*ЗАДАЧИ*/
 .tabs {
     display: flex;
     gap: $space-24;
@@ -35,25 +34,15 @@
     display: grid;
     grid-template-columns:
         auto
-        /* ID */
         1fr
-        /* Наименование - занимает всё доступное место */
         auto
-        /* Статус */
         auto
-        /* Срок */
         auto
-        /* Приоритет */
         auto
-        /* Сложность */
         auto
-        /* Время */
         auto
-        /* Исполнитель */
         auto
-        /* Создатель */
         auto;
-    /* Проект */
     gap: $space-16;
     width: max-content;
     min-width: 100%;

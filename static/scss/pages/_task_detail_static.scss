@@ -1,0 +1,184 @@
+$task-detail-gap: $space-32;
+$task-detail-col-main: 30vw;
+$task-detail-col-mid: 20vw;
+$task-detail-col-side: 20vw;
+
+.task-detail-sheet {
+    &.modal-content.create-task-modal {
+        width: fit-content;
+        max-width: 98vw;
+        height: auto;
+        max-height: 92vh;
+        min-height: 0;
+        margin: 0 auto;
+    }
+
+    .modal-body.create-task-modal__body {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .task-detail-static__grid {
+        display: grid;
+        grid-template-columns: $task-detail-col-main $task-detail-col-mid $task-detail-col-side;
+        align-items: stretch;
+        gap: $task-detail-gap;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    %task-detail-col {
+        min-width: 0;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        gap: $space-24;
+    }
+
+    .task-detail-static__col-main {
+        @extend %task-detail-col;
+        grid-column: 1;
+        width: $task-detail-col-main;
+        max-width: $task-detail-col-main;
+
+        > .auth-field:not(.task-detail-static__desc-wrap),
+        > .filter-section {
+            flex-shrink: 0;
+        }
+    }
+
+    .task-detail-static__col-meta {
+        @extend %task-detail-col;
+        grid-column: 2;
+        width: $task-detail-col-mid;
+        max-width: $task-detail-col-mid;
+
+        > .auth-field,
+        > .filter-section {
+            flex-shrink: 0;
+        }
+    }
+
+    .task-detail-static__col-side {
+        @extend %task-detail-col;
+        grid-column: 3;
+        width: $task-detail-col-side;
+        max-width: $task-detail-col-side;
+
+        > .auth-field {
+            flex-shrink: 0;
+        }
+    }
+
+    .task-detail-static__col-main,
+    .task-detail-static__col-meta,
+    .task-detail-static__col-side {
+        .auth-field,
+        .filter-section {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+
+        .filter-input,
+        select.create-task-select,
+        textarea.create-task-desc,
+        .create-task-attachments,
+        .create-task-deps-block {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+
+        .create-task-deps-row {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+
+        .create-task-attachments__btn {
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        .create-task-deps-suggest {
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+    }
+
+    .task-detail-static__desc-wrap {
+        flex: 1 1 auto;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    textarea.create-task-desc {
+        flex: 1 1 auto;
+        min-height: 6rem;
+        height: auto !important;
+        max-height: none !important;
+        resize: none;
+        box-sizing: border-box;
+    }
+
+    select.create-task-select {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .task-detail-static__dates {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .task-detail-static__dates .filter-date.task-detail-static__filter-date {
+        display: flex;
+        align-items: center;
+        gap: $space-8;
+        width: 100%;
+        max-width: 100%;
+        flex-wrap: nowrap;
+
+        .filter-input[type='date'] {
+            flex: 0 1 10rem;
+            max-width: 42%;
+            min-width: 0;
+            min-height: 2.75rem;
+            cursor: pointer;
+
+            &::-webkit-calendar-picker-indicator {
+                opacity: 0;
+                cursor: pointer;
+            }
+
+            &::-moz-calendar-picker-indicator {
+                display: none;
+            }
+        }
+
+        span {
+            flex-shrink: 0;
+        }
+    }
+}
+
+body[data-theme='dark'] .task-detail-sheet.modal-content.create-task-modal textarea.create-task-desc {
+    @include tp-textarea-skin-dark();
+    flex: 1 1 auto;
+    min-height: 6rem;
+    height: auto !important;
+    max-height: none !important;
+    resize: none;
+}

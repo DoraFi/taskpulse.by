@@ -1,7 +1,3 @@
-/**
- * Общий календарь диапазона дат (фильтры задач, модалка создания задачи).
- * Стили: .custom-calendar-modal
- */
 function openCustomCalendarRange({ start, end, onApply }) {
     let selectionStart = start || null;
     let selectionEnd = end || null;

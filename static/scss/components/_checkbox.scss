@@ -1,5 +1,3 @@
-/* Checkbox skin + special cases (kanban subtasks) */
-
 .checkbox-item {
     user-select: none;
 }
@@ -9,8 +7,6 @@
     display: none !important;
 }
 
-/* Kanban subtasks: keep input functional but invisible.
-   Global display:none stays to avoid inputs showing in modals. */
 .kanban-board-card .subtasks .checkbox-item,
 .board-kanban .tasks-grid .subtasks-list .checkbox-item {
     position: relative;

@@ -24,6 +24,7 @@
 @import 'util/print';
 @import 'components/boards/extends';
 @import 'pages/boards';
+@import 'pages/task_detail_static';
 
 
 * {
@@ -246,7 +247,6 @@ body[data-theme="dark"] {
     @include avatar-size($space-48);
 }
 
-/* Задачи to do*/
 .tasks-to-do-grid,
 .events-grid {
     display: grid;
@@ -281,7 +281,6 @@ body[data-theme="dark"] {
     }
 }
 
-/* активные проекты*/
 .project {
     gap: $space-16;
     display: flex;
@@ -335,7 +334,6 @@ body[data-theme="dark"] {
     }
 }
 
-/* команда */
 .status-online {
     position: relative;
     display: inline-block;
@@ -362,7 +360,6 @@ body[data-theme="dark"] {
     @include ellipsis-single-line(10vw);
 }
 
-/*активность команды*/
 #chartRoot {
     .mc-grid {
         stroke: $light-gray-transperent;
@@ -401,7 +398,6 @@ body[data-theme="dark"] {
     }
 }
 
-/*последние действия*/
 .last-actions-grid {
     display: grid;
     grid-template-columns: auto 1fr auto auto;

@@ -1,6 +1,3 @@
-/* Settings modal */
-
-/* Модалка «Настройки» — шире профиля, слева меню разделов */
 .modal-content.settings-modal {
     width: min(76rem, 96vw);
     max-width: 96vw;
@@ -71,9 +68,7 @@
         padding: $space-24 $space-32;
         background: $light-light-green;
     }
-
-    /* IMPORTANT: keep only one panel visible.
-       `display:flex` below would otherwise override native `[hidden]{display:none}`. */
+    
     .settings-modal__panel[hidden] {
         display: none !important;
     }

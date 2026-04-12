@@ -6,7 +6,7 @@
 
     const KANBAN_STORAGE_KEY = 'kanbanBoardsData';
     const KANBAN_DATA_VERSION_KEY = 'kanbanDataVersion';
-    const KANBAN_DATA_VERSION = '2';
+    const KANBAN_DATA_VERSION = '3';
     const KANBAN_COLLAPSE_KEY = 'kanbanBoardCollapsed';
     const KANBAN_SECTION_COLLAPSE_KEY = 'kanbanSectionCollapsed';
     const KANBAN_TIMELINE_SHOW_DONE_KEY = 'kanbanTimelineShowDone';
@@ -1235,8 +1235,15 @@
         item.dataset.boardId = task.boardId;
 
         const nameSpan = document.createElement('span');
-        nameSpan.className = task.stage === 'Готово' ? 'text-basic-line-through' : 'text-basic';
+        nameSpan.className = `${task.stage === 'Готово' ? 'text-basic-line-through' : 'text-basic'} kanban-task-title`;
         nameSpan.textContent = task.name;
+        nameSpan.style.cursor = 'pointer';
+        nameSpan.addEventListener('click', e => {
+            e.stopPropagation();
+            if (task.name === 'Обновить документацию API Gateway' && typeof window.tpOpenTaskDetailModal === 'function') {
+                window.tpOpenTaskDetailModal(task);
+            }
+        });
         item.appendChild(nameSpan);
 
         if (task.subtasks && task.subtasks.length > 0) {
@@ -1261,8 +1268,15 @@
         topRow.style.flexWrap = 'wrap';
 
         const nameSpan = document.createElement('span');
-        nameSpan.className = task.stage === 'Готово' ? 'text-basic-line-through' : 'text-basic';
+        nameSpan.className = `${task.stage === 'Готово' ? 'text-basic-line-through' : 'text-basic'} kanban-task-title`;
         nameSpan.textContent = task.name;
+        nameSpan.style.cursor = 'pointer';
+        nameSpan.addEventListener('click', e => {
+            e.stopPropagation();
+            if (task.name === 'Обновить документацию API Gateway' && typeof window.tpOpenTaskDetailModal === 'function') {
+                window.tpOpenTaskDetailModal(task);
+            }
+        });
         topRow.appendChild(nameSpan);
 
         let subtasksList = null;
@@ -1408,7 +1422,7 @@
             animation: 150,
             group: { name: 'kanban-tasks', pull: true, put: true },
             draggable: '.item',
-            filter: '.form-add-task',
+            filter: '.form-add-task, .kanban-task-title',
             preventOnFilter: false,
             forceFallback: true,
             fallbackOnBody: true,

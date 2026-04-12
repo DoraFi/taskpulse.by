@@ -28,7 +28,6 @@ body {
   box-shadow: 0 20px 35px -8px rgba(0, 0, 0, 0.15);
 }
 
-/* Шапка */
 .header {
   padding: 1.5rem 2rem;
   background: #ffffff;
@@ -59,7 +58,6 @@ body {
   margin-left: 0.75rem;
 }
 
-/* Табы (навигация по режимам) */
 .tabs {
   display: flex;
   flex-wrap: wrap;
@@ -95,7 +93,6 @@ body {
   border-bottom: 3px solid #1f6feb;
 }
 
-/* Контейнеры представлений */
 .view-container {
   padding: 2rem;
   background: white;
@@ -110,7 +107,6 @@ body {
   display: block;
 }
 
-/* общие стили для карточек и колонок */
 .board-columns {
   display: flex;
   gap: 1.5rem;
@@ -201,7 +197,6 @@ body {
   border-left-color: #3b9e6d;
 }
 
-/* обычный список */
 .simple-list {
   background: #ffffff;
   border-radius: 20px;
@@ -250,7 +245,6 @@ body {
   color: #2c4a6e;
 }
 
-/* скрам / скрамбан специфика (WIP) */
 .wip-limit {
   font-weight: normal;
   font-size: 0.8rem;
@@ -260,7 +254,6 @@ body {
   color: #1d3b5a;
 }
 
-/* адаптив */
 @media (max-width: 800px) {
   .board-columns {
     flex-direction: column;
@@ -275,4 +268,4 @@ body {
   .header {
     padding: 1.2rem;
   }
-}/*# sourceMappingURL=style.css.map */
+}

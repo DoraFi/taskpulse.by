@@ -1,5 +1,3 @@
-/* Shared form control skins (reduce duplication across modals) */
-
 @mixin tp-select-skin($w: 100%, $maxW: 100%) {
     $chevron-w: 0.625rem;
     $chevron-inset: $space-16;

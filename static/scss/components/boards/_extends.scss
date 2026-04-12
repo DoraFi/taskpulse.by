@@ -1,5 +1,3 @@
-/* Board UI: @extend-only placeholders (task row tag strip, chevrons, progress bar) */
-
 %tp-board-name-chevron-after {
     content: '';
     display: inline-block;
@@ -92,7 +90,6 @@
     }
 }
 
-/* Таймлайн: без явного justify-content (как в исходной вёрстке) */
 %tp-board-timeline-tag-deadline {
     display: flex;
     align-items: center;
