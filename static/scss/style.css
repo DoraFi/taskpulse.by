@@ -4617,7 +4617,6 @@ body[data-theme=dark] .form-add-task:focus-within {
 }
 .task-detail-sheet .task-detail-static__dates .filter-date.task-detail-static__filter-date .filter-input[type=date] {
   flex: 0 1 10rem;
-  max-width: 42%;
   min-width: 0;
   min-height: 2.75rem;
   cursor: pointer;
