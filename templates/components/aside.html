@@ -1,33 +1,29 @@
 <nav>
     <ul>
         <li class="item">
-            <button class="nav-link text-header" data-href="/templates/pages/index.html">TaskPulse</button>
+            <button class="nav-link text-header" data-href="/">TaskPulse</button>
         </li>
         <li class="item">
-            <button class="nav-link text-basic" data-href="/templates/pages/tasks.html">Задачи</button>
+            <button class="nav-link text-basic" data-href="/tasks">Задачи</button>
         </li>
         <li class="item">
             <div class="item-header">
                 <span class="arrow-wrapper">
-                    <img src="/static/source/icons/arrow_dark_cropped.svg" alt="" class="arrow-img">
+                    <img src="/static/source/icons/arrow_dark_cropped.svg" th:src="@{/static/source/icons/arrow_dark_cropped.svg}" alt="" class="arrow-img">
                 </span>
-                <button class="nav-link text-basic" data-href="/templates/pages/projects.html">Проекты</button>
+                <button class="nav-link text-basic" data-href="/projects">Проекты</button>
             </div>
-            <ul class="submenu">
-                <li><button class="nav-link" data-href="/templates/pages/board_list.html">Проект "Список"</button></li>
-                <li><button class="nav-link" data-href="/templates/pages/board_kanban.html">Проект "Kanban"</button></li>
-                <li><button class="nav-link">Диплом Scrum</button></li>
-                <li><button class="nav-link">Диплом Scrumban</button></li>
-                <li><button class="nav-link">Проекты организации</button></li>
-                <li><button class="nav-link">Архивные проекты</button></li>
+            <ul class="submenu" id="teamProjectsMenu">
+                <li><button class="nav-link" data-href="/boards">Проект "Список"</button></li>
+                <li><button class="nav-link" data-href="/kanban">Проект "Kanban"</button></li>
             </ul>
         </li>
         <li class="item">
             <div class="item-header">
                 <span class="arrow-wrapper">
-                    <img src="/static/source/icons/arrow_dark_cropped.svg" alt="" class="arrow-img">
+                    <img src="/static/source/icons/arrow_dark_cropped.svg" th:src="@{/static/source/icons/arrow_dark_cropped.svg}" alt="" class="arrow-img">
                 </span>
-                <button class="nav-link text-basic" data-href="/templates/pages/team.html">Команда</button>
+                <button class="nav-link text-basic">Команда</button>
             </div>
             <ul class="submenu">
                 <li><button class="nav-link">Члены команды</button></li>
@@ -38,9 +34,9 @@
         <li class="item">
             <div class="item-header">
                 <span class="arrow-wrapper">
-                    <img src="/static/source/icons/arrow_dark_cropped.svg" alt="" class="arrow-img">
+                    <img src="/static/source/icons/arrow_dark_cropped.svg" th:src="@{/static/source/icons/arrow_dark_cropped.svg}" alt="" class="arrow-img">
                 </span>
-                <button class="nav-link text-basic" data-href="/templates/pages/analitics.html">Аналитика</button>
+                <button class="nav-link text-basic">Аналитика</button>
             </div>
             <ul class="submenu">
                 <li><button class="nav-link">Отчеты</button></li>
@@ -49,14 +45,14 @@
             </ul>
         </li>
         <li class="item">
-            <button class="nav-link text-basic" data-href="/templates/pages/docs.html">Документация</button>
+            <button class="nav-link text-basic">Документация</button>
         </li>
         <li class="item">
             <div class="item-header">
                 <span class="arrow-wrapper">
-                    <img src="/static/source/icons/arrow_dark_cropped.svg" alt="" class="arrow-img">
+                    <img src="/static/source/icons/arrow_dark_cropped.svg" th:src="@{/static/source/icons/arrow_dark_cropped.svg}" alt="" class="arrow-img">
                 </span>
-                <button class="nav-link text-basic" data-href="/templates/pages/help.html">Помощь</button>
+                <button class="nav-link text-basic">Помощь</button>
             </div>
             <ul class="submenu">
                 <li><button class="nav-link">Частые вопросы</button></li>

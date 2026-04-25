@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: taskpulse-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: taskpulse
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 655650
+    ports:
+      - "5432:5432"
+    volumes:
+      - taskpulse_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d taskpulse"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  taskpulse_pgdata:

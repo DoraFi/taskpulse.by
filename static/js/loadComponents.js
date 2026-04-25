@@ -10,6 +10,23 @@
     }
 })();
 
+async function hydrateTeamProjectsMenu() {
+    const menu = document.getElementById('teamProjectsMenu');
+    if (!menu) return;
+    try {
+        const res = await fetch('/api/projects');
+        if (!res.ok) return;
+        const projects = await res.json();
+        if (!Array.isArray(projects) || !projects.length) return;
+        menu.innerHTML = projects.map((p) => {
+            const href = (p.code === 'WCL' || (p.name || '').toLowerCase().includes('kanban')) ? '/kanban' : '/boards';
+            return `<li><button class="nav-link" data-href="${href}">${p.name || 'Проект'}</button></li>`;
+        }).join('');
+    } catch (e) {
+        console.error(e);
+    }
+}
+
 function saveSubmenusState() {
     const states = {};
     document.querySelectorAll('.item').forEach((item, index) => {
@@ -155,6 +172,10 @@ async function loadExternalScript(src) {
         console.log(`Скрипт ${src} уже инициализирован через window`);
         return true;
     }
+    if (src.includes('projects') && window.initProjectsPage) {
+        console.log(`Скрипт ${src} уже инициализирован через window`);
+        return true;
+    }
     
     console.log(`Загружаем скрипт: ${src}`);
     return new Promise((resolve, reject) => {
@@ -234,13 +255,15 @@ async function loadPage(url) {
                         src.includes('board_list') ||
                         src.includes('board_kanban') ||
                         src.includes('tasks') ||
-                        src.includes('index');
+                        src.includes('index') ||
+                        src.includes('projects');
 
                     const alreadyInited =
                         (src.includes('board_list') && window.initBoardListPage) ||
                         (src.includes('board_kanban') && window.initBoardKanbanPage) ||
                         (src.includes('tasks') && window.initTasksPage) ||
-                        (src.includes('index') && window.initIndexPage);
+                        (src.includes('index') && window.initIndexPage) ||
+                        (src.includes('projects') && window.initProjectsPage);
 
                     if (!isPageScript || !alreadyInited) {
                         await loadExternalScript(src);
@@ -270,6 +293,10 @@ async function loadPage(url) {
                         console.log('Вызов initIndexPage');
                         window.initIndexPage();
                     }
+                    if (currentContent.querySelector('.projects-grid') && typeof window.initProjectsPage === 'function') {
+                        console.log('Вызов initProjectsPage');
+                        window.initProjectsPage();
+                    }
 
                     const isBoardList = currentContent.classList.contains('board-list') && !currentContent.classList.contains('board-kanban');
                     const isBoardKanban = currentContent.classList.contains('board-kanban');
@@ -285,8 +312,10 @@ async function loadPage(url) {
                     }
                     
                     initSubmenus();
-                    initNavigation();
-                    updateActiveMenuItem();
+                    hydrateTeamProjectsMenu().then(() => {
+                        initNavigation();
+                        updateActiveMenuItem();
+                    });
                     
                     console.log('Загрузка страницы завершена');
                 }, 200);
@@ -306,6 +335,8 @@ window.addEventListener('popstate', () => {
 
 document.addEventListener('DOMContentLoaded', () => {
     initSubmenus();
-    initNavigation();
-    updateActiveMenuItem();
+    hydrateTeamProjectsMenu().then(() => {
+        initNavigation();
+        updateActiveMenuItem();
+    });
 });

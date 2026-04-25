@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TaskPulse — Команда проекта</title>
-    <link rel="icon" type="image/svg+xml" href="/static/source/logo_rect.svg">
-    <link rel="stylesheet" href="/static/scss/style.css">
+    <link rel="icon" type="image/svg+xml" th:href="@{/static/source/logo_rect.svg}" href="/static/source/logo_rect.svg">
+    <link rel="stylesheet" th:href="@{/static/scss/style.css}" href="/static/scss/style.css">
 </head>
 
 <body class="auth-page auth-page--form">
     <header class="auth-page__header">
-        <a href="/templates/pages/auth_welcome.html" class="flex-row gap-24" style="align-items: center;">
-            <img class="logo" src="/static/source/logo_rect.svg" alt="TaskPulse">
+        <a th:href="@{/auth/welcome}" href="/auth/welcome" class="flex-row gap-24" style="align-items: center;">
+            <img class="logo" th:src="@{/static/source/logo_rect.svg}" src="/static/source/logo_rect.svg" alt="TaskPulse">
         </a>
         <span class="text-signature">Шаг 2 из 3</span>
     </header>
@@ -52,7 +52,7 @@
             </div>
             <div class="modal-header" style="margin-top: 0;">
                 <p class="text-header">Пригласите команду</p>
-                <a class="modal-close" href="/templates/pages/onboarding_done.html" aria-label="Пропустить приглашения" title="Пропустить">
+                <a class="modal-close" th:href="@{/onboarding/done}" href="/onboarding/done" aria-label="Пропустить приглашения" title="Пропустить">
                     <img src="/static/source/icons/cross.svg" alt="" width="24" height="24">
                 </a>
             </div>
@@ -97,17 +97,17 @@
                 </form>
             </div>
             <div class="modal-footer" style="flex-wrap: wrap; gap: 1rem;">
-                <a class="button-secondary" href="/templates/pages/onboarding_project.html">Назад</a>
+                <a class="button-secondary" th:href="@{/onboarding/project}" href="/onboarding/project">Назад</a>
                 <div style="display: flex; gap: 1rem; margin-left: auto;">
-                    <a class="text-basic" href="/templates/pages/onboarding_done.html" style="align-self: center; text-decoration: underline;">Пропустить</a>
-                    <a class="button-basic" href="/templates/pages/onboarding_done.html">Продолжить</a>
+                    <a class="text-basic" th:href="@{/onboarding/done}" href="/onboarding/done" style="align-self: center; text-decoration: underline;">Пропустить</a>
+                    <a class="button-basic" th:href="@{/onboarding/done}" href="/onboarding/done">Продолжить</a>
                 </div>
             </div>
         </div>
         </div>
     </main>
 
-    <script src="/static/js/auth_static.js"></script>
+    <script th:src="@{/static/js/auth_static.js}" src="/static/js/auth_static.js"></script>
 </body>
 
 </html>

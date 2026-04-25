@@ -2,7 +2,7 @@ let tasksData = [];
 
 async function loadTasks() {
     try {
-        const response = await fetch('/static/data/tasks.json');
+        const response = await fetch('/api/tasks');
         tasksData = await response.json();
         renderTasks('assigned');
     } catch (error) {
@@ -10,11 +10,28 @@ async function loadTasks() {
     }
 }
 
-const currentUser = {
-    name: 'Лев Аксенов',
-    avatar: 'lev_aksenov.jpg',
-    role: 'Tech Lead'
+let currentUser = {
+    id: null,
+    name: '',
+    avatar: 'basic_avatar.png',
+    role: 'member'
 };
+
+async function loadCurrentUser() {
+    try {
+        const response = await fetch('/api/me');
+        if (!response.ok) throw new Error('me api failed');
+        const me = await response.json();
+        currentUser = {
+            id: me.id ?? null,
+            name: me.fullName || '',
+            avatar: me.avatar || 'basic_avatar.png',
+            role: me.position || 'member'
+        };
+    } catch (error) {
+        console.error('Ошибка загрузки current user:', error);
+    }
+}
 
 function filterTasks(tab) {
     const today = new Date();
@@ -857,7 +874,7 @@ function initTasksPage() {
     initFilters();
     initTabs();
     initMoreActions();
-    loadTasks();
+    loadCurrentUser().then(loadTasks);
     window.addEventListener('resize', () => updateNameColumnMaxWidth());
 }
 

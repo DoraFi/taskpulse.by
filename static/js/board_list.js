@@ -9,6 +9,10 @@ let tableSortDirection = 'asc';
 let VanillaCalendarReady = false;
 let VanillaCalendarConstructor = null;
 
+function getTaskDisplayId(task) {
+    return task?.displayId || task?.id || '';
+}
+
 function loadVanillaCalendar() {
     return new Promise((resolve) => {
         if (VanillaCalendarReady && VanillaCalendarConstructor) {
@@ -30,7 +34,7 @@ function loadVanillaCalendar() {
 
 async function loadTeamData() {
     try {
-        const response = await fetch('/static/data/team.json');
+        const response = await fetch('/api/team');
         if (!response.ok) throw new Error('Ошибка загрузки команды');
         teamMembers = await response.json();
     } catch (error) {
@@ -41,7 +45,7 @@ async function loadTeamData() {
 
 async function loadBoardsData() {
     try {
-        const response = await fetch('/static/data/boards.json');
+        const response = await fetch('/api/boards');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -765,6 +769,7 @@ function createBoardTable(board, tasks, boardIndex) {
     sortedTasks.forEach(task => {
         const row = document.createElement('div');
         row.className = 'grid-row';
+        row.dataset.taskId = task.id;
         columns.forEach(col => {
             const cell = document.createElement('div');
             cell.className = `col-${col}`;
@@ -786,7 +791,7 @@ function createBoardTable(board, tasks, boardIndex) {
                     cell.appendChild(checkboxLabel);
                     break;
                 case 'id':
-                    cell.textContent = task.id;
+                    cell.textContent = getTaskDisplayId(task);
                     break;
                 case 'name': {
                     const container = document.createElement('div');
@@ -1329,7 +1334,7 @@ function createArchivedTaskRow(task, boardIndex) {
         cell.className = `col-${col.key}`;
         switch (col.key) {
             case 'id':
-                cell.textContent = task.id;
+                cell.textContent = getTaskDisplayId(task);
                 break;
             case 'name':
                 cell.appendChild(createArchivedTaskNameCell(task, boardIndex, row));
@@ -1941,11 +1946,11 @@ function initTableRowsSortable() {
                 const fromBoardId = parseInt(fromBoardCard.dataset.boardId);
                 const toBoardId = parseInt(toBoardCard.dataset.boardId);
                 const draggedRow = evt.item;
-                const taskId = parseInt(draggedRow.querySelector('.col-id')?.textContent);
+                const taskId = parseInt(draggedRow.dataset.taskId);
                 if (!taskId) return;
                 if (fromBoardId === toBoardId) {
                     const rows = Array.from(toContainer.children);
-                    const newOrder = rows.map(row => parseInt(row.querySelector('.col-id')?.textContent)).filter(id => id);
+                    const newOrder = rows.map(row => parseInt(row.dataset.taskId)).filter(id => id);
                     const board = boardsData.find(b => b.id === toBoardId);
                     if (board) {
                         const newTasks = [];
@@ -2830,15 +2835,7 @@ function sortTasksByPriorityAndDate(tasks) {
 async function initBoardListPage() {
     await loadTeamData();
     if (!document.querySelector('.board-list')) return;
-    const hasLocalData = loadBoardsFromLocalStorage();
-    if (hasLocalData && boardsData.length > 0) {
-        reorderBoardsForColumnCount();
-        renderCurrentView();
-        initBoardEvents();
-        initViewSwitching();
-    } else {
-        await loadBoardsData();
-    }
+    await loadBoardsData();
 }
 
 window.initBoardListPage = initBoardListPage;

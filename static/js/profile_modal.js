@@ -128,13 +128,83 @@
         return overlay;
     }
 
+    async function loadProfileData(overlay) {
+        try {
+            const res = await fetch('/api/me');
+            if (!res.ok) throw new Error('profile api failed');
+            const data = await res.json();
+
+            const avatar = overlay.querySelector('#profileAvatar');
+            if (avatar && data.avatar) avatar.src = `/static/source/user_img/${data.avatar}`;
+
+            const titleName = overlay.querySelector('#profileTitleName');
+            if (titleName) titleName.textContent = data.fullName || '';
+            const titleRole = overlay.querySelector('#profileTitleRole');
+            if (titleRole) titleRole.textContent = `${data.position || 'Участник'} · ${data.teamName || 'команда'}`;
+            const titleMeta = overlay.querySelector('#profileTitleMeta');
+            if (titleMeta) titleMeta.textContent = `@${data.username || ''} · в команде с ${data.teamSince || ''}`;
+            const publicIds = overlay.querySelector('#profilePublicIds');
+            if (publicIds) {
+                publicIds.textContent = `USR: ${data.publicId || '-'} · TEAM: ${data.teamPublicId || '-'} · ORG: ${data.organizationPublicId || '-'}`;
+            }
+
+            const byId = (id, value) => {
+                const el = overlay.querySelector(id);
+                if (el && value != null) el.textContent = String(value);
+            };
+
+            const setValue = (id, value) => {
+                const el = overlay.querySelector(id);
+                if (el && value != null) el.value = String(value);
+            };
+
+            setValue('#profileDisplayName', data.fullName);
+            setValue('#profileLogin', data.username);
+            setValue('#profileEmail', data.email);
+            setValue('#profilePhone', data.phone);
+            setValue('#profileTimezone', data.timezone);
+            setValue('#profileOffice', data.office);
+            setValue('#profileBio', data.bio);
+
+            byId('#profileStatAssigned', data.stats?.assigned ?? 0);
+            byId('#profileStatInProgress', data.stats?.inProgress ?? 0);
+            byId('#profileStatWeek', data.stats?.weekActivity ?? 0);
+            byId('#profileStatMonthDone', data.stats?.monthDone ?? 0);
+
+            const projectsList = overlay.querySelector('#profileProjectsRolesList');
+            if (projectsList && Array.isArray(data.projects)) {
+                projectsList.innerHTML = data.projects.map(p => `
+                    <li class="profile-modal__activity-row">
+                        <span class="profile-modal__activity-key text-signature">${p.project || ''}</span>
+                        <span class="profile-modal__activity-value text-basic">${p.role || ''}</span>
+                    </li>
+                `).join('');
+            }
+
+            const activityList = overlay.querySelector('#profileActivityList');
+            if (activityList && Array.isArray(data.activity)) {
+                activityList.innerHTML = data.activity.map(a => `
+                    <li class="profile-modal__activity-row">
+                        <span class="profile-modal__activity-key text-signature">${a.key || ''}</span>
+                        <span class="profile-modal__activity-value text-basic">${a.value || ''}</span>
+                    </li>
+                `).join('');
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
     function bindHeader() {
         const btn = document.getElementById('headerProfileBtn');
         if (!btn) return;
         btn.addEventListener('click', async () => {
             try {
                 const overlay = await ensureModal();
-                if (overlay) openModal(overlay);
+                if (overlay) {
+                    await loadProfileData(overlay);
+                    openModal(overlay);
+                }
             } catch (err) {
                 console.error(err);
             }

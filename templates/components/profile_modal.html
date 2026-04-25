@@ -8,11 +8,12 @@
         </div>
         <div class="modal-body profile-modal__body">
             <div class="profile-modal__hero">
-                <img class="profile-modal__avatar" src="/static/source/user_img/dar_shved.jpg" alt="">
+                <img class="profile-modal__avatar" id="profileAvatar" src="/static/source/user_img/dar_shved.jpg" alt="">
                 <div class="profile-modal__titles">
-                    <p class="text-header">Дарья Швед</p>
-                    <p class="text-signature">Разработчик · отдел разработки</p>
-                    <p class="text-basic profile-modal__id">@d.shved · в команде с октября 2024</p>
+                    <p class="text-header" id="profileTitleName">Дарья Швед</p>
+                    <p class="text-signature" id="profileTitleRole">Разработчик · отдел разработки</p>
+                    <p class="text-basic profile-modal__id" id="profileTitleMeta">@d.shved · в команде с октября 2024</p>
+                    <p class="text-signature profile-modal__id" id="profilePublicIds">USR: - · TEAM: - · ORG: -</p>
                 </div>
             </div>
 
@@ -62,26 +63,26 @@
                 <div class="profile-modal__stats">
                     <div class="profile-modal__stat border-dark-1 br-5">
                         <span class="text-signature">Назначено</span>
-                        <span class="text-header">6</span>
+                        <span class="text-header" id="profileStatAssigned">6</span>
                     </div>
                     <div class="profile-modal__stat border-dark-1 br-5">
                         <span class="text-signature">В работе</span>
-                        <span class="text-header">4</span>
+                        <span class="text-header" id="profileStatInProgress">4</span>
                     </div>
                     <div class="profile-modal__stat border-dark-1 br-5">
                         <span class="text-signature">За неделю</span>
-                        <span class="text-header">7</span>
+                        <span class="text-header" id="profileStatWeek">7</span>
                     </div>
                     <div class="profile-modal__stat border-dark-1 br-5">
                         <span class="text-signature">Завершено (мес.)</span>
-                        <span class="text-header">11</span>
+                        <span class="text-header" id="profileStatMonthDone">11</span>
                     </div>
                 </div>
             </div>
 
             <div class="profile-modal__section profile-modal__section--card profile-modal__section--activity border-dark-1 br-5">
                 <p class="filter-label">Проекты и роли</p>
-                <ul class="profile-modal__activity-list">
+                <ul class="profile-modal__activity-list" id="profileProjectsRolesList">
                     <li class="profile-modal__activity-row">
                         <span class="profile-modal__activity-key text-signature">Корпоративный портал</span>
                         <span class="profile-modal__activity-value text-basic">Разработка</span>
@@ -157,7 +158,7 @@
 
             <div class="profile-modal__section profile-modal__section--card profile-modal__section--activity border-dark-1 br-5">
                 <p class="filter-label">Активность</p>
-                <ul class="profile-modal__activity-list">
+                <ul class="profile-modal__activity-list" id="profileActivityList">
                     <li class="profile-modal__activity-row">
                         <span class="profile-modal__activity-key text-signature">Последний вход</span>
                         <span class="profile-modal__activity-value text-basic">Сегодня, 09:14 · Chrome · Windows</span>

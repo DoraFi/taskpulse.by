@@ -143,9 +143,51 @@ function initIndexPage() {
 
         window.drawMiniChart = drawMiniChart;
 
-        const sampleTeam = [10, 9, 2, 8, 7];
-        const sampleMe = [12, 5, 5, 4, 7];
-        drawMiniChart(sampleTeam, sampleMe, { min: 2, max: 14 });
+        fetch('/api/index/mini-chart')
+            .then(r => r.ok ? r.json() : Promise.reject(new Error('mini chart api')))
+            .then(data => {
+                drawMiniChart(data.team || [], data.me || [], {
+                    min: Number.isFinite(data.min) ? data.min : 0,
+                    max: Number.isFinite(data.max) ? data.max : 14
+                });
+            })
+            .catch(() => {
+                const sampleTeam = [10, 9, 2, 8, 7];
+                const sampleMe = [12, 5, 5, 4, 7];
+                drawMiniChart(sampleTeam, sampleMe, { min: 2, max: 14 });
+            });
+
+        fetch('/api/index/summary')
+            .then(r => r.ok ? r.json() : Promise.reject(new Error('index summary failed')))
+            .then(data => {
+                const grid = document.querySelector('.tasks-to-do-grid');
+                if (grid && Array.isArray(data.todo)) {
+                    grid.innerHTML = data.todo.map(task => {
+                        const dueClass = task.dueDate ? 'light-gray' : '';
+                        return `
+                            <div class="grid-row">
+                                <div class="col-task">
+                                    <div class="basic-and-signature">
+                                        <p class="text-basic">${task.name || ''}</p>
+                                        <p class="text-signature">${task.project || ''}</p>
+                                    </div>
+                                </div>
+                                <div class="col-date">
+                                    <p class="text-basic ${dueClass}">${task.dueDate || '—'}</p>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                const statCards = document.querySelectorAll('.cards .card .text-header');
+                if (statCards.length >= 3) {
+                    if (data.assigned != null) statCards[0].textContent = String(data.assigned);
+                    if (data.inProgress != null) statCards[1].textContent = String(data.inProgress);
+                    if (data.done != null) statCards[2].textContent = String(data.done);
+                }
+            })
+            .catch(err => console.error(err));
     })();
 }
 

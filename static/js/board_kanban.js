@@ -6,7 +6,7 @@
 
     const KANBAN_STORAGE_KEY = 'kanbanBoardsData';
     const KANBAN_DATA_VERSION_KEY = 'kanbanDataVersion';
-    const KANBAN_DATA_VERSION = '3';
+    const KANBAN_DATA_VERSION = '5';
     const KANBAN_COLLAPSE_KEY = 'kanbanBoardCollapsed';
     const KANBAN_SECTION_COLLAPSE_KEY = 'kanbanSectionCollapsed';
     const KANBAN_TIMELINE_SHOW_DONE_KEY = 'kanbanTimelineShowDone';
@@ -47,6 +47,10 @@
             return isNaN(date.getTime()) ? new Date(9999, 11, 31) : date;
         }
         return new Date(9999, 11, 31);
+    }
+
+    function getTaskDisplayId(task) {
+        return task?.displayId || task?.id || '';
     }
 
     function formatDueDate(dateStr) {
@@ -382,9 +386,17 @@
     function migrateKanbanData() {
         kanbanTasks.forEach(t => {
             if (t && t.boardId == null) t.boardId = 1;
+            if (t && !t.displayId) {
+                t.displayId = t.publicId || t.taskCode || String(t.id ?? '');
+            }
         });
         kanbanBoards.forEach(b => {
             if (!Array.isArray(b.archivedTasks)) b.archivedTasks = [];
+            b.archivedTasks.forEach(t => {
+                if (t && !t.displayId) {
+                    t.displayId = t.publicId || t.taskCode || String(t.id ?? '');
+                }
+            });
         });
         ensureBoardsForTasks();
     }
@@ -423,7 +435,7 @@
 
     async function loadTeamData() {
         try {
-            const res = await fetch('/static/data/team.json');
+            const res = await fetch('/api/team');
             if (!res.ok) throw new Error('Ошибка загрузки команды');
             teamMembers = await res.json();
         } catch {
@@ -432,8 +444,8 @@
     }
 
     async function loadKanbanData() {
-        const res = await fetch('/static/data/kanban.json');
-        if (!res.ok) throw new Error('Ошибка загрузки kanban.json');
+        const res = await fetch('/api/kanban/boards');
+        if (!res.ok) throw new Error('Ошибка загрузки kanban boards');
         const data = await res.json();
         kanbanBoards = data.boards || [];
         kanbanTasks = [];
@@ -442,16 +454,20 @@
             if (!Array.isArray(b.archivedTasks)) b.archivedTasks = [];
         });
 
-        const sources = new Set(
-            (kanbanBoards.map(b => b.tasksSource).filter(Boolean)).concat(['/static/data/kanban_tasks.json'])
-        );
+        const boardSources = kanbanBoards.map(b => b.tasksSource).filter(Boolean);
+        const sources = new Set(boardSources.length ? boardSources : ['/api/kanban/tasks']);
+        const seenTasks = new Set();
         for (const url of sources) {
             const tRes = await fetch(url);
             if (!tRes.ok) continue;
             const tData = await tRes.json();
             const tasks = tData.tasks || [];
             tasks.forEach(t => {
-                kanbanTasks.push({ ...t, boardId: t.boardId != null ? t.boardId : 1 });
+                const normalized = { ...t, boardId: t.boardId != null ? t.boardId : 1 };
+                const dedupeKey = `${normalized.boardId}:${normalized.id}`;
+                if (seenTasks.has(dedupeKey)) return;
+                seenTasks.add(dedupeKey);
+                kanbanTasks.push(normalized);
             });
         }
         migrateKanbanData();
@@ -1608,7 +1624,7 @@
                     const toBid = Number(toWrap?.dataset?.boardId);
                     const fromBid = Number(fromWrap?.dataset?.boardId);
                     const row = evt.item;
-                    const taskId = Number(row.querySelector('.col-id')?.textContent);
+                    const taskId = Number(row.dataset.taskId);
                     if (!taskId || !toStage) return;
                     const task = kanbanTasks.find(t => Number(t.id) === taskId && Number(t.boardId) === fromBid);
                     if (!task) return;
@@ -1624,7 +1640,7 @@
                     }
                     if (fromBid === toBid && fromStage === toStage) {
                         const order = Array.from(toC.children)
-                            .map(r => Number(r.querySelector('.col-id')?.textContent))
+                            .map(r => Number(r.dataset.taskId))
                             .filter(Boolean);
                         const stageTasks = kanbanTasks.filter(t => Number(t.boardId) === toBid && t.stage === toStage);
                         const reordered = order.map(id => stageTasks.find(t => Number(t.id) === id)).filter(Boolean);
@@ -2073,7 +2089,7 @@
             columns.forEach(col => {
                 const cell = document.createElement('div');
                 cell.className = `col-${col}`;
-                if (col === 'id') cell.textContent = task.id;
+                if (col === 'id') cell.textContent = getTaskDisplayId(task);
                 if (col === 'name') cell.appendChild(createKanbanTableNameCell(task, row));
                 if (col === 'priority') {
                     const p = document.createElement('p');
@@ -2413,7 +2429,7 @@
                         const row = document.createElement('div');
                         row.className = 'grid-row';
                         row.innerHTML = `
-                        <div class="col-id">${t.id}</div>
+                        <div class="col-id">${getTaskDisplayId(t)}</div>
                         <div class="col-name"><p class="text-basic">${escapeHtml(t.name)}</p></div>
                         <div class="col-priority"><p>${t.priority === 'срочно' ? 'Срочно' : 'Обычный'}</p></div>
                         <div class="col-archivedAt"><p>${t.archivedDate ? new Date(t.archivedDate).toLocaleString('ru-RU') : '—'}</p></div>
