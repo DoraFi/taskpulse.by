@@ -151,11 +151,7 @@ function initIndexPage() {
                     max: Number.isFinite(data.max) ? data.max : 14
                 });
             })
-            .catch(() => {
-                const sampleTeam = [10, 9, 2, 8, 7];
-                const sampleMe = [12, 5, 5, 4, 7];
-                drawMiniChart(sampleTeam, sampleMe, { min: 2, max: 14 });
-            });
+            .catch(err => console.error(err));
 
         fetch('/api/index/summary')
             .then(r => r.ok ? r.json() : Promise.reject(new Error('index summary failed')))
@@ -163,7 +159,8 @@ function initIndexPage() {
                 const grid = document.querySelector('.tasks-to-do-grid');
                 if (grid && Array.isArray(data.todo)) {
                     grid.innerHTML = data.todo.map(task => {
-                        const dueClass = task.dueDate ? 'light-gray' : '';
+                        const overdue = isOverdueDate(task.dueDate);
+                        const dueClass = isAttentionDate(task.dueDate) ? 'pink' : 'light-gray';
                         return `
                             <div class="grid-row">
                                 <div class="col-task">
@@ -173,7 +170,10 @@ function initIndexPage() {
                                     </div>
                                 </div>
                                 <div class="col-date">
-                                    <p class="text-basic ${dueClass}">${task.dueDate || '—'}</p>
+                                    ${overdue
+                                        ? `<div class="due-attention"><p class="text-basic">Просрочено</p><p class="text-signature">${formatRelativeDate(task.dueDate) || '—'}</p></div>`
+                                        : `<p class="text-basic ${dueClass}">${formatRelativeDate(task.dueDate) || '—'}</p>`
+                                    }
                                 </div>
                             </div>
                         `;
@@ -186,9 +186,124 @@ function initIndexPage() {
                     if (data.inProgress != null) statCards[1].textContent = String(data.inProgress);
                     if (data.done != null) statCards[2].textContent = String(data.done);
                 }
+
+                const projectsCard = document.querySelector('.card.activ-projects');
+                if (projectsCard && Array.isArray(data.activeProjects) && data.activeProjects.length > 0) {
+                    projectsCard.querySelectorAll('.project').forEach(el => el.remove());
+                    const projectsHtml = data.activeProjects.map((p) => `
+                        <div class="project">
+                            <div class="basic-and-signature">
+                                <p class="text-basic">${p.name || ''}</p>
+                                <p class="text-signature">${p.summary || ''}</p>
+                            </div>
+                            <div class="project-percents">
+                                <div class="done" style="width: ${p.donePercent || 0}%;">${p.donePercent || 0}%</div>
+                                <div class="inprocess" style="width: ${p.inProgressPercent || 0}%;">${p.inProgressPercent || 0}%</div>
+                                <div class="todo" style="width: ${p.queuePercent || 0}%;">${p.queuePercent || 0}%</div>
+                            </div>
+                        </div>
+                    `).join('');
+                    const legends = projectsCard.querySelector('.legends');
+                    if (legends) {
+                        legends.insertAdjacentHTML('beforebegin', projectsHtml);
+                    }
+                }
+
+                const teamCard = document.querySelector('.card.team');
+                if (teamCard && Array.isArray(data.team) && data.team.length > 0) {
+                    const teamList = teamCard.querySelector('.team-members-list');
+                    if (!teamList) return;
+                    const teamHtml = data.team.map((m) => `
+                        <div class="user-img-text">
+                            ${m.online ? `<div class="status-online"><img src="/static/source/user_img/${m.avatar || 'basic_avatar.png'}" alt=""></div>` : `<img src="/static/source/user_img/${m.avatar || 'basic_avatar.png'}" alt="">`}
+                            <div class="basic-and-signature">
+                                <p class="text-basic">${m.name || ''}</p>
+                                <p class="text-signature">${m.role || ''}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                    teamList.innerHTML = teamHtml;
+                }
+
+                const recentRoot = document.getElementById('indexRecentActions');
+                if (recentRoot && Array.isArray(data.recentActions)) {
+                    if (data.recentActions.length === 0) {
+                        return;
+                    }
+                    recentRoot.innerHTML = data.recentActions.slice(0, 5).map((a) => `
+                        <div class="grid-row">
+                            <div class="col-avatar"><img class="avatar" src="/static/source/user_img/${a.avatar || 'basic_avatar.png'}" alt=""></div>
+                            <div class="col-task">
+                                <div class="basic-and-signature">
+                                    <span class="id-name">
+                                        <p class="text-basic" id="tasknumber">${a.id || ''}</p>
+                                        <p class="text-basic" id="taskname">${a.name || ''}</p>
+                                    </span>
+                                    <p class="text-signature" id="projectname">${a.project || ''}</p>
+                                </div>
+                            </div>
+                            <div class="col-status"><span class="status ${a.status || 'neutral'}">${statusName(a.status)}</span></div>
+                            <div class="col-date"><p class="text-basic light-gray">${a.date || ''}</p></div>
+                        </div>
+                    `).join('');
+                }
             })
             .catch(err => console.error(err));
     })();
+}
+
+function statusName(status) {
+    switch (status) {
+        case 'inprocess': return 'В работе';
+        case 'done': return 'Завершено';
+        case 'exit': return 'Отложено';
+        default: return 'Назначена';
+    }
+}
+
+function parseDateValue(dateStr) {
+    if (!dateStr || typeof dateStr !== 'string') return null;
+    if (dateStr.includes('.')) {
+        const [day, month, year] = dateStr.split('.');
+        const date = new Date(Number(year), Number(month) - 1, Number(day));
+        return Number.isNaN(date.getTime()) ? null : date;
+    }
+    if (dateStr.includes('-')) {
+        const [year, month, day] = dateStr.split('-');
+        const date = new Date(Number(year), Number(month) - 1, Number(day));
+        return Number.isNaN(date.getTime()) ? null : date;
+    }
+    return null;
+}
+
+function daysDiffFromToday(dateStr) {
+    const date = parseDateValue(dateStr);
+    if (!date) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    date.setHours(0, 0, 0, 0);
+    return Math.round((date - today) / 86400000);
+}
+
+function formatRelativeDate(dateStr) {
+    const diff = daysDiffFromToday(dateStr);
+    if (diff == null) return dateStr || '';
+    if (diff === -1) return 'Вчера';
+    if (diff === 0) return 'Сегодня';
+    if (diff === 1) return 'Завтра';
+    return dateStr;
+}
+
+function isAttentionDate(dateStr) {
+    const diff = daysDiffFromToday(dateStr);
+    if (diff == null) return false;
+    return diff <= 2;
+}
+
+function isOverdueDate(dateStr) {
+    const diff = daysDiffFromToday(dateStr);
+    if (diff == null) return false;
+    return diff < 0;
 }
 
 console.log('index.js загружен, initIndexPage определена:', typeof window.initIndexPage);

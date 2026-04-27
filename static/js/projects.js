@@ -7,7 +7,7 @@ function initProjectsPage() {
         .then(projects => {
             if (!Array.isArray(projects) || !projects.length) return;
             grid.innerHTML = projects.map((p, idx) => {
-                const isKanban = idx % 2 === 0;
+                const isKanban = p.view === 'kanban';
                 const href = isKanban ? '/kanban' : '/boards';
                 const mode = isKanban ? 'Kanban' : 'List';
                 const chip = p.doneCount > 0 ? 'Активен' : 'Новый';

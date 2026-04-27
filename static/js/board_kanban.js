@@ -55,27 +55,36 @@
 
     function formatDueDate(dateStr) {
         if (!dateStr) return '';
+        const diff = daysDiffFromToday(dateStr);
+        if (diff === -1) return 'Вчера';
+        if (diff === 0) return 'Сегодня';
+        if (diff === 1) return 'Завтра';
         let year, month, day;
         if (dateStr.includes('.')) {
-            const parts = dateStr.split('.');
-            if (parts.length === 3) {
-                day = parts[0];
-                month = parts[1];
-                year = parts[2];
-            }
-        } else if (dateStr.includes('-')) {
-            const parts = dateStr.split('-');
-            if (parts.length === 3) {
-                year = parts[0];
-                month = parts[1];
-                day = parts[2];
-            }
-        } else {
-            return dateStr;
+            [day, month, year] = dateStr.split('.');
+            return `${day}.${month}.${year}`;
         }
-        const currentYear = new Date().getFullYear();
-        if (parseInt(year) === currentYear) return `${day}.${month}`;
-        return `${day}.${month}.${year}`;
+        if (dateStr.includes('-')) {
+            [year, month, day] = dateStr.split('-');
+            return `${day}.${month}.${year}`;
+        }
+        return dateStr;
+    }
+
+    function daysDiffFromToday(dateStr) {
+        const date = parseDateBoard(dateStr);
+        if (!(date instanceof Date) || Number.isNaN(date.getTime())) return null;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const due = new Date(date);
+        due.setHours(0, 0, 0, 0);
+        return Math.round((due - today) / 86400000);
+    }
+
+    function isAttentionDueDate(dateStr) {
+        const diff = daysDiffFromToday(dateStr);
+        if (diff == null) return false;
+        return diff <= 2;
     }
 
     function showToast(message) {
@@ -1239,6 +1248,7 @@
             const deadlineDiv = document.createElement('div');
             deadlineDiv.className = 'deadline';
             deadlineDiv.textContent = formatDueDate(task.dueDate);
+            if (isAttentionDueDate(task.dueDate)) deadlineDiv.classList.add('pink');
             tagBlock.appendChild(deadlineDiv);
         }
         return tagBlock;
@@ -2100,7 +2110,7 @@
                 if (col === 'dueDate') {
                     const p = document.createElement('p');
                     p.textContent = task.dueDate ? formatDueDate(task.dueDate) : '—';
-                    if (task.dueDate && parseDateBoard(task.dueDate) < new Date()) p.classList.add('overdue');
+                    if (isAttentionDueDate(task.dueDate)) p.classList.add('pink');
                     cell.appendChild(p);
                 }
                 if (col === 'assignee') {
@@ -2297,76 +2307,78 @@
         const container = document.querySelector('#cards-container');
         if (!container) return;
         container.className = 'cards reports-view';
-        container.innerHTML = '';
+        container.innerHTML = '<div class="card board-reports-card"><p class="text-basic">Загрузка отчёта...</p></div>';
 
-        const card = document.createElement('div');
-        card.className = 'card board-reports-card';
-        const header = document.createElement('div');
-        header.className = 'tasks-header flex-row-between';
-        header.innerHTML = '<p class="text-header">Отчёты (Kanban)</p>';
-        card.appendChild(header);
+        fetch('/api/reports/projects?mode=kanban')
+            .then(r => r.ok ? r.json() : Promise.reject(new Error('reports api failed')))
+            .then(data => {
+                const summaryData = data.summary || {};
+                const rows = Array.isArray(data.rows) ? data.rows : [];
+                const card = document.createElement('div');
+                card.className = 'card board-reports-card';
+                const header = document.createElement('div');
+                header.className = 'tasks-header flex-row-between';
+                header.innerHTML = '<p class="text-header">Отчёты (Kanban)</p>';
+                card.appendChild(header);
 
-        const wip = kanbanTasks.filter(t => t.stage === 'В работе' || t.stage === 'Тестирование');
-        const done = kanbanTasks.filter(t => t.stage === 'Готово');
-        const queue = kanbanTasks.filter(t => t.stage === 'Очередь');
-        const urgent = kanbanTasks.filter(t => t.priority === 'срочно' && t.stage !== 'Готово');
+                const summary = document.createElement('div');
+                summary.className = 'reports-summary';
+                summary.innerHTML = `
+                    <div class="reports-summary-grid">
+                        <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.projects ?? 0}</span><span class="reports-stat-label">проектов</span></div>
+                        <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.tasks ?? 0}</span><span class="reports-stat-label">задач</span></div>
+                        <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.done ?? 0}</span><span class="reports-stat-label">готово</span></div>
+                        <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.urgent ?? 0}</span><span class="reports-stat-label">срочных</span></div>
+                        <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.overdue ?? 0}</span><span class="reports-stat-label">просрочено</span></div>
+                    </div>
+                    <p class="reports-hint text-signature">Метрики формируются по данным БД.</p>
+                `;
+                card.appendChild(summary);
 
-        const summary = document.createElement('div');
-        summary.className = 'reports-summary';
-        summary.innerHTML = `
-        <div class="reports-summary-grid">
-            <div class="reports-stat-chip"><span class="reports-stat-value">${kanbanBoards.length}</span><span class="reports-stat-label">досок</span></div>
-            <div class="reports-stat-chip"><span class="reports-stat-value">${queue.length}</span><span class="reports-stat-label">в очереди</span></div>
-            <div class="reports-stat-chip"><span class="reports-stat-value">${wip.length}</span><span class="reports-stat-label">в работе / тест</span></div>
-            <div class="reports-stat-chip"><span class="reports-stat-value">${done.length}</span><span class="reports-stat-label">готово</span></div>
-            <div class="reports-stat-chip"><span class="reports-stat-value">${urgent.length}</span><span class="reports-stat-label">срочных не завершено</span></div>
-        </div>
-        <p class="reports-hint text-signature">Метрики по всем Kanban-доскам. «Готово» — задачи в последней колонке этапа.</p>
-    `;
-        card.appendChild(summary);
+                const gridWrap = document.createElement('div');
+                gridWrap.className = 'tasks-grid-wrapper';
+                const grid = document.createElement('div');
+                grid.className = 'tasks-grid reports-assignee-grid reports-kanban-grid';
+                const headerRow = document.createElement('div');
+                headerRow.className = 'grid-header';
+                ['Проект', 'Доски', 'Всего задач', 'Очередь', 'В работе / тест', 'Готово', 'Срочные', 'Просрочено']
+                    .forEach((title, i) => {
+                        const cls = ['project', 'boards', 'total', 'queue', 'inprogress', 'done', 'urgent', 'overdue'][i];
+                        const cell = document.createElement('div');
+                        cell.className = `col-${cls}`;
+                        const titleSpan = document.createElement('span');
+                        titleSpan.className = 'header-title';
+                        titleSpan.textContent = title;
+                        cell.appendChild(titleSpan);
+                        headerRow.appendChild(cell);
+                    });
+                grid.appendChild(headerRow);
 
-        const gridWrap = document.createElement('div');
-        gridWrap.className = 'tasks-grid-wrapper';
-        const grid = document.createElement('div');
-        grid.className = 'tasks-grid reports-assignee-grid reports-kanban-grid';
+                rows.forEach((r) => {
+                    const row = document.createElement('div');
+                    row.className = 'grid-row';
+                    row.innerHTML = `
+                        <div class="col-project"><p class="text-basic">${escapeHtml(r.project || '')} <span class="text-signature">${escapeHtml(r.code || '')}</span></p></div>
+                        <div class="col-boards"><p>${r.boards ?? 0}</p></div>
+                        <div class="col-total"><p>${r.total ?? 0}</p></div>
+                        <div class="col-queue"><p>${r.queue ?? 0}</p></div>
+                        <div class="col-inprogress"><p>${r.inProgress ?? 0}</p></div>
+                        <div class="col-done"><p>${r.done ?? 0}</p></div>
+                        <div class="col-urgent"><p>${r.urgent ?? 0}</p></div>
+                        <div class="col-overdue"><p>${r.overdue ?? 0}</p></div>
+                    `;
+                    grid.appendChild(row);
+                });
 
-        const headerRow = document.createElement('div');
-        headerRow.className = 'grid-header';
-        ['Доска', 'WIP', 'Готово', 'Срочные (активные)', 'Lead time (дней)', 'Загрузка'].forEach((title, i) => {
-            const cell = document.createElement('div');
-            cell.className = `col-${['board', 'wip', 'done', 'urgent', 'lead', 'load'][i]}`;
-            const titleSpan = document.createElement('span');
-            titleSpan.className = 'header-title';
-            titleSpan.textContent = title;
-            cell.appendChild(titleSpan);
-            headerRow.appendChild(cell);
-        });
-        grid.appendChild(headerRow);
-
-        kanbanBoards.forEach(board => {
-            const tf = kanbanTasks.filter(t => Number(t.boardId) === Number(board.id));
-            const w = tf.filter(t => t.stage !== 'Очередь' && t.stage !== 'Готово').length;
-            const d = tf.filter(t => t.stage === 'Готово').length;
-            const u = tf.filter(t => t.priority === 'срочно' && t.stage !== 'Готово').length;
-            const loadPct = tf.length ? Math.min(100, Math.round((w / tf.length) * 100)) : 0;
-
-            const gridRow = document.createElement('div');
-            gridRow.className = 'grid-row';
-            gridRow.innerHTML = `
-            <div class="col-board"><p class="text-basic">${escapeHtml(board.name)}</p></div>
-            <div class="col-wip"><p>${w}</p></div>
-            <div class="col-done"><p>${d}</p></div>
-            <div class="col-urgent"><p>${u}</p></div>
-            <div class="col-lead"><p>—</p></div>
-            <div class="col-load"><p>${loadPct}%</p></div>
-        `;
-            grid.appendChild(gridRow);
-        });
-
-        gridWrap.appendChild(grid);
-        card.appendChild(gridWrap);
-
-        container.appendChild(card);
+                gridWrap.appendChild(grid);
+                card.appendChild(gridWrap);
+                container.innerHTML = '';
+                container.appendChild(card);
+            })
+            .catch(err => {
+                console.error(err);
+                container.innerHTML = '<div class="card board-reports-card"><p class="text-basic">Не удалось загрузить отчёт</p></div>';
+            });
     }
 
     function renderKanbanArchiveView() {

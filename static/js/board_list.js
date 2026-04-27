@@ -883,9 +883,7 @@ function createBoardTable(board, tasks, boardIndex) {
                     const dueSpan = document.createElement('span');
                     const dueDate = task.dueDate ? formatDueDate(task.dueDate) : '—';
                     dueSpan.textContent = dueDate;
-                    if (task.dueDate && parseDateBoard(task.dueDate) < new Date()) {
-                        dueSpan.classList.add('overdue');
-                    }
+                    if (isAttentionDueDate(task.dueDate)) dueSpan.classList.add('pink');
                     cell.appendChild(dueSpan);
                     break;
                 case 'assignee':
@@ -1119,130 +1117,86 @@ function renderReportsView() {
     if (!container) return;
     container.classList.remove('tables-view', 'timeline-view', 'archive-view');
     container.classList.add('reports-view');
+    container.innerHTML = '<div class="card board-reports-card"><p class="text-basic">Загрузка отчёта...</p></div>';
+    fetch('/api/reports/projects?mode=list')
+        .then(r => r.ok ? r.json() : Promise.reject(new Error('reports api failed')))
+        .then(data => {
+            const summaryData = data.summary || {};
+            const rows = Array.isArray(data.rows) ? data.rows : [];
 
-    const demoSummary = {
-        boardCount: 6,
-        totalActive: 38,
-        totalArchived: 214,
-        urgentActive: 5,
-        noDueActive: 9
-    };
+            const card = document.createElement('div');
+            card.className = 'card board-reports-card';
+            const header = document.createElement('div');
+            header.className = 'tasks-header flex-row-between';
+            header.innerHTML = '<p class="text-header">Отчёт по проектам (List)</p>';
+            card.appendChild(header);
 
-    const membersForDemo = teamMembers.length
-        ? teamMembers
-        : [
-              { name: 'Лев Аксенов', avatar: 'lev_aksenov.jpg', role: 'Tech Lead' },
-              { name: 'Дарья Швед', avatar: 'dar_shved.jpg', role: 'Дизайнер' }
-          ];
-
-    const card = document.createElement('div');
-    card.className = 'card board-reports-card';
-
-    const header = document.createElement('div');
-    header.className = 'tasks-header flex-row-between';
-    header.innerHTML = '<p class="text-header">Отчёт по проекту</p>';
-    card.appendChild(header);
-
-    const summary = document.createElement('div');
-    summary.className = 'reports-summary';
-    summary.innerHTML = `
-        <div class="reports-summary-grid">
-            <div class="reports-stat-chip">
-                <span class="reports-stat-value">${demoSummary.boardCount}</span>
-                <span class="reports-stat-label">досок</span>
-            </div>
-            <div class="reports-stat-chip">
-                <span class="reports-stat-value">${demoSummary.totalActive}</span>
-                <span class="reports-stat-label">активных задач</span>
-            </div>
-            <div class="reports-stat-chip">
-                <span class="reports-stat-value">${demoSummary.totalArchived}</span>
-                <span class="reports-stat-label">в архиве (завершено)</span>
-            </div>
-            <div class="reports-stat-chip">
-                <span class="reports-stat-value">${demoSummary.urgentActive}</span>
-                <span class="reports-stat-label">срочных в работе</span>
-            </div>
-            <div class="reports-stat-chip">
-                <span class="reports-stat-value">${demoSummary.noDueActive}</span>
-                <span class="reports-stat-label">без срока (активные)</span>
-            </div>
-        </div>
-        <p class="reports-hint text-signature">Сводка по всем доскам текущего проекта.</p>
-    `;
-    card.appendChild(summary);
-
-    const gridWrap = document.createElement('div');
-    gridWrap.className = 'tasks-grid-wrapper';
-    const grid = document.createElement('div');
-    grid.className = 'tasks-grid reports-assignee-grid';
-
-    const headerRow = document.createElement('div');
-    headerRow.className = 'grid-header';
-    const reportCols = [
-        { key: 'member', title: 'Участник команды' },
-        { key: 'archived', title: 'Завершено (в архиве)' },
-        { key: 'active', title: 'Активных' },
-        { key: 'total', title: 'Всего' },
-        { key: 'rate', title: 'Доля завершённых' }
-    ];
-    reportCols.forEach(c => {
-        const cell = document.createElement('div');
-        cell.className = `col-${c.key}`;
-        const titleSpan = document.createElement('span');
-        titleSpan.className = 'header-title';
-        titleSpan.textContent = c.title;
-        cell.appendChild(titleSpan);
-        headerRow.appendChild(cell);
-    });
-    grid.appendChild(headerRow);
-
-    membersForDemo.forEach((member, i) => {
-        const active = 3 + ((i * 2) % 7);
-        const archived = 15 + i * 5;
-        const total = active + archived;
-        const rate = total > 0 ? Math.round((archived / total) * 100) : 0;
-
-        const gridRow = document.createElement('div');
-        gridRow.className = 'grid-row';
-
-        const colMember = document.createElement('div');
-        colMember.className = 'col-member';
-        colMember.innerHTML = `
-            <div class="user-img-text">
-                <img src="/static/source/user_img/${escapeHtml(member.avatar)}" alt="">
-                <div class="basic-and-signature">
-                    <p class="text-basic">${escapeHtml(member.name)}</p>
-                    <p class="text-signature">${escapeHtml(member.role || '')}</p>
+            const summary = document.createElement('div');
+            summary.className = 'reports-summary';
+            summary.innerHTML = `
+                <div class="reports-summary-grid">
+                    <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.projects ?? 0}</span><span class="reports-stat-label">проектов</span></div>
+                    <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.tasks ?? 0}</span><span class="reports-stat-label">задач</span></div>
+                    <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.done ?? 0}</span><span class="reports-stat-label">готово</span></div>
+                    <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.urgent ?? 0}</span><span class="reports-stat-label">срочных</span></div>
+                    <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.overdue ?? 0}</span><span class="reports-stat-label">просрочено</span></div>
                 </div>
-            </div>
-        `;
+                <p class="reports-hint text-signature">Метрики формируются по данным БД.</p>
+            `;
+            card.appendChild(summary);
 
-        const colArchived = document.createElement('div');
-        colArchived.className = 'col-archived';
-        colArchived.innerHTML = `<p>${archived}</p>`;
+            const gridWrap = document.createElement('div');
+            gridWrap.className = 'tasks-grid-wrapper';
+            const grid = document.createElement('div');
+            grid.className = 'tasks-grid reports-assignee-grid';
 
-        const colActive = document.createElement('div');
-        colActive.className = 'col-active';
-        colActive.innerHTML = `<p>${active}</p>`;
+            const headerRow = document.createElement('div');
+            headerRow.className = 'grid-header';
+            [
+                ['project', 'Проект'],
+                ['boards', 'Доски'],
+                ['total', 'Всего задач'],
+                ['queue', 'Очередь'],
+                ['inProgress', 'В работе / тест'],
+                ['done', 'Готово'],
+                ['urgent', 'Срочные'],
+                ['overdue', 'Просрочено']
+            ].forEach(([key, title]) => {
+                const cell = document.createElement('div');
+                cell.className = `col-${key}`;
+                const titleSpan = document.createElement('span');
+                titleSpan.className = 'header-title';
+                titleSpan.textContent = title;
+                cell.appendChild(titleSpan);
+                headerRow.appendChild(cell);
+            });
+            grid.appendChild(headerRow);
 
-        const colTotal = document.createElement('div');
-        colTotal.className = 'col-total';
-        colTotal.innerHTML = `<p>${total}</p>`;
+            rows.forEach((r) => {
+                const row = document.createElement('div');
+                row.className = 'grid-row';
+                row.innerHTML = `
+                    <div class="col-project"><p class="text-basic">${escapeHtml(r.project || '')} <span class="text-signature">${escapeHtml(r.code || '')}</span></p></div>
+                    <div class="col-boards"><p>${r.boards ?? 0}</p></div>
+                    <div class="col-total"><p>${r.total ?? 0}</p></div>
+                    <div class="col-queue"><p>${r.queue ?? 0}</p></div>
+                    <div class="col-inProgress"><p>${r.inProgress ?? 0}</p></div>
+                    <div class="col-done"><p>${r.done ?? 0}</p></div>
+                    <div class="col-urgent"><p>${r.urgent ?? 0}</p></div>
+                    <div class="col-overdue"><p>${r.overdue ?? 0}</p></div>
+                `;
+                grid.appendChild(row);
+            });
 
-        const colRate = document.createElement('div');
-        colRate.className = 'col-rate';
-        colRate.innerHTML = `<p>${total ? `${rate}%` : '—'}</p>`;
-
-        gridRow.append(colMember, colArchived, colActive, colTotal, colRate);
-        grid.appendChild(gridRow);
-    });
-
-    gridWrap.appendChild(grid);
-    card.appendChild(gridWrap);
-
-    container.innerHTML = '';
-    container.appendChild(card);
+            gridWrap.appendChild(grid);
+            card.appendChild(gridWrap);
+            container.innerHTML = '';
+            container.appendChild(card);
+        })
+        .catch(err => {
+            console.error(err);
+            container.innerHTML = '<div class="card board-reports-card"><p class="text-basic">Не удалось загрузить отчёт</p></div>';
+        });
 }
 
 const ARCHIVE_GRID_COLUMNS = [
@@ -1351,7 +1305,7 @@ function createArchivedTaskRow(task, boardIndex) {
                 const p = document.createElement('p');
                 if (task.dueDate && String(task.dueDate).trim()) {
                     p.textContent = formatDueDate(task.dueDate);
-                    if (parseDateBoard(task.dueDate) < new Date()) p.classList.add('overdue');
+                    if (isAttentionDueDate(task.dueDate)) p.classList.add('pink');
                 } else {
                     p.textContent = '—';
                 }
@@ -2045,6 +1999,7 @@ function initTaskSortable(container, boardId) {
                 const deadlineDiv = document.createElement('div');
                 deadlineDiv.className = 'deadline';
                 deadlineDiv.textContent = formatDueDate(task.dueDate);
+                if (isAttentionDueDate(task.dueDate)) deadlineDiv.classList.add('pink');
                 tag.appendChild(deadlineDiv);
             }
             kanbanCard.appendChild(tag);
@@ -2161,6 +2116,7 @@ function initTaskSortable(container, boardId) {
                     const deadlineDiv = document.createElement('div');
                     deadlineDiv.className = 'deadline';
                     deadlineDiv.textContent = formatDueDate(task.dueDate);
+                    if (isAttentionDueDate(task.dueDate)) deadlineDiv.classList.add('pink');
                     tag.appendChild(deadlineDiv);
                 }
                 kanbanCard.appendChild(tag);
@@ -2399,6 +2355,7 @@ function createTagBlock(task) {
         const deadlineDiv = document.createElement('div');
         deadlineDiv.className = 'deadline';
         deadlineDiv.textContent = formatDueDate(task.dueDate);
+        if (isAttentionDueDate(task.dueDate)) deadlineDiv.classList.add('pink');
         tagBlock.appendChild(deadlineDiv);
     }
     return tagBlock;
@@ -2776,35 +2733,49 @@ function parseDateBoard(dateStr) {
             return isNaN(date.getTime()) ? new Date(9999, 11, 31) : date;
         }
     }
+    if (typeof dateStr === 'string' && dateStr.includes('-')) {
+        const parts = dateStr.split('-');
+        if (parts.length === 3) {
+            const [year, month, day] = parts;
+            const date = new Date(year, month - 1, day);
+            return isNaN(date.getTime()) ? new Date(9999, 11, 31) : date;
+        }
+    }
     return new Date(9999, 11, 31);
 }
 
 function formatDueDate(dateStr) {
     if (!dateStr) return '';
+    const diff = daysDiffFromToday(dateStr);
+    if (diff === -1) return 'Вчера';
+    if (diff === 0) return 'Сегодня';
+    if (diff === 1) return 'Завтра';
     let year, month, day;
     if (dateStr.includes('.')) {
-        const parts = dateStr.split('.');
-        if (parts.length === 3) {
-            day = parts[0];
-            month = parts[1];
-            year = parts[2];
-        }
-    } else if (dateStr.includes('-')) {
-        const parts = dateStr.split('-');
-        if (parts.length === 3) {
-            year = parts[0];
-            month = parts[1];
-            day = parts[2];
-        }
-    } else {
-        return dateStr; 
-    }
-    const currentYear = new Date().getFullYear();
-    if (parseInt(year) === currentYear) {
-        return `${day}.${month}`;
-    } else {
+        [day, month, year] = dateStr.split('.');
         return `${day}.${month}.${year}`;
     }
+    if (dateStr.includes('-')) {
+        [year, month, day] = dateStr.split('-');
+        return `${day}.${month}.${year}`;
+    }
+    return dateStr;
+}
+
+function daysDiffFromToday(dateStr) {
+    const date = parseDateBoard(dateStr);
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(date);
+    due.setHours(0, 0, 0, 0);
+    return Math.round((due - today) / 86400000);
+}
+
+function isAttentionDueDate(dateStr) {
+    const diff = daysDiffFromToday(dateStr);
+    if (diff == null) return false;
+    return diff <= 2;
 }
 
 function formatDateBoard(dateStr) {

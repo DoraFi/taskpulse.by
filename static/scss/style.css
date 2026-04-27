@@ -38,7 +38,7 @@
   border: 0.0625rem solid #F6FBF2;
 }
 
-.border-dark-2, .card {
+.border-dark-2, .card, #indexTeamMembers {
   border: 0.125rem solid #2D3229;
 }
 
@@ -4617,6 +4617,7 @@ body[data-theme=dark] .form-add-task:focus-within {
 }
 .task-detail-sheet .task-detail-static__dates .filter-date.task-detail-static__filter-date .filter-input[type=date] {
   flex: 0 1 10rem;
+  max-width: 42%;
   min-width: 0;
   min-height: 2.75rem;
   cursor: pointer;
@@ -4796,13 +4797,13 @@ body[data-theme=dark] {
   border-radius: 0.3rem;
 }
 
-.br-10, .card, *::-webkit-scrollbar-track, *::-webkit-scrollbar-thumb, .dropdown-menu, .custom-calendar-modal .custom-calendar, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .kanban-board-card .kanban-priority-section.urgent,
+.br-10, .card, #indexTeamMembers, *::-webkit-scrollbar-track, *::-webkit-scrollbar-thumb, .dropdown-menu, .custom-calendar-modal .custom-calendar, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .kanban-board-card .kanban-priority-section.urgent,
 .kanban-archive-board .kanban-priority-section.urgent, .kanban-board-card .kanban-priority-section.normal,
 .kanban-archive-board .kanban-priority-section.normal {
   border-radius: 0.6rem;
 }
 
-.gap-24, .card, .dropdown-menu, .form-auth, .board-list .board-card-collapsible,
+.gap-24, .card, #indexTeamMembers, .dropdown-menu, .form-auth, .board-list .board-card-collapsible,
 .board-list .archive-board-body {
   gap: 1.125rem;
 }
@@ -4863,7 +4864,7 @@ body[data-theme=dark] {
   -ms-overflow-style: none;
 }
 
-.card {
+.card, #indexTeamMembers {
   padding: 1.5rem;
   display: flex;
   justify-content: flex-start;
@@ -4929,6 +4930,74 @@ body[data-theme=dark] .card {
   gap: 0.125rem;
 }
 
+.due-attention {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  align-items: flex-end;
+  text-align: right;
+}
+.due-attention .text-basic, .due-attention .tasks-grid .grid-row, .tasks-grid .due-attention .grid-row, .due-attention aside .submenu .nav-link, aside .submenu .due-attention .nav-link, .due-attention .button-basic,
+.due-attention .button-secondary,
+.due-attention .reset-filters-btn, .due-attention .tab-btn, .due-attention .modal-content .modal-body input, .modal-content .modal-body .due-attention input, .due-attention .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .due-attention .filter-input, .due-attention .custom-calendar-modal .custom-calendar, .custom-calendar-modal .due-attention .custom-calendar, .due-attention .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .due-attention button, .due-attention .modal-content.create-task-modal select.create-task-select, .modal-content.create-task-modal .due-attention select.create-task-select, .due-attention .modal-content.create-task-modal textarea.create-task-desc, .modal-content.create-task-modal .due-attention textarea.create-task-desc, .due-attention .modal-content.profile-modal select.create-task-select.profile-modal__select--full, .modal-content.profile-modal .due-attention select.create-task-select.profile-modal__select--full, .due-attention .modal-content.profile-modal textarea.profile-modal__bio, .modal-content.profile-modal .due-attention textarea.profile-modal__bio, .due-attention .modal-content.settings-modal .settings-modal__nav-item, .modal-content.settings-modal .due-attention .settings-modal__nav-item, .due-attention .modal-content.settings-modal .settings-modal__field input.filter-input, .modal-content.settings-modal .settings-modal__field .due-attention input.filter-input, .due-attention .modal-content.settings-modal select.create-task-select.settings-modal__select--full, .modal-content.settings-modal .due-attention select.create-task-select.settings-modal__select--full, .due-attention .auth-flow-card .modal-body textarea, .auth-flow-card .modal-body .due-attention textarea,
+.due-attention .auth-flow-card .modal-body select,
+.auth-flow-card .modal-body .due-attention select, .due-attention .auth-link-row a, .auth-link-row .due-attention a, .due-attention .board-timeline-card .timeline-date-chip, .board-timeline-card .due-attention .timeline-date-chip, .due-attention .board-timeline-card .timeline-task-card__name, .board-timeline-card .due-attention .timeline-task-card__name, .due-attention .board-timeline-card .timeline-assignee span, .board-timeline-card .timeline-assignee .due-attention span,
+.due-attention .text-signature,
+.due-attention .tasks-grid .grid-header,
+.tasks-grid .due-attention .grid-header,
+.due-attention .legends .legend,
+.legends .due-attention .legend,
+.due-attention .button-small,
+.due-attention .modal-content .modal-body .filter-section .filter-label,
+.modal-content .modal-body .filter-section .due-attention .filter-label,
+.due-attention .modal-content .modal-body .filter-section .filter-range .range-values,
+.modal-content .modal-body .filter-section .filter-range .due-attention .range-values,
+.due-attention .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays,
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .due-attention .weekdays,
+.due-attention .modal-content.settings-modal .settings-modal__links,
+.modal-content.settings-modal .due-attention .settings-modal__links,
+.due-attention .auth-hero__eyebrow,
+.due-attention .auth-motif-board__head,
+.due-attention .form-auth .checkbox-item .checkbox-text,
+.form-auth .checkbox-item .due-attention .checkbox-text,
+.due-attention .form-auth .checkbox-item a,
+.form-auth .checkbox-item .due-attention a,
+.due-attention .auth-mini-card__text,
+.due-attention .auth-step-pill,
+.due-attention .auth-field label,
+.auth-field .due-attention label,
+.due-attention .auth-hint,
+.due-attention .board-list .card .list .subtasks .checkbox-text,
+.board-list .card .list .subtasks .due-attention .checkbox-text,
+.due-attention .kanban-board-card .kanban-count-chip,
+.kanban-board-card .due-attention .kanban-count-chip,
+.due-attention .kanban-archive-board .kanban-count-chip,
+.kanban-archive-board .due-attention .kanban-count-chip,
+.due-attention .kanban-board-card .kanban-stage-col .subtasks .checkbox-text,
+.kanban-board-card .kanban-stage-col .subtasks .due-attention .checkbox-text,
+.due-attention .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text,
+.kanban-archive-board .kanban-stage-col .subtasks .due-attention .checkbox-text,
+.due-attention .board-reports-card .reports-stat-label,
+.board-reports-card .due-attention .reports-stat-label,
+.due-attention .board-list .tasks-grid-wrapper > .empty-state,
+.board-list .due-attention .tasks-grid-wrapper > .empty-state,
+.due-attention .board-timeline-card .timeline-due,
+.board-timeline-card .due-attention .timeline-due,
+.due-attention .board-timeline-card .subtasks .subtasks-list .checkbox-text,
+.board-timeline-card .subtasks .subtasks-list .due-attention .checkbox-text,
+.due-attention .board-list .tasks-grid .subtasks-list span,
+.board-list .tasks-grid .subtasks-list .due-attention span,
+.due-attention .board-table-card .subtasks .checkbox-text,
+.board-table-card .subtasks .due-attention .checkbox-text {
+  color: #F8085C;
+  font-weight: 500;
+}
+
+.due-attention--left {
+  align-items: flex-start;
+  text-align: left;
+}
+
 .user-img-text {
   display: flex;
   gap: 0.375rem;
@@ -4939,6 +5008,12 @@ body[data-theme=dark] .card {
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 50%;
+}
+
+.team-members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .header-signature {
@@ -4955,21 +5030,26 @@ body[data-theme=dark] .card {
 
 .tasks-to-do-grid,
 .events-grid {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.75rem 1.125rem;
-  align-items: center;
-  max-width: 24vw;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 24vw;
 }
 .tasks-to-do-grid .grid-row,
 .events-grid .grid-row {
-  display: contents;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  -moz-column-gap: 1.125rem;
+       column-gap: 1.125rem;
+  align-items: center;
+  width: 100%;
 }
 .tasks-to-do-grid .col-task,
 .tasks-to-do-grid .col-event,
 .events-grid .col-task,
 .events-grid .col-event {
   min-width: 0;
+  width: 100%;
 }
 .tasks-to-do-grid .col-task .basic-and-signature,
 .tasks-to-do-grid .col-event .basic-and-signature,
@@ -5318,12 +5398,14 @@ aside .submenu .events-grid .col-event .nav-link,
 .events-grid .col-date {
   flex-shrink: 0;
   white-space: nowrap;
+  justify-self: end;
 }
 
 .project {
   gap: 0.75rem;
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 .project .done,
 .project .inprocess,
@@ -5356,14 +5438,14 @@ aside .submenu .events-grid .col-event .nav-link,
   border-radius: 50%;
 }
 
-.status-online {
+.status-online, .status-offline {
   position: relative;
   display: inline-block;
 }
-.status-online img {
+.status-online img, .status-offline img {
   display: block;
 }
-.status-online:after {
+.status-online:after, .status-offline:after {
   content: "";
   position: absolute;
   right: 0.19rem;
@@ -5373,6 +5455,10 @@ aside .submenu .events-grid .col-event .nav-link,
   background-color: #61A039;
   border-radius: 50%;
   pointer-events: none;
+}
+
+.status-offline:after {
+  background-color: #9ca3af;
 }
 
 .column .user-img-text p {

@@ -58,10 +58,34 @@ function parseDate(dateStr) {
     return new Date(year, month - 1, day);
 }
 
-function isOverdue(dueDate) {
-    const today = new Date();
+function daysDiffFromToday(dueDate) {
+    if (!dueDate) return null;
     const due = parseDate(dueDate);
-    return due < today;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    due.setHours(0, 0, 0, 0);
+    return Math.round((due - today) / (1000 * 60 * 60 * 24));
+}
+
+function isAttentionDate(dueDate) {
+    const diff = daysDiffFromToday(dueDate);
+    if (diff == null) return false;
+    return diff <= 2;
+}
+
+function isOverdueDate(dueDate) {
+    const diff = daysDiffFromToday(dueDate);
+    if (diff == null) return false;
+    return diff < 0;
+}
+
+function formatRelativeDate(dueDate) {
+    const diff = daysDiffFromToday(dueDate);
+    if (diff == null) return dueDate;
+    if (diff === -1) return 'Вчера';
+    if (diff === 0) return 'Сегодня';
+    if (diff === 1) return 'Завтра';
+    return dueDate;
 }
 
 function renderTasks(tab) {
@@ -112,11 +136,19 @@ function createCell(col, task, tab) {
             div.appendChild(dropdown);
             break;
         case 'dueDate':
-            const dueP = document.createElement('p');
-            const overdue = isOverdue(task.dueDate);
-            if (overdue) dueP.className = 'overdue';
-            dueP.textContent = task.dueDate;
-            div.appendChild(dueP);
+            if (isOverdueDate(task.dueDate)) {
+                div.innerHTML = `
+                    <div class="due-attention due-attention--left">
+                        <p class="text-basic">Просрочено</p>
+                        <p class="text-signature">${formatRelativeDate(task.dueDate)}</p>
+                    </div>
+                `;
+            } else {
+                const dueP = document.createElement('p');
+                if (isAttentionDate(task.dueDate)) dueP.className = 'pink';
+                dueP.textContent = formatRelativeDate(task.dueDate);
+                div.appendChild(dueP);
+            }
             break;
         case 'priority':
             const prioritySpan = document.createElement('p');

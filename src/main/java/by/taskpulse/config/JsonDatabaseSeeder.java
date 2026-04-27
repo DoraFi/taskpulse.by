@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class JsonDatabaseSeeder implements ApplicationRunner {
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private static final int DEMO_DATE_SHIFT_DAYS = 25;
 
     private final JdbcTemplate jdbcTemplate;
     private final ObjectMapper objectMapper;
@@ -343,7 +344,7 @@ public class JsonDatabaseSeeder implements ApplicationRunner {
 
     private Date parseDate(String value) {
         if (value == null || value.isBlank()) return null;
-        return Date.valueOf(LocalDate.parse(value, DATE_FMT));
+        return Date.valueOf(LocalDate.parse(value, DATE_FMT).plusDays(DEMO_DATE_SHIFT_DAYS));
     }
 
     private String toUsername(String fullName) {

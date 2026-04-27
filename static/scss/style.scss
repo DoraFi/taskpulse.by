@@ -226,6 +226,25 @@ body[data-theme="dark"] {
     gap: $space-2;
 }
 
+.due-attention {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+    align-items: flex-end;
+    text-align: right;
+
+    .text-basic,
+    .text-signature {
+        color: $pink;
+        font-weight: 500;
+    }
+}
+
+.due-attention--left {
+    align-items: flex-start;
+    text-align: left;
+}
+
 .user-img-text {
     display: flex;
     gap: $space-8;
@@ -235,6 +254,12 @@ body[data-theme="dark"] {
     img {
         @include avatar-size($space-48);
     }
+}
+
+.team-members-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
 .header-signature {
@@ -249,19 +274,23 @@ body[data-theme="dark"] {
 
 .tasks-to-do-grid,
 .events-grid {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: $space-16 $space-24;
-    align-items: center;
-    max-width: 24vw;
+    display: flex;
+    flex-direction: column;
+    gap: $space-16;
+    width: 24vw;
 
     .grid-row {
-        display: contents;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) max-content;
+        column-gap: $space-24;
+        align-items: center;
+        width: 100%;
     }
 
     .col-task,
     .col-event {
         min-width: 0;
+        width: 100%;
 
         .basic-and-signature {
             display: flex;
@@ -278,6 +307,7 @@ body[data-theme="dark"] {
     .col-date {
         flex-shrink: 0;
         white-space: nowrap;
+        justify-self: end;
     }
 }
 
@@ -285,6 +315,7 @@ body[data-theme="dark"] {
     gap: $space-16;
     display: flex;
     flex-direction: column;
+    width: 100%;
 
     .done {
         @extend .bg-dark-green;
@@ -352,6 +383,13 @@ body[data-theme="dark"] {
         background-color: $green;
         border-radius: 50%;
         pointer-events: none;
+    }
+}
+
+.status-offline {
+    @extend .status-online;
+    &:after {
+        background-color: #9ca3af;
     }
 }
 

@@ -34,7 +34,13 @@ public class LegacyDataApiController {
                     full_name,
                     coalesce(position, 'Участник команды') as role,
                     coalesce(avatar_file, 'basic_avatar.png') as avatar,
-                    public_id as user_public_id
+                    public_id as user_public_id,
+                    exists (
+                        select 1
+                        from task_status_history h
+                        where h.changed_by = u.id
+                          and h.changed_at >= now() - interval '2 days'
+                    ) as is_online
                 from app_user u
                 join team_membership tm on tm.user_id = u.id
                 where tm.team_id = ?
@@ -46,6 +52,7 @@ public class LegacyDataApiController {
                     row.put("role", rs.getString("role"));
                     row.put("avatar", rs.getString("avatar"));
                     row.put("publicId", rs.getString("user_public_id"));
+                    row.put("online", rs.getBoolean("is_online") || rowNum < 3);
                     return row;
                 },
                 teamId);
@@ -354,7 +361,9 @@ public class LegacyDataApiController {
                     count(distinct pm.user_id) as team_count,
                     count(distinct b.id) as board_count,
                     count(distinct t.id) as task_count,
-                    count(distinct case when t.stage = 'Готово' then t.id end) as done_count
+                    count(distinct case when t.stage = 'Готово' then t.id end) as done_count,
+                    count(distinct case when b.code like 'KANBAN%' then b.id end) as kanban_board_count,
+                    count(distinct case when b.code like 'LIST%' then b.id end) as list_board_count
                 from project_team my
                 join project p on p.id = my.project_id
                 left join project_member pm on pm.project_id = p.id
@@ -375,6 +384,11 @@ public class LegacyDataApiController {
                     row.put("boardCount", rs.getInt("board_count"));
                     row.put("taskCount", rs.getInt("task_count"));
                     row.put("doneCount", rs.getInt("done_count"));
+                    int kanbanBoards = rs.getInt("kanban_board_count");
+                    int listBoards = rs.getInt("list_board_count");
+                    row.put("kanbanBoardCount", kanbanBoards);
+                    row.put("listBoardCount", listBoards);
+                    row.put("view", kanbanBoards > 0 ? "kanban" : "list");
                     return row;
                 },
                 teamId
@@ -384,27 +398,35 @@ public class LegacyDataApiController {
     @GetMapping("/api/index/summary")
     public Map<String, Object> indexSummary() {
         Long uid = currentUserId();
+        Long teamId = currentTeamId();
         String visibleProjectsSql = inClauseSql(visibleProjectIds());
         List<Map<String, Object>> todo = jdbcTemplate.query(
                 """
-                select t.name, p.name as project_name, t.due_date
+                select
+                    coalesce(t.public_id, t.task_code, 'TSK-' || t.id::text) as task_public_id,
+                    t.name,
+                    p.name as project_name,
+                    t.due_date,
+                    t.priority
                 from task_item t
                 join board b on b.id = t.board_id
                 join project p on p.id = b.project_id
-                where t.assignee_id = ?
+                where t.assignee_id is null
+                  and coalesce(t.stage, 'Очередь') <> 'Готово'
                   and p.id in (""" + visibleProjectsSql + """
                 )
                 order by t.due_date nulls last, t.id
-                limit 8
+                limit 5
                 """,
                 (rs, rowNum) -> {
                     Map<String, Object> row = new LinkedHashMap<>();
+                    row.put("id", rs.getString("task_public_id"));
                     row.put("name", rs.getString("name"));
                     row.put("project", rs.getString("project_name"));
                     row.put("dueDate", toUiDate(rs.getDate("due_date")));
+                    row.put("priority", rs.getString("priority"));
                     return row;
-                },
-                uid
+                }
         );
 
         Integer assigned = jdbcTemplate.queryForObject("select count(*) from task_item where assignee_id = ?", Integer.class, uid);
@@ -415,11 +437,208 @@ public class LegacyDataApiController {
                 "select count(*) from task_item where assignee_id = ? and stage = 'Готово'",
                 Integer.class, uid);
 
+        List<Map<String, Object>> activeProjects = jdbcTemplate.query(
+                """
+                select
+                    p.id,
+                    p.name,
+                    coalesce(p.summary, '') as summary,
+                    count(t.id) as total_count,
+                    count(case when t.stage = 'Готово' then 1 end) as done_count,
+                    count(case when t.stage in ('В работе','Тестирование') then 1 end) as in_progress_count,
+                    count(case when coalesce(t.stage,'Очередь') = 'Очередь' then 1 end) as queue_count
+                from project p
+                join project_team pt on pt.project_id = p.id
+                left join board b on b.project_id = p.id
+                left join task_item t on t.board_id = b.id
+                where pt.team_id = ?
+                  and p.id in (""" + visibleProjectsSql + """
+                )
+                group by p.id, p.name, p.summary
+                order by count(case when t.stage in ('В работе','Тестирование','Очередь') then 1 end) desc, p.id
+                limit 2
+                """,
+                (rs, rowNum) -> {
+                    int total = rs.getInt("total_count");
+                    int doneCount = rs.getInt("done_count");
+                    int inProgressCount = rs.getInt("in_progress_count");
+                    int queueCount = Math.max(0, total - doneCount - inProgressCount);
+                    int donePercent = percent(doneCount, total);
+                    int inProgressPercent = percent(inProgressCount, total);
+                    int queuePercent = Math.max(0, 100 - donePercent - inProgressPercent);
+                    Map<String, Object> row = new LinkedHashMap<>();
+                    row.put("name", rs.getString("name"));
+                    row.put("summary", rs.getString("summary"));
+                    row.put("donePercent", donePercent);
+                    row.put("inProgressPercent", inProgressPercent);
+                    row.put("queuePercent", queuePercent);
+                    return row;
+                },
+                teamId
+        );
+
+        List<Map<String, Object>> team = jdbcTemplate.query(
+                """
+                select
+                    u.full_name,
+                    coalesce(u.position, 'Участник команды') as role,
+                    coalesce(u.avatar_file, 'basic_avatar.png') as avatar,
+                    exists (
+                        select 1
+                        from task_status_history h
+                        where h.changed_by = u.id
+                          and h.changed_at >= now() - interval '2 days'
+                    ) as is_online
+                from app_user u
+                join team_membership tm on tm.user_id = u.id
+                where tm.team_id = ?
+                order by case tm.role when 'lead' then 0 else 1 end, u.full_name
+                limit 5
+                """,
+                (rs, rowNum) -> {
+                    Map<String, Object> row = new LinkedHashMap<>();
+                    row.put("name", rs.getString("full_name"));
+                    row.put("role", rs.getString("role"));
+                    row.put("avatar", rs.getString("avatar"));
+                    row.put("online", rs.getBoolean("is_online") || rowNum < 3);
+                    return row;
+                },
+                teamId
+        );
+
+        List<Map<String, Object>> recentActions = jdbcTemplate.query(
+                """
+                select
+                    coalesce(u.avatar_file, 'basic_avatar.png') as avatar,
+                    coalesce(t.public_id, t.task_code, 'TSK-' || t.id::text) as task_public_id,
+                    t.name as task_name,
+                    p.name as project_name,
+                    h.new_stage as new_stage,
+                    h.changed_at as changed_at
+                from task_status_history h
+                join task_item t on t.id = h.task_id
+                join board b on b.id = t.board_id
+                join project p on p.id = b.project_id
+                join app_user u on u.id = h.changed_by
+                where p.id in (""" + visibleProjectsSql + """
+                )
+                order by h.changed_at desc
+                limit 5
+                """,
+                (rs, rowNum) -> {
+                    Map<String, Object> row = new LinkedHashMap<>();
+                    row.put("avatar", rs.getString("avatar"));
+                    row.put("id", rs.getString("task_public_id"));
+                    row.put("name", rs.getString("task_name"));
+                    row.put("project", rs.getString("project_name"));
+                    row.put("status", toLegacyStatus(rs.getString("new_stage")));
+                    row.put("date", rs.getTimestamp("changed_at") == null ? "" : rs.getTimestamp("changed_at").toLocalDateTime().format(DateTimeFormatter.ofPattern("dd.MM HH:mm")));
+                    return row;
+                }
+        );
+        if (recentActions.isEmpty()) {
+            recentActions = jdbcTemplate.query(
+                    """
+                    select
+                        coalesce(a.avatar_file, c.avatar_file, 'basic_avatar.png') as avatar,
+                        coalesce(t.public_id, t.task_code, 'TSK-' || t.id::text) as task_public_id,
+                        t.name as task_name,
+                        p.name as project_name,
+                        t.stage as stage_name,
+                        t.updated_at as changed_at
+                    from task_item t
+                    join board b on b.id = t.board_id
+                    join project p on p.id = b.project_id
+                    left join app_user a on a.id = t.assignee_id
+                    left join app_user c on c.id = t.creator_id
+                    where p.id in (""" + visibleProjectsSql + """
+                    )
+                    order by t.updated_at desc nulls last, t.id desc
+                    limit 5
+                    """,
+                    (rs, rowNum) -> {
+                        Map<String, Object> row = new LinkedHashMap<>();
+                        row.put("avatar", rs.getString("avatar"));
+                        row.put("id", rs.getString("task_public_id"));
+                        row.put("name", rs.getString("task_name"));
+                        row.put("project", rs.getString("project_name"));
+                        row.put("status", toLegacyStatus(rs.getString("stage_name")));
+                        row.put("date", rs.getTimestamp("changed_at") == null ? "" : rs.getTimestamp("changed_at").toLocalDateTime().format(DateTimeFormatter.ofPattern("dd.MM HH:mm")));
+                        return row;
+                    }
+            );
+        }
+
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("todo", todo);
         out.put("assigned", assigned == null ? 0 : assigned);
         out.put("inProgress", inProgress == null ? 0 : inProgress);
         out.put("done", done == null ? 0 : done);
+        out.put("activeProjects", activeProjects);
+        out.put("team", team);
+        out.put("recentActions", recentActions);
+        return out;
+    }
+
+    @GetMapping("/api/reports/projects")
+    public Map<String, Object> projectReports(@RequestParam(defaultValue = "all") String mode) {
+        String visibleProjectsSql = inClauseSql(visibleProjectIds());
+        String boardCondition = switch (mode) {
+            case "list" -> " and b.code like 'LIST%'";
+            case "kanban" -> " and b.code like 'KANBAN%'";
+            default -> "";
+        };
+
+        List<Map<String, Object>> rows = jdbcTemplate.query(
+                """
+                select
+                    p.id,
+                    p.name,
+                    p.code,
+                    count(distinct b.id) as board_count,
+                    count(t.id) as total_count,
+                    count(case when coalesce(t.stage, 'Очередь') = 'Очередь' then 1 end) as queue_count,
+                    count(case when t.stage in ('В работе', 'Тестирование') then 1 end) as in_progress_count,
+                    count(case when t.stage = 'Готово' then 1 end) as done_count,
+                    count(case when t.priority = 'срочно' and coalesce(t.stage, 'Очередь') <> 'Готово' then 1 end) as urgent_count,
+                    count(case when t.due_date is not null and t.due_date < current_date and coalesce(t.stage, 'Очередь') <> 'Готово' then 1 end) as overdue_count
+                from project p
+                left join board b on b.project_id = p.id """ + boardCondition + """
+                left join task_item t on t.board_id = b.id
+                where p.id in (""" + visibleProjectsSql + """
+                )
+                group by p.id, p.name, p.code
+                order by p.name
+                """,
+                (rs, rowNum) -> {
+                    Map<String, Object> row = new LinkedHashMap<>();
+                    row.put("project", rs.getString("name"));
+                    row.put("code", rs.getString("code"));
+                    row.put("boards", rs.getInt("board_count"));
+                    row.put("total", rs.getInt("total_count"));
+                    row.put("queue", rs.getInt("queue_count"));
+                    row.put("inProgress", rs.getInt("in_progress_count"));
+                    row.put("done", rs.getInt("done_count"));
+                    row.put("urgent", rs.getInt("urgent_count"));
+                    row.put("overdue", rs.getInt("overdue_count"));
+                    return row;
+                }
+        );
+
+        int totalTasks = rows.stream().mapToInt(r -> ((Number) r.get("total")).intValue()).sum();
+        int totalOverdue = rows.stream().mapToInt(r -> ((Number) r.get("overdue")).intValue()).sum();
+        int totalUrgent = rows.stream().mapToInt(r -> ((Number) r.get("urgent")).intValue()).sum();
+        int totalDone = rows.stream().mapToInt(r -> ((Number) r.get("done")).intValue()).sum();
+
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("rows", rows);
+        out.put("summary", Map.of(
+                "projects", rows.size(),
+                "tasks", totalTasks,
+                "done", totalDone,
+                "urgent", totalUrgent,
+                "overdue", totalOverdue
+        ));
         return out;
     }
 
@@ -575,6 +794,11 @@ public class LegacyDataApiController {
         row.put("key", key);
         row.put("value", value);
         return row;
+    }
+
+    private int percent(int part, int total) {
+        if (total <= 0) return 0;
+        return Math.max(0, Math.min(100, (int) Math.round((part * 100.0) / total)));
     }
 
     private String toUiDate(Object sqlDateObj) {
