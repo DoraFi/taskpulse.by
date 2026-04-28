@@ -7,12 +7,131 @@
     <title>TaskPulse — Новый проект</title>
     <link rel="icon" type="image/svg+xml" th:href="@{/static/source/logo_rect.svg}" href="/static/source/logo_rect.svg">
     <link rel="stylesheet" th:href="@{/static/scss/style.css}" href="/static/scss/style.css">
+    <style>
+        .project-type-field {
+            cursor: pointer;
+            background: #ffffff;
+        }
+        .project-type-picker {
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 27, 16, 0.52);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            z-index: 1200;
+        }
+        .project-type-picker[aria-hidden="false"] {
+            display: flex;
+        }
+        .project-type-picker__dialog {
+            width: min(1100px, 96vw);
+            min-height: min(760px, 92vh);
+            max-height: 92vh;
+            background: #f6fbf2;
+            border: 1px solid #dbe6d3;
+            border-radius: 18px;
+            box-shadow: 0 24px 40px rgba(36, 46, 31, 0.2);
+            display: grid;
+            grid-template-rows: auto 1fr;
+            overflow: hidden;
+        }
+        .project-type-picker__head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1.25rem 1.5rem 0.75rem;
+            border-bottom: 1px solid #dbe6d3;
+        }
+        .project-type-picker__body {
+            padding: 1rem 1.5rem 1.5rem;
+            overflow: auto;
+        }
+        .project-type-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+        .project-type-card {
+            width: 100%;
+            background: #ffffff;
+            border: 1px solid #dbe6d3;
+            border-radius: 14px;
+            padding: 1rem;
+            text-align: left;
+            cursor: pointer;
+            display: grid;
+            gap: 0.75rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        }
+        .project-type-card:hover {
+            border-color: #61a039;
+            box-shadow: 0 8px 20px rgba(97, 160, 57, 0.16);
+            transform: translateY(-1px);
+        }
+        .project-type-card__image {
+            height: 170px;
+            border-radius: 10px;
+            border: 1px solid #dbe6d3;
+            background: linear-gradient(160deg, #eef7e6 0%, #dff0cc 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .project-type-card__image::before {
+            content: "";
+            position: absolute;
+            inset: 14px;
+            border-radius: 8px;
+            border: 1px dashed rgba(97, 160, 57, 0.6);
+        }
+        .project-type-card__image[data-type="list"]::after {
+            content: "Таблица заявок • SLA • Ответственные";
+            position: absolute;
+            left: 20px;
+            bottom: 16px;
+            color: #4c6e35;
+            font-size: 0.78rem;
+        }
+        .project-type-card__image[data-type="kanban"]::after {
+            content: "Очередь → В работе → Проверка → Готово";
+            position: absolute;
+            left: 20px;
+            bottom: 16px;
+            color: #4c6e35;
+            font-size: 0.78rem;
+        }
+        .project-type-card__image[data-type="scrum"]::after {
+            content: "Бэклог • Спринт • Ретро";
+            position: absolute;
+            left: 20px;
+            bottom: 16px;
+            color: #4c6e35;
+            font-size: 0.78rem;
+        }
+        .project-type-card__image[data-type="scrumban"]::after {
+            content: "План блоками + срочные входящие";
+            position: absolute;
+            left: 20px;
+            bottom: 16px;
+            color: #4c6e35;
+            font-size: 0.78rem;
+        }
+        .project-type-card__title {
+            margin: 0;
+            font-size: 1.05rem;
+            color: #23331a;
+            font-weight: 600;
+        }
+    </style>
 </head>
 
 <body class="auth-page auth-page--form">
     <header class="auth-page__header">
         <a th:href="@{/auth/welcome}" href="/auth/welcome" class="flex-row gap-24" style="align-items: center;">
-            <img class="logo" th:src="@{/static/source/logo_rect.svg}" src="/static/source/logo_rect.svg" alt="TaskPulse">
+            <img class="logo" th:src="@{/static/source/logo_rect.svg}" src="/static/source/logo_rect.svg"
+                alt="TaskPulse">
         </a>
         <span class="text-signature">Шаг 1 из 3</span>
     </header>
@@ -25,7 +144,8 @@
                     <span class="auth-hero__title-line">Имя проекта</span>
                     <span class="auth-hero__title-line auth-hero__title-line--accent">и его «пульс».</span>
                 </h1>
-                <p class="auth-hero__lead text-basic">Ключ и шаблон доски задают, как команда увидит очередь и этапы — как в вашем Kanban.</p>
+                <p class="auth-hero__lead text-basic">Ключ и шаблон доски задают, как команда увидит очередь и этапы —
+                    как в вашем Kanban.</p>
                 <div class="auth-motif auth-motif--board">
                     <div class="auth-motif-board">
                         <div class="auth-motif-board__col">
@@ -48,58 +168,152 @@
         </section>
 
         <div class="auth-page__panel">
-        <div class="modal-content auth-flow-card auth-flow-card--signature">
-            <div class="auth-page__steps auth-steps" style="--steps-total: 3; --step-index: 1;" aria-label="Прогресс: шаг 1 из 3">
-                <div class="auth-steps__bar" aria-hidden="true">
-                    <div class="auth-steps__fill"></div>
+            <div class="modal-content auth-flow-card auth-flow-card--signature">
+                <div class="auth-page__steps auth-steps" style="--steps-total: 3; --step-index: 1;"
+                    aria-label="Прогресс: шаг 1 из 3">
+                    <div class="auth-steps__bar" aria-hidden="true">
+                        <div class="auth-steps__fill"></div>
+                    </div>
+                </div>
+                <div class="modal-header" style="margin-top: 0;">
+                    <p class="text-header"> Создайте проект</p>
+                    <a class="modal-close" th:href="@{/auth/welcome}" href="/auth/welcome"
+                        aria-label="Пропустить и открыть приложение" title="Пропустить">
+                        <img src="/static/source/icons/cross.svg" alt="" width="24" height="24">
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <form class="form-auth" data-static-form action="#" method="post">
+                        <div class="auth-field">
+                            <label for="proj-name">Название проекта <img class="required-icon"
+                                    src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>
+                            <input id="proj-name" name="projectName" type="text"
+                                placeholder="Например, Корпоративный портал" required>
+                        </div>
+                        <div class="auth-field">
+                            <label for="proj-key">Ключ проекта <span class="text-signature">(короткий код для
+                                    ссылок)</span></label>
+                            <input id="proj-key" name="projectKey" type="text" placeholder="PORTAL" maxlength="12"
+                                style="text-transform: uppercase;">
+                        </div>
+                        <div class="auth-field">
+                            <label for="proj-desc">Описание</label>
+                            <textarea id="proj-desc" name="description" rows="3"
+                                placeholder="Цели, сроки, контекст для команды"></textarea>
+                        </div>
+                        <div class="auth-field">
+                            <label for="proj-template-display">Тип проекта</label>
+                            <input id="proj-template-display" class="project-type-field" type="text" value="Kanban" readonly aria-haspopup="dialog" aria-controls="projectTypePicker" tabindex="0">
+                            <input id="proj-template" name="template" type="hidden" value="kanban">
+                        </div>
+                        <div class="auth-field">
+                            <label for="proj-visibility">Видимость</label>
+                            <select id="proj-visibility" name="visibility">
+                                <option value="private">Только приглашённые</option>
+                                <option value="org">Вся организация</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <a class="button-secondary" th:href="@{/auth/login}" href="/auth/login">Назад</a>
+                    <a class="button-basic" th:href="@{/onboarding/team}" href="/onboarding/team">Далее: команда</a>
                 </div>
             </div>
-            <div class="modal-header" style="margin-top: 0;">
-                <p class="text-header"> Создайте проект</p>
-                <a class="modal-close" th:href="@{/auth/welcome}" href="/auth/welcome" aria-label="Пропустить и открыть приложение" title="Пропустить">
-                    <img src="/static/source/icons/cross.svg" alt="" width="24" height="24">
-                </a>
-            </div>
-            <div class="modal-body">
-                <form class="form-auth" data-static-form action="#" method="post">
-                    <div class="auth-field">
-                        <label for="proj-name">Название проекта <img class="required-icon" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>
-                        <input id="proj-name" name="projectName" type="text" placeholder="Например, Корпоративный портал" required>
-                    </div>
-                    <div class="auth-field">
-                        <label for="proj-key">Ключ проекта <span class="text-signature">(короткий код для ссылок)</span></label>
-                        <input id="proj-key" name="projectKey" type="text" placeholder="PORTAL" maxlength="12" style="text-transform: uppercase;">
-                    </div>
-                    <div class="auth-field">
-                        <label for="proj-desc">Описание</label>
-                        <textarea id="proj-desc" name="description" rows="3" placeholder="Цели, сроки, контекст для команды"></textarea>
-                    </div>
-                    <div class="auth-field">
-                        <label for="proj-template">Шаблон доски</label>
-                        <select id="proj-template" name="template">
-                            <option value="kanban">Kanban — Очередь / В работе / Готово</option>
-                            <option value="scrum">Scrum — бэклог и спринты</option>
-                            <option value="empty">Пустой проект</option>
-                        </select>
-                    </div>
-                    <div class="auth-field">
-                        <label for="proj-visibility">Видимость</label>
-                        <select id="proj-visibility" name="visibility">
-                            <option value="private">Только приглашённые</option>
-                            <option value="org">Вся организация</option>
-                        </select>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <a class="button-secondary" th:href="@{/auth/login}" href="/auth/login">Назад</a>
-                <a class="button-basic" th:href="@{/onboarding/team}" href="/onboarding/team">Далее: команда</a>
-            </div>
-        </div>
         </div>
     </main>
 
+    <div class="project-type-picker" id="projectTypePicker" aria-hidden="true">
+        <section class="project-type-picker__dialog" role="dialog" aria-modal="true" aria-labelledby="projectTypePickerTitle">
+            <header class="project-type-picker__head">
+                <div>
+                    <p id="projectTypePickerTitle" class="text-header">Выберите тип проекта</p>
+                    <p class="text-basic">Карточки показывают, как будет устроена работа внутри проекта и какие артефакты получит команда.</p>
+                </div>
+                <button type="button" class="modal-close" id="projectTypePickerClose" aria-label="Закрыть выбор типа проекта">
+                    <img src="/static/source/icons/cross.svg" alt="" width="24" height="24">
+                </button>
+            </header>
+            <div class="project-type-picker__body">
+                <div class="project-type-grid">
+                    <button type="button" class="project-type-card" data-template-value="list">
+                        <div class="project-type-card__image" data-type="list"></div>
+                        <p class="project-type-card__title">Список</p>
+                        <p class="text-basic">Подходит для реестра обращений: карточки в виде записей таблицы, фильтры, приоритеты, SLA, сроки и исполнители.</p>
+                    </button>
+                    <button type="button" class="project-type-card" data-template-value="kanban">
+                        <div class="project-type-card__image" data-type="kanban"></div>
+                        <p class="project-type-card__title">Kanban</p>
+                        <p class="text-basic">Непрерывный flow задач. Команда видит загрузку по колонкам, WIP-ограничения и узкие места в процессе.</p>
+                    </button>
+                    <button type="button" class="project-type-card" data-template-value="scrum">
+                        <div class="project-type-card__image" data-type="scrum"></div>
+                        <p class="project-type-card__title">Scrum</p>
+                        <p class="text-basic">Итерационный режим: бэклог, планирование спринта, цель, демо и ретро. Удобно для предсказуемых релизов.</p>
+                    </button>
+                    <button type="button" class="project-type-card" data-template-value="scrumban">
+                        <div class="project-type-card__image" data-type="scrumban"></div>
+                        <p class="project-type-card__title">Scrumban</p>
+                        <p class="text-basic">Гибрид Scrum и Kanban: планирование блоками плюс обработка срочных инцидентов без срыва всего цикла.</p>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+
     <script th:src="@{/static/js/auth_static.js}" src="/static/js/auth_static.js"></script>
+    <script>
+        (function() {
+            const picker = document.getElementById('projectTypePicker');
+            const closeBtn = document.getElementById('projectTypePickerClose');
+            const templateInput = document.getElementById('proj-template');
+            const templateDisplay = document.getElementById('proj-template-display');
+            if (!picker || !closeBtn || !templateInput || !templateDisplay) return;
+            const labels = {
+                list: 'Список',
+                kanban: 'Kanban',
+                scrum: 'Scrum',
+                scrumban: 'Scrumban'
+            };
+
+            function openPicker() {
+                picker.setAttribute('aria-hidden', 'false');
+            }
+
+            function closePicker() {
+                picker.setAttribute('aria-hidden', 'true');
+            }
+
+            templateDisplay.addEventListener('click', openPicker);
+            templateDisplay.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    openPicker();
+                }
+            });
+            closeBtn.addEventListener('click', closePicker);
+
+            picker.addEventListener('click', (e) => {
+                if (e.target === picker) closePicker();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && picker.getAttribute('aria-hidden') === 'false') {
+                    closePicker();
+                }
+            });
+
+            picker.querySelectorAll('.project-type-card').forEach((card) => {
+                card.addEventListener('click', () => {
+                    const value = card.dataset.templateValue;
+                    if (!value) return;
+                    templateInput.value = value;
+                    templateDisplay.value = labels[value] || value;
+                    closePicker();
+                });
+            });
+        })();
+    </script>
 </body>
 
 </html>
