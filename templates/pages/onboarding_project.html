@@ -45,9 +45,26 @@
             padding: 1.25rem 1.5rem 0.75rem;
             border-bottom: 1px solid #dbe6d3;
         }
+        .project-type-picker__close {
+            border: none;
+            background: transparent;
+            padding: 0;
+            margin: 0;
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0.78;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .project-type-picker__close:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
         .project-type-picker__body {
             padding: 1rem 1.5rem 1.5rem;
-            overflow: auto;
         }
         .project-type-grid {
             display: grid;
@@ -78,6 +95,7 @@
             background: linear-gradient(160deg, #eef7e6 0%, #dff0cc 100%);
             position: relative;
             overflow: hidden;
+            padding: 8px;
         }
         .project-type-card__image::before {
             content: "";
@@ -86,8 +104,191 @@
             border-radius: 8px;
             border: 1px dashed rgba(97, 160, 57, 0.6);
         }
+        .project-type-mini {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            background: #f6fbf2;
+            border: 1px solid #dbe6d3;
+            overflow: hidden;
+        }
+        .project-type-mini--list {
+            display: grid;
+            grid-template-rows: 24px 1fr;
+        }
+        .mini-list-head {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr 0.8fr 0.7fr;
+            gap: 4px;
+            padding: 4px 6px;
+            border-bottom: 1px solid #dbe6d3;
+            background: #eef7e6;
+        }
+        .mini-list-head span {
+            display: block;
+            height: 5px;
+            border-radius: 3px;
+            background: #9bbd82;
+        }
+        .mini-list-body {
+            padding: 6px;
+            display: grid;
+            gap: 5px;
+        }
+        .mini-list-row {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr 0.8fr 0.7fr;
+            gap: 4px;
+            align-items: center;
+            background: #ffffff;
+            border: 1px solid #e0ebd5;
+            border-radius: 5px;
+            padding: 4px;
+        }
+        .mini-list-row span {
+            display: block;
+            height: 4px;
+            border-radius: 3px;
+            background: #c6dbb3;
+        }
+        .mini-list-row span:last-child {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #7fb363;
+            justify-self: end;
+        }
+        .project-type-mini--kanban {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            padding: 6px;
+        }
+        .mini-kanban-col {
+            background: #edf5e4;
+            border: 1px solid #d8e8c8;
+            border-radius: 6px;
+            padding: 4px;
+            display: grid;
+            grid-template-rows: 10px 1fr;
+            gap: 4px;
+        }
+        .mini-kanban-col span {
+            display: block;
+            height: 4px;
+            border-radius: 3px;
+            background: #7fb363;
+        }
+        .mini-kanban-stack {
+            display: grid;
+            gap: 4px;
+            align-content: start;
+        }
+        .mini-kanban-card {
+            height: 18px;
+            border-radius: 4px;
+            background: #ffffff;
+            border: 1px solid #d4e5c3;
+        }
+        .project-type-mini--scrum {
+            display: grid;
+            grid-template-columns: 0.95fr 1.15fr;
+            gap: 6px;
+            padding: 6px;
+        }
+        .mini-scrum-backlog,
+        .mini-scrum-sprint {
+            background: #edf5e4;
+            border: 1px solid #d8e8c8;
+            border-radius: 6px;
+            padding: 4px;
+            display: grid;
+            grid-template-rows: 10px 1fr;
+            gap: 4px;
+        }
+        .mini-scrum-backlog > span,
+        .mini-scrum-sprint > span {
+            display: block;
+            height: 4px;
+            border-radius: 3px;
+            background: #7fb363;
+        }
+        .mini-scrum-list {
+            display: grid;
+            gap: 4px;
+            align-content: start;
+        }
+        .mini-scrum-item {
+            height: 16px;
+            border-radius: 4px;
+            background: #ffffff;
+            border: 1px solid #d4e5c3;
+        }
+        .mini-scrum-footer {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+        }
+        .mini-scrum-footer div {
+            height: 14px;
+            border-radius: 4px;
+            background: #ffffff;
+            border: 1px solid #d4e5c3;
+        }
+        .project-type-mini--scrumban {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            padding: 6px;
+        }
+        .mini-scrumban-col {
+            background: #edf5e4;
+            border: 1px solid #d8e8c8;
+            border-radius: 6px;
+            padding: 4px;
+            display: grid;
+            grid-template-rows: 10px 1fr auto;
+            gap: 4px;
+        }
+        .mini-scrumban-col > span {
+            display: block;
+            height: 4px;
+            border-radius: 3px;
+            background: #7fb363;
+        }
+        .mini-scrumban-stack {
+            display: grid;
+            gap: 4px;
+            align-content: start;
+        }
+        .mini-scrumban-card {
+            height: 16px;
+            border-radius: 4px;
+            background: #ffffff;
+            border: 1px solid #d4e5c3;
+            position: relative;
+        }
+        .mini-scrumban-card--urgent::after {
+            content: "";
+            position: absolute;
+            right: 3px;
+            top: 3px;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #d95050;
+        }
+        .mini-scrumban-wip {
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(217, 80, 80, 0.2);
+            border: 1px solid rgba(217, 80, 80, 0.35);
+        }
         .project-type-card__image[data-type="list"]::after {
-            content: "Таблица заявок • SLA • Ответственные";
+            content: "Мини-реестр задач";
             position: absolute;
             left: 20px;
             bottom: 16px;
@@ -95,7 +296,7 @@
             font-size: 0.78rem;
         }
         .project-type-card__image[data-type="kanban"]::after {
-            content: "Очередь → В работе → Проверка → Готово";
+            content: "Мини-kanban поток";
             position: absolute;
             left: 20px;
             bottom: 16px;
@@ -103,7 +304,7 @@
             font-size: 0.78rem;
         }
         .project-type-card__image[data-type="scrum"]::after {
-            content: "Бэклог • Спринт • Ретро";
+            content: "Мини-scrum цикл";
             position: absolute;
             left: 20px;
             bottom: 16px;
@@ -111,7 +312,7 @@
             font-size: 0.78rem;
         }
         .project-type-card__image[data-type="scrumban"]::after {
-            content: "План блоками + срочные входящие";
+            content: "Мини-scrumban гибрид";
             position: absolute;
             left: 20px;
             bottom: 16px;
@@ -123,6 +324,10 @@
             font-size: 1.05rem;
             color: #23331a;
             font-weight: 600;
+        }
+        .project-type-card__text {
+            display: grid;
+            gap: 0.2rem;
         }
     </style>
 </head>
@@ -228,33 +433,123 @@
             <header class="project-type-picker__head">
                 <div>
                     <p id="projectTypePickerTitle" class="text-header">Выберите тип проекта</p>
-                    <p class="text-basic">Карточки показывают, как будет устроена работа внутри проекта и какие артефакты получит команда.</p>
                 </div>
-                <button type="button" class="modal-close" id="projectTypePickerClose" aria-label="Закрыть выбор типа проекта">
+                <button type="button" class="project-type-picker__close" id="projectTypePickerClose" aria-label="Закрыть выбор типа проекта">
                     <img src="/static/source/icons/cross.svg" alt="" width="24" height="24">
                 </button>
             </header>
             <div class="project-type-picker__body">
                 <div class="project-type-grid">
                     <button type="button" class="project-type-card" data-template-value="list">
-                        <div class="project-type-card__image" data-type="list"></div>
-                        <p class="project-type-card__title">Список</p>
-                        <p class="text-basic">Подходит для реестра обращений: карточки в виде записей таблицы, фильтры, приоритеты, SLA, сроки и исполнители.</p>
+                        <div class="project-type-card__image" data-type="list">
+                            <div class="project-type-mini project-type-mini--list">
+                                <div class="mini-list-head">
+                                    <span></span><span></span><span></span><span></span>
+                                </div>
+                                <div class="mini-list-body">
+                                    <div class="mini-list-row"><span></span><span></span><span></span><span></span></div>
+                                    <div class="mini-list-row"><span></span><span></span><span></span><span></span></div>
+                                    <div class="mini-list-row"><span></span><span></span><span></span><span></span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="project-type-card__text">
+                            <p class="project-type-card__title">Список</p>
+                            <p class="text-basic">Подходит для реестра обращений: карточки в виде записей таблицы, фильтры, приоритеты, SLA, сроки и исполнители.</p>
+                        </div>
                     </button>
                     <button type="button" class="project-type-card" data-template-value="kanban">
-                        <div class="project-type-card__image" data-type="kanban"></div>
-                        <p class="project-type-card__title">Kanban</p>
-                        <p class="text-basic">Непрерывный flow задач. Команда видит загрузку по колонкам, WIP-ограничения и узкие места в процессе.</p>
+                        <div class="project-type-card__image" data-type="kanban">
+                            <div class="project-type-mini project-type-mini--kanban">
+                                <div class="mini-kanban-col">
+                                    <span></span>
+                                    <div class="mini-kanban-stack">
+                                        <div class="mini-kanban-card"></div>
+                                        <div class="mini-kanban-card"></div>
+                                    </div>
+                                </div>
+                                <div class="mini-kanban-col">
+                                    <span></span>
+                                    <div class="mini-kanban-stack">
+                                        <div class="mini-kanban-card"></div>
+                                        <div class="mini-kanban-card"></div>
+                                        <div class="mini-kanban-card"></div>
+                                    </div>
+                                </div>
+                                <div class="mini-kanban-col">
+                                    <span></span>
+                                    <div class="mini-kanban-stack">
+                                        <div class="mini-kanban-card"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="project-type-card__text">
+                            <p class="project-type-card__title">Kanban</p>
+                            <p class="text-basic">Непрерывный flow задач. Команда видит загрузку по колонкам, WIP-ограничения и узкие места в процессе.</p>
+                        </div>
                     </button>
                     <button type="button" class="project-type-card" data-template-value="scrum">
-                        <div class="project-type-card__image" data-type="scrum"></div>
-                        <p class="project-type-card__title">Scrum</p>
-                        <p class="text-basic">Итерационный режим: бэклог, планирование спринта, цель, демо и ретро. Удобно для предсказуемых релизов.</p>
+                        <div class="project-type-card__image" data-type="scrum">
+                            <div class="project-type-mini project-type-mini--scrum">
+                                <div class="mini-scrum-backlog">
+                                    <span></span>
+                                    <div class="mini-scrum-list">
+                                        <div class="mini-scrum-item"></div>
+                                        <div class="mini-scrum-item"></div>
+                                        <div class="mini-scrum-item"></div>
+                                    </div>
+                                </div>
+                                <div class="mini-scrum-sprint">
+                                    <span></span>
+                                    <div class="mini-scrum-list">
+                                        <div class="mini-scrum-item"></div>
+                                        <div class="mini-scrum-item"></div>
+                                    </div>
+                                </div>
+                                <div class="mini-scrum-footer">
+                                    <div></div><div></div><div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="project-type-card__text">
+                            <p class="project-type-card__title">Scrum</p>
+                            <p class="text-basic">Итерационный режим: бэклог, планирование спринта, цель, демо и ретро. Удобно для предсказуемых релизов.</p>
+                        </div>
                     </button>
                     <button type="button" class="project-type-card" data-template-value="scrumban">
-                        <div class="project-type-card__image" data-type="scrumban"></div>
-                        <p class="project-type-card__title">Scrumban</p>
-                        <p class="text-basic">Гибрид Scrum и Kanban: планирование блоками плюс обработка срочных инцидентов без срыва всего цикла.</p>
+                        <div class="project-type-card__image" data-type="scrumban">
+                            <div class="project-type-mini project-type-mini--scrumban">
+                                <div class="mini-scrumban-col">
+                                    <span></span>
+                                    <div class="mini-scrumban-stack">
+                                        <div class="mini-scrumban-card"></div>
+                                        <div class="mini-scrumban-card mini-scrumban-card--urgent"></div>
+                                    </div>
+                                    <div class="mini-scrumban-wip"></div>
+                                </div>
+                                <div class="mini-scrumban-col">
+                                    <span></span>
+                                    <div class="mini-scrumban-stack">
+                                        <div class="mini-scrumban-card"></div>
+                                        <div class="mini-scrumban-card"></div>
+                                        <div class="mini-scrumban-card mini-scrumban-card--urgent"></div>
+                                    </div>
+                                    <div class="mini-scrumban-wip"></div>
+                                </div>
+                                <div class="mini-scrumban-col">
+                                    <span></span>
+                                    <div class="mini-scrumban-stack">
+                                        <div class="mini-scrumban-card"></div>
+                                    </div>
+                                    <div class="mini-scrumban-wip"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="project-type-card__text">
+                            <p class="project-type-card__title">Scrumban</p>
+                            <p class="text-basic">Гибрид Scrum и Kanban: планирование блоками плюс обработка срочных инцидентов без срыва всего цикла.</p>
+                        </div>
                     </button>
                 </div>
             </div>
