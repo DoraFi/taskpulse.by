@@ -52,6 +52,10 @@
   border: 0.0625rem solid #7F8C73;
 }
 
+.border-gray-2 {
+  border: 0.125rem solid #7F8C73;
+}
+
 .text-signature, .tasks-grid .grid-header, .legends .legend, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .timeline-due, .board-list .tasks-grid-wrapper > .empty-state, .board-reports-card .reports-stat-label, .kanban-board-card .kanban-stage-col .subtasks .checkbox-text,
 .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text, .kanban-board-card .kanban-count-chip,
 .kanban-archive-board .kanban-count-chip, .board-list .card .list .subtasks .checkbox-text, .auth-hint, .auth-field label, .auth-step-pill, .auth-mini-card__text, .form-auth .checkbox-item .checkbox-text,
