@@ -108,6 +108,22 @@ public class PageController {
         return "pages/index";
     }
 
+    @GetMapping("/o/{orgId}")
+    public String incompleteOrgContext(@PathVariable String orgId, HttpServletRequest request, Model model) {
+        if (!isValidUuid(orgId)) {
+            return contextErrorView(model, request, 404, "Ссылка выглядит поврежденной. Проверьте, что вы открыли ее полностью.");
+        }
+        return contextErrorView(model, request, 404, "Ссылка неполная: в ней не указана команда.");
+    }
+
+    @GetMapping("/o/{orgId}/t")
+    public String incompleteTeamPrefix(@PathVariable String orgId, HttpServletRequest request, Model model) {
+        if (!isValidUuid(orgId)) {
+            return contextErrorView(model, request, 404, "Ссылка выглядит поврежденной. Проверьте, что вы открыли ее полностью.");
+        }
+        return contextErrorView(model, request, 404, "Ссылка неполная: после /t отсутствует идентификатор команды.");
+    }
+
     @GetMapping("/o/{orgId}/t/{teamId}/index")
     public String homeContextIndex(@PathVariable String orgId, @PathVariable String teamId, HttpServletRequest request, Model model) {
         String contextError = validateContextAccess(orgId, teamId);

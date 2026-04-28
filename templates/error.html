@@ -31,17 +31,26 @@
             max-height: 220px;
             opacity: 1;
         }
+        body.tp-error-page aside .item .nav-link.active {
+            color: inherit !important;
+            font-weight: inherit !important;
+        }
+        body.tp-error-page aside .item .nav-link.active::after {
+            display: none !important;
+        }
         .auth-hero-success{
             margin: 0 5rem 0.75rem 9.5rem;
         }
     </style>
 </head>
-<body>
+<body class="tp-error-page">
 <div th:if="${path != null and #strings.startsWith(path, '/o/')}">
     <div class="header">
         <div class="gap-24 flex-row">
-            <a class="logo-link" data-context-link="home" href="/"><img class="h-32" th:src="@{/static/source/logo_dark.svg}" src="/static/source/logo_dark.svg" alt="TaskPulse"></a>
-            <div class="search-panel border-dark-2px br-5">
+            <a class="logo-link" data-context-link="home" href="/">
+                <img class="logo" th:src="@{/static/source/logo_rect.svg}" src="/static/source/logo_rect.svg" alt="TaskPulse">
+            </a>
+            <div class="search-panel border-dark-1 br-5">
                 <img class="h-16" th:src="@{/static/source/icons/search.svg}" src="/static/source/icons/search.svg" alt="Поиск">
                 <input class="text-basic" type="text" placeholder="Поиск">
             </div>

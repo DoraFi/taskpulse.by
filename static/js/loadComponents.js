@@ -20,6 +20,11 @@ function apiUrl(path) {
     return `${getApiBasePath()}${path}`;
 }
 
+function apiUrlForBase(basePath, path) {
+    if (!basePath) return `/api${path}`;
+    return `${basePath}/api${path}`;
+}
+
 async function resolveContextBase() {
     try {
         const res = await fetch('/api/bootstrap/context');
@@ -39,13 +44,26 @@ function applyContextNavLinks(base) {
     document.querySelectorAll('a.logo-link, .header .logo[href="/"], .header a[href="/"]').forEach(a => a.setAttribute('href', base));
 }
 
+function isErrorPage() {
+    return Boolean(document.querySelector('.tp-error-details'));
+}
+
+function clearActiveMenuState() {
+    document.querySelectorAll('.nav-link.active').forEach(link => {
+        link.classList.remove('active');
+    });
+}
+
 async function hydrateTeamProjectsMenu() {
     const menu = document.getElementById('teamProjectsMenu');
     if (!menu) return;
     try {
         const base = await resolveContextBase();
         applyContextNavLinks(base);
-        const [meRes, projectsRes] = await Promise.all([fetch(apiUrl('/me')), fetch(apiUrl('/projects'))]);
+        const [meRes, projectsRes] = await Promise.all([
+            fetch(apiUrlForBase(base, '/me')),
+            fetch(apiUrlForBase(base, '/projects'))
+        ]);
         if (!meRes.ok || !projectsRes.ok) return;
         const me = await meRes.json();
         const projects = await projectsRes.json();
@@ -63,6 +81,10 @@ async function hydrateTeamProjectsMenu() {
                 : fallback;
             return `<li><button class="nav-link" data-href="${href}">${p.name || 'Проект'}</button></li>`;
         }).join('');
+
+        if (isErrorPage()) {
+            clearActiveMenuState();
+        }
     } catch (e) {
         console.error(e);
     }
@@ -148,21 +170,29 @@ function initSubmenus() {
 }
 
 function isCurrentPage(url) {
-    const currentPath = window.location.pathname;
-    const targetPath = new URL(url, window.location.origin).pathname;
-    return currentPath === targetPath;
+    const currentUrl = new URL(window.location.href);
+    const targetUrl = new URL(url, window.location.origin);
+    if (currentUrl.pathname !== targetUrl.pathname) return false;
+    if (!targetUrl.search) return true;
+    return currentUrl.search === targetUrl.search;
 }
 
 function updateActiveMenuItem() {
-    const currentPath = window.location.pathname;
+    clearActiveMenuState();
+
+    if (isErrorPage()) {
+        return;
+    }
+
+    const currentUrl = new URL(window.location.href);
     
     document.querySelectorAll('.nav-link[data-href]').forEach(link => {
-        const linkPath = new URL(link.dataset.href, window.location.origin).pathname;
+        const linkUrl = new URL(link.dataset.href, window.location.origin);
         
-        if (currentPath === linkPath) {
+        const samePath = currentUrl.pathname === linkUrl.pathname;
+        const sameSearch = !linkUrl.search || currentUrl.search === linkUrl.search;
+        if (samePath && sameSearch) {
             link.classList.add('active');
-        } else {
-            link.classList.remove('active');
         }
     });
 }
