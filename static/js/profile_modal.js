@@ -4,6 +4,16 @@
 
     const MODAL_URL = '/templates/components/profile_modal.html';
 
+    function getApiBasePath() {
+        const m = window.location.pathname.match(/^\/o\/([^/]+)\/t\/([^/]+)/);
+        if (!m) return '/api';
+        return `/o/${m[1]}/t/${m[2]}/api`;
+    }
+
+    function apiUrl(path) {
+        return `${getApiBasePath()}${path}`;
+    }
+
     function openModal(overlay) {
         if (overlay.parentElement !== document.body) document.body.appendChild(overlay);
         resetExitConfirm(overlay);
@@ -130,7 +140,7 @@
 
     async function loadProfileData(overlay) {
         try {
-            const res = await fetch('/api/me');
+            const res = await fetch(apiUrl('/me'));
             if (!res.ok) throw new Error('profile api failed');
             const data = await res.json();
 

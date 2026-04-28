@@ -454,10 +454,7 @@ body:not([data-theme="dark"]) .board-list .card .list .item {
         display: flex;
         flex-direction: column;
         align-items: stretch;
-    }
-
-    .kanban-task-list > .form-add-task:not(:first-child) {
-        margin-top: $space-16;
+        gap: $space-16;
     }
 
     .kanban-stage-col {

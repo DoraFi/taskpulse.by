@@ -1,3 +1,38 @@
+function getApiBasePath() {
+    const m = window.location.pathname.match(/^\/o\/([^/]+)\/t\/([^/]+)/);
+    if (!m) return '/api';
+    return `/o/${m[1]}/t/${m[2]}/api`;
+}
+
+function apiUrl(path) {
+    return `${getApiBasePath()}${path}`;
+}
+
+function getContextBasePath() {
+    const m = window.location.pathname.match(/^\/o\/([^/]+)\/t\/([^/]+)/);
+    if (m) return `/o/${m[1]}/t/${m[2]}`;
+    return null;
+}
+
+async function resolveContextBasePath() {
+    const fromPath = getContextBasePath();
+    if (fromPath) return fromPath;
+    try {
+        const res = await fetch('/api/bootstrap/context');
+        if (!res.ok) return null;
+        const data = await res.json();
+        return data?.basePath || null;
+    } catch {
+        return null;
+    }
+}
+
+function navigateTo(url) {
+    if (!url) return;
+    if (typeof window.loadPage === 'function') window.loadPage(url);
+    else window.location.href = url;
+}
+
 function initIndexPage() {
     console.log('initIndexPage вызван');
 
@@ -143,7 +178,7 @@ function initIndexPage() {
 
         window.drawMiniChart = drawMiniChart;
 
-        fetch('/api/index/mini-chart')
+        fetch(apiUrl('/index/mini-chart'))
             .then(r => r.ok ? r.json() : Promise.reject(new Error('mini chart api')))
             .then(data => {
                 drawMiniChart(data.team || [], data.me || [], {
@@ -153,7 +188,7 @@ function initIndexPage() {
             })
             .catch(err => console.error(err));
 
-        fetch('/api/index/summary')
+        fetch(apiUrl('/index/summary'))
             .then(r => r.ok ? r.json() : Promise.reject(new Error('index summary failed')))
             .then(data => {
                 const grid = document.querySelector('.tasks-to-do-grid');
@@ -250,6 +285,26 @@ function initIndexPage() {
             })
             .catch(err => console.error(err));
     })();
+
+    resolveContextBasePath().then((base) => {
+        if (!base) return;
+        const routes = {
+            indexBtnAllTasks: `${base}/tasks`,
+            indexBtnCalendar: `${base}/tasks`,
+            indexBtnAllProjects: `${base}/projects`,
+            indexBtnAllTeam: `${base}/projects`,
+            indexBtnChartDetails: `${base}/tasks`,
+            indexBtnAllHistory: `${base}/tasks`
+        };
+        Object.entries(routes).forEach(([id, href]) => {
+            const btn = document.getElementById(id);
+            if (!btn) return;
+            btn.onclick = (e) => {
+                e.preventDefault();
+                navigateTo(href);
+            };
+        });
+    });
 }
 
 function statusName(status) {
@@ -264,7 +319,14 @@ function statusName(status) {
 function parseDateValue(dateStr) {
     if (!dateStr || typeof dateStr !== 'string') return null;
     if (dateStr.includes('.')) {
-        const [day, month, year] = dateStr.split('.');
+        const parts = dateStr.split('.');
+        let day, month, year;
+        if (parts.length === 2) {
+            [day, month] = parts;
+            year = String(new Date().getFullYear());
+        } else {
+            [day, month, year] = parts;
+        }
         const date = new Date(Number(year), Number(month) - 1, Number(day));
         return Number.isNaN(date.getTime()) ? null : date;
     }

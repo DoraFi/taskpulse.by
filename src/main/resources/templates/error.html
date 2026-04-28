@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Ошибка</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/static/source/logo_rect.svg}" href="/static/source/logo_rect.svg">
+    <link rel="stylesheet" th:href="@{/static/scss/style.css}" href="/static/scss/style.css">
+</head>
+<body>
+<div th:if="${path != null and #strings.startsWith(path, '/o/')}">
+    <div class="header">
+        <div class="gap-24 flex-row">
+            <a class="logo-link" data-context-link="home" href="/"><img class="h-32" th:src="@{/static/source/logo_dark.svg}" src="/static/source/logo_dark.svg" alt="TaskPulse"></a>
+            <div class="search-panel border-dark-2px br-5">
+                <img class="h-16" th:src="@{/static/source/icons/search.svg}" src="/static/source/icons/search.svg" alt="Поиск">
+                <input class="text-basic" type="text" placeholder="Поиск">
+            </div>
+        </div>
+        <ul class="gap-24 flex-row header-toolbar">
+            <li><button type="button" class="header-toolbar__action" id="headerCreateTaskBtn" aria-label="Создать"><img class="h-32" th:src="@{/static/source/icons/plus.svg}" src="/static/source/icons/plus.svg" alt=""></button></li>
+            <li><button type="button" class="header-toolbar__action" id="headerSettingsBtn" aria-label="Настройки"><img class="h-32" th:src="@{/static/source/icons/settings.svg}" src="/static/source/icons/settings.svg" alt=""></button></li>
+            <li><button type="button" class="header-toolbar__action" id="headerProfileBtn" aria-label="Профиль"><img class="h-32" th:src="@{/static/source/icons/profile.svg}" src="/static/source/icons/profile.svg" alt=""></button></li>
+            <li><a th:href="@{/auth/welcome}" href="/auth/welcome" class="header-toolbar__action" aria-label="Выйти"><img class="h-32" th:src="@{/static/source/icons/logout.svg}" src="/static/source/icons/logout.svg" alt=""></a></li>
+            <li><button type="button" class="theme-toggle header-toolbar__action" id="themeToggle" aria-label="Переключить тему"><img class="h-32 theme-toggle__icon" th:src="@{/static/source/icons/lighttheme.svg}" src="/static/source/icons/lighttheme.svg" alt="" aria-hidden="true"></button></li>
+        </ul>
+    </div>
+    <div class="main-layout">
+        <aside id="aside-container"></aside>
+        <div class="app-container">
+            <div th:replace="~{::errorCard}"></div>
+        </div>
+    </div>
+</div>
+
+<main th:if="${path == null or !#strings.startsWith(path, '/o/')}" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; background: #f6fbf2;">
+    <div th:replace="~{::errorCard}"></div>
+</main>
+
+<th:block th:fragment="errorCard">
+    <div class="card" style="max-width: 920px; width: 100%; display: grid; grid-template-columns: 1.3fr 1fr; gap: 1.5rem; align-items: center; margin: 2rem auto;">
+        <div>
+            <p class="text-header" th:text="${title}">Не удалось открыть страницу</p>
+            <p class="text-basic" th:text="${hint}" style="margin-top: 0.5rem;">Попробуйте открыть раздел через меню.</p>
+            <p class="text-signature" style="margin-top: 0.75rem;">Мы сохранили технические данные — их можно показать разработчику при обращении.</p>
+
+            <div style="margin-top: 1.25rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <a class="button-basic" href="/" onclick="window.location.href='/'; return false;">Вернуться в приложение</a>
+                <a class="button-secondary" th:href="@{/auth/welcome}" href="/auth/welcome">На экран входа</a>
+            </div>
+        </div>
+
+        <div style="display:flex; justify-content:center;">
+            <section class="auth-hero auth-hero--compact" style="padding: 0; min-height: auto; width: 100%;">
+                <div class="auth-hero__inner" style="align-items:center; text-align:center;">
+                    <div class="auth-hero-success" style="color:#d95050; transform: scale(3); transform-origin: center;">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M12 6v7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                            <circle cx="12" cy="17.5" r="1.2" fill="currentColor"/>
+                        </svg>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <details style="grid-column: 1 / -1; margin-top: 0.5rem; border: 1px solid #dbe6d3; border-radius: 10px; padding: 0.75rem 1rem; background: #fbfdf9; width: 100%;">
+            <summary class="text-signature" style="cursor:pointer; display:flex; align-items:center; gap:0.5rem;">
+                <img src="/static/source/icons/arrow_dark_cropped.svg" alt="" style="width:14px; height:14px;">
+                Технические детали для поддержки
+            </summary>
+            <div style="margin-top: 0.75rem; display: grid; gap: 0.4rem;">
+                <div class="text-signature"><strong>Код ошибки:</strong> <span th:text="${status}">500</span></div>
+                <div class="text-signature"><strong>Адрес:</strong> <span th:text="${path}">/path</span></div>
+                <div class="text-signature"><strong>Описание:</strong> <span th:text="${message}">message</span></div>
+            </div>
+        </details>
+    </div>
+</th:block>
+
+<script src="/static/js/loadComponents.js"></script>
+<script src="/static/js/app.js"></script>
+<script src="/static/js/theme.js"></script>
+<script src="/static/js/create_task_modal.js"></script>
+<script src="/static/js/profile_modal.js"></script>
+<script src="/static/js/settings_modal.js"></script>
+</body>
+</html>

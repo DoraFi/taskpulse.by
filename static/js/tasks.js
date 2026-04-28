@@ -1,12 +1,32 @@
 let tasksData = [];
+let assignedTasksData = [];
+
+function getApiBasePath() {
+    const m = window.location.pathname.match(/^\/o\/([^/]+)\/t\/([^/]+)/);
+    if (!m) return '/api';
+    return `/o/${m[1]}/t/${m[2]}/api`;
+}
+
+function apiUrl(path) {
+    return `${getApiBasePath()}${path}`;
+}
 
 async function loadTasks() {
     try {
-        const response = await fetch('/api/tasks');
+        const response = await fetch(apiUrl('/tasks'));
         tasksData = await response.json();
-        renderTasks('assigned');
     } catch (error) {
         console.error('Ошибка загрузки задач:', error);
+    }
+}
+
+async function loadAssignedTasks() {
+    try {
+        const response = await fetch(apiUrl('/tasks/assigned'));
+        assignedTasksData = await response.json();
+    } catch (error) {
+        console.error('Ошибка загрузки назначенных задач:', error);
+        assignedTasksData = [];
     }
 }
 
@@ -19,7 +39,7 @@ let currentUser = {
 
 async function loadCurrentUser() {
     try {
-        const response = await fetch('/api/me');
+        const response = await fetch(apiUrl('/me'));
         if (!response.ok) throw new Error('me api failed');
         const me = await response.json();
         currentUser = {
@@ -34,27 +54,51 @@ async function loadCurrentUser() {
 }
 
 function filterTasks(tab) {
+    const sortByPriorityAndDate = (arr, doneLast = false) => {
+        const priorityWeight = (p) => p === 'срочно' ? 0 : 1;
+        return [...arr].sort((a, b) => {
+            if (doneLast) {
+                const aDone = a.status === 'done' ? 1 : 0;
+                const bDone = b.status === 'done' ? 1 : 0;
+                if (aDone !== bDone) return aDone - bDone;
+            }
+            const pa = priorityWeight(a.priority);
+            const pb = priorityWeight(b.priority);
+            if (pa !== pb) return pa - pb;
+            const da = parseDate(a.dueDate || '31.12.2099');
+            const db = parseDate(b.dueDate || '31.12.2099');
+            return da - db;
+        });
+    };
     const today = new Date();
     switch(tab) {
         case 'assigned':
-            return tasksData.filter(task => task.assignee === currentUser.name);
+            return sortByPriorityAndDate(
+                (Array.isArray(assignedTasksData) ? assignedTasksData : []).filter(task => task.status !== 'done')
+            );
         case 'deadline':
-            return tasksData.filter(task => {
+            return sortByPriorityAndDate(tasksData.filter(task => {
                 const dueDate = parseDate(task.dueDate);
                 const diffDays = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
                 return diffDays <= 3 && diffDays >= 0 && task.status !== 'done';
-            });
+            }));
         case 'todo':
-            return tasksData.filter(task => task.status === 'neutral');
+            return sortByPriorityAndDate(tasksData.filter(task => task.assignee === '—'));
         case 'created':
-            return tasksData.filter(task => task.creator === currentUser.name);
+            return sortByPriorityAndDate(tasksData.filter(task => task.creator === currentUser.name), true);
         default:
-            return tasksData;
+            return sortByPriorityAndDate(tasksData);
     }
 }
 
 function parseDate(dateStr) {
-    const [day, month, year] = dateStr.split('.');
+    if (!dateStr) return new Date(2099, 11, 31);
+    const parts = dateStr.split('.');
+    if (parts.length === 2) {
+        const [day, month] = parts;
+        return new Date(new Date().getFullYear(), month - 1, day);
+    }
+    const [day, month, year] = parts;
     return new Date(year, month - 1, day);
 }
 
@@ -136,7 +180,15 @@ function createCell(col, task, tab) {
             div.appendChild(dropdown);
             break;
         case 'dueDate':
-            if (isOverdueDate(task.dueDate)) {
+            if (task.status === 'done' && task.completedDate) {
+                const dueText = task.dueDate ? formatRelativeDate(task.dueDate) : '';
+                div.innerHTML = `
+                    <div class="basic-and-signature">
+                        <p class="text-basic" style="color:#2D5F20;">${task.completedDate}</p>
+                        ${dueText ? `<p class="text-signature light-gray">${dueText}</p>` : ''}
+                    </div>
+                `;
+            } else if (isOverdueDate(task.dueDate)) {
                 div.innerHTML = `
                     <div class="due-attention due-attention--left">
                         <p class="text-basic">Просрочено</p>
@@ -166,14 +218,18 @@ function createCell(col, task, tab) {
             div.textContent = task.timeEstimate;
             break;
         case 'assignee':
-            div.innerHTML = `
-                <div class="user-img-text">
-                    <img src="/static/source/user_img/${task.assigneeAvatar}" alt="">
-                    <div class="basic-and-signature">
-                        <p class="text-basic">${escapeHtml(task.assignee)}</p>
+            if (!task.assigneeAvatar || task.assignee === '—') {
+                div.innerHTML = `<p class="text-basic">—</p>`;
+            } else {
+                div.innerHTML = `
+                    <div class="user-img-text">
+                        <img src="/static/source/user_img/${task.assigneeAvatar}" alt="">
+                        <div class="basic-and-signature">
+                            <p class="text-basic">${escapeHtml(task.assignee)}</p>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            }
             break;
         case 'creator':
             div.innerHTML = `
@@ -391,7 +447,15 @@ function initFilters() {
 }
 
 function convertToISODate(dateStr) {
-    const [day, month, year] = dateStr.split('.');
+    if (!dateStr) return '';
+    const parts = dateStr.split('.');
+    let day, month, year;
+    if (parts.length === 2) {
+        [day, month] = parts;
+        year = String(new Date().getFullYear());
+    } else {
+        [day, month, year] = parts;
+    }
     return `${year}-${month}-${day}`;
 }
 
@@ -439,7 +503,7 @@ function applyFiltersToTasks(criteria) {
     let filteredTasks = [];
     switch(currentTab) {
         case 'assigned':
-            filteredTasks = tasksData.filter(task => task.assignee === currentUser.name);
+            filteredTasks = tasksData.filter(task => task.assignee === currentUser.name && task.status !== 'done');
             break;
         case 'deadline':
             filteredTasks = tasksData.filter(task => {
@@ -543,7 +607,16 @@ function initTabs() {
 function handleTabClick(e) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     e.currentTarget.classList.add('active');
-    renderTasks(e.currentTarget.dataset.tab);
+    const tab = e.currentTarget.dataset.tab;
+    if (tab === 'assigned') {
+        loadAssignedTasks().then(() => renderTasks(tab));
+    } else {
+        if (!tasksData || tasksData.length === 0) {
+            loadTasks().then(() => renderTasks(tab));
+        } else {
+            renderTasks(tab);
+        }
+    }
     updateNameColumnMaxWidth();
     if (filterModal && filterModal.classList.contains('show')) {
         updateFilterSectionsVisibility();
@@ -906,7 +979,7 @@ function initTasksPage() {
     initFilters();
     initTabs();
     initMoreActions();
-    loadCurrentUser().then(loadTasks);
+    loadCurrentUser().then(() => Promise.all([loadTasks(), loadAssignedTasks()]).then(() => renderTasks('assigned')));
     window.addEventListener('resize', () => updateNameColumnMaxWidth());
 }
 

@@ -6,6 +6,16 @@ let teamMembers = [];
 let tableSortColumn = null;
 let tableSortDirection = 'asc';
 
+function getApiBasePath() {
+    const m = window.location.pathname.match(/^\/o\/([^/]+)\/t\/([^/]+)/);
+    if (!m) return '/api';
+    return `/o/${m[1]}/t/${m[2]}/api`;
+}
+
+function apiUrl(path) {
+    return `${getApiBasePath()}${path}`;
+}
+
 let VanillaCalendarReady = false;
 let VanillaCalendarConstructor = null;
 
@@ -34,7 +44,7 @@ function loadVanillaCalendar() {
 
 async function loadTeamData() {
     try {
-        const response = await fetch('/api/team');
+        const response = await fetch(apiUrl('/team'));
         if (!response.ok) throw new Error('Ошибка загрузки команды');
         teamMembers = await response.json();
     } catch (error) {
@@ -45,7 +55,10 @@ async function loadTeamData() {
 
 async function loadBoardsData() {
     try {
-        const response = await fetch('/api/boards');
+        const params = new URLSearchParams(window.location.search);
+        const project = params.get('project');
+        const url = project ? apiUrl(`/boards?project=${encodeURIComponent(project)}`) : apiUrl('/boards');
+        const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -1118,7 +1131,7 @@ function renderReportsView() {
     container.classList.remove('tables-view', 'timeline-view', 'archive-view');
     container.classList.add('reports-view');
     container.innerHTML = '<div class="card board-reports-card"><p class="text-basic">Загрузка отчёта...</p></div>';
-    fetch('/api/reports/projects?mode=list')
+    fetch(apiUrl('/reports/projects?mode=list'))
         .then(r => r.ok ? r.json() : Promise.reject(new Error('reports api failed')))
         .then(data => {
             const summaryData = data.summary || {};
@@ -2727,6 +2740,12 @@ function parseDateBoard(dateStr) {
     if (!dateStr) return new Date(9999, 11, 31);
     if (typeof dateStr === 'string' && dateStr.includes('.')) {
         const parts = dateStr.split('.');
+        if (parts.length === 2) {
+            const [day, month] = parts;
+            const year = String(new Date().getFullYear());
+            const date = new Date(year, month - 1, day);
+            return isNaN(date.getTime()) ? new Date(9999, 11, 31) : date;
+        }
         if (parts.length === 3) {
             const [day, month, year] = parts;
             const date = new Date(year, month - 1, day);
@@ -2752,12 +2771,20 @@ function formatDueDate(dateStr) {
     if (diff === 1) return 'Завтра';
     let year, month, day;
     if (dateStr.includes('.')) {
-        [day, month, year] = dateStr.split('.');
-        return `${day}.${month}.${year}`;
+        const parts = dateStr.split('.');
+        if (parts.length === 2) {
+            [day, month] = parts;
+            return `${day}.${month}`;
+        }
+        [day, month, year] = parts;
+        const currentYear = String(new Date().getFullYear());
+        return year === currentYear ? `${day}.${month}` : `${day}.${month}.${year}`;
     }
     if (dateStr.includes('-')) {
         [year, month, day] = dateStr.split('-');
-        return `${day}.${month}.${year}`;
+        if (!year) return `${day}.${month}`;
+        const currentYear = String(new Date().getFullYear());
+        return year === currentYear ? `${day}.${month}` : `${day}.${month}.${year}`;
     }
     return dateStr;
 }

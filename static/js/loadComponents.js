@@ -10,16 +10,57 @@
     }
 })();
 
+function getApiBasePath() {
+    const m = window.location.pathname.match(/^\/o\/([^/]+)\/t\/([^/]+)/);
+    if (!m) return '/api';
+    return `/o/${m[1]}/t/${m[2]}/api`;
+}
+
+function apiUrl(path) {
+    return `${getApiBasePath()}${path}`;
+}
+
+async function resolveContextBase() {
+    try {
+        const res = await fetch('/api/bootstrap/context');
+        if (!res.ok) return null;
+        const data = await res.json();
+        return data && data.basePath ? data.basePath : null;
+    } catch {
+        return null;
+    }
+}
+
+function applyContextNavLinks(base) {
+    if (!base) return;
+    document.querySelectorAll('[data-context-link="home"]').forEach(el => el.dataset.href = base);
+    document.querySelectorAll('[data-context-link="tasks"]').forEach(el => el.dataset.href = `${base}/tasks`);
+    document.querySelectorAll('[data-context-link="projects"]').forEach(el => el.dataset.href = `${base}/projects`);
+    document.querySelectorAll('a.logo-link, .header .logo[href="/"], .header a[href="/"]').forEach(a => a.setAttribute('href', base));
+}
+
 async function hydrateTeamProjectsMenu() {
     const menu = document.getElementById('teamProjectsMenu');
     if (!menu) return;
     try {
-        const res = await fetch('/api/projects');
-        if (!res.ok) return;
-        const projects = await res.json();
+        const base = await resolveContextBase();
+        applyContextNavLinks(base);
+        const [meRes, projectsRes] = await Promise.all([fetch(apiUrl('/me')), fetch(apiUrl('/projects'))]);
+        if (!meRes.ok || !projectsRes.ok) return;
+        const me = await meRes.json();
+        const projects = await projectsRes.json();
         if (!Array.isArray(projects) || !projects.length) return;
+        const orgId = me.organizationPublicId;
+        const teamId = me.teamPublicId;
+        if (orgId && teamId) applyContextNavLinks(`/o/${encodeURIComponent(orgId)}/t/${encodeURIComponent(teamId)}`);
         menu.innerHTML = projects.map((p) => {
-            const href = (p.code === 'WCL' || (p.name || '').toLowerCase().includes('kanban')) ? '/kanban' : '/boards';
+            const projectCode = encodeURIComponent(p.code || '');
+            const fallback = '#';
+            const href = orgId && teamId && projectCode
+                ? (p.view === 'kanban'
+                    ? `/o/${encodeURIComponent(orgId)}/t/${encodeURIComponent(teamId)}/p/${projectCode}/kanban?project=${projectCode}`
+                    : `/o/${encodeURIComponent(orgId)}/t/${encodeURIComponent(teamId)}/p/${projectCode}/boards?project=${projectCode}`)
+                : fallback;
             return `<li><button class="nav-link" data-href="${href}">${p.name || 'Проект'}</button></li>`;
         }).join('');
     } catch (e) {
@@ -38,17 +79,15 @@ function saveSubmenusState() {
 }
 
 function openDefaultSubmenus() {
-    document.querySelectorAll('.item').forEach(item => {
+    document.querySelectorAll('.item').forEach((item, index) => {
         const submenu = item.querySelector('.submenu');
         const arrowWrapper = item.querySelector('.arrow-wrapper');
         const arrowImg = arrowWrapper?.querySelector('.arrow-img');
-        
-        if (submenu) {
-            submenu.style.display = 'block';
-            if (arrowImg) arrowImg.style.transform = 'rotate(-90deg)';
-        }
+        if (!submenu) return;
+        const shouldOpen = index === 2;
+        submenu.style.display = shouldOpen ? 'block' : 'none';
+        if (arrowImg) arrowImg.style.transform = shouldOpen ? 'rotate(-90deg)' : 'rotate(0deg)';
     });
-    console.log('Все подменю открыты');
 }
 
 function loadSubmenusState() {

@@ -10,11 +10,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+@Component
 public class LegacyDataApiController {
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
@@ -158,10 +160,9 @@ public class LegacyDataApiController {
     }
 
     @GetMapping("/api/boards")
-    public Map<String, Object> boards() {
+    public Map<String, Object> boards(@RequestParam(required = false) String project) {
         String visibleProjectsSql = inClauseSql(visibleProjectIds());
-        List<Map<String, Object>> rows = jdbcTemplate.queryForList(
-                """
+        String sql = """
                 select
                     b.id as board_id,
                     b.name as board_name,
@@ -173,13 +174,15 @@ public class LegacyDataApiController {
                     u.full_name as assignee_name,
                     u.avatar_file as assignee_avatar
                 from board b
+                join project p on p.id = b.project_id
                 left join task_item t on t.board_id = b.id
                 left join app_user u on u.id = t.assignee_id
                 where b.code like 'LIST%'
                   and b.project_id in (""" + visibleProjectsSql + """
-                )
-                order by b.id, t.id
-                """);
+                ) """ + (project != null && !project.isBlank() ? " and p.code = ? " : "") + " order by b.id, t.id";
+        List<Map<String, Object>> rows = (project != null && !project.isBlank())
+                ? jdbcTemplate.queryForList(sql, project)
+                : jdbcTemplate.queryForList(sql);
 
         Map<Long, List<Map<String, Object>>> subtasksByTask = loadSubtasksByTaskId();
         Map<Long, Map<String, Object>> boardsMap = new LinkedHashMap<>();
@@ -207,7 +210,7 @@ public class LegacyDataApiController {
             task.put("priority", row.get("task_priority"));
             task.put("dueDate", toUiDate(row.get("due_date")));
             task.put("assignee", row.get("assignee_name"));
-            task.put("assigneeAvatar", row.get("assignee_avatar") != null ? row.get("assignee_avatar") : "basic_avatar.png");
+            task.put("assigneeAvatar", row.get("assignee_avatar"));
             task.put("subtasks", subtasksByTask.getOrDefault(taskId, List.of()));
             ((List<Map<String, Object>>) board.get("tasks")).add(task);
         }
@@ -218,30 +221,43 @@ public class LegacyDataApiController {
     }
 
     @GetMapping("/api/kanban/boards")
-    public Map<String, Object> kanbanBoards() {
+    public Map<String, Object> kanbanBoards(@RequestParam(required = false) String project) {
         String visibleProjectsSql = inClauseSql(visibleProjectIds());
-        List<Map<String, Object>> boards = jdbcTemplate.queryForList(
-                """
+        String sql = """
                 select b.id, b.name
                 from board b
+                join project p on p.id = b.project_id
                 where b.code like 'KANBAN%'
+                  and p.project_type = 'kanban'
                   and b.project_id in (""" + visibleProjectsSql + """
-                )
-                order by b.id
-                """);
+                ) """ + (project != null && !project.isBlank() ? " and p.code = ? " : "") + " order by b.id";
+        List<Map<String, Object>> boards = (project != null && !project.isBlank())
+                ? jdbcTemplate.queryForList(sql, project)
+                : jdbcTemplate.queryForList(sql);
 
         List<Map<String, Object>> resultBoards = new ArrayList<>();
         for (Map<String, Object> b : boards) {
             Long boardId = ((Number) b.get("id")).longValue();
             List<String> stages = jdbcTemplate.query(
                     """
-                    select distinct coalesce(nullif(t.stage,''), 'Очередь') as st
-                    from task_item t
-                    where t.board_id = ?
-                    order by st
+                    select bs.stage_name
+                    from board_stage bs
+                    where bs.board_id = ?
+                    order by bs.position
                     """,
-                    (rs, rowNum) -> rs.getString("st"),
+                    (rs, rowNum) -> rs.getString("stage_name"),
                     boardId);
+            if (stages.isEmpty()) {
+                stages = jdbcTemplate.query(
+                        """
+                        select distinct coalesce(nullif(t.stage,''), 'Очередь') as st
+                        from task_item t
+                        where t.board_id = ?
+                        order by st
+                        """,
+                        (rs, rowNum) -> rs.getString("st"),
+                        boardId);
+            }
             stages.sort(Comparator.comparingInt(this::stageOrder).thenComparing(s -> s));
             if (stages.isEmpty()) {
                 stages = List.of("Очередь", "В работе", "Тестирование", "Готово");
@@ -250,7 +266,7 @@ public class LegacyDataApiController {
             row.put("id", boardId);
             row.put("name", b.get("name"));
             row.put("stages", stages);
-            row.put("tasksSource", "/api/kanban/tasks?boardId=" + boardId);
+            row.put("tasksSource", "/api/kanban/tasks?boardId=" + boardId + (project != null && !project.isBlank() ? "&project=" + project : ""));
             row.put("archivedTasks", List.of());
             resultBoards.add(row);
         }
@@ -260,7 +276,8 @@ public class LegacyDataApiController {
     }
 
     @GetMapping("/api/kanban/tasks")
-    public Map<String, Object> kanbanTasks(@RequestParam(required = false) Long boardId) {
+    public Map<String, Object> kanbanTasks(@RequestParam(required = false) Long boardId,
+                                           @RequestParam(required = false) String project) {
         String visibleProjectsSql = inClauseSql(visibleProjectIds());
         String sql = """
                 select
@@ -269,14 +286,23 @@ public class LegacyDataApiController {
                     u.avatar_file as assignee_avatar
                 from task_item t
                 join board b on b.id = t.board_id
+                join project p on p.id = b.project_id
                 left join app_user u on u.id = t.assignee_id
                 where b.code like 'KANBAN%'
                   and b.project_id in (""" + visibleProjectsSql + """
-                ) """ + (boardId != null ? " and t.board_id = ? " : "") + " order by t.id";
+                ) """ + (project != null && !project.isBlank() ? " and p.code = ? " : "")
+                + (boardId != null ? " and t.board_id = ? " : "") + " order by t.id";
 
-        List<Map<String, Object>> rows = boardId == null
-                ? jdbcTemplate.queryForList(sql)
-                : jdbcTemplate.queryForList(sql, boardId);
+        List<Map<String, Object>> rows;
+        if (project != null && !project.isBlank() && boardId != null) {
+            rows = jdbcTemplate.queryForList(sql, project, boardId);
+        } else if (project != null && !project.isBlank()) {
+            rows = jdbcTemplate.queryForList(sql, project);
+        } else if (boardId != null) {
+            rows = jdbcTemplate.queryForList(sql, boardId);
+        } else {
+            rows = jdbcTemplate.queryForList(sql);
+        }
 
         Map<Long, List<Map<String, Object>>> subtasksByTask = loadSubtasksByTaskId();
         List<Map<String, Object>> tasks = new ArrayList<>();
@@ -290,7 +316,7 @@ public class LegacyDataApiController {
             t.put("priority", row.get("priority"));
             t.put("dueDate", toUiDate(row.get("due_date")));
             t.put("assignee", row.get("assignee_name"));
-            t.put("assigneeAvatar", row.get("assignee_avatar") != null ? row.get("assignee_avatar") : "basic_avatar.png");
+            t.put("assigneeAvatar", row.get("assignee_avatar"));
             t.put("stage", row.get("stage"));
             t.put("subtasks", subtasksByTask.getOrDefault(taskId, List.of()));
             tasks.add(t);
@@ -300,13 +326,75 @@ public class LegacyDataApiController {
         return out;
     }
 
+    @PostMapping("/api/kanban/tasks/move")
+    public Map<String, Object> moveKanbanTask(@RequestBody Map<String, Object> payload) {
+        Number taskIdNum = (Number) payload.get("taskId");
+        Number boardIdNum = (Number) payload.get("boardId");
+        String stage = payload.get("stage") == null ? null : String.valueOf(payload.get("stage"));
+        String priority = payload.get("priority") == null ? null : String.valueOf(payload.get("priority"));
+        if (taskIdNum == null || boardIdNum == null || stage == null || stage.isBlank()) {
+            throw new IllegalArgumentException("taskId, boardId и stage обязательны");
+        }
+        long taskId = taskIdNum.longValue();
+        long boardId = boardIdNum.longValue();
+        Long uid = currentUserId();
+        int updated = jdbcTemplate.update(
+                """
+                update task_item
+                set board_id = ?, stage = ?, priority = ?, updated_at = now()
+                where id = ?
+                """,
+                boardId,
+                stage,
+                (priority == null || priority.isBlank()) ? "обычный" : priority,
+                taskId
+        );
+        if (updated == 0) {
+            throw new IllegalArgumentException("Задача не найдена");
+        }
+        jdbcTemplate.update(
+                "insert into task_status_history(task_id, changed_by, old_stage, new_stage, changed_at) values (?, ?, ?, ?, now())",
+                taskId, uid, null, stage
+        );
+        return Map.of("ok", true);
+    }
+
+    @PostMapping("/api/kanban/subtasks/toggle")
+    public Map<String, Object> toggleSubtask(@RequestBody Map<String, Object> payload) {
+        Number subtaskIdNum = (Number) payload.get("subtaskId");
+        Object completedRaw = payload.get("completed");
+        if (subtaskIdNum == null || completedRaw == null) {
+            throw new IllegalArgumentException("subtaskId и completed обязательны");
+        }
+        boolean completed = Boolean.parseBoolean(String.valueOf(completedRaw));
+        long subtaskId = subtaskIdNum.longValue();
+        String stage = jdbcTemplate.queryForObject(
+                """
+                select t.stage
+                from subtask s
+                join task_item t on t.id = s.task_id
+                where s.id = ?
+                """,
+                String.class,
+                subtaskId
+        );
+        if ("Очередь".equals(stage)) {
+            throw new IllegalStateException("Нельзя менять подзадачи в статусе Очередь");
+        }
+        int updated = jdbcTemplate.update("update subtask set completed = ? where id = ?", completed, subtaskId);
+        if (updated == 0) {
+            throw new IllegalArgumentException("Подзадача не найдена");
+        }
+        return Map.of("ok", true);
+    }
+
     @GetMapping("/api/tasks")
     public List<Map<String, Object>> tasksTable() {
         String visibleProjectsSql = inClauseSql(visibleProjectIds());
         return jdbcTemplate.query(
                 """
                 select
-                    t.id, t.task_code, t.name, t.stage, t.priority, t.due_date,
+                    t.id, t.task_code, t.name, t.stage, t.priority, t.due_date, t.created_at, t.updated_at,
                     t.story_points, t.estimate_hours,
                     a.full_name as assignee_name,
                     a.avatar_file as assignee_avatar,
@@ -325,27 +413,81 @@ public class LegacyDataApiController {
                 (rs, rowNum) -> {
                     Map<String, Object> m = new LinkedHashMap<>();
                     String dueDate = toUiDate(rs.getDate("due_date"));
-                    if (dueDate == null) {
-                        dueDate = LocalDate.now().plusDays(7).format(DATE_FMT);
-                    }
+                    String stage = rs.getString("stage");
                     m.put("id", rs.getString("task_code") != null ? rs.getString("task_code") : "TSK-" + rs.getLong("id"));
                     m.put("name", rs.getString("name"));
-                    m.put("status", toLegacyStatus(rs.getString("stage")));
+                    m.put("status", toLegacyStatus(stage));
                     m.put("dueDate", dueDate);
+                    m.put("completedDate", "Готово".equals(stage) ? toUiDate(rs.getDate("updated_at")) : null);
                     m.put("priority", rs.getString("priority"));
-                    m.put("createdDate", dueDate);
+                    m.put("createdDate", toUiDate(rs.getDate("created_at")));
                     m.put("complexity", rs.getObject("story_points") != null ? rs.getInt("story_points") : 3);
                     String estimate = rs.getObject("estimate_hours") != null ? rs.getBigDecimal("estimate_hours").toPlainString() : "8";
                     m.put("timeEstimate", estimate + "ч");
                     m.put("creator", rs.getString("creator_name"));
                     m.put("creatorRole", "manager");
                     m.put("creatorAvatar", rs.getString("creator_avatar") != null ? rs.getString("creator_avatar") : "basic_avatar.png");
-                    m.put("assignee", rs.getString("assignee_name"));
+                    m.put("assignee", rs.getString("assignee_name") != null ? rs.getString("assignee_name") : "—");
                     m.put("assigneeRole", "member");
-                    m.put("assigneeAvatar", rs.getString("assignee_avatar") != null ? rs.getString("assignee_avatar") : "basic_avatar.png");
+                    m.put("assigneeAvatar", rs.getString("assignee_avatar"));
                     m.put("project", rs.getString("project_name"));
                     return m;
                 });
+    }
+
+    @GetMapping("/api/tasks/assigned")
+    public List<Map<String, Object>> assignedTasks() {
+        Long uid = currentUserId();
+        String visibleProjectsSql = inClauseSql(visibleProjectIds());
+        return jdbcTemplate.query(
+                """
+                select
+                    t.id, t.task_code, t.name, t.stage, t.priority, t.due_date, t.created_at, t.updated_at,
+                    t.story_points, t.estimate_hours,
+                    a.full_name as assignee_name,
+                    a.avatar_file as assignee_avatar,
+                    c.full_name as creator_name,
+                    c.avatar_file as creator_avatar,
+                    p.name as project_name
+                from task_item t
+                left join app_user a on a.id = t.assignee_id
+                left join app_user c on c.id = t.creator_id
+                left join board b on b.id = t.board_id
+                left join project p on p.id = b.project_id
+                where p.id in (""" + visibleProjectsSql + """
+                )
+                  and t.assignee_id = ?
+                  and coalesce(t.stage, 'Очередь') <> 'Готово'
+                order by
+                  case when t.priority = 'срочно' then 0 else 1 end,
+                  t.due_date nulls last,
+                  t.id
+                """,
+                (rs, rowNum) -> {
+                    Map<String, Object> m = new LinkedHashMap<>();
+                    String dueDate = toUiDate(rs.getDate("due_date"));
+                    String stage = rs.getString("stage");
+                    m.put("id", rs.getString("task_code") != null ? rs.getString("task_code") : "TSK-" + rs.getLong("id"));
+                    m.put("name", rs.getString("name"));
+                    m.put("status", toLegacyStatus(stage));
+                    m.put("dueDate", dueDate);
+                    m.put("completedDate", null);
+                    m.put("priority", rs.getString("priority"));
+                    m.put("createdDate", toUiDate(rs.getDate("created_at")));
+                    m.put("complexity", rs.getObject("story_points") != null ? rs.getInt("story_points") : 3);
+                    String estimate = rs.getObject("estimate_hours") != null ? rs.getBigDecimal("estimate_hours").toPlainString() : "8";
+                    m.put("timeEstimate", estimate + "ч");
+                    m.put("creator", rs.getString("creator_name"));
+                    m.put("creatorRole", "manager");
+                    m.put("creatorAvatar", rs.getString("creator_avatar") != null ? rs.getString("creator_avatar") : "basic_avatar.png");
+                    m.put("assignee", rs.getString("assignee_name") != null ? rs.getString("assignee_name") : "—");
+                    m.put("assigneeRole", "member");
+                    m.put("assigneeAvatar", rs.getString("assignee_avatar"));
+                    m.put("project", rs.getString("project_name"));
+                    return m;
+                },
+                uid
+        );
     }
 
     @GetMapping("/api/projects")
@@ -358,6 +500,7 @@ public class LegacyDataApiController {
                     p.name,
                     p.summary,
                     p.code,
+                    p.project_type,
                     count(distinct pm.user_id) as team_count,
                     count(distinct b.id) as board_count,
                     count(distinct t.id) as task_count,
@@ -370,9 +513,10 @@ public class LegacyDataApiController {
                 left join board b on b.project_id = p.id
                 left join task_item t on t.board_id = b.id
                 where my.team_id = ?
-                group by p.id, p.name, p.summary, p.code
+                  and p.project_type in ('list', 'kanban')
+                group by p.id, p.name, p.summary, p.code, p.project_type
                 order by p.id
-                limit 4
+                limit 2
                 """,
                 (rs, rowNum) -> {
                     Map<String, Object> row = new LinkedHashMap<>();
@@ -380,6 +524,7 @@ public class LegacyDataApiController {
                     row.put("name", rs.getString("name"));
                     row.put("summary", rs.getString("summary"));
                     row.put("code", rs.getString("code"));
+                    row.put("type", rs.getString("project_type"));
                     row.put("teamCount", rs.getInt("team_count"));
                     row.put("boardCount", rs.getInt("board_count"));
                     row.put("taskCount", rs.getInt("task_count"));
@@ -388,7 +533,7 @@ public class LegacyDataApiController {
                     int listBoards = rs.getInt("list_board_count");
                     row.put("kanbanBoardCount", kanbanBoards);
                     row.put("listBoardCount", listBoards);
-                    row.put("view", kanbanBoards > 0 ? "kanban" : "list");
+                    row.put("view", "kanban".equals(rs.getString("project_type")) ? "kanban" : "list");
                     return row;
                 },
                 teamId
@@ -416,7 +561,7 @@ public class LegacyDataApiController {
                   and p.id in (""" + visibleProjectsSql + """
                 )
                 order by t.due_date nulls last, t.id
-                limit 5
+                limit 10
                 """,
                 (rs, rowNum) -> {
                     Map<String, Object> row = new LinkedHashMap<>();
@@ -686,12 +831,13 @@ public class LegacyDataApiController {
 
     private Map<Long, List<Map<String, Object>>> loadSubtasksByTaskId() {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(
-                "select task_id, name, completed from subtask order by id");
+                "select id, task_id, name, completed from subtask order by id");
         Map<Long, List<Map<String, Object>>> map = new LinkedHashMap<>();
         for (Map<String, Object> r : rows) {
             Long taskId = ((Number) r.get("task_id")).longValue();
             List<Map<String, Object>> list = map.computeIfAbsent(taskId, k -> new ArrayList<>());
             Map<String, Object> st = new LinkedHashMap<>();
+            st.put("id", ((Number) r.get("id")).longValue());
             st.put("name", r.get("name"));
             st.put("completed", r.get("completed"));
             list.add(st);
@@ -702,6 +848,7 @@ public class LegacyDataApiController {
     private String toLegacyStatus(String stage) {
         if (stage == null) return "neutral";
         return switch (stage) {
+            case "Новая" -> "neutral";
             case "В работе" -> "inprocess";
             case "Готово" -> "done";
             case "Тестирование" -> "inprocess";
@@ -780,11 +927,12 @@ public class LegacyDataApiController {
     private int stageOrder(String stage) {
         if (stage == null) return 99;
         return switch (stage) {
-            case "Очередь" -> 1;
-            case "В работе" -> 2;
-            case "Тестирование" -> 3;
-            case "Готово" -> 4;
-            case "Отложено" -> 5;
+            case "Новая" -> 1;
+            case "Очередь" -> 2;
+            case "В работе" -> 3;
+            case "Тестирование" -> 4;
+            case "Готово" -> 5;
+            case "Отложено" -> 6;
             default -> 99;
         };
     }
@@ -810,6 +958,10 @@ public class LegacyDataApiController {
             d = ld;
         } else {
             return String.valueOf(sqlDateObj);
+        }
+        LocalDate now = LocalDate.now();
+        if (d.getYear() == now.getYear()) {
+            return String.format("%02d.%02d", d.getDayOfMonth(), d.getMonthValue());
         }
         return d.format(DATE_FMT);
     }

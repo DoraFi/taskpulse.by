@@ -1,14 +1,35 @@
+function getApiBasePath() {
+    const m = window.location.pathname.match(/^\/o\/([^/]+)\/t\/([^/]+)/);
+    if (!m) return '/api';
+    return `/o/${m[1]}/t/${m[2]}/api`;
+}
+
+function apiUrl(path) {
+    return `${getApiBasePath()}${path}`;
+}
+
 function initProjectsPage() {
     const grid = document.querySelector('.projects-grid');
     if (!grid) return;
 
-    fetch('/api/projects')
-        .then(r => r.ok ? r.json() : Promise.reject(new Error('projects api failed')))
-        .then(projects => {
+    Promise.all([fetch(apiUrl('/projects')), fetch(apiUrl('/me'))])
+        .then(([projectsRes, meRes]) => {
+            if (!projectsRes.ok) throw new Error('projects api failed');
+            if (!meRes.ok) throw new Error('me api failed');
+            return Promise.all([projectsRes.json(), meRes.json()]);
+        })
+        .then(([projects, me]) => {
             if (!Array.isArray(projects) || !projects.length) return;
+            const orgId = me.organizationPublicId;
+            const teamId = me.teamPublicId;
             grid.innerHTML = projects.map((p, idx) => {
                 const isKanban = p.view === 'kanban';
-                const href = isKanban ? '/kanban' : '/boards';
+                const projectCode = encodeURIComponent(p.code || '');
+                const href = (orgId && teamId && projectCode)
+                    ? (isKanban
+                        ? `/o/${encodeURIComponent(orgId)}/t/${encodeURIComponent(teamId)}/p/${projectCode}/kanban?project=${projectCode}`
+                        : `/o/${encodeURIComponent(orgId)}/t/${encodeURIComponent(teamId)}/p/${projectCode}/boards?project=${projectCode}`)
+                    : (isKanban ? `/kanban?project=${projectCode}` : `/boards?project=${projectCode}`);
                 const mode = isKanban ? 'Kanban' : 'List';
                 const chip = p.doneCount > 0 ? 'Активен' : 'Новый';
                 return `

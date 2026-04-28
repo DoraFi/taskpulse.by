@@ -4,12 +4,29 @@
     let teamMembers = [];
     let currentView = 'board';
 
-    const KANBAN_STORAGE_KEY = 'kanbanBoardsData';
     const KANBAN_DATA_VERSION_KEY = 'kanbanDataVersion';
-    const KANBAN_DATA_VERSION = '5';
+    const KANBAN_DATA_VERSION = '7';
     const KANBAN_COLLAPSE_KEY = 'kanbanBoardCollapsed';
     const KANBAN_SECTION_COLLAPSE_KEY = 'kanbanSectionCollapsed';
     const KANBAN_TIMELINE_SHOW_DONE_KEY = 'kanbanTimelineShowDone';
+
+    function getApiBasePath() {
+        const m = window.location.pathname.match(/^\/o\/([^/]+)\/t\/([^/]+)/);
+        if (!m) return '/api';
+        return `/o/${m[1]}/t/${m[2]}/api`;
+    }
+
+    function apiUrl(path) {
+        return `${getApiBasePath()}${path}`;
+    }
+
+    function scopedApiUrl(url) {
+        if (!url) return url;
+        if (url.startsWith('/api/')) {
+            return `${getApiBasePath()}${url.slice('/api'.length)}`;
+        }
+        return url;
+    }
 
     function getTimelineShowDone() {
         const v = localStorage.getItem(KANBAN_TIMELINE_SHOW_DONE_KEY);
@@ -35,6 +52,12 @@
         if (!dateStr) return new Date(9999, 11, 31);
         if (typeof dateStr === 'string' && dateStr.includes('.')) {
             const parts = dateStr.split('.');
+            if (parts.length === 2) {
+                const [day, month] = parts;
+                const year = String(new Date().getFullYear());
+                const date = new Date(year, month - 1, day);
+                return isNaN(date.getTime()) ? new Date(9999, 11, 31) : date;
+            }
             if (parts.length === 3) {
                 const [day, month, year] = parts;
                 const date = new Date(year, month - 1, day);
@@ -61,12 +84,20 @@
         if (diff === 1) return 'Завтра';
         let year, month, day;
         if (dateStr.includes('.')) {
-            [day, month, year] = dateStr.split('.');
-            return `${day}.${month}.${year}`;
+            const parts = dateStr.split('.');
+            if (parts.length === 2) {
+                [day, month] = parts;
+                return `${day}.${month}`;
+            }
+            [day, month, year] = parts;
+            const currentYear = String(new Date().getFullYear());
+            return year === currentYear ? `${day}.${month}` : `${day}.${month}.${year}`;
         }
         if (dateStr.includes('-')) {
             [year, month, day] = dateStr.split('-');
-            return `${day}.${month}.${year}`;
+            if (!year) return `${day}.${month}`;
+            const currentYear = String(new Date().getFullYear());
+            return year === currentYear ? `${day}.${month}` : `${day}.${month}.${year}`;
         }
         return dateStr;
     }
@@ -370,7 +401,7 @@
     }
 
     function saveKanbanToLocalStorage() {
-        localStorage.setItem(KANBAN_STORAGE_KEY, JSON.stringify({ boards: kanbanBoards, tasks: kanbanTasks }));
+        // Источник правды — API сервера, не localStorage.
     }
 
     function ensureBoardsForTasks() {
@@ -411,17 +442,25 @@
     }
 
     function loadKanbanFromLocalStorage() {
-        const saved = localStorage.getItem(KANBAN_STORAGE_KEY);
-        if (!saved) return false;
-        try {
-            const parsed = JSON.parse(saved);
-            kanbanBoards = parsed.boards || [];
-            kanbanTasks = parsed.tasks || [];
-            migrateKanbanData();
-            return true;
-        } catch {
-            return false;
-        }
+        return false;
+    }
+
+    async function persistTaskMove(taskId, boardId, stage, priority) {
+        const res = await fetch(apiUrl('/kanban/tasks/move'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ taskId, boardId, stage, priority })
+        });
+        if (!res.ok) throw new Error('Не удалось сохранить перемещение задачи');
+    }
+
+    async function persistSubtaskToggle(subtaskId, completed) {
+        const res = await fetch(apiUrl('/kanban/subtasks/toggle'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ subtaskId, completed })
+        });
+        if (!res.ok) throw new Error('Не удалось обновить подзадачу');
     }
 
     function getCollapseMap(key) {
@@ -444,7 +483,7 @@
 
     async function loadTeamData() {
         try {
-            const res = await fetch('/api/team');
+            const res = await fetch(apiUrl('/team'));
             if (!res.ok) throw new Error('Ошибка загрузки команды');
             teamMembers = await res.json();
         } catch {
@@ -453,7 +492,10 @@
     }
 
     async function loadKanbanData() {
-        const res = await fetch('/api/kanban/boards');
+        const params = new URLSearchParams(window.location.search);
+        const project = params.get('project');
+        const boardsUrl = project ? apiUrl(`/kanban/boards?project=${encodeURIComponent(project)}`) : apiUrl('/kanban/boards');
+        const res = await fetch(boardsUrl);
         if (!res.ok) throw new Error('Ошибка загрузки kanban boards');
         const data = await res.json();
         kanbanBoards = data.boards || [];
@@ -463,8 +505,9 @@
             if (!Array.isArray(b.archivedTasks)) b.archivedTasks = [];
         });
 
-        const boardSources = kanbanBoards.map(b => b.tasksSource).filter(Boolean);
-        const sources = new Set(boardSources.length ? boardSources : ['/api/kanban/tasks']);
+        const boardSources = kanbanBoards.map(b => scopedApiUrl(b.tasksSource)).filter(Boolean);
+        const defaultSource = project ? apiUrl(`/kanban/tasks?project=${encodeURIComponent(project)}`) : apiUrl('/kanban/tasks');
+        const sources = new Set(boardSources.length ? boardSources : [defaultSource]);
         const seenTasks = new Set();
         for (const url of sources) {
             const tRes = await fetch(url);
@@ -557,7 +600,8 @@
     }
 
     function findKanbanTask(taskId, boardId) {
-        return kanbanTasks.find(t => Number(t.id) === Number(taskId) && Number(t.boardId) === Number(boardId));
+        return kanbanTasks.find(t => Number(t.id) === Number(taskId) && Number(t.boardId) === Number(boardId))
+            || kanbanTasks.find(t => Number(t.id) === Number(taskId));
     }
 
     function nextKanbanTaskId(boardId) {
@@ -1173,7 +1217,7 @@
     }
 
     function subtasksReadOnly(stage) {
-        return stage === 'Готово';
+        return stage === 'Готово' || stage === 'Очередь';
     }
 
     function createSubtasksBlockKanban(task, stage) {
@@ -1210,9 +1254,12 @@
                 const cb = subtaskItem.querySelector('input');
                 cb.addEventListener('change', e => {
                     e.stopPropagation();
-                    subtask.completed = cb.checked;
-                    saveKanbanToLocalStorage();
-                    renderCurrentView();
+                    persistSubtaskToggle(subtask.id, cb.checked)
+                        .then(() => loadKanbanData().then(renderCurrentView))
+                        .catch(() => {
+                            cb.checked = !cb.checked;
+                            showToast('Подзадачи нельзя менять в текущем статусе');
+                        });
                 });
             }
             subtasksList.appendChild(subtaskItem);
@@ -1335,9 +1382,12 @@
                 if (!ro) {
                     const cb = subtaskItem.querySelector('input');
                     cb.addEventListener('change', () => {
-                        subtask.completed = cb.checked;
-                        saveKanbanToLocalStorage();
-                        renderCurrentView();
+                        persistSubtaskToggle(subtask.id, cb.checked)
+                            .then(() => loadKanbanData().then(renderCurrentView))
+                            .catch(() => {
+                                cb.checked = !cb.checked;
+                                showToast('Подзадачи нельзя менять в текущем статусе');
+                            });
                     });
                 }
                 subtasksList.appendChild(subtaskItem);
@@ -1483,8 +1533,12 @@
                     if (movedFromDone) task.subtasks = task.subtasks.map(st => ({ ...st, completed: false }));
                 }
 
-                saveKanbanToLocalStorage();
-                renderCurrentView();
+                persistTaskMove(task.id, Number(task.boardId), task.stage, task.priority)
+                    .then(() => loadKanbanData().then(renderCurrentView))
+                    .catch(() => {
+                        showToast('Не удалось сохранить перемещение');
+                        loadKanbanData().then(renderCurrentView);
+                    });
             },
             onCancel() {
                 if (cardsContainer) cardsContainer.classList.remove('dragging-active');
@@ -1662,8 +1716,12 @@
                         }
                         kanbanTasks = [...without.slice(0, insertAt), ...reordered, ...without.slice(insertAt)];
                     }
-                    saveKanbanToLocalStorage();
-                    renderCurrentView();
+                    persistTaskMove(task.id, Number(task.boardId), task.stage, task.priority)
+                        .then(() => loadKanbanData().then(renderCurrentView))
+                        .catch(() => {
+                            showToast('Не удалось сохранить перемещение');
+                            loadKanbanData().then(renderCurrentView);
+                        });
                 },
                 onCancel() {
                     if (cardsContainer) cardsContainer.classList.remove('dragging-active');
@@ -2309,7 +2367,7 @@
         container.className = 'cards reports-view';
         container.innerHTML = '<div class="card board-reports-card"><p class="text-basic">Загрузка отчёта...</p></div>';
 
-        fetch('/api/reports/projects?mode=kanban')
+        fetch(apiUrl('/reports/projects?mode=kanban'))
             .then(r => r.ok ? r.json() : Promise.reject(new Error('reports api failed')))
             .then(data => {
                 const summaryData = data.summary || {};
@@ -2463,15 +2521,8 @@
     async function initBoardKanbanPage() {
         if (!document.querySelector('.board-kanban')) return;
         await loadTeamData();
-        const hasLocal = loadKanbanFromLocalStorage();
-        const versionOk = localStorage.getItem(KANBAN_DATA_VERSION_KEY) === KANBAN_DATA_VERSION;
-        if (!hasLocal || !versionOk) {
-            await loadKanbanData();
-            saveKanbanToLocalStorage();
-            localStorage.setItem(KANBAN_DATA_VERSION_KEY, KANBAN_DATA_VERSION);
-        } else {
-            migrateKanbanData();
-        }
+        await loadKanbanData();
+        localStorage.setItem(KANBAN_DATA_VERSION_KEY, KANBAN_DATA_VERSION);
         initViewSwitching();
         renderCurrentView();
     }

@@ -1,21 +1,21 @@
 <nav>
     <ul>
         <li class="item">
-            <button class="nav-link text-header" data-href="/">TaskPulse</button>
+            <button class="nav-link text-header" data-context-link="home">TaskPulse</button>
         </li>
         <li class="item">
-            <button class="nav-link text-basic" data-href="/tasks">Задачи</button>
+            <button class="nav-link text-basic" data-context-link="tasks">Задачи</button>
         </li>
         <li class="item">
             <div class="item-header">
                 <span class="arrow-wrapper">
                     <img src="/static/source/icons/arrow_dark_cropped.svg" th:src="@{/static/source/icons/arrow_dark_cropped.svg}" alt="" class="arrow-img">
                 </span>
-                <button class="nav-link text-basic" data-href="/projects">Проекты</button>
+                <button class="nav-link text-basic" data-context-link="projects">Проекты</button>
             </div>
             <ul class="submenu" id="teamProjectsMenu">
-                <li><button class="nav-link" data-href="/boards">Проект "Список"</button></li>
-                <li><button class="nav-link" data-href="/kanban">Проект "Kanban"</button></li>
+                <li><button class="nav-link">Проект "Список"</button></li>
+                <li><button class="nav-link">Проект "Kanban"</button></li>
             </ul>
         </li>
         <li class="item">

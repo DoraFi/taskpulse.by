@@ -1,68 +1,49 @@
 package by.taskpulse.config;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 @Component
 public class JsonDatabaseSeeder implements ApplicationRunner {
 
-    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-    private static final int DEMO_DATE_SHIFT_DAYS = 25;
-
     private final JdbcTemplate jdbcTemplate;
-    private final ObjectMapper objectMapper;
-    private final ResourceLoader resourceLoader;
 
-    public JsonDatabaseSeeder(JdbcTemplate jdbcTemplate, ObjectMapper objectMapper, ResourceLoader resourceLoader) {
+    public JsonDatabaseSeeder(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.objectMapper = objectMapper;
-        this.resourceLoader = resourceLoader;
     }
 
     @Override
     @Transactional
-    public void run(ApplicationArguments args) throws Exception {
-        seedFromJson();
+    public void run(ApplicationArguments args) {
+        seedFromDatabase();
     }
 
-    private void seedFromJson() throws IOException {
-        JsonNode team = readJson("file:./static/data/team.json");
-        JsonNode boardsJson = readJson("file:./static/data/boards.json");
-        JsonNode kanbanBoardsJson = readJson("file:./static/data/kanban.json");
-        JsonNode kanbanTasksJson = readJson("file:./static/data/kanban_tasks.json");
-        JsonNode tasksJson = readJson("file:./static/data/tasks.json");
-
+    private void seedFromDatabase() {
         truncateAll();
 
         jdbcTemplate.update("insert into organization(id, name) values ('TPB', 'TaskPulse BY')");
-        jdbcTemplate.update(
-                "insert into app_team(organization_id, code, name) values ('TPB', 'DEV', 'Команда разработки TaskPulse')");
+        jdbcTemplate.update("insert into app_team(organization_id, code, name) values ('TPB', 'DEV', 'Команда разработки TaskPulse')");
         Long teamId = jdbcTemplate.queryForObject("select id from app_team where organization_id='TPB' and code='DEV'", Long.class);
 
+        List<Map<String, Object>> members = jdbcTemplate.queryForList(
+                "select full_name, role_label, avatar_file, is_lead from seed_team_member order by position_no");
         Map<String, Long> userByName = new HashMap<>();
-        for (JsonNode person : team) {
-            String name = text(person, "name");
-            String role = text(person, "role");
-            String avatar = text(person, "avatar");
+        for (Map<String, Object> m : members) {
+            String name = String.valueOf(m.get("full_name"));
+            String role = String.valueOf(m.get("role_label"));
+            String avatar = m.get("avatar_file") == null ? "basic_avatar.png" : String.valueOf(m.get("avatar_file"));
             String username = toUsername(name);
             String email = username + "@taskpulse.by";
             jdbcTemplate.update(
@@ -72,225 +53,191 @@ public class JsonDatabaseSeeder implements ApplicationRunner {
                       phone, timezone, office, bio, department, position, avatar_file, team_joined_at
                     ) values (?, ?, ?, 'TPB', ?, true, ?, 'Europe/Minsk', ?, ?, ?, ?, ?, ?)
                     """,
-                    email,
-                    name,
-                    "$2a$10$json.seed.password",
-                    username,
-                    "+375 (29) 000-00-00",
-                    "Минск",
-                    "Участник команды TaskPulse",
-                    "Разработка",
-                    role,
-                    avatar == null || avatar.isBlank() ? "basic_avatar.png" : avatar,
-                    Date.valueOf(LocalDate.of(2024, 10, 1))
+                    email, name, "$2a$10$json.seed.password", username,
+                    "+375 (29) 000-00-00", "Минск", "Участник команды TaskPulse",
+                    "Разработка", role, avatar, Date.valueOf(LocalDate.of(2024, 10, 1))
             );
-            Long userId = jdbcTemplate.queryForObject("select id from app_user where username = ?", Long.class, username);
-            userByName.put(name, userId);
+            Long uid = jdbcTemplate.queryForObject("select id from app_user where username = ?", Long.class, username);
+            userByName.put(name, uid);
+            String membershipRole = Boolean.TRUE.equals(m.get("is_lead")) ? "lead" : "member";
+            jdbcTemplate.update("insert into team_membership(team_id, user_id, role) values (?, ?, ?)", teamId, uid, membershipRole);
+        }
+
+        Long ownerId = userByName.getOrDefault("Дарья Швед", jdbcTemplate.queryForObject("select min(id) from app_user", Long.class));
+        List<Map<String, Object>> templates = jdbcTemplate.queryForList(
+                "select code, project_type, name, summary, board_count, tasks_per_stage from seed_project_template order by id");
+
+        Map<String, Long> projectIdByCode = new HashMap<>();
+        for (Map<String, Object> t : templates) {
+            String code = String.valueOf(t.get("code"));
+            String type = String.valueOf(t.get("project_type"));
+            String name = String.valueOf(t.get("name"));
+            String summary = t.get("summary") == null ? "" : String.valueOf(t.get("summary"));
             jdbcTemplate.update(
-                    "insert into team_membership(team_id, user_id, role) values (?, ?, ?)",
-                    teamId,
-                    userId,
-                    "Дарья Швед".equals(name) ? "lead" : "member"
+                    "insert into project(name, owner_id, organization_id, code, project_type, summary) values (?, ?, 'TPB', ?, ?, ?)",
+                    name, ownerId, code, type, summary
             );
-        }
-
-        Long ownerId = userByName.getOrDefault("Дарья Швед",
-                jdbcTemplate.queryForObject("select min(id) from app_user", Long.class));
-
-        jdbcTemplate.update(
-                "insert into project(name, owner_id, organization_id, code, summary) values (?, ?, 'TPB', 'LST', ?)",
-                "Проект Список",
-                ownerId,
-                "Списки и табличное управление задачами команды"
-        );
-        jdbcTemplate.update(
-                "insert into project(name, owner_id, organization_id, code, summary) values (?, ?, 'TPB', 'WCL', ?)",
-                "Проект Kanban",
-                ownerId,
-                "Kanban-доски и поток задач команды"
-        );
-        Long listProjectId = jdbcTemplate.queryForObject("select id from project where code='LST'", Long.class);
-        Long kanProjectId = jdbcTemplate.queryForObject("select id from project where code='WCL'", Long.class);
-
-        jdbcTemplate.update("insert into project_team(project_id, team_id) values (?, ?)", listProjectId, teamId);
-        jdbcTemplate.update("insert into project_team(project_id, team_id) values (?, ?)", kanProjectId, teamId);
-
-        for (Map.Entry<String, Long> e : userByName.entrySet()) {
-            String role = "contributor";
-            if ("Дарья Швед".equals(e.getKey())) role = "owner";
-            if ("Оксана Кветко".equals(e.getKey())) role = "manager";
-            jdbcTemplate.update("insert into project_member(project_id, user_id, role) values (?, ?, ?)", listProjectId, e.getValue(), role);
-            jdbcTemplate.update("insert into project_member(project_id, user_id, role) values (?, ?, ?)", kanProjectId, e.getValue(), role);
-        }
-
-        Map<Long, Long> listBoardIdMap = new HashMap<>();
-        Set<String> usedTaskCodes = new HashSet<>();
-        for (JsonNode b : boardsJson.path("boards")) {
-            long originalId = b.path("id").asLong();
-            String boardName = text(b, "name");
-            jdbcTemplate.update(
-                    "insert into board(id, name, project_id, code) values (?, ?, ?, ?)",
-                    originalId,
-                    boardName,
-                    listProjectId,
-                    "LIST_" + originalId
-            );
-            listBoardIdMap.put(originalId, originalId);
-        }
-
-        Map<Long, Long> kanbanBoardIdMap = new HashMap<>();
-        for (JsonNode b : kanbanBoardsJson.path("boards")) {
-            long originalId = b.path("id").asLong();
-            String boardName = text(b, "name");
-            jdbcTemplate.update(
-                    "insert into board(id, name, project_id, code) values (?, ?, ?, ?)",
-                    1000 + originalId,
-                    boardName,
-                    kanProjectId,
-                    "KANBAN_" + originalId
-            );
-            kanbanBoardIdMap.put(originalId, 1000 + originalId);
-        }
-
-        for (JsonNode boardNode : boardsJson.path("boards")) {
-            long boardId = listBoardIdMap.get(boardNode.path("id").asLong());
-            for (JsonNode task : boardNode.path("tasks")) {
-                insertTask(task, boardId, userByName, "LST", usedTaskCodes);
+            Long pid = jdbcTemplate.queryForObject("select id from project where code = ?", Long.class, code);
+            projectIdByCode.put(code, pid);
+            jdbcTemplate.update("insert into project_team(project_id, team_id) values (?, ?)", pid, teamId);
+            for (Map.Entry<String, Long> e : userByName.entrySet()) {
+                String role = "contributor";
+                if ("Дарья Швед".equals(e.getKey())) role = "owner";
+                if ("Оксана Кветко".equals(e.getKey())) role = "manager";
+                jdbcTemplate.update("insert into project_member(project_id, user_id, role) values (?, ?, ?)", pid, e.getValue(), role);
             }
         }
 
-        for (JsonNode task : kanbanTasksJson.path("tasks")) {
-            long srcBoardId = task.path("boardId").asLong();
-            Long mapped = kanbanBoardIdMap.get(srcBoardId);
-            if (mapped == null) continue;
-            insertTask(task, mapped, userByName, "WCL", usedTaskCodes);
-        }
+        long nextBoardId = 1L;
+        long nextTaskId = 1L;
+        LocalDate baseDate = LocalDate.of(2026, 4, 26);
+        List<Long> creatorPool = new ArrayList<>(userByName.values());
+        List<Long> assigneePool = new ArrayList<>(userByName.values());
 
-        long backlogBoardId = 1999L;
-        jdbcTemplate.update(
-                "insert into board(id, name, project_id, code) values (?, ?, ?, ?)",
-                backlogBoardId,
-                "Бэклог команды",
-                listProjectId,
-                "LIST_BACKLOG"
-        );
-        long syntheticId = 50000L;
-        for (JsonNode task : tasksJson) {
-            String code = text(task, "id");
-            String name = text(task, "name");
-            String priority = text(task, "priority");
-            String dueDate = text(task, "dueDate");
-            String assignee = text(task, "assignee");
-            String creator = text(task, "creator");
-            String status = text(task, "status");
-            Integer sp = task.hasNonNull("complexity") ? task.path("complexity").asInt() : null;
-            String timeEstimate = text(task, "timeEstimate");
-            BigDecimal estimate = parseHours(timeEstimate);
+        for (Map<String, Object> t : templates) {
+            String projectCode = String.valueOf(t.get("code"));
+            String projectType = String.valueOf(t.get("project_type"));
+            int boardCount = ((Number) t.get("board_count")).intValue();
+            int tasksPerStage = ((Number) t.get("tasks_per_stage")).intValue();
+            Long projectId = projectIdByCode.get(projectCode);
 
-            if (code == null || code.isBlank() || usedTaskCodes.contains(code)) {
-                code = uniqueTaskCode("WCL", syntheticId, usedTaskCodes);
-            } else {
-                usedTaskCodes.add(code);
+            List<Map<String, Object>> boardTemplates = jdbcTemplate.queryForList(
+                    "select board_name from seed_board_template where project_type = ? order by position_no", projectType);
+            for (int bi = 0; bi < boardCount; bi++) {
+                if (boardTemplates.isEmpty() || bi >= boardTemplates.size()) {
+                    throw new IllegalStateException(
+                            "Недостаточно шаблонов досок в seed_board_template для project_type=" + projectType);
+                }
+                String boardName = String.valueOf(boardTemplates.get(bi).get("board_name"));
+                String boardCode = projectType.toUpperCase() + "_" + (bi + 1);
+                long boardId = nextBoardId++;
+                jdbcTemplate.update("insert into board(id, name, project_id, code) values (?, ?, ?, ?)", boardId, boardName, projectId, boardCode);
+                List<String> titles = jdbcTemplate.query(
+                        """
+                        select title
+                        from seed_task_catalog
+                        where project_type = ?
+                          and board_name = ?
+                        order by id
+                        """,
+                        (rs, rowNum) -> rs.getString("title"),
+                        projectType,
+                        boardName
+                );
+                if (titles.isEmpty()) {
+                    throw new IllegalStateException(
+                            "В seed_task_catalog нет задач для project_type=" + projectType + ", board_name=" + boardName);
+                }
+                int titleIndex = 0;
+                List<String> boardStages = jdbcTemplate.query(
+                        """
+                        select stage_name
+                        from seed_board_stage_template
+                        where project_type = ?
+                          and board_name = ?
+                        order by position_no
+                        """,
+                        (rs, rowNum) -> rs.getString("stage_name"),
+                        projectType,
+                        boardName
+                );
+                if (boardStages.isEmpty()) {
+                    boardStages = jdbcTemplate.query(
+                            "select stage_name from seed_stage_template where project_type = ? order by position_no",
+                            (rs, rowNum) -> rs.getString("stage_name"),
+                            projectType
+                    );
+                }
+                if (boardStages.isEmpty()) {
+                    throw new IllegalStateException("В seed_stage_template нет этапов для project_type=" + projectType);
+                }
+
+                for (int si = 0; si < boardStages.size(); si++) {
+                    jdbcTemplate.update(
+                            "insert into board_stage(board_id, stage_name, position) values (?, ?, ?)",
+                            boardId, boardStages.get(si), si + 1
+                    );
+                    for (int k = 0; k < tasksPerStage; k++) {
+                        long taskId = nextTaskId++;
+                        String stage = boardStages.get(si);
+                        if (titleIndex >= titles.size()) {
+                            throw new IllegalStateException(
+                                    "Недостаточно уникальных задач в seed_task_catalog для project_type=" + projectType
+                                            + ". Требуется минимум " + (titleIndex + 1) + ", а загружено " + titles.size());
+                        }
+                        String taskName = titles.get(titleIndex++);
+                        String priority = (taskId % 5 == 0) ? "срочно" : "обычный";
+                        LocalDate dueDate = baseDate.plusDays((int) ((taskId * 5 + bi * 3 + si) % 75) - 2);
+                        LocalDate createdDate = dueDate.minusDays(4 + (taskId % 4));
+                        LocalDate updatedDate = "Готово".equals(stage) ? dueDate.plusDays(1) : createdDate.plusDays(2);
+                        Long creatorId = creatorPool.get((int) (taskId % creatorPool.size()));
+
+                        Long assigneeId = null;
+                        if ("Очередь".equals(stage)) {
+                            if (taskId % 7 == 0 && !assigneePool.isEmpty()) {
+                                assigneeId = assigneePool.get((int) (taskId % assigneePool.size()));
+                            }
+                        } else if (!assigneePool.isEmpty()) {
+                            assigneeId = assigneePool.get((int) (taskId % assigneePool.size()));
+                        }
+                        if (taskId % 23 == 0) assigneeId = ownerId;
+
+                        String taskCode = projectCode + "-" + taskId;
+                        jdbcTemplate.update(
+                                """
+                                insert into task_item(
+                                  id, name, stage, priority, due_date, board_id, assignee_id, creator_id, task_code,
+                                  description, story_points, estimate_hours, spent_hours, created_at, updated_at
+                                ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                """,
+                                taskId,
+                                taskName,
+                                stage,
+                                priority,
+                                Date.valueOf(dueDate),
+                                boardId,
+                                assigneeId,
+                                creatorId,
+                                taskCode,
+                                "Автогенерация из seed-конфигурации БД",
+                                Integer.valueOf((int) ((taskId % 8) + 1)),
+                                BigDecimal.valueOf((taskId % 9) + 2),
+                                BigDecimal.valueOf("Готово".equals(stage) ? (taskId % 6) + 1 : 0),
+                                Timestamp.valueOf(createdDate.atTime(10, 0)),
+                                Timestamp.valueOf(updatedDate.atTime(16, 0))
+                        );
+                        jdbcTemplate.update(
+                                "insert into task_status_history(task_id, changed_by, old_stage, new_stage, changed_at) values (?, ?, ?, ?, ?)",
+                                taskId,
+                                assigneeId != null ? assigneeId : creatorId,
+                                "Очередь",
+                                stage,
+                                Timestamp.valueOf(updatedDate.atTime(17, 0))
+                        );
+                        if (taskId % 2 == 0) {
+                            jdbcTemplate.update(
+                                    "insert into subtask(name, completed, task_id, public_id) values (?, ?, ?, ?)",
+                                    "Подготовить уточнения по задаче",
+                                    "Готово".equals(stage),
+                                    taskId,
+                                    taskCode + "-1"
+                            );
+                            jdbcTemplate.update(
+                                    "insert into subtask(name, completed, task_id, public_id) values (?, ?, ?, ?)",
+                                    "Выполнить проверку результата",
+                                    "Готово".equals(stage),
+                                    taskId,
+                                    taskCode + "-2"
+                            );
+                        }
+                    }
+                }
             }
-
-            jdbcTemplate.update(
-                    """
-                    insert into task_item(
-                      id, name, stage, priority, due_date, board_id, assignee_id, creator_id, task_code,
-                      description, story_points, estimate_hours, spent_hours, created_at, updated_at
-                    ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())
-                    """,
-                    syntheticId++,
-                    name,
-                    fromLegacyStatus(status),
-                    priority == null || priority.isBlank() ? "обычный" : priority,
-                    parseDate(dueDate),
-                    backlogBoardId,
-                    userByName.get(assignee),
-                    userByName.get(creator),
-                    code,
-                    "Импортировано из tasks.json",
-                    sp,
-                    estimate,
-                    BigDecimal.ZERO
-            );
         }
 
         jdbcTemplate.execute("select setval('board_id_seq', (select max(id) from board))");
         jdbcTemplate.execute("select setval('task_item_id_seq', (select max(id) from task_item))");
         backfillSubtaskPublicIds();
-    }
-
-    private void insertTask(JsonNode task, long boardId, Map<String, Long> userByName, String prefix, Set<String> usedTaskCodes) {
-        long id = task.path("id").asLong();
-        String name = text(task, "name");
-        String priority = text(task, "priority");
-        String dueDate = text(task, "dueDate");
-        String assignee = text(task, "assignee");
-        String stage = text(task, "stage");
-        String code = prefix + "-" + id;
-        if (task.hasNonNull("displayId")) {
-            String displayId = text(task, "displayId");
-            if (displayId != null && displayId.matches("^[A-Z]{3}-\\d+$")) {
-                code = displayId;
-            }
-        }
-        if (usedTaskCodes.contains(code)) {
-            code = uniqueTaskCode(prefix, id, usedTaskCodes);
-        } else {
-            usedTaskCodes.add(code);
-        }
-
-        Long assigneeId = userByName.get(assignee);
-        Long creatorId = userByName.getOrDefault("Дарья Швед", assigneeId);
-        if (creatorId == null && !userByName.isEmpty()) creatorId = userByName.values().iterator().next();
-
-        Integer storyPoints = null;
-        if (task.hasNonNull("storyPoints")) {
-            storyPoints = Integer.valueOf(task.path("storyPoints").asInt());
-        } else if (task.hasNonNull("complexity")) {
-            storyPoints = Integer.valueOf(task.path("complexity").asInt());
-        }
-        BigDecimal estimate = task.hasNonNull("timeEstimateHours")
-                ? BigDecimal.valueOf(task.path("timeEstimateHours").asDouble())
-                : parseHours(text(task, "timeEstimate"));
-
-        jdbcTemplate.update(
-                """
-                insert into task_item(
-                  id, name, stage, priority, due_date, board_id, assignee_id, creator_id, task_code,
-                  description, story_points, estimate_hours, spent_hours, created_at, updated_at
-                ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())
-                """,
-                id,
-                name,
-                stage == null || stage.isBlank() ? "Очередь" : stage,
-                priority == null || priority.isBlank() ? "обычный" : priority,
-                parseDate(dueDate),
-                boardId,
-                assigneeId,
-                creatorId,
-                code,
-                "Импортировано из JSON",
-                storyPoints,
-                estimate,
-                BigDecimal.ZERO
-        );
-
-        if (task.has("subtasks")) {
-            Iterator<JsonNode> it = task.path("subtasks").elements();
-            int ordinal = 1;
-            while (it.hasNext()) {
-                JsonNode st = it.next();
-                jdbcTemplate.update(
-                        "insert into subtask(name, completed, task_id, public_id) values (?, ?, ?, ?)",
-                        text(st, "name"),
-                        st.path("completed").asBoolean(false),
-                        id,
-                        code + "-" + (ordinal++)
-                );
-            }
-        }
     }
 
     private void truncateAll() {
@@ -304,6 +251,7 @@ public class JsonDatabaseSeeder implements ApplicationRunner {
                     task_dependency,
                     subtask,
                     task_item,
+                    board_stage,
                     board,
                     project_member,
                     project_team,
@@ -330,21 +278,6 @@ public class JsonDatabaseSeeder implements ApplicationRunner {
                 from ranked r
                 where s.id = r.sid
                 """);
-    }
-
-    private JsonNode readJson(String location) throws IOException {
-        Resource resource = resourceLoader.getResource(location);
-        return objectMapper.readTree(resource.getInputStream());
-    }
-
-    private String text(JsonNode node, String field) {
-        JsonNode v = node.path(field);
-        return v.isMissingNode() || v.isNull() ? null : v.asText();
-    }
-
-    private Date parseDate(String value) {
-        if (value == null || value.isBlank()) return null;
-        return Date.valueOf(LocalDate.parse(value, DATE_FMT).plusDays(DEMO_DATE_SHIFT_DAYS));
     }
 
     private String toUsername(String fullName) {
@@ -375,34 +308,4 @@ public class JsonDatabaseSeeder implements ApplicationRunner {
                 .replaceAll("[^a-zA-Z0-9._-]", "");
     }
 
-    private String fromLegacyStatus(String status) {
-        if (status == null) return "Очередь";
-        return switch (status) {
-            case "inprocess" -> "В работе";
-            case "done" -> "Готово";
-            case "exit" -> "Отложено";
-            default -> "Очередь";
-        };
-    }
-
-    private BigDecimal parseHours(String text) {
-        if (text == null || text.isBlank()) return BigDecimal.valueOf(8);
-        String cleaned = text.replace("ч", "").replace(",", ".").trim();
-        try {
-            return new BigDecimal(cleaned);
-        } catch (Exception ignored) {
-            return BigDecimal.valueOf(8);
-        }
-    }
-
-    private String uniqueTaskCode(String prefix, long baseId, Set<String> usedTaskCodes) {
-        String candidate = prefix + "-" + baseId;
-        long n = baseId;
-        while (usedTaskCodes.contains(candidate)) {
-            n++;
-            candidate = prefix + "-" + n;
-        }
-        usedTaskCodes.add(candidate);
-        return candidate;
-    }
 }

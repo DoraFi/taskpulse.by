@@ -75,11 +75,25 @@
                     </div>
                 </div>
                 <div class="modal-footer" style="justify-content: center;">
-                    <a class="text-basic" th:href="@{/}" href="/" style="text-decoration: underline;">В приложение без авторизации</a>
+                    <a class="text-basic" id="authWelcomeAppLink" href="/auth/welcome" style="text-decoration: underline;">В приложение без авторизации</a>
                 </div>
             </div>
         </div>
     </main>
+
+    <script>
+        (async function () {
+            try {
+                const res = await fetch('/api/bootstrap/context');
+                if (!res.ok) return;
+                const data = await res.json();
+                const base = data.basePath;
+                if (!base) return;
+                const link = document.getElementById('authWelcomeAppLink');
+                if (link) link.href = base;
+            } catch (_) {}
+        })();
+    </script>
 
     <script th:src="@{/static/js/auth_static.js}" src="/static/js/auth_static.js"></script>
 </body>

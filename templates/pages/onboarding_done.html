@@ -62,11 +62,29 @@
                 <p class="text-basic" style="margin: 0;">Проект создан, приглашения можно дослать позже. Откройте рабочее пространство и выберите представление досок или таблицы.</p>
             </div>
             <div class="modal-footer">
-                <a class="button-secondary" th:href="@{/}" href="/">На главную сводку</a>
-                <a class="button-basic" th:href="@{/kanban}" href="/kanban">Открыть проект</a>
+                <a class="button-secondary" id="onboardingHomeLink" href="/auth/welcome">На главную сводку</a>
+                <a class="button-basic" id="onboardingProjectLink" href="/auth/welcome">Открыть проект</a>
             </div>
         </div>
         </div>
+
+    <script>
+        (async function () {
+            try {
+                const res = await fetch('/api/me');
+                if (!res.ok) return;
+                const me = await res.json();
+                const org = me.organizationPublicId;
+                const team = me.teamPublicId;
+                if (!org || !team) return;
+                const base = `/o/${encodeURIComponent(org)}/t/${encodeURIComponent(team)}`;
+                const home = document.getElementById('onboardingHomeLink');
+                if (home) home.href = base;
+                const project = document.getElementById('onboardingProjectLink');
+                if (project) project.href = `${base}/projects`;
+            } catch (_) {}
+        })();
+    </script>
     </main>
 
     <script th:src="@{/static/js/auth_static.js}" src="/static/js/auth_static.js"></script>

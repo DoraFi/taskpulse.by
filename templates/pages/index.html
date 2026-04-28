@@ -11,7 +11,7 @@
 <body>
     <div class="header">
         <div class="gap-24 flex-row">
-            <a th:href="@{/}" href="/"><img class="logo" th:src="@{/static/source/logo_rect.svg}" src="/static/source/logo_rect.svg"
+            <a class="logo-link" data-context-link="home" href="/"><img class="logo" th:src="@{/static/source/logo_rect.svg}" src="/static/source/logo_rect.svg"
                     alt="TaskPulse"></a>
             <div class="search-panel border-dark-1 br-5">
                 <img class="h-16" th:src="@{/static/source/icons/search.svg}" src="/static/source/icons/search.svg" alt="Поиск">
@@ -137,7 +137,7 @@
                             </div>
                         </div>
                     </div>
-                    <button class="button-basic">Просмотреть все</button>          
+                    <button class="button-basic" id="indexBtnAllTasks">Просмотреть все</button>          
                 </div>
                 <div class="card">
                     <p class="text-header">Ближайшие события</p>
@@ -205,7 +205,7 @@
                             </div>
                         </div>
                     </div>
-                    <button class="button-basic">К календарю</button>          
+                    <button class="button-basic" id="indexBtnCalendar">К календарю</button>          
                 </div>      
             </div>
             <div class="column">
@@ -248,7 +248,7 @@
                                 <p>Не начато</p>
                             </div>
                         </div>
-                        <button class="button-basic">Все проекты</button>              
+                        <button class="button-basic" id="indexBtnAllProjects">Все проекты</button>              
                     </div>
                     <div class="card team">
                         <p class="text-header">Команда</p>
@@ -289,7 +289,7 @@
                             </div>
                         </div>
                         </div>
-                        <button class="button-basic">Вся команда</button>
+                        <button class="button-basic" id="indexBtnAllTeam">Вся команда</button>
                     </div>
                 </div>
                 <div class="card">
@@ -362,7 +362,7 @@
                             <p>Средняя активность команды</p>
                         </div>
                     </div>
-                    <button class="button-basic">Просмотреть все</button>
+                    <button class="button-basic" id="indexBtnChartDetails">Просмотреть все</button>
                 </div>
                 <div class="card last-actions">
                     <p class="text-header">Последние действия</p>
@@ -451,7 +451,7 @@
                                 <p class="text-basic light-gray">22.03, 17:20</p>
                             </div>
                         </div>              </div>
-                    <button class="button-basic">Вся история</button>          
+                    <button class="button-basic" id="indexBtnAllHistory">Вся история</button>          
                 </div>
             </div>
         </div>

@@ -11,7 +11,7 @@
 <body>
     <div class="header">
         <div class="gap-24 flex-row">
-            <a th:href="@{/}" href="/"><img class="logo" th:src="@{/static/source/logo_rect.svg}" src="/static/source/logo_rect.svg" alt="TaskPulse"></a>
+            <a class="logo-link" data-context-link="home" href="/"><img class="logo" th:src="@{/static/source/logo_rect.svg}" src="/static/source/logo_rect.svg" alt="TaskPulse"></a>
             <div class="search-panel border-dark-1 br-5">
                 <img class="h-16" th:src="@{/static/source/icons/search.svg}" src="/static/source/icons/search.svg" alt="Поиск">
                 <input class="text-basic" type="text" placeholder="Поиск">
@@ -51,7 +51,7 @@
 
         <div class="app-container flex-col">
             <div class="projects-grid">
-                <a class="project-card project-card--kanban" th:href="@{/kanban}" href="/kanban" aria-label="Открыть проект Kanban">
+                <a class="project-card project-card--kanban" href="#" aria-label="Открыть проект Kanban">
                     <div class="project-card__body">
                         <div class="project-card__head">
                             <div class="project-card__icon" aria-hidden="true">K</div>
@@ -90,7 +90,7 @@
                     </div>
                 </a>
 
-                <a class="project-card project-card--list" th:href="@{/boards}" href="/boards" aria-label="Открыть проект Список">
+                <a class="project-card project-card--list" href="#" aria-label="Открыть проект Список">
                     <div class="project-card__body">
                         <div class="project-card__head">
                             <div class="project-card__icon" aria-hidden="true">L</div>
