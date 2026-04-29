@@ -192,27 +192,32 @@ function initIndexPage() {
             .then(r => r.ok ? r.json() : Promise.reject(new Error('index summary failed')))
             .then(data => {
                 const grid = document.querySelector('.tasks-to-do-grid');
-                if (grid && Array.isArray(data.todo)) {
-                    grid.innerHTML = data.todo.map(task => {
-                        const overdue = isOverdueDate(task.dueDate);
-                        const dueClass = isAttentionDate(task.dueDate) ? 'pink' : 'light-gray';
-                        return `
-                            <div class="grid-row">
-                                <div class="col-task">
-                                    <div class="basic-and-signature">
-                                        <p class="text-basic">${task.name || ''}</p>
-                                        <p class="text-signature">${task.project || ''}</p>
+                if (grid) {
+                    const todo = Array.isArray(data.todo) ? data.todo : [];
+                    if (todo.length === 0) {
+                        grid.innerHTML = '<div class="empty-message">Пока нет задач к выполнению</div>';
+                    } else {
+                        grid.innerHTML = todo.map(task => {
+                            const overdue = isOverdueDate(task.dueDate);
+                            const dueClass = isAttentionDate(task.dueDate) ? 'pink' : 'light-gray';
+                            return `
+                                <div class="grid-row">
+                                    <div class="col-task">
+                                        <div class="basic-and-signature">
+                                            <p class="text-basic">${task.name || ''}</p>
+                                            <p class="text-signature">${task.project || ''}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-date">
+                                        ${overdue
+                                            ? `<div class="due-attention"><p class="text-basic">Просрочено</p><p class="text-signature">${formatRelativeDate(task.dueDate) || '—'}</p></div>`
+                                            : `<p class="text-basic ${dueClass}">${formatRelativeDate(task.dueDate) || '—'}</p>`
+                                        }
                                     </div>
                                 </div>
-                                <div class="col-date">
-                                    ${overdue
-                                        ? `<div class="due-attention"><p class="text-basic">Просрочено</p><p class="text-signature">${formatRelativeDate(task.dueDate) || '—'}</p></div>`
-                                        : `<p class="text-basic ${dueClass}">${formatRelativeDate(task.dueDate) || '—'}</p>`
-                                    }
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
+                            `;
+                        }).join('');
+                    }
                 }
 
                 const statCards = document.querySelectorAll('.cards .card .text-header');
@@ -261,11 +266,12 @@ function initIndexPage() {
                 }
 
                 const recentRoot = document.getElementById('indexRecentActions');
-                if (recentRoot && Array.isArray(data.recentActions)) {
-                    if (data.recentActions.length === 0) {
-                        return;
-                    }
-                    recentRoot.innerHTML = data.recentActions.slice(0, 5).map((a) => `
+                if (recentRoot) {
+                    const actions = Array.isArray(data.recentActions) ? data.recentActions : [];
+                    if (actions.length === 0) {
+                        recentRoot.innerHTML = '';
+                    } else {
+                        recentRoot.innerHTML = actions.slice(0, 5).map((a) => `
                         <div class="grid-row">
                             <div class="col-avatar"><img class="avatar" src="/static/source/user_img/${a.avatar || 'basic_avatar.png'}" alt=""></div>
                             <div class="col-task">
@@ -281,6 +287,33 @@ function initIndexPage() {
                             <div class="col-date"><p class="text-basic light-gray">${a.date || ''}</p></div>
                         </div>
                     `).join('');
+                    }
+                }
+
+                const eventsGrid = document.querySelector('.events-grid');
+                if (eventsGrid) {
+                    const todo = Array.isArray(data.todo) ? data.todo : [];
+                    const upcoming = todo
+                        .filter(t => t && t.dueDate)
+                        .slice(0, 6);
+
+                    if (upcoming.length === 0) {
+                        eventsGrid.innerHTML = '';
+                    } else {
+                        eventsGrid.innerHTML = upcoming.map(e => {
+                            const dueClass = isAttentionDate(e.dueDate) ? 'pink' : 'light-gray';
+                            return `
+                                <div class="grid-row">
+                                    <div class="col-event">
+                                        <p class="text-basic">${e.name || ''}</p>
+                                    </div>
+                                    <div class="col-date">
+                                        <p class="text-basic ${dueClass}">${formatRelativeDate(e.dueDate) || ''}</p>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
                 }
             })
             .catch(err => console.error(err));

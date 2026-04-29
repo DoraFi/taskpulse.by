@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskPulse — Организация и команда</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/static/source/logo_rect.svg}" href="/static/source/logo_rect.svg">
+    <link rel="stylesheet" th:href="@{/static/scss/style.css}" href="/static/scss/style.css">
+</head>
+
+<body class="auth-page auth-page--form">
+    <header class="auth-page__header">
+        <a th:href="@{/auth/welcome}" href="/auth/welcome" class="flex-row gap-24" style="align-items: center;">
+            <img class="logo" th:src="@{/static/source/logo_rect.svg}" src="/static/source/logo_rect.svg" alt="TaskPulse">
+        </a>
+        <span class="text-signature">Шаг 1 из 4</span>
+    </header>
+
+    <main class="auth-page__main auth-page__main--split" data-auth-parallax-root>
+        <section class="auth-hero auth-hero--compact auth-hero--motif" aria-hidden="true">
+            <div class="auth-hero__inner" data-auth-parallax="0.05">
+                <p class="auth-hero__eyebrow">Шаг 1 — люди и контекст</p>
+                <h1 class="auth-hero__title">
+                    <span class="auth-hero__title-line">Поток задач</span>
+                    <span class="auth-hero__title-line auth-hero__title-line--accent">для вашей команды</span>
+                </h1>
+                <p class="auth-hero__lead text-basic">Создадим организацию, команду и назначим вас администратором.</p>
+                <div class="auth-motif auth-motif--web" aria-hidden="true">
+                    <div class="auth-motif-web">
+                        <svg class="auth-motif-web__svg" viewBox="27 27 146 70" xmlns="http://www.w3.org/2000/svg">
+                            <path class="auth-motif-web__curve" d="M 36 68 C 52 52 76 44 100 40 C 124 44 148 52 164 68" fill="none" />
+                            <path class="auth-motif-web__curve" d="M 100 40 Q 100 64 100 88" fill="none" />
+                            <path class="auth-motif-web__curve" d="M 36 68 Q 68 78 100 88" fill="none" />
+                            <path class="auth-motif-web__curve" d="M 164 68 Q 132 78 100 88" fill="none" />
+                            <path class="auth-motif-web__curve" d="M 36 68 Q 100 56 164 68" fill="none" />
+                            <circle class="auth-motif-web__node" cx="36" cy="68" r="7" />
+                            <circle class="auth-motif-web__node auth-motif-web__node--primary" cx="100" cy="38" r="9" />
+                            <circle class="auth-motif-web__node" cx="164" cy="68" r="7" />
+                            <circle class="auth-motif-web__node" cx="100" cy="88" r="7" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="auth-page__panel">
+            <div class="modal-content auth-flow-card auth-flow-card--signature">
+                <div class="auth-page__steps auth-steps" style="--steps-total: 4; --step-index: 1;" aria-label="Прогресс: шаг 1 из 4">
+                    <div class="auth-steps__bar" aria-hidden="true">
+                        <div class="auth-steps__fill"></div>
+                    </div>
+                </div>
+
+                <div class="modal-header" style="margin-top: 0;">
+                    <p class="text-header">Создайте организацию и команду</p>
+                    <a class="modal-close" th:href="@{/auth/welcome}" href="/auth/welcome" aria-label="Пропустить онбординг">
+                        <img src="/static/source/icons/cross.svg" alt="" width="24" height="24">
+                    </a>
+                </div>
+
+                <div class="modal-body">
+                    <form class="form-auth" data-static-form action="#" method="post">
+                        <div class="auth-field">
+                            <label for="org-name">Название организации <img class="required-icon" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>
+                            <input id="org-name" name="organizationName" type="text" placeholder="Например, TaskPulse Studio" required>
+                        </div>
+
+                        <div class="auth-field">
+                            <label for="team-name">Название команды <img class="required-icon" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>
+                            <input id="team-name" name="teamName" type="text" placeholder="Например, Продуктовая команда" required>
+                        </div>
+
+                        <div class="auth-field">
+                            <label for="org-scope">Сфера деятельности команды <span class="text-signature">(необязательно)</span></label>
+                            <textarea id="org-scope" name="orgScope" rows="3" placeholder="Например, разработка ПО, дизайн, аналитика"></textarea>
+                        </div>
+
+                        <div class="auth-field">
+                            <p class="text-basic" style="margin: 0;">
+                                Ваш аккаунт будет назначен руководителем команды, а проект появится автоматически на следующем шаге.
+                            </p>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <a class="button-secondary" th:href="@{/auth/register}" href="/auth/register">Назад</a>
+                    <button class="button-basic" type="button" id="onboardingOrgTeamNextBtn">Далее: проект</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script th:src="@{/static/js/auth_static.js}" src="/static/js/auth_static.js"></script>
+</body>
+
+</html>
+

@@ -1,5 +1,6 @@
 package by.taskpulse.web.api;
 
+import by.taskpulse.auth.CurrentUserProvider;
 import java.util.List;
 import java.util.Map;
 
@@ -15,14 +16,15 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class ContextApiController {
-    private static final String CURRENT_USERNAME = "d.shved";
 
     private final JdbcTemplate jdbcTemplate;
     private final LegacyDataApiController legacy;
+    private final CurrentUserProvider currentUserProvider;
 
-    public ContextApiController(JdbcTemplate jdbcTemplate, LegacyDataApiController legacy) {
+    public ContextApiController(JdbcTemplate jdbcTemplate, LegacyDataApiController legacy, CurrentUserProvider currentUserProvider) {
         this.jdbcTemplate = jdbcTemplate;
         this.legacy = legacy;
+        this.currentUserProvider = currentUserProvider;
     }
 
     @GetMapping("/api/me")
@@ -59,6 +61,16 @@ public class ContextApiController {
     @PostMapping("/api/kanban/tasks/move")
     public Map<String, Object> moveTaskAuto(@RequestBody Map<String, Object> payload) {
         return legacy.moveKanbanTask(payload);
+    }
+
+    @PostMapping("/api/kanban/tasks/create")
+    public Map<String, Object> createKanbanTaskAuto(@RequestBody Map<String, Object> payload) {
+        return legacy.createKanbanTask(payload);
+    }
+
+    @PostMapping("/api/kanban/tasks/update")
+    public Map<String, Object> updateKanbanTaskAuto(@RequestBody Map<String, Object> payload) {
+        return legacy.updateKanbanTask(payload);
     }
 
     @PostMapping("/api/kanban/subtasks/toggle")
@@ -154,6 +166,22 @@ public class ContextApiController {
         return legacy.moveKanbanTask(payload);
     }
 
+    @PostMapping("/o/{orgId}/t/{teamId}/api/kanban/tasks/create")
+    public Map<String, Object> createKanbanTask(@PathVariable String orgId,
+                                                @PathVariable String teamId,
+                                                @RequestBody Map<String, Object> payload) {
+        ensureContextAccess(orgId, teamId);
+        return legacy.createKanbanTask(payload);
+    }
+
+    @PostMapping("/o/{orgId}/t/{teamId}/api/kanban/tasks/update")
+    public Map<String, Object> updateKanbanTask(@PathVariable String orgId,
+                                                @PathVariable String teamId,
+                                                @RequestBody Map<String, Object> payload) {
+        ensureContextAccess(orgId, teamId);
+        return legacy.updateKanbanTask(payload);
+    }
+
     @PostMapping("/o/{orgId}/t/{teamId}/api/kanban/subtasks/toggle")
     public Map<String, Object> toggleSubtask(@PathVariable String orgId,
                                              @PathVariable String teamId,
@@ -217,7 +245,15 @@ public class ContextApiController {
                 order by t.id
                 limit 1
                 """,
-                CURRENT_USERNAME
+                currentUsername()
         );
+    }
+
+    private String currentUsername() {
+        String username = currentUserProvider.getUsername();
+        if (username == null || username.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Требуется авторизация");
+        }
+        return username;
     }
 }

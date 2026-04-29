@@ -49,7 +49,7 @@
                 </a>
             </div>
             <div class="modal-body">
-                <form class="form-auth" data-static-form action="#" method="post">
+                <form class="form-auth" data-static-form action="#" method="post" id="loginForm">
                     <div class="auth-field">
                         <label for="login-email">Электронная почта <img class="required-icon" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>
                         <input id="login-email" name="email" type="email" autocomplete="username" placeholder="you@company.com" required>
@@ -72,7 +72,7 @@
                 </div>
                 <div style="display: flex; gap: 1rem; margin-left: auto;">
                     <a class="button-secondary" th:href="@{/auth/welcome}" href="/auth/welcome">Отмена</a>
-                    <a class="button-basic" th:href="@{/onboarding/project}" href="/onboarding/project">Войти</a>
+                    <button class="button-basic" type="button" id="loginSubmitBtn">Войти</button>
                 </div>
             </div>
         </div>

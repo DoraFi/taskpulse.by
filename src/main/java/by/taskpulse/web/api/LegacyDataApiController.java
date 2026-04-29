@@ -1,5 +1,6 @@
 package by.taskpulse.web.api;
 
+import by.taskpulse.auth.CurrentUserProvider;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -20,11 +21,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class LegacyDataApiController {
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-    private static final String CURRENT_USERNAME = "d.shved";
     private final JdbcTemplate jdbcTemplate;
+    private final CurrentUserProvider currentUserProvider;
 
-    public LegacyDataApiController(JdbcTemplate jdbcTemplate) {
+    public LegacyDataApiController(JdbcTemplate jdbcTemplate, CurrentUserProvider currentUserProvider) {
         this.jdbcTemplate = jdbcTemplate;
+        this.currentUserProvider = currentUserProvider;
     }
 
     @GetMapping("/api/team")
@@ -228,7 +230,7 @@ public class LegacyDataApiController {
                 from board b
                 join project p on p.id = b.project_id
                 where b.code like 'KANBAN%'
-                  and p.project_type = 'kanban'
+                  and p.project_type in ('kanban', 'scrum', 'scrumban')
                   and b.project_id in (""" + visibleProjectsSql + """
                 ) """ + (project != null && !project.isBlank() ? " and p.code = ? " : "") + " order by b.id";
         List<Map<String, Object>> boards = (project != null && !project.isBlank())
@@ -281,7 +283,17 @@ public class LegacyDataApiController {
         String visibleProjectsSql = inClauseSql(visibleProjectIds());
         String sql = """
                 select
-                    t.id, coalesce(t.public_id, t.task_code, 'TSK-' || t.id::text) as public_id, t.board_id, t.name, t.priority, t.due_date, t.stage,
+                    t.id,
+                    coalesce(t.public_id, t.task_code, 'TSK-' || t.id::text) as public_id,
+                    t.board_id,
+                    t.name,
+                    t.description,
+                    t.priority,
+                    t.due_date,
+                    t.stage,
+                    t.story_points,
+                    t.estimate_hours,
+                    p.name as project_name,
                     u.full_name as assignee_name,
                     u.avatar_file as assignee_avatar
                 from task_item t
@@ -313,11 +325,17 @@ public class LegacyDataApiController {
             t.put("displayId", row.get("public_id"));
             t.put("boardId", ((Number) row.get("board_id")).longValue());
             t.put("name", row.get("name"));
+            t.put("description", row.get("description"));
             t.put("priority", row.get("priority"));
             t.put("dueDate", toUiDate(row.get("due_date")));
             t.put("assignee", row.get("assignee_name"));
             t.put("assigneeAvatar", row.get("assignee_avatar"));
             t.put("stage", row.get("stage"));
+            Object spObj = row.get("story_points");
+            t.put("storyPoints", spObj == null ? null : ((Number) spObj).intValue());
+            Object estObj = row.get("estimate_hours");
+            t.put("timeEstimateHours", estObj == null ? null : ((java.math.BigDecimal) estObj).toPlainString());
+            t.put("project", row.get("project_name"));
             t.put("subtasks", subtasksByTask.getOrDefault(taskId, List.of()));
             tasks.add(t);
         }
@@ -385,6 +403,215 @@ public class LegacyDataApiController {
         if (updated == 0) {
             throw new IllegalArgumentException("Подзадача не найдена");
         }
+        return Map.of("ok", true);
+    }
+
+    @PostMapping("/api/kanban/tasks/create")
+    public Map<String, Object> createKanbanTask(@RequestBody Map<String, Object> payload) {
+        Number boardIdNum = (Number) payload.get("boardId");
+        String name = payload.get("name") == null ? null : String.valueOf(payload.get("name")).trim();
+        String stage = payload.get("stage") == null ? null : String.valueOf(payload.get("stage")).trim();
+        String priority = payload.get("priority") == null ? null : String.valueOf(payload.get("priority")).trim();
+        String dueIso = payload.get("dueDate") == null ? null : String.valueOf(payload.get("dueDate")).trim();
+        String description = payload.get("description") == null ? null : String.valueOf(payload.get("description")).trim();
+
+        Object storyPointsObj = payload.get("storyPoints");
+        Object estimateHoursObj = payload.get("estimateHours");
+        String assigneeName = payload.get("assignee") == null ? null : String.valueOf(payload.get("assignee")).trim();
+
+        if (boardIdNum == null || name == null || name.isBlank()) {
+            throw new IllegalArgumentException("boardId и name обязательны");
+        }
+
+        if (stage == null || stage.isBlank()) stage = "Очередь";
+        if (priority == null || priority.isBlank()) priority = "обычный";
+
+        Long teamId = currentTeamId();
+        Long creatorId = currentUserId();
+
+        Map<String, Object> boardRow = jdbcTemplate.queryForMap(
+                """
+                select
+                    b.id as board_id,
+                    p.code as project_code
+                from board b
+                join project p on p.id = b.project_id
+                join project_team pt on pt.project_id = p.id
+                where b.id = ?
+                  and pt.team_id = ?
+                limit 1
+                """,
+                boardIdNum.longValue(), teamId
+        );
+
+        Long boardId = ((Number) boardRow.get("board_id")).longValue();
+        String projectCode = String.valueOf(boardRow.get("project_code"));
+
+        Long assigneeId = null;
+        if (assigneeName != null && !assigneeName.isBlank()) {
+            List<Long> ids = jdbcTemplate.query(
+                    """
+                    select u.id
+                    from app_user u
+                    join team_membership tm on tm.user_id = u.id
+                    where tm.team_id = ?
+                      and u.full_name = ?
+                    limit 1
+                    """,
+                    (rs, rowNum) -> rs.getLong("id"),
+                    teamId, assigneeName
+            );
+            if (!ids.isEmpty()) assigneeId = ids.get(0);
+        }
+
+        Integer nextN = jdbcTemplate.queryForObject(
+                """
+                select coalesce(max(substring(task_code from '[0-9]+$')::int), 0) + 1
+                from task_item
+                where task_code like ?
+                """,
+                Integer.class,
+                projectCode + "-%"
+        );
+        String taskCode = projectCode + "-" + nextN;
+
+        java.sql.Date dueDate = null;
+        if (dueIso != null && !dueIso.isBlank()) {
+            dueDate = Date.valueOf(java.time.LocalDate.parse(dueIso));
+        }
+
+        Integer storyPoints = null;
+        if (storyPointsObj != null) {
+            if (storyPointsObj instanceof Number n) storyPoints = n.intValue();
+            else storyPoints = Integer.parseInt(String.valueOf(storyPointsObj));
+        }
+
+        java.math.BigDecimal estimateHours = null;
+        if (estimateHoursObj != null && !String.valueOf(estimateHoursObj).isBlank()) {
+            estimateHours = new java.math.BigDecimal(String.valueOf(estimateHoursObj));
+        }
+
+        jdbcTemplate.update(
+                """
+                insert into task_item(
+                    name, stage, priority, due_date, board_id, assignee_id, creator_id,
+                    task_code, description, story_points, estimate_hours
+                )
+                values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                name, stage, priority, dueDate, boardId, assigneeId, creatorId,
+                taskCode, description, storyPoints, estimateHours
+        );
+
+        return Map.of("ok", true, "taskCode", taskCode);
+    }
+
+    @PostMapping("/api/kanban/tasks/update")
+    public Map<String, Object> updateKanbanTask(@RequestBody Map<String, Object> payload) {
+        Number taskIdNum = (Number) payload.get("taskId");
+        if (taskIdNum == null) throw new IllegalArgumentException("taskId обязателен");
+        Long taskId = taskIdNum.longValue();
+
+        Long teamId = currentTeamId();
+        Long uid = currentUserId();
+
+        String name = payload.get("name") == null ? null : String.valueOf(payload.get("name")).trim();
+        String description = payload.get("description") == null ? null : String.valueOf(payload.get("description")).trim();
+        String stage = payload.get("stage") == null ? null : String.valueOf(payload.get("stage")).trim();
+        String priority = payload.get("priority") == null ? null : String.valueOf(payload.get("priority")).trim();
+        String dueIso = payload.get("dueDate") == null ? null : String.valueOf(payload.get("dueDate")).trim();
+        String assigneeName = payload.get("assignee") == null ? null : String.valueOf(payload.get("assignee")).trim();
+        Object storyPointsObj = payload.get("storyPoints");
+        Object estimateHoursObj = payload.get("estimateHours");
+
+        if (name == null || name.isBlank()) throw new IllegalArgumentException("name обязателен");
+        if (stage == null || stage.isBlank()) stage = "Очередь";
+        if (priority == null || priority.isBlank()) priority = "обычный";
+
+        java.sql.Date dueDate = null;
+        if (dueIso != null && !dueIso.isBlank()) {
+            dueDate = Date.valueOf(java.time.LocalDate.parse(dueIso));
+        }
+
+        Long assigneeId = null;
+        if (assigneeName != null && !assigneeName.isBlank()) {
+            List<Long> ids = jdbcTemplate.query(
+                    """
+                    select u.id
+                    from app_user u
+                    join team_membership tm on tm.user_id = u.id
+                    where tm.team_id = ?
+                      and u.full_name = ?
+                    limit 1
+                    """,
+                    (rs, rowNum) -> rs.getLong("id"),
+                    teamId, assigneeName
+            );
+            if (!ids.isEmpty()) assigneeId = ids.get(0);
+        }
+
+        Integer storyPoints = null;
+        if (storyPointsObj != null && storyPointsObj instanceof Number n) storyPoints = n.intValue();
+        if (storyPointsObj != null && !(storyPointsObj instanceof Number)) {
+            String spRaw = String.valueOf(storyPointsObj).trim();
+            if (!spRaw.isEmpty()) storyPoints = Integer.parseInt(spRaw);
+        }
+
+        java.math.BigDecimal estimateHours = null;
+        if (estimateHoursObj != null && estimateHoursObj instanceof Number n) estimateHours = new java.math.BigDecimal(String.valueOf(n));
+        if (estimateHoursObj != null && !(estimateHoursObj instanceof Number)) {
+            String hRaw = String.valueOf(estimateHoursObj).trim();
+            if (!hRaw.isEmpty()) estimateHours = new java.math.BigDecimal(hRaw);
+        }
+
+        Map<String, Object> oldRow = jdbcTemplate.queryForMap(
+                """
+                select t.stage as old_stage
+                from task_item t
+                join board b on b.id = t.board_id
+                join project p on p.id = b.project_id
+                join project_team pt on pt.project_id = p.id
+                where t.id = ?
+                  and pt.team_id = ?
+                limit 1
+                """,
+                taskId, teamId
+        );
+        String oldStage = String.valueOf(oldRow.get("old_stage"));
+
+        jdbcTemplate.update(
+                """
+                update task_item
+                set
+                    name = ?,
+                    description = ?,
+                    stage = ?,
+                    priority = ?,
+                    due_date = ?,
+                    assignee_id = ?,
+                    story_points = ?,
+                    estimate_hours = ?,
+                    updated_at = now()
+                where id = ?
+                """,
+                name, description, stage, priority, dueDate, assigneeId, storyPoints, estimateHours, taskId
+        );
+
+        if (!stage.equals(oldStage)) {
+            jdbcTemplate.update(
+                    "insert into task_status_history(task_id, changed_by, old_stage, new_stage, changed_at) values (?, ?, ?, ?, now())",
+                    taskId, uid, oldStage, stage
+            );
+        }
+
+        // Упростим правило по подзадачам: на "Готово" отмечаем все выполненными.
+        if ("Готово".equals(stage)) {
+            jdbcTemplate.update("update subtask set completed = true where task_id = ?", taskId);
+        }
+        if ("Очередь".equals(stage)) {
+            jdbcTemplate.update("update subtask set completed = false where task_id = ?", taskId);
+        }
+
         return Map.of("ok", true);
     }
 
@@ -861,7 +1088,7 @@ public class LegacyDataApiController {
         List<Long> ids = jdbcTemplate.query(
                 "select id from app_user where username = ? order by id limit 1",
                 (rs, rowNum) -> rs.getLong("id"),
-                CURRENT_USERNAME
+                currentUsername()
         );
         if (!ids.isEmpty()) {
             return ids.get(0);
@@ -964,5 +1191,13 @@ public class LegacyDataApiController {
             return String.format("%02d.%02d", d.getDayOfMonth(), d.getMonthValue());
         }
         return d.format(DATE_FMT);
+    }
+
+    private String currentUsername() {
+        String username = currentUserProvider.getUsername();
+        if (username == null || username.isBlank()) {
+            return "__anonymous__";
+        }
+        return username;
     }
 }

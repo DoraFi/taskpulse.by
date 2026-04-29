@@ -57,7 +57,7 @@
                 </a>
             </div>
             <div class="modal-body">
-                <form class="form-auth" data-static-form action="#" method="post">
+                <form class="form-auth" data-static-form action="#" method="post" id="registerForm">
                     <div class="auth-field">
                         <label for="reg-name">Имя и фамилия <img class="required-icon" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>
                         <input id="reg-name" name="displayName" type="text" autocomplete="name" placeholder="Иван Иванов" required>
@@ -83,7 +83,7 @@
             </div>
             <div class="modal-footer">
                 <a class="button-secondary" th:href="@{/auth/welcome}" href="/auth/welcome">Назад</a>
-                <a class="button-basic" th:href="@{/onboarding/project}" href="/onboarding/project">Зарегистрироваться</a>
+                <button class="button-basic" type="button" id="registerContinueBtn">Зарегистрироваться</button>
             </div>
         </div>
         </div>

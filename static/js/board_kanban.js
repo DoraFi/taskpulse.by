@@ -1174,7 +1174,7 @@
             }
         });
 
-        createBtn.addEventListener('click', e => {
+        createBtn.addEventListener('click', async e => {
             e.preventDefault();
             const taskName = input.value.trim();
             if (!taskName) {
@@ -1183,28 +1183,41 @@
             }
             const board = kanbanBoards[boardIndex];
             if (!board) return;
+
             const pr = priorityKey === 'urgent' ? 'срочно' : 'обычный';
             let dueDate = null;
             if (selectedDueDate) {
                 if (typeof selectedDueDate === 'string') dueDate = selectedDueDate;
                 else if (selectedDueDate.end) dueDate = selectedDueDate.end;
             }
-            const newTask = {
-                id: nextKanbanTaskId(board.id),
-                boardId: board.id,
-                name: taskName,
-                priority: pr,
-                stage: 'Очередь',
-                dueDate,
-                assignee: selectedAssignee ? selectedAssignee.name : null,
-                assigneeAvatar: selectedAssignee ? selectedAssignee.avatar : null,
-                subtasks: []
-            };
-            kanbanTasks.push(newTask);
-            saveKanbanToLocalStorage();
-            renderCurrentView();
-            showToast(`Задача «${taskName}» добавлена в очередь`);
-            hideTagAndReset();
+
+            try {
+                const res = await fetch(apiUrl('/kanban/tasks/create'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        boardId: board.id,
+                        name: taskName,
+                        priority: pr,
+                        stage: 'Очередь',
+                        dueDate,
+                        description: '',
+                        assignee: selectedAssignee ? selectedAssignee.name : null
+                    })
+                });
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err.error || 'Ошибка создания задачи');
+                }
+
+                hideTagAndReset();
+                await loadKanbanData();
+                renderCurrentView();
+                showToast(`Задача «${taskName}» создана`);
+            } catch (err) {
+                console.error(err);
+                showToast('Не удалось создать задачу');
+            }
         });
 
         document.addEventListener('click', e => {
@@ -1313,7 +1326,7 @@
         nameSpan.style.cursor = 'pointer';
         nameSpan.addEventListener('click', e => {
             e.stopPropagation();
-            if (task.name === 'Обновить документацию API Gateway' && typeof window.tpOpenTaskDetailModal === 'function') {
+            if (typeof window.tpOpenTaskDetailModal === 'function') {
                 window.tpOpenTaskDetailModal(task);
             }
         });
@@ -1346,7 +1359,7 @@
         nameSpan.style.cursor = 'pointer';
         nameSpan.addEventListener('click', e => {
             e.stopPropagation();
-            if (task.name === 'Обновить документацию API Gateway' && typeof window.tpOpenTaskDetailModal === 'function') {
+            if (typeof window.tpOpenTaskDetailModal === 'function') {
                 window.tpOpenTaskDetailModal(task);
             }
         });
@@ -2528,6 +2541,10 @@
     }
 
     window.initBoardKanbanPage = initBoardKanbanPage;
+    window.tpRefreshKanban = async function tpRefreshKanban() {
+        await loadKanbanData();
+        renderCurrentView();
+    };
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {

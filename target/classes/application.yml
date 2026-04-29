@@ -30,3 +30,8 @@ spring:
 logging:
   level:
     org.hibernate.SQL: info
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:taskpulse-dev-secret-key-taskpulse-dev-secret-key}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:720}

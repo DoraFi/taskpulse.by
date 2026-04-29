@@ -1,5 +1,6 @@
 package by.taskpulse.web;
 
+import by.taskpulse.auth.CurrentUserProvider;
 import java.util.Map;
 import java.util.UUID;
 
@@ -13,11 +14,12 @@ import org.springframework.ui.Model;
 
 @Controller
 public class PageController {
-    private static final String CURRENT_USERNAME = "d.shved";
     private final JdbcTemplate jdbcTemplate;
+    private final CurrentUserProvider currentUserProvider;
 
-    public PageController(JdbcTemplate jdbcTemplate) {
+    public PageController(JdbcTemplate jdbcTemplate, CurrentUserProvider currentUserProvider) {
         this.jdbcTemplate = jdbcTemplate;
+        this.currentUserProvider = currentUserProvider;
     }
 
     @GetMapping("/")
@@ -36,7 +38,7 @@ public class PageController {
                     order by t.id
                     limit 1
                     """,
-                    CURRENT_USERNAME
+                    currentUsername()
             );
             String orgId = String.valueOf(row.get("org_public_id"));
             String teamId = String.valueOf(row.get("team_public_id"));
@@ -180,6 +182,11 @@ public class PageController {
         return "pages/onboarding_project";
     }
 
+    @GetMapping({"/onboarding/org-team", "/templates/pages/onboarding_org_team.html"})
+    public String onboardingOrgTeam() {
+        return "pages/onboarding_org_team";
+    }
+
     @GetMapping({"/onboarding/team", "/templates/pages/onboarding_team.html"})
     public String onboardingTeam() {
         return "pages/onboarding_team";
@@ -244,7 +251,7 @@ public class PageController {
                   and t.public_id = ?
                 """,
                 Integer.class,
-                CURRENT_USERNAME, orgId, teamId
+                currentUsername(), orgId, teamId
         );
         if (hasAccess == null || hasAccess == 0) {
             return "У вас пока нет доступа к этой команде.";
@@ -288,5 +295,13 @@ public class PageController {
         model.addAttribute("title", status == 400 ? "Не удалось открыть страницу" : "Страница недоступна");
         model.addAttribute("hint", "Проверьте ссылку или перейдите на рабочую страницу через меню.");
         return "error";
+    }
+
+    private String currentUsername() {
+        String username = currentUserProvider.getUsername();
+        if (username == null || username.isBlank()) {
+            return "__anonymous__";
+        }
+        return username;
     }
 }

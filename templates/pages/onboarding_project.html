@@ -329,6 +329,13 @@
             display: grid;
             gap: 0.2rem;
         }
+
+        .modal-content .modal-body {
+            overflow-y: auto;
+        }
+        .modal-content .modal-footer {
+            flex-wrap: wrap;
+        }
     </style>
 </head>
 
@@ -338,13 +345,13 @@
             <img class="logo" th:src="@{/static/source/logo_rect.svg}" src="/static/source/logo_rect.svg"
                 alt="TaskPulse">
         </a>
-        <span class="text-signature">Шаг 1 из 3</span>
+        <span class="text-signature">Шаг 2 из 4</span>
     </header>
 
     <main class="auth-page__main auth-page__main--split" data-auth-parallax-root>
         <section class="auth-hero auth-hero--compact auth-hero--motif" aria-hidden="true">
             <div class="auth-hero__inner" data-auth-parallax="0.05">
-                <p class="auth-hero__eyebrow">Шаг 1 — пространство</p>
+                <p class="auth-hero__eyebrow">Шаг 2 — проект</p>
                 <h1 class="auth-hero__title">
                     <span class="auth-hero__title-line">Имя проекта</span>
                     <span class="auth-hero__title-line auth-hero__title-line--accent">и его «пульс».</span>
@@ -374,8 +381,8 @@
 
         <div class="auth-page__panel">
             <div class="modal-content auth-flow-card auth-flow-card--signature">
-                <div class="auth-page__steps auth-steps" style="--steps-total: 3; --step-index: 1;"
-                    aria-label="Прогресс: шаг 1 из 3">
+                <div class="auth-page__steps auth-steps" style="--steps-total: 4; --step-index: 2;"
+                    aria-label="Прогресс: шаг 2 из 4">
                     <div class="auth-steps__bar" aria-hidden="true">
                         <div class="auth-steps__fill"></div>
                     </div>
@@ -396,9 +403,10 @@
                                 placeholder="Например, Корпоративный портал" required>
                         </div>
                         <div class="auth-field">
-                            <label for="proj-key">Ключ проекта <span class="text-signature">(короткий код для
-                                    ссылок)</span></label>
-                            <input id="proj-key" name="projectKey" type="text" placeholder="PORTAL" maxlength="12"
+                            <label for="proj-key">
+                                Ключ проекта <span class="text-signature">(3 латинские буквы; можно оставить пустым)</span>
+                            </label>
+                            <input id="proj-key" name="projectKey" type="text" placeholder="PORTAL" maxlength="3"
                                 style="text-transform: uppercase;">
                         </div>
                         <div class="auth-field">
@@ -421,8 +429,8 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <a class="button-secondary" th:href="@{/auth/login}" href="/auth/login">Назад</a>
-                    <a class="button-basic" th:href="@{/onboarding/team}" href="/onboarding/team">Далее: команда</a>
+                    <a class="button-secondary" th:href="@{/onboarding/org-team}" href="/onboarding/org-team">Назад</a>
+                    <button class="button-basic" type="button" id="onboardingProjectNextBtn">Далее: приглашения</button>
                 </div>
             </div>
         </div>

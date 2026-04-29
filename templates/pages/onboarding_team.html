@@ -7,6 +7,14 @@
     <title>TaskPulse — Команда проекта</title>
     <link rel="icon" type="image/svg+xml" th:href="@{/static/source/logo_rect.svg}" href="/static/source/logo_rect.svg">
     <link rel="stylesheet" th:href="@{/static/scss/style.css}" href="/static/scss/style.css">
+    <style>
+        .modal-content .modal-body {
+            overflow-y: auto;
+        }
+        .modal-content .modal-footer {
+            flex-wrap: wrap;
+        }
+    </style>
 </head>
 
 <body class="auth-page auth-page--form">
@@ -14,13 +22,13 @@
         <a th:href="@{/auth/welcome}" href="/auth/welcome" class="flex-row gap-24" style="align-items: center;">
             <img class="logo" th:src="@{/static/source/logo_rect.svg}" src="/static/source/logo_rect.svg" alt="TaskPulse">
         </a>
-        <span class="text-signature">Шаг 2 из 3</span>
+        <span class="text-signature">Шаг 3 из 4</span>
     </header>
 
     <main class="auth-page__main auth-page__main--split" data-auth-parallax-root>
         <section class="auth-hero auth-hero--compact auth-hero--motif" aria-hidden="true">
             <div class="auth-hero__inner" data-auth-parallax="0.05">
-                <p class="auth-hero__eyebrow">Шаг 2 — люди</p>
+                <p class="auth-hero__eyebrow">Шаг 3 — люди</p>
                 <h1 class="auth-hero__title">
                     <span class="auth-hero__title-line">Пригласите</span>
                     <span class="auth-hero__title-line auth-hero__title-line--accent">команду в поток.</span>
@@ -45,7 +53,7 @@
 
         <div class="auth-page__panel">
         <div class="modal-content auth-flow-card auth-flow-card--signature">
-            <div class="auth-page__steps auth-steps" style="--steps-total: 3; --step-index: 2;" aria-label="Прогресс: шаг 2 из 3">
+            <div class="auth-page__steps auth-steps" style="--steps-total: 4; --step-index: 3;" aria-label="Прогресс: шаг 3 из 4">
                 <div class="auth-steps__bar" aria-hidden="true">
                     <div class="auth-steps__fill"></div>
                 </div>
@@ -100,7 +108,7 @@
                 <a class="button-secondary" th:href="@{/onboarding/project}" href="/onboarding/project">Назад</a>
                 <div style="display: flex; gap: 1rem; margin-left: auto;">
                     <a class="text-basic" th:href="@{/onboarding/done}" href="/onboarding/done" style="align-self: center; text-decoration: underline;">Пропустить</a>
-                    <a class="button-basic" th:href="@{/onboarding/done}" href="/onboarding/done">Продолжить</a>
+                    <button class="button-basic" type="button" id="onboardingTeamFinishBtn">Продолжить</button>
                 </div>
             </div>
         </div>
