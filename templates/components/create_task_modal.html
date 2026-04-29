@@ -9,12 +9,14 @@
         <div class="modal-body create-task-modal__body">
             <div class="auth-field create-task-field">
                 <label for="createTaskProject">Проект <img class="required-icon" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>
-                <select id="createTaskProject" class="filter-input create-task-select" required>
-                    <option value="" selected disabled>Выберите проект</option>
-                    <option value="Корпоративный портал">Корпоративный портал</option>
-                    <option value="Микросервисная платформа">Микросервисная платформа</option>
-                    <option value="CRM-система">CRM-система</option>
-                </select>
+                <input id="createTaskProject" class="filter-input" placeholder="Выберите проект или начните вводить" required autocomplete="off">
+                <ul class="create-task-deps-suggest text-basic create-task-search-menu" id="createTaskProjectMenu" aria-label="Проекты"></ul>
+            </div>
+
+            <div class="auth-field create-task-field">
+                <label for="createTaskBoard">Доска <img class="required-icon" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>
+                <input id="createTaskBoard" class="filter-input" placeholder="Выберите доску или начните вводить" required autocomplete="off">
+                <ul class="create-task-deps-suggest text-basic create-task-search-menu" id="createTaskBoardMenu" aria-label="Доски"></ul>
             </div>
 
             <div class="auth-field create-task-field">
@@ -33,6 +35,7 @@
                     <p class="text-basic create-task-attachments__hint">Перетащите сюда файлы или</p>
                     <button type="button" class="button-basic create-task-attachments__btn">Выберите в проводнике</button>
                 </div>
+                <ul class="create-task-deps-suggest text-basic mt-8" id="createTaskSelectedFiles" aria-label="Выбранные файлы"></ul>
             </div>
 
             <div class="auth-field create-task-field">
@@ -56,12 +59,8 @@
 
             <div class="auth-field create-task-field">
                 <label for="createTaskAssignee">Исполнитель</label>
-                <select id="createTaskAssignee" class="filter-input create-task-select">
-                    <option value="" selected>Не назначен</option>
-                    <option value="Лев Аксенов">Лев Аксенов</option>
-                    <option value="Дарья Швед">Дарья Швед</option>
-                    <option value="Ксения Глебко">Ксения Глебко</option>
-                </select>
+                <input id="createTaskAssignee" class="filter-input" placeholder="Не назначен / поиск по команде" autocomplete="off">
+                <ul class="create-task-deps-suggest text-basic create-task-search-menu" id="createTaskAssigneeMenu" aria-label="Исполнители"></ul>
             </div>
 
             <div class="filter-section create-task-field">
@@ -107,10 +106,7 @@
                         <label class="text-signature" for="createTaskDepSearch">От чего зависит</label>
                         <input type="search" id="createTaskDepSearch" class="filter-input" placeholder="Поиск по коду или названию…" autocomplete="off">
                     </div>
-                    <ul class="create-task-deps-suggest text-basic" aria-label="Подсказки">
-                        <li class="create-task-deps-suggest__item" tabindex="0">WCL-256 — Обновить документацию API</li>
-                        <li class="create-task-deps-suggest__item" tabindex="0">CRM-104 — Импорт контактов</li>
-                    </ul>
+                    <ul class="create-task-deps-suggest text-basic" id="createTaskDepSuggest" aria-label="Подсказки"></ul>
                 </div>
             </div>
         </div>

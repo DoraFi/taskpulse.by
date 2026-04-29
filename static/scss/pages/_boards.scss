@@ -687,10 +687,12 @@ body[data-theme="dark"] .kanban-task-item, .board-list .card .list .item {
     width: 100%;
 
     .tasks-grid-wrapper {
-        width: fit-content;
+        width: 100%;
+        overflow-x: auto;
 
         .tasks-grid {
             margin-bottom: $space-8;
+            min-width: 72rem;
         }
     }
 
@@ -729,10 +731,19 @@ body[data-theme="dark"] .kanban-task-item, .board-list .card .list .item {
 
 .tasks-grid.reports-assignee-grid {
     grid-template-columns:
-        auto auto auto auto auto !important;
+        minmax(12rem, 1.8fr)
+        minmax(6rem, .8fr)
+        minmax(5rem, .7fr)
+        minmax(7rem, .9fr)
+        minmax(6rem, .8fr)
+        minmax(8rem, 1fr)
+        minmax(6rem, .8fr)
+        minmax(8rem, 1fr)
+        minmax(8rem, 1fr) !important;
 
     .grid-row {
-        padding: $space-4;
+        padding: $space-8 $space-6;
+        align-items: center;
     }
 
     .col-member {
@@ -752,8 +763,16 @@ body[data-theme="dark"] .kanban-task-item, .board-list .card .list .item {
     .col-archived,
     .col-active,
     .col-total,
-    .col-rate {
+    .col-rate,
+    .col-code,
+    .col-boards,
+    .col-queue,
+    .col-inProgress,
+    .col-done,
+    .col-urgent,
+    .col-overdue {
         white-space: nowrap;
+        text-align: center;
     }
 }
 

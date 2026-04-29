@@ -112,6 +112,22 @@ function ensureArchivedTasksArrays() {
     if (!boardsData || !boardsData.length) return;
     boardsData.forEach(board => {
         if (!Array.isArray(board.archivedTasks)) board.archivedTasks = [];
+        if (!Array.isArray(board.tasks)) board.tasks = [];
+        const archivedIds = new Set(board.archivedTasks.filter(t => t).map(t => String(t.id)));
+        const active = [];
+        board.tasks.forEach(task => {
+            if (!task) return;
+            if (task.stage === 'Готово') {
+                const idKey = String(task.id);
+                if (!archivedIds.has(idKey)) {
+                    board.archivedTasks.push({ ...task, archivedDate: task.updatedAt || new Date().toISOString() });
+                    archivedIds.add(idKey);
+                }
+                return;
+            }
+            active.push(task);
+        });
+        board.tasks = active;
     });
 }
 
@@ -640,7 +656,7 @@ function createAddTaskForm(boardId, boardIndex) {
         }
     });
 
-    createBtn.addEventListener('click', (e) => {
+    createBtn.addEventListener('click', async (e) => {
         e.preventDefault();
         const taskName = input.value.trim();
         if (!taskName) {
@@ -649,27 +665,50 @@ function createAddTaskForm(boardId, boardIndex) {
         }
         const board = boardsData[boardIndex];
         if (!board) return;
-        const maxId = Math.max(0, ...board.tasks.map(t => t.id).filter(id => typeof id === 'number'));
-        const newId = maxId + 1;
         let dueDate = null;
+        let startDate = null;
+        let endDate = null;
         if (selectedDueDate) {
-            if (typeof selectedDueDate === 'string') dueDate = selectedDueDate;
-            else if (selectedDueDate.end) dueDate = selectedDueDate.end;
+            if (typeof selectedDueDate === 'string') {
+                dueDate = selectedDueDate;
+                endDate = selectedDueDate;
+            } else {
+                startDate = selectedDueDate.start || null;
+                endDate = selectedDueDate.end || null;
+                dueDate = endDate || startDate;
+            }
         }
-        const newTask = {
-            id: newId,
-            name: taskName,
-            priority: 'обычный',
-            dueDate: dueDate,
-            assignee: selectedAssignee ? selectedAssignee.name : null,
-            assigneeAvatar: selectedAssignee ? selectedAssignee.avatar : null,
-            subtasks: []
-        };
-        board.tasks.push(newTask);
-        saveBoardsToLocalStorage();
-        renderCurrentView();
-        showToast(`Задача "${taskName}" создана в доске "${board.name}"`);
-        hideTagAndReset();
+        try {
+            const res = await fetch(apiUrl('/kanban/tasks/create'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    boardId: board.id,
+                    name: taskName,
+                    priority: 'обычный',
+                    stage: 'Очередь',
+                    dueDate,
+                    startDate,
+                    endDate,
+                    description: '',
+                    assignee: selectedAssignee ? selectedAssignee.name : null,
+                    storyPoints: null,
+                    estimateHours: null,
+                    dependencyType: null,
+                    dependencyTaskId: null
+                })
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || 'Ошибка создания задачи');
+            }
+            await loadBoardsData();
+            showToast(`Задача "${taskName}" создана в доске "${board.name}"`);
+            hideTagAndReset();
+        } catch (err) {
+            console.error(err);
+            showToast('Не удалось создать задачу');
+        }
     });
 
     document.addEventListener('click', (e) => {
@@ -1135,6 +1174,8 @@ function renderReportsView() {
         .then(r => r.ok ? r.json() : Promise.reject(new Error('reports api failed')))
         .then(data => {
             const summaryData = data.summary || {};
+            const executive = data.executive || {};
+            const topRisks = Array.isArray(data.topRisks) ? data.topRisks : [];
             const rows = Array.isArray(data.rows) ? data.rows : [];
 
             const card = document.createElement('div');
@@ -1146,63 +1187,84 @@ function renderReportsView() {
 
             const summary = document.createElement('div');
             summary.className = 'reports-summary';
+            const healthLabel = executive.health === 'high_risk'
+                ? 'Высокий риск'
+                : (executive.health === 'attention' ? 'Зона внимания' : 'Стабильно');
             summary.innerHTML = `
                 <div class="reports-summary-grid">
                     <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.projects ?? 0}</span><span class="reports-stat-label">проектов</span></div>
                     <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.tasks ?? 0}</span><span class="reports-stat-label">задач</span></div>
                     <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.done ?? 0}</span><span class="reports-stat-label">готово</span></div>
+                    <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.inProgress ?? 0}</span><span class="reports-stat-label">в работе</span></div>
                     <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.urgent ?? 0}</span><span class="reports-stat-label">срочных</span></div>
                     <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.overdue ?? 0}</span><span class="reports-stat-label">просрочено</span></div>
+                </div>
+                <div class="reports-summary-grid" style="margin-top: 0.75rem;">
+                    <div class="reports-stat-chip"><span class="reports-stat-value">${executive.doneRate ?? 0}%</span><span class="reports-stat-label">выполнение плана</span></div>
+                    <div class="reports-stat-chip"><span class="reports-stat-value">${executive.overdueRate ?? 0}%</span><span class="reports-stat-label">доля просрочки</span></div>
+                    <div class="reports-stat-chip"><span class="reports-stat-value">${healthLabel}</span><span class="reports-stat-label">оценка портфеля</span></div>
                 </div>
                 <p class="reports-hint text-signature">Метрики формируются по данным БД.</p>
             `;
             card.appendChild(summary);
 
-            const gridWrap = document.createElement('div');
-            gridWrap.className = 'tasks-grid-wrapper';
-            const grid = document.createElement('div');
-            grid.className = 'tasks-grid reports-assignee-grid';
-
-            const headerRow = document.createElement('div');
-            headerRow.className = 'grid-header';
-            [
-                ['project', 'Проект'],
-                ['boards', 'Доски'],
-                ['total', 'Всего задач'],
-                ['queue', 'Очередь'],
-                ['inProgress', 'В работе / тест'],
-                ['done', 'Готово'],
-                ['urgent', 'Срочные'],
-                ['overdue', 'Просрочено']
-            ].forEach(([key, title]) => {
-                const cell = document.createElement('div');
-                cell.className = `col-${key}`;
-                const titleSpan = document.createElement('span');
-                titleSpan.className = 'header-title';
-                titleSpan.textContent = title;
-                cell.appendChild(titleSpan);
-                headerRow.appendChild(cell);
-            });
-            grid.appendChild(headerRow);
-
-            rows.forEach((r) => {
-                const row = document.createElement('div');
-                row.className = 'grid-row';
-                row.innerHTML = `
-                    <div class="col-project"><p class="text-basic">${escapeHtml(r.project || '')} <span class="text-signature">${escapeHtml(r.code || '')}</span></p></div>
-                    <div class="col-boards"><p>${r.boards ?? 0}</p></div>
-                    <div class="col-total"><p>${r.total ?? 0}</p></div>
-                    <div class="col-queue"><p>${r.queue ?? 0}</p></div>
-                    <div class="col-inProgress"><p>${r.inProgress ?? 0}</p></div>
-                    <div class="col-done"><p>${r.done ?? 0}</p></div>
-                    <div class="col-urgent"><p>${r.urgent ?? 0}</p></div>
-                    <div class="col-overdue"><p>${r.overdue ?? 0}</p></div>
+            if (topRisks.length > 0) {
+                const risks = document.createElement('div');
+                risks.className = 'reports-summary';
+                risks.innerHTML = `
+                    <p class="text-header" style="margin-bottom:0.5rem;">Риски для руководителя</p>
+                    <ul style="margin:0;padding-left:18px;">
+                        ${topRisks.map(r => `
+                            <li class="text-basic" style="margin-bottom:4px;">
+                                ${escapeHtml(r.project || 'Проект')} — срочные: ${r.urgent ?? 0}, просрочено: ${r.overdue ?? 0}
+                            </li>
+                        `).join('')}
+                    </ul>
                 `;
-                grid.appendChild(row);
-            });
+                card.appendChild(risks);
+            }
 
-            gridWrap.appendChild(grid);
-            card.appendChild(gridWrap);
+            const tableWrap = document.createElement('div');
+            tableWrap.style.overflowX = 'auto';
+            tableWrap.style.marginTop = '10px';
+            const table = document.createElement('table');
+            table.style.width = '100%';
+            table.style.minWidth = '880px';
+            table.style.borderCollapse = 'collapse';
+            table.style.background = 'rgba(255,255,255,0.25)';
+            table.style.borderRadius = '8px';
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th style="text-align:left;padding:8px;border-bottom:1px solid #b8c8ad;">Проект</th>
+                        <th style="text-align:left;padding:8px;border-bottom:1px solid #b8c8ad;">Код</th>
+                        <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">Доски</th>
+                        <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">Всего задач</th>
+                        <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">Очередь</th>
+                        <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">В работе/тест</th>
+                        <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">Готово</th>
+                        <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">Срочные</th>
+                        <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">Просрочено</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rows.map(r => `
+                        <tr>
+                            <td style="padding:8px;border-bottom:1px solid #d7e2cf;">${escapeHtml(r.project || '')}</td>
+                            <td style="padding:8px;border-bottom:1px solid #d7e2cf;">${escapeHtml(r.code || '—')}</td>
+                            <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${r.boards ?? 0}</td>
+                            <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${r.total ?? 0}</td>
+                            <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${r.queue ?? 0}</td>
+                            <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${r.inProgress ?? 0}</td>
+                            <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${r.done ?? 0}</td>
+                            <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${r.urgent ?? 0}</td>
+                            <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${r.overdue ?? 0}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+            tableWrap.appendChild(table);
+            card.appendChild(tableWrap);
             container.innerHTML = '';
             container.appendChild(card);
         })
@@ -1480,8 +1542,30 @@ function restoreFromArchive(boardIndex, taskId) {
     if (!board || !board.archivedTasks) return;
     const idx = board.archivedTasks.findIndex(t => t && Number(t.id) === Number(taskId));
     if (idx === -1) return;
-    const task = board.archivedTasks.splice(idx, 1)[0];
+    const task = board.archivedTasks[idx];
+    if (!task) return;
+    fetch(apiUrl('/kanban/tasks/update'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            taskId: task.id,
+            name: task.name,
+            description: task.description || '',
+            stage: 'Очередь',
+            priority: task.priority || 'обычный',
+            dueDate: task.dueDate || null,
+            startDate: task.startDate || null,
+            endDate: task.endDate || null,
+            assignee: task.assignee || null,
+            storyPoints: task.storyPoints || null,
+            estimateHours: task.timeEstimateHours || null,
+            dependencyType: task.dependencyType || null,
+            dependencyTaskId: task.dependencyTaskId || null
+        })
+    }).catch(() => {});
+    board.archivedTasks.splice(idx, 1);
     delete task.archivedDate;
+    task.stage = 'Очередь';
     if (task.subtasks && task.subtasks.length) {
         task.subtasks = task.subtasks.map(st => ({
             ...st,
@@ -2057,12 +2141,14 @@ function initTaskSortable(container, boardId) {
         group: { name: 'tasks', pull: true, put: true },
         handle: '.item',
         draggable: '.item',
+        filter: '.task-open-trigger, .checkbox-item, input, textarea, button, select, .name',
+        preventOnFilter: false,
         ghostClass: '',
         dragClass: '',
         chosenClass: '',
         forceFallback: true,
         fallbackOnBody: true,
-        fallbackTolerance: 0,
+        fallbackTolerance: 6,
         onStart: function() {
             if (cardsContainer) cardsContainer.classList.add('dragging-active');
             __dragging = true;
@@ -2222,19 +2308,54 @@ function createTaskItem(task, boardIndex, taskIndex) {
         <span class="custom-checkbox"></span>
     `;
     const checkbox = checkboxLabel.querySelector('input');
-    checkbox.addEventListener('change', (e) => {
+    checkbox.checked = task.stage === 'Готово';
+    checkbox.addEventListener('change', async (e) => {
         e.stopPropagation();
-        if (checkbox.checked) {
-            archiveTask(boardIndex, task.id, true);
+        try {
+            const stage = checkbox.checked ? 'Готово' : 'Очередь';
+            const res = await fetch(apiUrl('/kanban/tasks/update'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    taskId: task.id,
+                    name: task.name,
+                    description: task.description || '',
+                    stage,
+                    priority: task.priority || 'обычный',
+                    dueDate: task.dueDate || null,
+                    startDate: task.startDate || null,
+                    endDate: task.endDate || null,
+                    assignee: task.assignee || null,
+                    storyPoints: task.storyPoints || null,
+                    estimateHours: task.timeEstimateHours || null,
+                    dependencyType: task.dependencyType || null,
+                    dependencyTaskId: task.dependencyTaskId || null
+                })
+            });
+            if (!res.ok) throw new Error('update failed');
+            task.stage = stage;
+            if (typeof window.tpRefreshBoardList === 'function') await window.tpRefreshBoardList();
+            showToast(stage === 'Готово' ? 'Задача отмечена как выполненная' : 'Задача возвращена в работу');
+        } catch (err) {
+            console.error(err);
+            checkbox.checked = !checkbox.checked;
+            showToast('Не удалось обновить статус задачи');
         }
     });
     checkbox.setAttribute('draggable', 'false');
     row.appendChild(checkboxLabel);
 
     const textSpan = document.createElement('span');
-    textSpan.className = 'checkbox-text'; 
+    textSpan.className = 'checkbox-text task-open-trigger';
     textSpan.textContent = escapeHtml(task.name);
-    textSpan.style.cursor = 'default';
+    textSpan.style.cursor = 'pointer';
+    textSpan.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (typeof window.tpOpenTaskDetailModal === 'function') {
+            window.tpOpenTaskDetailModal(task);
+        }
+    });
     row.appendChild(textSpan);
 
     item.appendChild(row);
@@ -2345,7 +2466,8 @@ function createTagBlock(task) {
     const hasAssignee = task.assignee && task.assignee.trim();
     const hasPriority = task.priority && (task.priority === 'срочно' || task.priority === 'обычный');
     const hasDueDate = task.dueDate && task.dueDate.trim();
-    if (!hasAssignee && !hasPriority && !hasDueDate) return null;
+    const hasDependency = task.dependencyLabel && String(task.dependencyLabel).trim();
+    if (!hasAssignee && !hasPriority && !hasDueDate && !hasDependency) return null;
     const tagBlock = document.createElement('div');
     tagBlock.className = 'tag';
     if (hasAssignee) {
@@ -2370,6 +2492,15 @@ function createTagBlock(task) {
         deadlineDiv.textContent = formatDueDate(task.dueDate);
         if (isAttentionDueDate(task.dueDate)) deadlineDiv.classList.add('pink');
         tagBlock.appendChild(deadlineDiv);
+    }
+    if (hasDependency) {
+        const depDiv = document.createElement('div');
+        depDiv.className = 'deadline';
+        const depPrefix = task.dependencyType === 'blocks'
+            ? 'Блокирует'
+            : (task.dependencyType === 'blocked_by' ? 'Блокируется' : 'Связана');
+        depDiv.textContent = `${depPrefix}: ${task.dependencyLabel}`;
+        tagBlock.appendChild(depDiv);
     }
     return tagBlock;
 }
@@ -2837,6 +2968,9 @@ async function initBoardListPage() {
 }
 
 window.initBoardListPage = initBoardListPage;
+window.tpRefreshBoardList = async function tpRefreshBoardList() {
+    await loadBoardsData();
+};
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {

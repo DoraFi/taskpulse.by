@@ -35,3 +35,5 @@ app:
   jwt:
     secret: ${JWT_SECRET:taskpulse-dev-secret-key-taskpulse-dev-secret-key}
     expiration-minutes: ${JWT_EXPIRATION_MINUTES:720}
+  seed:
+    enabled: ${APP_SEED_ENABLED:false}

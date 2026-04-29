@@ -45,7 +45,7 @@ function initProjectsPage() {
                             </div>
                             <p class="text-signature project-card__desc">${p.summary || ''}</p>
                             <div class="project-card__stats">
-                                <div class="project-card__stat"><span class="text-signature">Команда</span><span class="text-basic">${p.teamCount ?? 0}</span></div>
+                                <div class="project-card__stat"><span class="text-signature">Команда</span><span class="text-basic">${p.teamName || me.teamName || '—'}</span></div>
                                 <div class="project-card__stat"><span class="text-signature">Доски</span><span class="text-basic">${p.boardCount ?? 0}</span></div>
                                 <div class="project-card__stat"><span class="text-signature">Задачи</span><span class="text-basic">${p.taskCount ?? 0}</span></div>
                                 <div class="project-card__stat"><span class="text-signature">Готово</span><span class="text-basic">${p.doneCount ?? 0}</span></div>

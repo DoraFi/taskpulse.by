@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
@@ -40,6 +41,12 @@ public class ContextApiController {
     @GetMapping("/api/projects")
     public List<Map<String, Object>> projectsAuto() {
         return legacy.projects();
+    }
+
+    @GetMapping("/api/task-form/options")
+    public Map<String, Object> taskFormOptionsAuto(@RequestParam(required = false) String project,
+                                                   @RequestParam(required = false) String q) {
+        return legacy.taskFormOptions(project, q);
     }
 
     @GetMapping("/api/boards")
@@ -71,6 +78,27 @@ public class ContextApiController {
     @PostMapping("/api/kanban/tasks/update")
     public Map<String, Object> updateKanbanTaskAuto(@RequestBody Map<String, Object> payload) {
         return legacy.updateKanbanTask(payload);
+    }
+
+    @PostMapping("/api/kanban/tasks/attachments/upload")
+    public Map<String, Object> uploadTaskAttachmentAuto(@RequestParam Long taskId,
+                                                        @RequestParam("file") MultipartFile file) {
+        return legacy.uploadTaskAttachment(taskId, file);
+    }
+
+    @PostMapping("/api/kanban/tasks/attachments/delete")
+    public Map<String, Object> deleteTaskAttachmentAuto(@RequestParam Long attachmentId) {
+        return legacy.deleteTaskAttachment(attachmentId);
+    }
+
+    @GetMapping("/api/kanban/tasks/attachments/delete")
+    public Map<String, Object> deleteTaskAttachmentAutoGet(@RequestParam Long attachmentId) {
+        return legacy.deleteTaskAttachment(attachmentId);
+    }
+
+    @GetMapping("/api/kanban/tasks/attachments")
+    public List<Map<String, Object>> taskAttachmentsAuto(@RequestParam Long taskId) {
+        return legacy.taskAttachments(taskId);
     }
 
     @PostMapping("/api/kanban/subtasks/toggle")
@@ -133,6 +161,15 @@ public class ContextApiController {
         return legacy.projects();
     }
 
+    @GetMapping("/o/{orgId}/t/{teamId}/api/task-form/options")
+    public Map<String, Object> taskFormOptions(@PathVariable String orgId,
+                                               @PathVariable String teamId,
+                                               @RequestParam(required = false) String project,
+                                               @RequestParam(required = false) String q) {
+        ensureContextAccess(orgId, teamId);
+        return legacy.taskFormOptions(project, q);
+    }
+
     @GetMapping("/o/{orgId}/t/{teamId}/api/boards")
     public Map<String, Object> boards(@PathVariable String orgId,
                                       @PathVariable String teamId,
@@ -180,6 +217,39 @@ public class ContextApiController {
                                                 @RequestBody Map<String, Object> payload) {
         ensureContextAccess(orgId, teamId);
         return legacy.updateKanbanTask(payload);
+    }
+
+    @PostMapping("/o/{orgId}/t/{teamId}/api/kanban/tasks/attachments/upload")
+    public Map<String, Object> uploadTaskAttachment(@PathVariable String orgId,
+                                                    @PathVariable String teamId,
+                                                    @RequestParam Long taskId,
+                                                    @RequestParam("file") MultipartFile file) {
+        ensureContextAccess(orgId, teamId);
+        return legacy.uploadTaskAttachment(taskId, file);
+    }
+
+    @PostMapping("/o/{orgId}/t/{teamId}/api/kanban/tasks/attachments/delete")
+    public Map<String, Object> deleteTaskAttachment(@PathVariable String orgId,
+                                                    @PathVariable String teamId,
+                                                    @RequestParam Long attachmentId) {
+        ensureContextAccess(orgId, teamId);
+        return legacy.deleteTaskAttachment(attachmentId);
+    }
+
+    @GetMapping("/o/{orgId}/t/{teamId}/api/kanban/tasks/attachments/delete")
+    public Map<String, Object> deleteTaskAttachmentGet(@PathVariable String orgId,
+                                                       @PathVariable String teamId,
+                                                       @RequestParam Long attachmentId) {
+        ensureContextAccess(orgId, teamId);
+        return legacy.deleteTaskAttachment(attachmentId);
+    }
+
+    @GetMapping("/o/{orgId}/t/{teamId}/api/kanban/tasks/attachments")
+    public List<Map<String, Object>> taskAttachments(@PathVariable String orgId,
+                                                     @PathVariable String teamId,
+                                                     @RequestParam Long taskId) {
+        ensureContextAccess(orgId, teamId);
+        return legacy.taskAttachments(taskId);
     }
 
     @PostMapping("/o/{orgId}/t/{teamId}/api/kanban/subtasks/toggle")

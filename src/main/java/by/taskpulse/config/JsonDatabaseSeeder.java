@@ -11,11 +11,13 @@ import java.util.Map;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
+@ConditionalOnProperty(prefix = "app.seed", name = "enabled", havingValue = "true")
 public class JsonDatabaseSeeder implements ApplicationRunner {
 
     private final JdbcTemplate jdbcTemplate;

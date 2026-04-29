@@ -60,7 +60,7 @@
             </div>
             <div class="modal-header" style="margin-top: 0;">
                 <p class="text-header">Пригласите команду</p>
-                <a class="modal-close" th:href="@{/onboarding/done}" href="/onboarding/done" aria-label="Пропустить приглашения" title="Пропустить">
+                <a class="modal-close" href="#" id="onboardingTeamSkipTop" aria-label="Пропустить приглашения" title="Пропустить">
                     <img src="/static/source/icons/cross.svg" alt="" width="24" height="24">
                 </a>
             </div>
@@ -107,7 +107,7 @@
             <div class="modal-footer" style="flex-wrap: wrap; gap: 1rem;">
                 <a class="button-secondary" th:href="@{/onboarding/project}" href="/onboarding/project">Назад</a>
                 <div style="display: flex; gap: 1rem; margin-left: auto;">
-                    <a class="text-basic" th:href="@{/onboarding/done}" href="/onboarding/done" style="align-self: center; text-decoration: underline;">Пропустить</a>
+                    <a class="text-basic" href="#" id="onboardingTeamSkipLink" style="align-self: center; text-decoration: underline;">Пропустить</a>
                     <button class="button-basic" type="button" id="onboardingTeamFinishBtn">Продолжить</button>
                 </div>
             </div>

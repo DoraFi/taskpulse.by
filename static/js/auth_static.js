@@ -1,6 +1,7 @@
 (function () {
     var REGISTER_DRAFT_KEY = 'tpRegisterDraft';
     var ONBOARDING_DRAFT_KEY = 'tpOnboardingDraft';
+    var ACCOUNT_REGISTERED_KEY = 'tpAccountRegistered';
     var EMAIL_STRICT_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     document.querySelectorAll('form[data-static-form]').forEach(function (form) {
@@ -39,7 +40,7 @@
 
     var registerContinueBtn = document.getElementById('registerContinueBtn');
     if (registerContinueBtn) {
-        registerContinueBtn.addEventListener('click', function () {
+        registerContinueBtn.addEventListener('click', async function () {
             var fullName = value('reg-name');
             var email = value('reg-email').toLowerCase();
             var password = value('reg-password');
@@ -80,12 +81,30 @@
                 showToast('Нужно принять условия использования.');
                 return;
             }
-            sessionStorage.setItem(REGISTER_DRAFT_KEY, JSON.stringify({
-                fullName: fullName,
-                email: email,
-                password: password
-            }));
-            window.location.href = '/onboarding/org-team';
+            registerContinueBtn.disabled = true;
+            try {
+                var res = await fetch('/api/auth/register-account', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fullName: fullName, email: email, password: password })
+                });
+                var data = await res.json().catch(function () { return {}; });
+                if (!res.ok) {
+                    showToast(data.error || 'Не удалось зарегистрировать пользователя.');
+                    return;
+                }
+                sessionStorage.setItem(REGISTER_DRAFT_KEY, JSON.stringify({
+                    fullName: fullName,
+                    email: email,
+                    password: password
+                }));
+                sessionStorage.setItem(ACCOUNT_REGISTERED_KEY, '1');
+                window.location.href = '/onboarding/org-team';
+            } catch (e) {
+                showToast('Ошибка сети. Попробуйте еще раз.');
+            } finally {
+                registerContinueBtn.disabled = false;
+            }
         });
 
         // Разрешаем переход по Enter (submit формы), чтобы пользователь не “застревал”
@@ -191,6 +210,16 @@
 
     var finishBtn = document.getElementById('onboardingTeamFinishBtn');
     if (finishBtn) {
+        var skipTop = document.getElementById('onboardingTeamSkipTop');
+        var skipLink = document.getElementById('onboardingTeamSkipLink');
+        [skipTop, skipLink].forEach(function (el) {
+            if (!el) return;
+            el.addEventListener('click', function (e) {
+                e.preventDefault();
+                finishBtn.click();
+            });
+        });
+
         finishBtn.addEventListener('click', async function () {
             var registerDraft = readDraft(REGISTER_DRAFT_KEY);
             var onboardingDraft = readDraft(ONBOARDING_DRAFT_KEY);
@@ -200,7 +229,15 @@
                 return;
             }
             var invites = collectInvites();
-            var payload = {
+            var accountReady = sessionStorage.getItem(ACCOUNT_REGISTERED_KEY) === '1';
+            var payload = accountReady ? {
+                organizationName: onboardingDraft.organizationName,
+                teamName: onboardingDraft.teamName,
+                projectName: onboardingDraft.projectName,
+                projectKey: onboardingDraft.projectKey,
+                projectType: onboardingDraft.projectType,
+                invites: invites
+            } : {
                 fullName: registerDraft.fullName,
                 email: registerDraft.email,
                 password: registerDraft.password,
@@ -213,18 +250,22 @@
             };
             finishBtn.disabled = true;
             try {
-                var res = await fetch('/api/auth/register', {
+                var res = await fetch(accountReady ? '/api/auth/complete-onboarding' : '/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
                 var data = await res.json().catch(function () { return {}; });
                 if (!res.ok) {
-                    showToast(data.error || 'Не удалось завершить регистрацию.');
+                    showToast(data.error || ('Не удалось завершить регистрацию. Код: ' + res.status));
                     return;
+                }
+                if (data && data.context && data.context.basePath) {
+                    sessionStorage.setItem('tpOnboardingBasePath', String(data.context.basePath));
                 }
                 sessionStorage.removeItem(REGISTER_DRAFT_KEY);
                 sessionStorage.removeItem(ONBOARDING_DRAFT_KEY);
+                sessionStorage.removeItem(ACCOUNT_REGISTERED_KEY);
                 window.location.href = '/onboarding/done';
             } catch (e) {
                 showToast('Ошибка сети. Попробуйте еще раз.');

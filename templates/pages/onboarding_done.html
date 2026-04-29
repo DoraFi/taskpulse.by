@@ -71,17 +71,18 @@
     <script>
         (async function () {
             try {
-                const res = await fetch('/api/me');
-                if (!res.ok) return;
-                const me = await res.json();
-                const org = me.organizationPublicId;
-                const team = me.teamPublicId;
-                if (!org || !team) return;
-                const base = `/o/${encodeURIComponent(org)}/t/${encodeURIComponent(team)}`;
-                const home = document.getElementById('onboardingHomeLink');
-                if (home) home.href = base;
-                const project = document.getElementById('onboardingProjectLink');
-                if (project) project.href = `${base}/projects`;
+                var cachedBase = sessionStorage.getItem('tpOnboardingBasePath');
+                if (cachedBase) {
+                    var cachedHome = document.getElementById('onboardingHomeLink');
+                    if (cachedHome) cachedHome.href = cachedBase;
+                    var cachedProject = document.getElementById('onboardingProjectLink');
+                    if (cachedProject) cachedProject.href = cachedBase + '/projects';
+                    sessionStorage.removeItem('tpOnboardingBasePath');
+                    return;
+                }
+                // Если нет контекста из шага регистрации, не подставляем старую сессию.
+                // Пользователь остается на нейтральных ссылках /auth/welcome.
+                return;
             } catch (_) {}
         })();
     </script>

@@ -1186,9 +1186,17 @@
 
             const pr = priorityKey === 'urgent' ? 'срочно' : 'обычный';
             let dueDate = null;
+            let startDate = null;
+            let endDate = null;
             if (selectedDueDate) {
-                if (typeof selectedDueDate === 'string') dueDate = selectedDueDate;
-                else if (selectedDueDate.end) dueDate = selectedDueDate.end;
+                if (typeof selectedDueDate === 'string') {
+                    dueDate = selectedDueDate;
+                    endDate = selectedDueDate;
+                } else {
+                    startDate = selectedDueDate.start || null;
+                    endDate = selectedDueDate.end || null;
+                    dueDate = endDate || startDate;
+                }
             }
 
             try {
@@ -1201,6 +1209,8 @@
                         priority: pr,
                         stage: 'Очередь',
                         dueDate,
+                        startDate,
+                        endDate,
                         description: '',
                         assignee: selectedAssignee ? selectedAssignee.name : null
                     })
@@ -1290,7 +1300,8 @@
     function createTagBlock(task) {
         const hasAssignee = task.assignee && String(task.assignee).trim();
         const hasDueDate = task.dueDate && String(task.dueDate).trim();
-        if (!hasAssignee && !hasDueDate) return null;
+        const hasDependency = task.dependencyLabel && String(task.dependencyLabel).trim();
+        if (!hasAssignee && !hasDueDate && !hasDependency) return null;
         const tagBlock = document.createElement('div');
         tagBlock.className = 'tag';
         if (hasAssignee) {
@@ -1310,6 +1321,15 @@
             deadlineDiv.textContent = formatDueDate(task.dueDate);
             if (isAttentionDueDate(task.dueDate)) deadlineDiv.classList.add('pink');
             tagBlock.appendChild(deadlineDiv);
+        }
+        if (hasDependency) {
+            const depDiv = document.createElement('div');
+            depDiv.className = 'deadline';
+            const depPrefix = task.dependencyType === 'blocks'
+                ? 'Блокирует'
+                : (task.dependencyType === 'blocked_by' ? 'Блокируется' : 'Связана');
+            depDiv.textContent = `${depPrefix}: ${task.dependencyLabel}`;
+            tagBlock.appendChild(depDiv);
         }
         return tagBlock;
     }

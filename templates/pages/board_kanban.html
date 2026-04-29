@@ -85,11 +85,8 @@
                     <div class="task-detail-static__col-main">
                         <div class="auth-field create-task-field">
                             <label for="taskDetailProject">Проект <img class="required-icon" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>
-                            <select id="taskDetailProject" class="filter-input create-task-select" required>
-                                <option value="Корпоративный портал">Корпоративный портал</option>
-                                <option value="Микросервисная платформа">Микросервисная платформа</option>
-                                <option value="CRM-система">CRM-система</option>
-                            </select>
+                            <input id="taskDetailProject" class="filter-input" autocomplete="off" required>
+                            <ul class="create-task-deps-suggest text-basic create-task-search-menu" id="taskDetailProjectMenu" aria-label="Проекты"></ul>
                         </div>
                         <div class="auth-field create-task-field">
                             <label for="taskDetailName">Наименование задачи <img class="required-icon" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>
@@ -120,14 +117,8 @@
                         </div>
                         <div class="auth-field create-task-field">
                             <label for="taskDetailAssignee">Исполнитель</label>
-                            <select id="taskDetailAssignee" class="filter-input create-task-select">
-                                <option value="">Не назначен</option>
-                                <option value="Лев Аксенов">Лев Аксенов</option>
-                                <option value="Дарья Швед">Дарья Швед</option>
-                                <option value="Ксения Глебко">Ксения Глебко</option>
-                                <option value="Полина Ильючик">Полина Ильючик</option>
-                                <option value="Оксана Кветко">Оксана Кветко</option>
-                            </select>
+                            <input id="taskDetailAssignee" class="filter-input" placeholder="Не назначен / поиск по команде" autocomplete="off">
+                            <ul class="create-task-deps-suggest text-basic create-task-search-menu" id="taskDetailAssigneeMenu" aria-label="Исполнители"></ul>
                         </div>
                         <div class="auth-field create-task-field">
                             <label for="taskDetailHours">Время на выполнение (в часах)</label>
@@ -171,18 +162,17 @@
                                     <label class="text-signature" for="taskDetailDepSearch">От чего зависит</label>
                                     <input type="search" id="taskDetailDepSearch" class="filter-input" placeholder="Поиск по коду или названию…" autocomplete="off">
                                 </div>
-                                <ul class="create-task-deps-suggest text-basic" aria-label="Подсказки">
-                                    <li class="create-task-deps-suggest__item" tabindex="0">1002 — API авторизации</li>
-                                    <li class="create-task-deps-suggest__item" tabindex="0">1001 — Планирование архитектуры</li>
-                                </ul>
+                                <ul class="create-task-deps-suggest text-basic" id="taskDetailDepSuggest" aria-label="Подсказки"></ul>
                             </div>
                         </div>
-                        <div class="auth-field create-task-field">
+                        <div class="auth-field create-task-field" id="taskDetailAttachmentsField">
                             <span class="text-signature create-task-label-plain">Вложения</span>
                             <div class="create-task-attachments border-dark-1 br-5">
                                 <p class="text-basic create-task-attachments__hint">Перетащите сюда файлы или</p>
                                 <button type="button" class="button-basic create-task-attachments__btn">Выберите в проводнике</button>
                             </div>
+                            <ul class="create-task-deps-suggest text-basic mt-8" id="taskDetailSelectedFiles" aria-label="Выбранные файлы"></ul>
+                            <ul class="create-task-deps-suggest text-basic mt-8" id="taskDetailAttachmentsList" aria-label="Загруженные файлы"></ul>
                         </div>
                     </div>
                 </div>

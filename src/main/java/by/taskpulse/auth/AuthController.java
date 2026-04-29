@@ -8,9 +8,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.dao.DataAccessException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.security.SecureRandom;
 import java.time.Duration;
@@ -32,12 +35,38 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final JwtProperties jwtProperties;
+    private final CurrentUserProvider currentUserProvider;
 
-    public AuthController(JdbcTemplate jdbcTemplate, PasswordEncoder passwordEncoder, JwtService jwtService, JwtProperties jwtProperties) {
+    public AuthController(JdbcTemplate jdbcTemplate, PasswordEncoder passwordEncoder, JwtService jwtService, JwtProperties jwtProperties, CurrentUserProvider currentUserProvider) {
         this.jdbcTemplate = jdbcTemplate;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.jwtProperties = jwtProperties;
+        this.currentUserProvider = currentUserProvider;
+    }
+
+    @PostMapping("/register-account")
+    public ResponseEntity<Map<String, Object>> registerAccount(@Valid @RequestBody RegisterAccountRequest req) {
+        String email = req.email().trim().toLowerCase(Locale.ROOT);
+        if (exists("select count(*) from app_user where email = ?", email)) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Пользователь с таким email уже существует"));
+        }
+        String username = nextUniqueUsername(email);
+        jdbcTemplate.update(
+                """
+                insert into app_user(email, full_name, password_hash, username, is_active)
+                values (?, ?, ?, ?, true)
+                """,
+                email, req.fullName().trim(), passwordEncoder.encode(req.password()), username
+        );
+        Long userId = jdbcTemplate.queryForObject("select id from app_user where email = ?", Long.class, email);
+        String token = jwtService.generateToken(username, userId, List.of("member"));
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("token", token);
+        body.put("userId", userId);
+        body.put("username", username);
+        body.put("email", email);
+        return withAuthCookie(token, body);
     }
 
     @PostMapping("/register")
@@ -69,6 +98,14 @@ public class AuthController {
                 email, req.fullName().trim(), passwordEncoder.encode(req.password()), orgId, username
         );
         Long userId = jdbcTemplate.queryForObject("select id from app_user where email = ?", Long.class, email);
+        try {
+            jdbcTemplate.update(
+                    "update app_user set team_joined_at = coalesce(team_joined_at, now()) where id = ?",
+                    userId
+            );
+        } catch (DataAccessException ignored) {
+            // Колонка может отсутствовать в старых схемах.
+        }
 
         jdbcTemplate.update(
                 """
@@ -134,6 +171,84 @@ public class AuthController {
         Map<String, Object> context = contextByUserId(userId);
         String token = jwtService.generateToken(username, userId, List.of("organization_registrar", "team_admin", "project_admin"));
 
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("token", token);
+        body.put("userId", userId);
+        body.put("username", username);
+        body.put("email", email);
+        body.put("context", context);
+        body.put("invites", inviteResult);
+        return withAuthCookie(token, body);
+    }
+
+    @PostMapping("/complete-onboarding")
+    public ResponseEntity<Map<String, Object>> completeOnboarding(@Valid @RequestBody CompleteOnboardingRequest req) {
+        String username = currentUserProvider.getUsername();
+        if (username == null || username.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Требуется авторизация");
+        }
+        Map<String, Object> userRow = jdbcTemplate.queryForMap(
+                "select id, email from app_user where username = ? and is_active = true",
+                username
+        );
+        Long userId = ((Number) userRow.get("id")).longValue();
+        String email = String.valueOf(userRow.get("email"));
+
+        String orgId = nextOrganizationCode(req.organizationName());
+        String teamCode = nextTeamCode(orgId);
+        String projectCodeInput = req.projectKey() == null ? "" : req.projectKey().trim();
+        if (!projectCodeInput.isBlank() && !projectCodeInput.matches("^[A-Za-z]{3}$")) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Ключ проекта должен состоять из 3 латинских букв."));
+        }
+        String projectCode = projectCodeInput.isBlank()
+                ? nextProjectCodeFromName(orgId, req.projectName())
+                : projectCodeInput.toUpperCase(Locale.ROOT);
+        String projectType = normalizeProjectType(req.projectType());
+
+        jdbcTemplate.update("insert into organization(id, name) values (?, ?)", orgId, req.organizationName().trim());
+        jdbcTemplate.update("update app_user set organization_id = ? where id = ?", orgId, userId);
+        try {
+            jdbcTemplate.update("update app_user set team_joined_at = coalesce(team_joined_at, now()) where id = ?", userId);
+        } catch (DataAccessException ignored) {}
+
+        jdbcTemplate.update(
+                "insert into app_team(organization_id, code, name, lead_user_id) values (?, ?, ?, ?)",
+                orgId, teamCode, req.teamName().trim(), userId
+        );
+        Long teamId = jdbcTemplate.queryForObject(
+                "select id from app_team where organization_id = ? and code = ?",
+                Long.class, orgId, teamCode
+        );
+        jdbcTemplate.update("insert into team_membership(team_id, user_id, role) values (?, ?, 'lead')", teamId, userId);
+        jdbcTemplate.update(
+                "insert into project(name, owner_id, organization_id, code, summary, project_type) values (?, ?, ?, ?, ?, ?)",
+                req.projectName().trim(), userId, orgId, projectCode, "", projectType
+        );
+        Long projectId = jdbcTemplate.queryForObject(
+                "select id from project where organization_id = ? and code = ?",
+                Long.class, orgId, projectCode
+        );
+        jdbcTemplate.update("insert into project_team(project_id, team_id) values (?, ?)", projectId, teamId);
+        jdbcTemplate.update("insert into project_member(project_id, user_id, role) values (?, ?, 'owner')", projectId, userId);
+        jdbcTemplate.update("insert into app_user_role(user_id, role_code, organization_id) values (?, 'organization_registrar', ?)", userId, orgId);
+        jdbcTemplate.update("insert into app_user_role(user_id, role_code, organization_id, team_id) values (?, 'team_admin', ?, ?)", userId, orgId, teamId);
+        jdbcTemplate.update("insert into app_user_role(user_id, role_code, organization_id, team_id, project_id) values (?, 'project_admin', ?, ?, ?)", userId, orgId, teamId, projectId);
+        createDefaultBoardsAndStages(projectId, projectCode, projectType);
+
+        List<Map<String, Object>> inviteResult = new ArrayList<>();
+        for (InviteRequest invite : req.invites()) {
+            String inviteRole = normalizeInviteRole(invite.role());
+            String invitedEmail = invite.email().trim().toLowerCase(Locale.ROOT);
+            jdbcTemplate.update(
+                    "insert into team_invitation(organization_id, team_id, invited_email, invited_role, status, invited_by) values (?, ?, ?, ?, 'sent', ?)",
+                    orgId, teamId, invitedEmail, inviteRole, userId
+            );
+            inviteResult.add(Map.of("email", invitedEmail, "role", inviteRole, "status", "sent"));
+        }
+
+        Map<String, Object> context = contextByUserId(userId);
+        String token = jwtService.generateToken(username, userId, List.of("organization_registrar", "team_admin", "project_admin"));
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("token", token);
         body.put("userId", userId);
@@ -255,80 +370,26 @@ public class AuthController {
     }
 
     private void createDefaultBoardsAndStages(Long projectId, String projectCode, String projectType) {
-        // Реализация UI сейчас полностью завязана на два набора досок: LIST и KANBAN.
-        // Поэтому для scrum/scrumban используем префикс KANBAN, но этапы берём по project_type.
         String boardCodePrefix = "list".equals(projectType) ? "LIST" : "KANBAN";
-
-        List<Map<String, Object>> boardTemplates = jdbcTemplate.queryForList(
-                """
-                select board_name, position_no
-                from seed_board_template
-                where project_type = ?
-                order by position_no
-                limit 3
-                """,
-                projectType
+        String boardName = "Название доски";
+        String boardCode = boardCodePrefix + "_1";
+        jdbcTemplate.update(
+                "insert into board(name, project_id, code) values (?, ?, ?)",
+                boardName, projectId, boardCode
         );
-        if (boardTemplates.isEmpty()) {
-            throw new IllegalStateException("Нет шаблонов досок для project_type=" + projectType);
-        }
 
-        // Создаем доски (без задач) и этапы для каждой.
-        for (int i = 0; i < boardTemplates.size(); i++) {
-            Map<String, Object> bt = boardTemplates.get(i);
-            String boardName = String.valueOf(bt.get("board_name"));
-            int positionNo = ((Number) bt.get("position_no")).intValue();
+        Long boardId = jdbcTemplate.queryForObject(
+                "select id from board where project_id = ? and code = ?",
+                Long.class,
+                projectId, boardCode
+        );
 
-            String boardCode = boardCodePrefix + "_" + positionNo;
+        List<String> stages = List.of("Очередь", "В работе", "Готово");
+        for (int s = 0; s < stages.size(); s++) {
             jdbcTemplate.update(
-                    "insert into board(name, project_id, code) values (?, ?, ?)",
-                    boardName, projectId, boardCode
+                    "insert into board_stage(board_id, stage_name, position) values (?, ?, ?)",
+                    boardId, stages.get(s), s + 1
             );
-
-            Long boardId = jdbcTemplate.queryForObject(
-                    "select id from board where project_id = ? and code = ?",
-                    Long.class,
-                    projectId, boardCode
-            );
-
-            List<String> stages;
-            if ("kanban".equals(projectType)) {
-                stages = jdbcTemplate.query(
-                        """
-                        select stage_name
-                        from seed_board_stage_template
-                        where project_type = ?
-                          and board_name = ?
-                        order by position_no
-                        """,
-                        (rs, rowNum) -> rs.getString("stage_name"),
-                        projectType,
-                        boardName
-                );
-            } else {
-                stages = jdbcTemplate.query(
-                        """
-                        select stage_name
-                        from seed_stage_template
-                        where project_type = ?
-                        order by position_no
-                        """,
-                        (rs, rowNum) -> rs.getString("stage_name"),
-                        projectType
-                );
-            }
-
-            if (stages == null || stages.isEmpty()) {
-                // Fallback: минимальный жизненный цикл.
-                stages = List.of("Очередь", "В работе", "Готово");
-            }
-
-            for (int s = 0; s < stages.size(); s++) {
-                jdbcTemplate.update(
-                        "insert into board_stage(board_id, stage_name, position) values (?, ?, ?)",
-                        boardId, stages.get(s), s + 1
-                );
-            }
         }
     }
 
@@ -439,6 +500,25 @@ public class AuthController {
                    @NotBlank @Pattern(regexp = EMAIL_REGEX_STRICT) @Size(max = 160) String email,
             @NotBlank String role
     ) {}
+
+    public record RegisterAccountRequest(
+            @NotBlank @Size(max = 160) String fullName,
+            @NotBlank @Pattern(regexp = EMAIL_REGEX_STRICT) @Size(max = 160) String email,
+            @NotBlank @Size(min = 8, max = 120) String password
+    ) {}
+
+    public record CompleteOnboardingRequest(
+            @NotBlank @Size(max = 180) String organizationName,
+            @NotBlank @Size(max = 140) String teamName,
+            @NotBlank @Size(max = 150) String projectName,
+            @Size(max = 12) String projectKey,
+            @NotBlank String projectType,
+            List<InviteRequest> invites
+    ) {
+        public List<InviteRequest> invites() {
+            return invites == null ? List.of() : invites;
+        }
+    }
 
     public record LoginRequest(
                    @NotBlank @Pattern(regexp = EMAIL_REGEX_STRICT) String email,

@@ -269,7 +269,7 @@ function initIndexPage() {
                 if (recentRoot) {
                     const actions = Array.isArray(data.recentActions) ? data.recentActions : [];
                     if (actions.length === 0) {
-                        recentRoot.innerHTML = '';
+                        recentRoot.innerHTML = '<div class="empty-message">Пока нет последних действий</div>';
                     } else {
                         recentRoot.innerHTML = actions.slice(0, 5).map((a) => `
                         <div class="grid-row">
@@ -298,7 +298,7 @@ function initIndexPage() {
                         .slice(0, 6);
 
                     if (upcoming.length === 0) {
-                        eventsGrid.innerHTML = '';
+                        eventsGrid.innerHTML = '<div class="empty-message">Пока нет ближайших событий</div>';
                     } else {
                         eventsGrid.innerHTML = upcoming.map(e => {
                             const dueClass = isAttentionDate(e.dueDate) ? 'pink' : 'light-gray';
