@@ -93,6 +93,15 @@
                     .day {
                         background: $light-light-green;
 
+                        &.today {
+                            outline: 2px solid $green;
+                            outline-offset: -2px;
+                        }
+
+                        &.weekend {
+                            background: rgba(255, 105, 180, 0.15);
+                        }
+
                         &:hover {
                             background: rgba($green, 0.1);
                         }
@@ -182,6 +191,15 @@ body[data-theme="dark"] .custom-calendar-modal .custom-calendar {
                 background: rgba($black, 0.35);
                 color: $light-light-green;
                 border: $space-1 solid transparent;
+
+                &.today {
+                    outline: 2px solid rgba($green, 0.95);
+                    outline-offset: -2px;
+                }
+
+                &.weekend {
+                    background: rgba(255, 105, 180, 0.15);
+                }
 
                 &:hover {
                     background: rgba($green, 0.12);

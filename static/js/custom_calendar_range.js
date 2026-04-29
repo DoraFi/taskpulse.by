@@ -3,6 +3,8 @@ function openCustomCalendarRange({ start, end, onApply }) {
     let selectionEnd = end || null;
     let currentYear;
     let currentMonth;
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
     const modal = document.createElement('div');
     modal.className = 'modal-overlay custom-calendar-modal';
@@ -75,6 +77,9 @@ function openCustomCalendarRange({ start, end, onApply }) {
         for (let d = 1; d <= daysInMonth; d++) {
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
             let classes = 'day';
+            const dayOfWeek = new Date(year, month, d).getDay();
+            if (dayOfWeek === 0 || dayOfWeek === 6) classes += ' weekend';
+            if (dateStr === todayStr) classes += ' today';
             if (selectionStart === dateStr) classes += ' selected-start';
             if (selectionEnd === dateStr) classes += ' selected-end';
             if (selectionStart && selectionEnd && dateStr > selectionStart && dateStr < selectionEnd) classes += ' in-range';

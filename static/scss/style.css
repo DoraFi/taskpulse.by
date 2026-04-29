@@ -897,6 +897,13 @@ body[data-theme=dark] .dropdown-menu .dropdown-header {
 .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .day {
   background: #F6FBF2;
 }
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .day.today {
+  outline: 2px solid #61A039;
+  outline-offset: -2px;
+}
+.custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .day.weekend {
+  background: rgba(255, 105, 180, 0.15);
+}
 .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .day:hover {
   background: rgba(97, 160, 57, 0.1);
 }
@@ -965,6 +972,13 @@ body[data-theme=dark] .custom-calendar-modal .custom-calendar .custom-calendar-m
   background: rgba(40, 45, 37, 0.35);
   color: #F6FBF2;
   border: 0.0625rem solid transparent;
+}
+body[data-theme=dark] .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .day.today {
+  outline: 2px solid rgba(97, 160, 57, 0.95);
+  outline-offset: -2px;
+}
+body[data-theme=dark] .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .day.weekend {
+  background: rgba(255, 105, 180, 0.15);
 }
 body[data-theme=dark] .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .days .day:hover {
   background: rgba(97, 160, 57, 0.12);
