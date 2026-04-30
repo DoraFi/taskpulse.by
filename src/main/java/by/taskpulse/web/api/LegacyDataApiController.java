@@ -6,6 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -188,6 +190,7 @@ public class LegacyDataApiController {
                     t.end_date as end_date,
                     t.story_points as story_points,
                     t.estimate_hours as estimate_hours,
+                    t.archived_at as archived_at,
                     p.name as project_name,
                     p.project_type as project_type,
                     u.full_name as assignee_name,
@@ -259,6 +262,7 @@ public class LegacyDataApiController {
             task.put("timeEstimateHours", estimate instanceof java.math.BigDecimal bd ? formatEstimateHours(bd) : null);
             task.put("project", row.get("project_name"));
             task.put("projectType", row.get("project_type"));
+            task.put("archivedDate", toIsoDateTime(row.get("archived_at")));
             task.put("assignee", row.get("assignee_name"));
             task.put("assigneeAvatar", row.get("assignee_avatar"));
             Object depOutId = row.get("dep_out_task_id");
@@ -358,6 +362,7 @@ public class LegacyDataApiController {
                     t.stage,
                     t.story_points,
                     t.estimate_hours,
+                    t.archived_at,
                     p.name as project_name,
                     p.project_type as project_type,
                     u.full_name as assignee_name,
@@ -427,6 +432,7 @@ public class LegacyDataApiController {
             t.put("timeEstimateHours", estObj == null ? null : formatEstimateHours((java.math.BigDecimal) estObj));
             t.put("project", row.get("project_name"));
             t.put("projectType", row.get("project_type"));
+            t.put("archivedDate", toIsoDateTime(row.get("archived_at")));
             Object depOutId = row.get("dep_out_task_id");
             Object depInId = row.get("dep_in_task_id");
             if (depOutId != null) {
@@ -461,16 +467,26 @@ public class LegacyDataApiController {
         }
         long taskId = taskIdNum.longValue();
         long boardId = boardIdNum.longValue();
+        Map<String, Object> oldRow = jdbcTemplate.queryForMap(
+                "select stage as old_stage, archived_at as old_archived_at from task_item where id = ?",
+                taskId
+        );
+        String oldStage = oldRow.get("old_stage") == null ? null : String.valueOf(oldRow.get("old_stage"));
+        Object oldArchivedAt = oldRow.get("old_archived_at");
+        Object nextArchivedAt = "Готово".equals(stage)
+                ? ("Готово".equals(oldStage) ? oldArchivedAt : Timestamp.from(Instant.now()))
+                : null;
         Long uid = currentUserId();
         int updated = jdbcTemplate.update(
                 """
                 update task_item
-                set board_id = ?, stage = ?, priority = ?, updated_at = now()
+                set board_id = ?, stage = ?, priority = ?, archived_at = ?, updated_at = now()
                 where id = ?
                 """,
                 boardId,
                 stage,
                 (priority == null || priority.isBlank()) ? "обычный" : priority,
+                nextArchivedAt,
                 taskId
         );
         if (updated == 0) {
@@ -535,6 +551,7 @@ public class LegacyDataApiController {
 
         if (stage == null || stage.isBlank()) stage = "Очередь";
         if (priority == null || priority.isBlank()) priority = "обычный";
+        Timestamp archivedAt = "Готово".equals(stage) ? Timestamp.from(Instant.now()) : null;
 
         Long teamId = currentTeamId();
         Long creatorId = currentUserId();
@@ -608,12 +625,12 @@ public class LegacyDataApiController {
                 """
                 insert into task_item(
                     name, stage, priority, due_date, board_id, assignee_id, creator_id,
-                    task_code, description, story_points, estimate_hours, start_date, end_date
+                    task_code, description, story_points, estimate_hours, start_date, end_date, archived_at
                 )
-                values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 name, stage, priority, dueDate, boardId, assigneeId, creatorId,
-                taskCode, description, storyPoints, estimateHours, startDate, endDate
+                taskCode, description, storyPoints, estimateHours, startDate, endDate, archivedAt
         );
 
         Long taskId = jdbcTemplate.queryForObject(
@@ -697,6 +714,7 @@ public class LegacyDataApiController {
         Map<String, Object> oldRow = jdbcTemplate.queryForMap(
                 """
                 select t.stage as old_stage
+                     , t.archived_at as old_archived_at
                 from task_item t
                 join board b on b.id = t.board_id
                 join project p on p.id = b.project_id
@@ -708,6 +726,10 @@ public class LegacyDataApiController {
                 taskId, teamId
         );
         String oldStage = String.valueOf(oldRow.get("old_stage"));
+        Object oldArchivedAt = oldRow.get("old_archived_at");
+        Object nextArchivedAt = "Готово".equals(stage)
+                ? ("Готово".equals(oldStage) ? oldArchivedAt : Timestamp.from(Instant.now()))
+                : null;
 
         jdbcTemplate.update(
                 """
@@ -723,10 +745,11 @@ public class LegacyDataApiController {
                     assignee_id = ?,
                     story_points = ?,
                     estimate_hours = ?,
+                    archived_at = ?,
                     updated_at = now()
                 where id = ?
                 """,
-                name, description, stage, priority, dueDate, startDate, endDate, assigneeId, storyPoints, estimateHours, taskId
+                name, description, stage, priority, dueDate, startDate, endDate, assigneeId, storyPoints, estimateHours, nextArchivedAt, taskId
         );
         jdbcTemplate.update("delete from task_dependency where task_id = ? or depends_on_task_id = ?", taskId, taskId);
         if (dependencyTaskIdNum != null && dependencyTaskIdNum.longValue() > 0
@@ -1669,6 +1692,13 @@ public class LegacyDataApiController {
             return String.format("%02d.%02d", d.getDayOfMonth(), d.getMonthValue());
         }
         return d.format(DATE_FMT);
+    }
+
+    private String toIsoDateTime(Object tsObj) {
+        if (tsObj == null) return null;
+        if (tsObj instanceof Timestamp t) return t.toInstant().toString();
+        if (tsObj instanceof java.time.OffsetDateTime odt) return odt.toInstant().toString();
+        return String.valueOf(tsObj);
     }
 
     private String currentUsername() {

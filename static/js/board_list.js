@@ -5,6 +5,8 @@ let currentView = 'board';
 let teamMembers = [];
 let tableSortColumn = null;
 let tableSortDirection = 'asc';
+const BOARD_LIST_VIEW_STORAGE_KEY = 'boardListCurrentView';
+const BOARD_LIST_ALLOWED_VIEWS = new Set(['board', 'tables', 'timeline', 'reports', 'archive']);
 
 function getApiBasePath() {
     const m = window.location.pathname.match(/^\/o\/([^/]+)\/t\/([^/]+)/);
@@ -55,6 +57,16 @@ async function loadTeamData() {
 
 async function loadBoardsData() {
     try {
+        const preservedArchivedDates = collectArchivedDateMap(boardsData);
+        const localBoardsRaw = localStorage.getItem('boardsData');
+        if (localBoardsRaw) {
+            try {
+                const localBoards = JSON.parse(localBoardsRaw);
+                mergeArchivedDateMap(preservedArchivedDates, collectArchivedDateMap(localBoards));
+            } catch {
+                // ignore broken localStorage payload
+            }
+        }
         const params = new URLSearchParams(window.location.search);
         const project = params.get('project');
         const url = project ? apiUrl(`/boards?project=${encodeURIComponent(project)}`) : apiUrl('/boards');
@@ -64,7 +76,7 @@ async function loadBoardsData() {
         }
         const data = await response.json();
         boardsData = data.boards || data;
-        ensureArchivedTasksArrays();
+        ensureArchivedTasksArrays(preservedArchivedDates);
         reorderBoardsForColumnCount();
         renderCurrentView();
         initBoardEvents();
@@ -108,7 +120,28 @@ function loadBoardsFromLocalStorage() {
     return false;
 }
 
-function ensureArchivedTasksArrays() {
+function collectArchivedDateMap(boards) {
+    const map = new Map();
+    if (!Array.isArray(boards)) return map;
+    boards.forEach(board => {
+        const boardId = board?.id;
+        if (boardId == null || !Array.isArray(board?.archivedTasks)) return;
+        board.archivedTasks.forEach(task => {
+            if (!task || task.id == null || !task.archivedDate) return;
+            map.set(`${boardId}:${task.id}`, task.archivedDate);
+        });
+    });
+    return map;
+}
+
+function mergeArchivedDateMap(target, source) {
+    if (!(target instanceof Map) || !(source instanceof Map)) return;
+    source.forEach((value, key) => {
+        if (!target.has(key) && value) target.set(key, value);
+    });
+}
+
+function ensureArchivedTasksArrays(archivedDateMap = new Map()) {
     if (!boardsData || !boardsData.length) return;
     boardsData.forEach(board => {
         if (!Array.isArray(board.archivedTasks)) board.archivedTasks = [];
@@ -120,7 +153,11 @@ function ensureArchivedTasksArrays() {
             if (task.stage === 'Готово') {
                 const idKey = String(task.id);
                 if (!archivedIds.has(idKey)) {
-                    board.archivedTasks.push({ ...task, archivedDate: task.updatedAt || new Date().toISOString() });
+                    const preserved = archivedDateMap.get(`${board.id}:${task.id}`);
+                    board.archivedTasks.push({
+                        ...task,
+                        archivedDate: preserved || task.archivedDate || task.updatedAt || new Date().toISOString()
+                    });
                     archivedIds.add(idKey);
                 }
                 return;
@@ -175,6 +212,32 @@ function getBoardListNavButtons() {
     return document.querySelectorAll('.board-list .tabs .tab-btn[data-tab], .board-list .tabs-buttons > .button-basic[data-tab]');
 }
 
+function persistCurrentView() {
+    try {
+        localStorage.setItem(BOARD_LIST_VIEW_STORAGE_KEY, currentView);
+    } catch {
+        // ignore storage errors
+    }
+}
+
+function restoreCurrentView() {
+    try {
+        const saved = localStorage.getItem(BOARD_LIST_VIEW_STORAGE_KEY);
+        if (saved && BOARD_LIST_ALLOWED_VIEWS.has(saved)) {
+            currentView = saved;
+        }
+    } catch {
+        currentView = 'board';
+    }
+}
+
+function syncActiveViewButton() {
+    getBoardListNavButtons().forEach(btn => {
+        const isActive = btn.dataset.tab === currentView;
+        btn.classList.toggle('active', isActive);
+    });
+}
+
 function wireBoardCardCollapse(header, board, bodyEl) {
     const toggle = header._collapseToggle;
     if (!toggle || !bodyEl) return;
@@ -202,12 +265,13 @@ function handleTabClick(e) {
     else if (tab === 'timeline') currentView = 'timeline';
     else if (tab === 'reports') currentView = 'reports';
     else if (tab === 'archive') currentView = 'archive';
-    getBoardListNavButtons().forEach(btn => btn.classList.remove('active'));
-    e.currentTarget.classList.add('active');
+    persistCurrentView();
+    syncActiveViewButton();
     renderCurrentView();
 }
 
 function renderCurrentView() {
+    syncActiveViewButton();
     if (currentView === 'board') renderBoardView();
     else if (currentView === 'tables') renderTableView();
     else if (currentView === 'timeline') renderTimelineView();
@@ -1444,7 +1508,15 @@ function createArchiveTasksGrid(board, boardIndex) {
     const grid = document.createElement('div');
     grid.className = 'tasks-grid archive-tasks-grid';
 
-    const archived = (board.archivedTasks || []).filter(t => t);
+    const archived = (board.archivedTasks || [])
+        .filter(t => t)
+        .sort((a, b) => {
+            const aTs = a?.archivedDate ? new Date(a.archivedDate).getTime() : Number.NEGATIVE_INFINITY;
+            const bTs = b?.archivedDate ? new Date(b.archivedDate).getTime() : Number.NEGATIVE_INFINITY;
+            const safeA = Number.isFinite(aTs) ? aTs : Number.NEGATIVE_INFINITY;
+            const safeB = Number.isFinite(bTs) ? bTs : Number.NEGATIVE_INFINITY;
+            return safeB - safeA;
+        });
     if (archived.length === 0) {
         wrapper.innerHTML = '<div class="empty-state">В архиве этой доски пусто</div>';
         return wrapper;
@@ -1553,9 +1625,9 @@ function restoreFromArchive(boardIndex, taskId) {
             description: task.description || '',
             stage: 'Очередь',
             priority: task.priority || 'обычный',
-            dueDate: task.dueDate || null,
-            startDate: task.startDate || null,
-            endDate: task.endDate || null,
+            dueDate: toApiIsoDate(task.dueDate),
+            startDate: toApiIsoDate(task.startDate),
+            endDate: toApiIsoDate(task.endDate),
             assignee: task.assignee || null,
             storyPoints: task.storyPoints || null,
             estimateHours: task.timeEstimateHours || null,
@@ -2322,9 +2394,9 @@ function createTaskItem(task, boardIndex, taskIndex) {
                     description: task.description || '',
                     stage,
                     priority: task.priority || 'обычный',
-                    dueDate: task.dueDate || null,
-                    startDate: task.startDate || null,
-                    endDate: task.endDate || null,
+                    dueDate: toApiIsoDate(task.dueDate),
+                    startDate: toApiIsoDate(task.startDate),
+                    endDate: toApiIsoDate(task.endDate),
                     assignee: task.assignee || null,
                     storyPoints: task.storyPoints || null,
                     estimateHours: task.timeEstimateHours || null,
@@ -2894,6 +2966,26 @@ function parseDateBoard(dateStr) {
     return new Date(9999, 11, 31);
 }
 
+function toApiIsoDate(dateStr) {
+    if (!dateStr) return null;
+    const raw = String(dateStr).trim();
+    if (!raw) return null;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+    if (raw.includes('.')) {
+        const parts = raw.split('.');
+        if (parts.length === 2) {
+            const [day, month] = parts;
+            const year = String(new Date().getFullYear());
+            return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        }
+        if (parts.length === 3) {
+            const [day, month, year] = parts;
+            return `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        }
+    }
+    return null;
+}
+
 function formatDueDate(dateStr) {
     if (!dateStr) return '';
     const diff = daysDiffFromToday(dateStr);
@@ -2962,8 +3054,9 @@ function sortTasksByPriorityAndDate(tasks) {
 }
 
 async function initBoardListPage() {
-    await loadTeamData();
     if (!document.querySelector('.board-list')) return;
+    restoreCurrentView();
+    await loadTeamData();
     await loadBoardsData();
 }
 

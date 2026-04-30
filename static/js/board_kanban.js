@@ -3,6 +3,8 @@
     let kanbanTasks = [];
     let teamMembers = [];
     let currentView = 'board';
+    const KANBAN_VIEW_STORAGE_KEY = 'boardKanbanCurrentView';
+    const KANBAN_ALLOWED_VIEWS = new Set(['board', 'tables', 'timeline', 'reports', 'archive']);
 
     const KANBAN_DATA_VERSION_KEY = 'kanbanDataVersion';
     const KANBAN_DATA_VERSION = '7';
@@ -529,6 +531,32 @@
         return document.querySelectorAll('.board-kanban .tabs .tab-btn[data-tab], .board-kanban .tabs-buttons > .button-basic[data-tab]');
     }
 
+    function persistCurrentView() {
+        try {
+            localStorage.setItem(KANBAN_VIEW_STORAGE_KEY, currentView);
+        } catch {
+            // ignore storage errors
+        }
+    }
+
+    function restoreCurrentView() {
+        try {
+            const saved = localStorage.getItem(KANBAN_VIEW_STORAGE_KEY);
+            if (saved && KANBAN_ALLOWED_VIEWS.has(saved)) {
+                currentView = saved;
+            }
+        } catch {
+            currentView = 'board';
+        }
+    }
+
+    function syncActiveViewButton() {
+        getBoardListNavButtons().forEach(btn => {
+            const isActive = btn.dataset.tab === currentView;
+            btn.classList.toggle('active', isActive);
+        });
+    }
+
     function initViewSwitching() {
         getBoardListNavButtons().forEach(btn => {
             btn.removeEventListener('click', handleTabClick);
@@ -543,8 +571,8 @@
         else if (tab === 'timeline') currentView = 'timeline';
         else if (tab === 'reports') currentView = 'reports';
         else if (tab === 'archive') currentView = 'archive';
-        getBoardListNavButtons().forEach(btn => btn.classList.remove('active'));
-        e.currentTarget.classList.add('active');
+        persistCurrentView();
+        syncActiveViewButton();
         renderCurrentView();
     }
 
@@ -592,6 +620,7 @@
 
     function renderCurrentView() {
         destroyKanbanBoardsSortable();
+        syncActiveViewButton();
         if (currentView === 'board') renderKanbanBoardView();
         else if (currentView === 'tables') renderKanbanTablesView();
         else if (currentView === 'timeline') renderKanbanTimelineView();
@@ -2553,6 +2582,7 @@
 
     async function initBoardKanbanPage() {
         if (!document.querySelector('.board-kanban')) return;
+        restoreCurrentView();
         await loadTeamData();
         await loadKanbanData();
         localStorage.setItem(KANBAN_DATA_VERSION_KEY, KANBAN_DATA_VERSION);
