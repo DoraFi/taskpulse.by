@@ -1,6 +1,13 @@
 let tasksData = [];
 let assignedTasksData = [];
 
+const STATUS_LABELS = {
+    neutral: 'Назначена',
+    inprocess: 'В работе',
+    done: 'Завершено',
+    exit: 'Отложено'
+};
+
 function getApiBasePath() {
     const m = window.location.pathname.match(/^\/o\/([^/]+)\/t\/([^/]+)/);
     if (!m) return '/api';
@@ -151,16 +158,10 @@ function createCell(col, task, tab) {
             div.appendChild(nameP);
             break;
         case 'status':
-            const statusText = {
-                neutral: 'Назначена',
-                inprocess: 'В работе',
-                done: 'Завершено',
-                exit: 'Отложено'
-            };
             div.style.position = 'relative';
             const statusSelect = document.createElement('div');
             statusSelect.className = `status-select text-basic ${task.status}`;
-            statusSelect.textContent = statusText[task.status];
+            statusSelect.textContent = STATUS_LABELS[task.status];
             const dropdown = document.createElement('div');
             dropdown.className = 'status-dropdown';
             const statuses = [
@@ -495,6 +496,67 @@ function collectFilters() {
         dateTo: dateToInput ? dateToInput.value : ''
     };
     return filters;
+}
+
+function escapeAttr(str) {
+    return escapeHtml(String(str ?? ''));
+}
+
+function renderCheckboxGroup(containerId, options, selectedValues = []) {
+    const group = document.getElementById(containerId);
+    if (!group) return;
+    const selected = new Set((selectedValues || []).map(v => String(v)));
+    group.innerHTML = (options || []).map(({ value, label }) => `
+        <label class="checkbox-item">
+            <input type="checkbox" value="${escapeAttr(value)}" ${selected.has(String(value)) ? 'checked' : ''}>
+            <span class="custom-checkbox"></span>
+            <span class="checkbox-text">${escapeHtml(label)}</span>
+        </label>
+    `).join('');
+}
+
+function uniqueSortedStrings(values) {
+    return Array.from(new Set((values || [])
+        .map(v => String(v || '').trim())
+        .filter(Boolean)))
+        .sort((a, b) => a.localeCompare(b, 'ru'));
+}
+
+function hydrateFilterCheckboxesFromDb() {
+    const tasks = Array.isArray(tasksData) ? tasksData : [];
+
+    const current = collectFilters();
+    renderCheckboxGroup(
+        'filterStatusGroup',
+        uniqueSortedStrings(tasks.map(t => t.status)).map(status => ({
+            value: status,
+            label: STATUS_LABELS[status] || status
+        })),
+        current.statuses
+    );
+    renderCheckboxGroup(
+        'filterPriorityGroup',
+        uniqueSortedStrings(tasks.map(t => t.priority)).map(priority => ({
+            value: priority,
+            label: priority === 'срочно' ? 'Срочно' : priority === 'обычный' ? 'Обычный' : priority
+        })),
+        current.priorities
+    );
+    renderCheckboxGroup(
+        'filterProjectGroup',
+        uniqueSortedStrings(tasks.map(t => t.project)).map(project => ({ value: project, label: project })),
+        current.projects
+    );
+    renderCheckboxGroup(
+        'filterAssigneeGroup',
+        uniqueSortedStrings(tasks.map(t => t.assignee).filter(a => a && a !== '—')).map(name => ({ value: name, label: name })),
+        current.assignees
+    );
+    renderCheckboxGroup(
+        'filterCreatorGroup',
+        uniqueSortedStrings(tasks.map(t => t.creator)).map(name => ({ value: name, label: name })),
+        current.creators
+    );
 }
 
 function applyFiltersToTasks(criteria) {
@@ -979,7 +1041,10 @@ function initTasksPage() {
     initFilters();
     initTabs();
     initMoreActions();
-    loadCurrentUser().then(() => Promise.all([loadTasks(), loadAssignedTasks()]).then(() => renderTasks('assigned')));
+    loadCurrentUser().then(() => Promise.all([loadTasks(), loadAssignedTasks()]).then(() => {
+        hydrateFilterCheckboxesFromDb();
+        renderTasks('assigned');
+    }));
     window.addEventListener('resize', () => updateNameColumnMaxWidth());
 }
 
