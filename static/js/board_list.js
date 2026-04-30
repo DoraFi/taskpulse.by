@@ -2221,6 +2221,20 @@ function initTaskSortable(container, boardId) {
         forceFallback: true,
         fallbackOnBody: true,
         fallbackTolerance: 6,
+        onMove: function(evt) {
+            const taskId = parseInt(evt.dragged?.dataset?.taskId);
+            if (!taskId) return true;
+            let task = null;
+            for (const b of boardsData || []) {
+                task = (b.tasks || []).find(t => t && t.id === taskId);
+                if (task) break;
+            }
+            if (isTaskBlocked(task)) {
+                showToast('Заблокированную задачу нельзя перемещать');
+                return false;
+            }
+            return true;
+        },
         onStart: function() {
             if (cardsContainer) cardsContainer.classList.add('dragging-active');
             __dragging = true;
@@ -2320,6 +2334,13 @@ function initTaskSortable(container, boardId) {
             const toBoardId = parseInt(toBoard.dataset.boardId);
             const draggedItem = evt.item;
             const taskId = parseInt(draggedItem.dataset.taskId);
+            const sourceBoard = boardsData.find(b => b.id === fromBoardId);
+            const movedTaskCandidate = sourceBoard?.tasks?.find(t => t.id === taskId);
+            if (isTaskBlocked(movedTaskCandidate)) {
+                showToast('Заблокированную задачу нельзя перемещать');
+                renderCurrentView();
+                return;
+            }
             if (fromBoardId === toBoardId) {
                 const items = Array.from(toList.children);
                 const newOrder = items.map(item => parseInt(item.dataset.taskId));
@@ -2337,7 +2358,6 @@ function initTaskSortable(container, boardId) {
                     }
                 }
             } else {
-                const sourceBoard = boardsData.find(b => b.id === fromBoardId);
                 const targetBoard = boardsData.find(b => b.id === toBoardId);
                 const taskIndex = sourceBoard.tasks.findIndex(t => t.id === taskId);
                 if (taskIndex !== -1) {
@@ -2542,6 +2562,25 @@ function createTagBlock(task) {
     if (!hasAssignee && !hasPriority && !hasDueDate && !hasDependency) return null;
     const tagBlock = document.createElement('div');
     tagBlock.className = 'tag';
+    const getTaskDisplayIdSafe = (t) => String(t?.displayId || t?.id || '').trim();
+    const openDependencyTaskById = (displayId) => {
+        const depId = String(displayId || '').trim();
+        if (!depId) return;
+        let linkedTask = null;
+        for (const b of boardsData || []) {
+            linkedTask = (b.tasks || []).find(t => getTaskDisplayIdSafe(t) === depId) || null;
+            if (linkedTask) break;
+            linkedTask = (b.archivedTasks || []).find(t => getTaskDisplayIdSafe(t) === depId) || null;
+            if (linkedTask) break;
+        }
+        if (!linkedTask) {
+            showToast('Связанная задача не найдена');
+            return;
+        }
+        if (typeof window.tpOpenTaskDetailModal === 'function') {
+            window.tpOpenTaskDetailModal(linkedTask);
+        }
+    };
     if (hasAssignee) {
         const executor = document.createElement('div');
         executor.className = 'executor';
@@ -2567,14 +2606,46 @@ function createTagBlock(task) {
     }
     if (hasDependency) {
         const depDiv = document.createElement('div');
-        depDiv.className = 'deadline';
+        depDiv.className = 'deadline dependency-chip';
+        const depId = String(task.dependencyLabel || '').split('—')[0].trim();
         const depPrefix = task.dependencyType === 'blocks'
             ? 'Блокирует'
             : (task.dependencyType === 'blocked_by' ? 'Блокируется' : 'Связана');
-        depDiv.textContent = `${depPrefix}: ${task.dependencyLabel}`;
+        depDiv.innerHTML = `
+            <span class="text-signature">${escapeHtml(depPrefix)}</span>
+            <span class="text-basic dependency-chip-id">${escapeHtml(depId || '—')}</span>
+        `;
+        if (depPrefix === 'Блокируется' && isTaskBlocked(task)) depDiv.classList.add('dependency-chip--blocked');
+        if (depId) {
+            depDiv.classList.add('dependency-chip--clickable');
+            depDiv.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openDependencyTaskById(depId);
+            });
+        }
         tagBlock.appendChild(depDiv);
     }
     return tagBlock;
+}
+
+function isTaskBlocked(task) {
+    if (!task) return false;
+    const rawLabel = String(task.dependencyLabel || '');
+    const depTypeBlocked = task.dependencyType === 'blocked_by'
+        || rawLabel.toLowerCase().includes('блокируется');
+    if (!depTypeBlocked) return false;
+    const blockerDisplayId = rawLabel.split('—')[0].trim();
+    if (!blockerDisplayId) return true;
+    let blocker = null;
+    for (const b of boardsData || []) {
+        blocker = (b.tasks || []).find(t => String(t?.displayId || t?.id || '').trim() === blockerDisplayId) || null;
+        if (blocker) break;
+        blocker = (b.archivedTasks || []).find(t => String(t?.displayId || t?.id || '').trim() === blockerDisplayId) || null;
+        if (blocker) break;
+    }
+    if (!blocker) return true;
+    return blocker.stage !== 'Готово';
 }
 
 function archiveTask(boardIndex, taskId, isArchived) {

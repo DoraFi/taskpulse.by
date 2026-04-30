@@ -1331,8 +1331,25 @@
         const hasDueDate = task.dueDate && String(task.dueDate).trim();
         const hasDependency = task.dependencyLabel && String(task.dependencyLabel).trim();
         if (!hasAssignee && !hasDueDate && !hasDependency) return null;
+        const extractDependencyDisplayId = (label) => {
+            const raw = String(label || '').trim();
+            if (!raw) return '';
+            return raw.split('—')[0].trim();
+        };
         const tagBlock = document.createElement('div');
         tagBlock.className = 'tag';
+        const openDependencyTaskById = (displayId) => {
+            const depId = String(displayId || '').trim();
+            if (!depId) return;
+            const linked = kanbanTasks.find(t => String(getTaskDisplayId(t)).trim() === depId);
+            if (!linked) {
+                showToast('Связанная задача не найдена');
+                return;
+            }
+            if (typeof window.tpOpenTaskDetailModal === 'function') {
+                window.tpOpenTaskDetailModal(linked);
+            }
+        };
         if (hasAssignee) {
             let avatar = task.assigneeAvatar || '';
             if (!avatar) {
@@ -1353,11 +1370,24 @@
         }
         if (hasDependency) {
             const depDiv = document.createElement('div');
-            depDiv.className = 'deadline';
+            depDiv.className = 'deadline dependency-chip';
             const depPrefix = task.dependencyType === 'blocks'
                 ? 'Блокирует'
                 : (task.dependencyType === 'blocked_by' ? 'Блокируется' : 'Связана');
-            depDiv.textContent = `${depPrefix}: ${task.dependencyLabel}`;
+            const depId = extractDependencyDisplayId(task.dependencyLabel);
+            depDiv.innerHTML = `
+                <span class="text-signature">${escapeHtml(depPrefix)}</span>
+                <span class="text-basic dependency-chip-id">${escapeHtml(depId || '—')}</span>
+            `;
+            if (depPrefix === 'Блокируется' && isTaskBlocked(task)) depDiv.classList.add('dependency-chip--blocked');
+            if (depId) {
+                depDiv.classList.add('dependency-chip--clickable');
+                depDiv.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openDependencyTaskById(depId);
+                });
+            }
             tagBlock.appendChild(depDiv);
         }
         return tagBlock;
@@ -1567,6 +1597,17 @@
             fallbackTolerance: 3,
             ghostClass: 'task-dragging',
             dragClass: 'task-drag-over',
+            onMove(evt) {
+                const taskId = Number(evt.dragged?.dataset?.taskId);
+                if (!taskId) return true;
+                const task = findKanbanTask(taskId, Number(evt.from?.dataset?.boardId));
+                if (!task) return true;
+                if (isTaskBlocked(task)) {
+                    showToast('Заблокированную задачу нельзя перемещать');
+                    return false;
+                }
+                return true;
+            },
             onStart() {
                 if (cardsContainer) cardsContainer.classList.add('dragging-active');
             },
@@ -1580,6 +1621,11 @@
 
                 const task = findKanbanTask(taskId, boardId);
                 if (!task) return;
+                if (isTaskBlocked(task)) {
+                    showToast('Заблокированную задачу нельзя перемещать');
+                    loadKanbanData().then(renderCurrentView);
+                    return;
+                }
 
                 const toStage = toList.dataset.stage;
                 const toPriorityKey = toList.dataset.priorityKey;
@@ -1718,6 +1764,19 @@
                 fallbackClass: TABLE_ROW_FALLBACK_CLASS,
                 ghostClass: '',
                 dragClass: '',
+                onMove(evt) {
+                    const taskId = Number(evt.dragged?.dataset?.taskId);
+                    if (!taskId) return true;
+                    const fromWrap = evt.from?.closest('.kanban-stage-table');
+                    const fromBid = Number(fromWrap?.dataset?.boardId);
+                    const task = kanbanTasks.find(t => Number(t.id) === taskId && Number(t.boardId) === fromBid);
+                    if (!task) return true;
+                    if (isTaskBlocked(task)) {
+                        showToast('Заблокированную задачу нельзя перемещать');
+                        return false;
+                    }
+                    return true;
+                },
                 onClone(evt) {
                     container._kanbanTableRowDragEl = evt.clone;
                     evt.clone?.classList?.add(TABLE_ROW_FALLBACK_CLASS);
@@ -1754,6 +1813,11 @@
                     if (!taskId || !toStage) return;
                     const task = kanbanTasks.find(t => Number(t.id) === taskId && Number(t.boardId) === fromBid);
                     if (!task) return;
+                    if (isTaskBlocked(task)) {
+                        showToast('Заблокированную задачу нельзя перемещать');
+                        loadKanbanData().then(renderCurrentView);
+                        return;
+                    }
                     task.stage = toStage;
                     task.boardId = toBid;
                     if (fromStage !== toStage || fromBid !== toBid) {
@@ -2269,6 +2333,29 @@
 
         wrap.appendChild(tableWrapper);
         return wrap;
+    }
+
+    function getDependencyDisplayId(label) {
+        const raw = String(label || '').trim();
+        if (!raw) return '';
+        return raw.split('—')[0].trim();
+    }
+
+    function isTaskBlocked(task) {
+        if (!task) return false;
+        const label = String(task.dependencyLabel || '');
+        const depTypeBlocked = task.dependencyType === 'blocked_by'
+            || label.toLowerCase().includes('блокируется');
+        if (!depTypeBlocked) return false;
+        const blockerDisplayId = getDependencyDisplayId(label);
+        if (!blockerDisplayId) return true;
+        const blocker = kanbanTasks.find(t => String(getTaskDisplayId(t)).trim() === blockerDisplayId);
+        if (blocker) return blocker.stage !== 'Готово';
+        const archivedBlocker = kanbanBoards
+            .flatMap(b => Array.isArray(b.archivedTasks) ? b.archivedTasks : [])
+            .find(t => String(getTaskDisplayId(t)).trim() === blockerDisplayId);
+        if (archivedBlocker) return false;
+        return true;
     }
 
     function renderKanbanBoardView() {

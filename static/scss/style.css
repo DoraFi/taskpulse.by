@@ -5885,4 +5885,62 @@ body[data-theme=dark] .toast-notification {
     opacity: 1;
     transform: translateY(0);
   }
-}/*# sourceMappingURL=style.css.map */
+}
+
+.kanban-task-item.sortable-fallback .tag .deadline.dependency-chip::before,
+.kanban-board-card .kanban-stage-col .tag .deadline.dependency-chip::before,
+.kanban-archive-board .kanban-stage-col .tag .deadline.dependency-chip::before,
+.board-list .card .list .tag .deadline.dependency-chip::before {
+  content: "";
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  background-image: url("/static/source/icons/lock.svg") !important;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  flex-shrink: 0;
+}
+
+.board-kanban .tag .dependency-chip--blocked,
+.board-list .tag .dependency-chip--blocked {
+  border: 1px solid #F8085C;
+}
+
+.kanban-board-card .kanban-stage-col .tag,
+.kanban-archive-board .kanban-stage-col .tag,
+.board-list .card .list .tag {
+  flex-wrap: wrap;
+  row-gap: 0.25rem;
+}
+
+.kanban-board-card .kanban-stage-col .tag .deadline,
+.kanban-archive-board .kanban-stage-col .tag .deadline,
+.board-list .card .list .tag .deadline {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.kanban-board-card .kanban-stage-col .tag .deadline.dependency-chip,
+.kanban-archive-board .kanban-stage-col .tag .deadline.dependency-chip,
+.board-list .card .list .tag .deadline.dependency-chip {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  column-gap: 0.375rem;
+  row-gap: 0.125rem;
+}
+
+.kanban-board-card .kanban-stage-col .tag .deadline.dependency-chip .text-signature,
+.kanban-board-card .kanban-stage-col .tag .deadline.dependency-chip .dependency-chip-id,
+.kanban-archive-board .kanban-stage-col .tag .deadline.dependency-chip .text-signature,
+.kanban-archive-board .kanban-stage-col .tag .deadline.dependency-chip .dependency-chip-id,
+.board-list .card .list .tag .deadline.dependency-chip .text-signature,
+.board-list .card .list .tag .deadline.dependency-chip .dependency-chip-id {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/*# sourceMappingURL=style.css.map */

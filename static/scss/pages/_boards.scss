@@ -646,6 +646,32 @@ body[data-theme="dark"] .kanban-stage-group.sortable-fallback .kanban-stage-sep-
     }
 }
 
+.kanban-task-item.sortable-fallback .tag .deadline.dependency-chip::before,
+.kanban-board-card .kanban-stage-col .tag .deadline.dependency-chip::before,
+.kanban-archive-board .kanban-stage-col .tag .deadline.dependency-chip::before,
+.board-list .card .list .tag .deadline.dependency-chip::before {
+    content: "";
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    background-image: url('/static/source/icons/lock.svg') !important;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    flex-shrink: 0;
+}
+
+.board-kanban .tag .dependency-chip--clickable,
+.board-list .tag .dependency-chip--clickable {
+    cursor: pointer;
+}
+
+.board-kanban .tag .dependency-chip--blocked,
+.board-list .tag .dependency-chip--blocked {
+    border: 1px solid $pink;
+}
+
+
 .kanban-task-item.sortable-fallback .tag {
     @extend %tp-board-tag-shell;
 
