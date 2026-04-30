@@ -1689,6 +1689,47 @@
         showToast('Задача перемещена в архив');
     }
 
+    function restoreArchivedKanbanTask(boardIndex, taskId) {
+        const board = kanbanBoards[boardIndex];
+        if (!board || !Array.isArray(board.archivedTasks)) return;
+        const idx = board.archivedTasks.findIndex(t => t && Number(t.id) === Number(taskId));
+        if (idx === -1) return;
+        const task = board.archivedTasks[idx];
+        const restored = { ...task };
+        delete restored.archivedDate;
+        delete restored.archivedReason;
+        if (!restored.stage || !board.stages.includes(restored.stage)) {
+            restored.stage = board.stages[0] || 'Очередь';
+        }
+        board.archivedTasks.splice(idx, 1);
+        kanbanTasks.push(restored);
+        const map = getArchiveTaskMap();
+        delete map[`${board.id}:${task.id}`];
+        saveArchiveTaskMap(map);
+        saveKanbanToLocalStorage();
+        renderCurrentView();
+        showToast('Задача возвращена из архива');
+    }
+
+    function copyArchivedKanbanTask(boardIndex, taskId) {
+        const board = kanbanBoards[boardIndex];
+        if (!board || !Array.isArray(board.archivedTasks)) return;
+        const archived = board.archivedTasks.find(t => t && Number(t.id) === Number(taskId));
+        if (!archived) return;
+        const copy = JSON.parse(JSON.stringify(archived));
+        copy.id = nextKanbanTaskId(board.id);
+        delete copy.archivedDate;
+        delete copy.archivedReason;
+        copy.boardId = board.id;
+        if (!copy.stage || !board.stages.includes(copy.stage)) {
+            copy.stage = board.stages[0] || 'Очередь';
+        }
+        kanbanTasks.push(copy);
+        saveKanbanToLocalStorage();
+        renderCurrentView();
+        showToast('Создана копия задачи');
+    }
+
     function createPrioritySection(board, priorityLabel, priorityKey, tasks, boardIndex) {
         const section = document.createElement('div');
         section.className = `kanban-priority-section ${priorityKey === 'urgent' ? 'urgent' : 'normal'}`;
@@ -3029,53 +3070,66 @@
             if (!archived.length) {
                 body.innerHTML = '<div class="empty-state">Пусто</div>';
             } else {
-                const byStage = {};
-                archived.forEach(t => {
-                    const st = t.stage || '—';
-                    if (!byStage[st]) byStage[st] = [];
-                    byStage[st].push(t);
-                });
-
-                Object.entries(byStage).forEach(([stageName, items]) => {
-                    const headMain = document.createElement('div');
-                    headMain.className = 'kanban-stage-table-head-main';
-                    headMain.innerHTML = `<p class="text-basic">${escapeHtml(stageName)}</p><span class="kanban-count-badge">${items.length}</span>`;
-                    body.appendChild(headMain);
-
-                    const wrap = document.createElement('div');
-                    wrap.className = 'tasks-grid-wrapper';
-                    const grid = document.createElement('div');
-                    grid.className = 'tasks-grid archive-tasks-grid';
-                    const hdr = document.createElement('div');
-                    hdr.className = 'grid-header';
-                    [
-                        { cls: 'col-id', title: 'ID' },
-                        { cls: 'col-name', title: 'Название' },
-                        { cls: 'col-priority', title: 'Приоритет' },
-                        { cls: 'col-archivedAt', title: 'Архивировано' },
-                        { cls: 'col-reason', title: 'Причина' }
-                    ].forEach(({ cls, title }) => {
-                        const c = document.createElement('div');
-                        c.className = cls;
-                        c.innerHTML = `<span class="header-title">${title}</span>`;
-                        hdr.appendChild(c);
+                const items = archived
+                    .filter(t => t)
+                    .sort((a, b) => {
+                        const aTs = a?.archivedDate ? new Date(a.archivedDate).getTime() : Number.NEGATIVE_INFINITY;
+                        const bTs = b?.archivedDate ? new Date(b.archivedDate).getTime() : Number.NEGATIVE_INFINITY;
+                        const safeA = Number.isFinite(aTs) ? aTs : Number.NEGATIVE_INFINITY;
+                        const safeB = Number.isFinite(bTs) ? bTs : Number.NEGATIVE_INFINITY;
+                        return safeB - safeA;
                     });
-                    grid.appendChild(hdr);
-                    items.forEach(t => {
-                        const row = document.createElement('div');
-                        row.className = 'grid-row';
-                        row.innerHTML = `
+                const wrap = document.createElement('div');
+                wrap.className = 'tasks-grid-wrapper';
+                const grid = document.createElement('div');
+                grid.className = 'tasks-grid archive-tasks-grid';
+                const hdr = document.createElement('div');
+                hdr.className = 'grid-header';
+                [
+                    { cls: 'col-id', title: 'ID' },
+                    { cls: 'col-name', title: 'Название' },
+                    { cls: 'col-priority', title: 'Приоритет' },
+                    { cls: 'col-archivedAt', title: 'Архивировано' },
+                    { cls: 'col-reason', title: 'Причина' },
+                    { cls: 'col-actions', title: 'Действия' }
+                ].forEach(({ cls, title }) => {
+                    const c = document.createElement('div');
+                    c.className = cls;
+                    c.innerHTML = `<span class="header-title">${title}</span>`;
+                    hdr.appendChild(c);
+                });
+                grid.appendChild(hdr);
+                items.forEach(t => {
+                    const row = document.createElement('div');
+                    row.className = 'grid-row';
+                    row.innerHTML = `
                         <div class="col-id">${getTaskDisplayId(t)}</div>
                         <div class="col-name"><p class="text-basic">${escapeHtml(t.name)}</p></div>
                         <div class="col-priority"><p>${t.priority === 'срочно' ? 'Срочно' : 'Обычный'}</p></div>
                         <div class="col-archivedAt"><p>${t.archivedDate ? new Date(t.archivedDate).toLocaleString('ru-RU') : '—'}</p></div>
                         <div class="col-reason"><p>${escapeHtml(t.archivedReason || '—')}</p></div>
                     `;
-                        grid.appendChild(row);
-                    });
-                    wrap.appendChild(grid);
-                    body.appendChild(wrap);
+                    const actions = document.createElement('div');
+                    actions.className = 'col-actions';
+                    const actionsWrap = document.createElement('div');
+                    actionsWrap.className = 'archive-row-actions';
+                    const btnRestore = document.createElement('button');
+                    btnRestore.type = 'button';
+                    btnRestore.className = 'button-small';
+                    btnRestore.textContent = 'Вернуть';
+                    btnRestore.addEventListener('click', () => restoreArchivedKanbanTask(boardIndex, t.id));
+                    const btnCopy = document.createElement('button');
+                    btnCopy.type = 'button';
+                    btnCopy.className = 'button-small';
+                    btnCopy.textContent = 'Копия';
+                    btnCopy.addEventListener('click', () => copyArchivedKanbanTask(boardIndex, t.id));
+                    actionsWrap.append(btnRestore, btnCopy);
+                    actions.appendChild(actionsWrap);
+                    row.appendChild(actions);
+                    grid.appendChild(row);
                 });
+                wrap.appendChild(grid);
+                body.appendChild(wrap);
             }
             section.appendChild(body);
             container.appendChild(section);

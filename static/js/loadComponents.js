@@ -225,6 +225,74 @@ function initNavigation() {
     });
 }
 
+const ASIDE_COLLAPSED_KEY = 'tpAsideCollapsed';
+
+function ensureAsideCollapseButton() {
+    let btn = document.getElementById('asideCollapseToggle');
+    if (!btn) {
+        btn = document.createElement('button');
+        btn.type = 'button';
+        btn.id = 'asideCollapseToggle';
+        btn.className = 'header-toolbar__action aside-collapse-toggle-btn';
+        btn.setAttribute('aria-label', 'Свернуть меню');
+        btn.innerHTML = '<img class="h-32 aside-toggle-icon" src="/static/source/icons/close_aside.svg" alt="">';
+    }
+    if (!btn.dataset.bound) {
+        btn.addEventListener('click', () => {
+            const collapsed = !document.body.classList.contains('aside-collapsed');
+            setAsideCollapsedState(collapsed);
+        });
+        btn.dataset.bound = '1';
+    }
+    return btn;
+}
+
+function placeAsideToggleButton(collapsed) {
+    const btn = ensureAsideCollapseButton();
+    const headerLeft = document.querySelector('.header .gap-24.flex-row');
+    const logo = headerLeft?.querySelector('.logo-link');
+    const aside = document.getElementById('aside-container');
+
+    if (collapsed) {
+        // В свернутом режиме кнопка в хедере слева от логотипа.
+        if (headerLeft && logo) {
+            headerLeft.insertBefore(btn, logo);
+        } else if (headerLeft && !btn.parentElement) {
+            headerLeft.insertBefore(btn, headerLeft.firstChild);
+        }
+        return;
+    }
+
+    // В развернутом режиме кнопка внутри бокового меню.
+    if (aside) {
+        let slot = aside.querySelector('.aside-collapse-corner');
+        if (!slot) {
+            slot = document.createElement('div');
+            slot.className = 'aside-collapse-corner';
+            aside.appendChild(slot);
+        }
+        slot.innerHTML = '';
+        slot.appendChild(btn);
+    }
+}
+
+function setAsideCollapsedState(collapsed) {
+    document.body.classList.toggle('aside-collapsed', !!collapsed);
+    localStorage.setItem(ASIDE_COLLAPSED_KEY, collapsed ? '1' : '0');
+    const btn = ensureAsideCollapseButton();
+    if (btn) {
+        btn.setAttribute('aria-pressed', collapsed ? 'true' : 'false');
+        btn.setAttribute('aria-label', collapsed ? 'Развернуть меню' : 'Свернуть меню');
+    }
+    placeAsideToggleButton(!!collapsed);
+}
+
+function initAsideCollapseToggle() {
+    ensureAsideCollapseButton();
+    const saved = localStorage.getItem(ASIDE_COLLAPSED_KEY) === '1';
+    setAsideCollapsedState(saved);
+}
+
 function handleNavigationClick(e) {
     e.preventDefault();
     const url = this.dataset.href;
@@ -402,6 +470,7 @@ async function loadPage(url) {
                     }
                     
                     initSubmenus();
+                    initAsideCollapseToggle();
                     hydrateTeamProjectsMenu().then(() => {
                         initNavigation();
                         updateActiveMenuItem();
@@ -425,6 +494,7 @@ window.addEventListener('popstate', () => {
 
 document.addEventListener('DOMContentLoaded', () => {
     initSubmenus();
+    initAsideCollapseToggle();
     hydrateTeamProjectsMenu().then(() => {
         initNavigation();
         updateActiveMenuItem();

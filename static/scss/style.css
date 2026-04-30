@@ -96,6 +96,7 @@ aside {
   height: calc(100vh - 3rem);
   overflow-y: auto;
   flex-shrink: 0;
+  position: relative;
 }
 aside::-webkit-scrollbar {
   display: none;
@@ -140,6 +141,12 @@ aside .item .nav-link {
   font-family: inherit;
   padding: 0;
   text-align: left;
+  display: inline-block;
+  max-width: 14.5vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
 }
 aside .item .nav-link:hover {
   color: #61A039;
@@ -167,6 +174,17 @@ aside .submenu .nav-link {
   margin-bottom: 0.75rem;
   display: block;
   text-align: left;
+  max-width: 14.5vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+aside .submenu .text-signature {
+  display: block;
+  max-width: 14.5vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 aside:empty {
   opacity: 0;
@@ -4154,6 +4172,15 @@ body[data-theme=dark] .kanban-task-item, .board-list .card .list .item {
   align-items: center;
   margin-right: 0.19rem;
 }
+.kanban-archive-board .tasks-grid.archive-tasks-grid {
+  grid-template-columns: auto 1fr auto auto auto auto !important;
+}
+.kanban-archive-board .tasks-grid .archive-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  align-items: center;
+}
 
 .board-list .tasks-grid .col-dueDate {
   white-space: nowrap;
@@ -4782,6 +4809,43 @@ select {
 }
 .header-toolbar__action img {
   display: block;
+}
+.aside-collapse-toggle-btn {
+  flex-shrink: 0;
+}
+.aside-collapse-item {
+  margin-bottom: 0.75rem;
+}
+aside .aside-collapse-item .aside-collapse-toggle-btn {
+  display: inline-flex;
+}
+aside .aside-collapse-corner {
+  position: absolute;
+  bottom: 2.25rem;
+  right: 1.5rem;
+  z-index: 2;
+}
+aside .aside-collapse-corner .aside-collapse-toggle-btn {
+  display: inline-flex;
+}
+.aside-toggle-icon {
+  transition: transform 0.2s ease;
+  transform: rotate(180deg);
+}
+body.aside-collapsed .aside-toggle-icon {
+  transform: rotate(0deg);
+}
+aside#aside-container {
+  transition: min-width 0.2s ease, width 0.2s ease, padding 0.2s ease, opacity 0.2s ease;
+}
+body.aside-collapsed aside#aside-container {
+  min-width: 0 !important;
+  width: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
 }
 
 .theme-toggle__icon {
