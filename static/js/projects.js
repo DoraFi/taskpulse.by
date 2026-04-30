@@ -11,7 +11,7 @@ function apiUrl(path) {
 function initProjectsPage() {
     const grid = document.querySelector('.projects-grid');
     if (!grid) return;
-    const searchInput = document.querySelector('.search-panel input[type="text"]');
+    const searchInput = document.querySelector('.projects-search input[type="text"]');
     const pathname = window.location.pathname;
     const isArchiveView = pathname.endsWith('/projects/archive');
     const isOrgView = pathname.endsWith('/projects/org');
@@ -31,9 +31,7 @@ function initProjectsPage() {
                 const q = String(query || '').trim().toLowerCase();
                 const filtered = !q ? allProjects : allProjects.filter(p => {
                     const name = String(p.name || '').toLowerCase();
-                    const code = String(p.code || '').toLowerCase();
-                    const summary = String(p.summary || '').toLowerCase();
-                    return name.includes(q) || code.includes(q) || summary.includes(q);
+                    return name.includes(q);
                 });
                 if (!filtered.length) {
                     grid.innerHTML = `<p class="text-basic">${allProjects.length ? 'Ничего не найдено' : 'Список пуст'}</p>`;
