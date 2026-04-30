@@ -11,6 +11,8 @@
     const KANBAN_COLLAPSE_KEY = 'kanbanBoardCollapsed';
     const KANBAN_SECTION_COLLAPSE_KEY = 'kanbanSectionCollapsed';
     const KANBAN_TIMELINE_SHOW_DONE_KEY = 'kanbanTimelineShowDone';
+    const KANBAN_WIP_SETTINGS_KEY = 'kanbanWipSettings';
+    const KANBAN_TASK_ARCHIVE_KEY = 'kanbanTaskArchiveMap';
 
     function getApiBasePath() {
         const m = window.location.pathname.match(/^\/o\/([^/]+)\/t\/([^/]+)/);
@@ -91,6 +93,87 @@
 
     function getTaskDisplayId(task) {
         return task?.displayId || task?.id || '';
+    }
+
+    function getScopedStorageKey(baseKey) {
+        const p = currentProjectCodeFromUrl() || 'all';
+        return `${baseKey}:${p}`;
+    }
+
+    function readJsonStorage(key, fallback) {
+        try {
+            const raw = localStorage.getItem(key);
+            if (!raw) return fallback;
+            return JSON.parse(raw);
+        } catch {
+            return fallback;
+        }
+    }
+
+    function writeJsonStorage(key, value) {
+        try {
+            localStorage.setItem(key, JSON.stringify(value));
+        } catch {
+            // ignore storage errors
+        }
+    }
+
+    function getWipSettings() {
+        return readJsonStorage(getScopedStorageKey(KANBAN_WIP_SETTINGS_KEY), { boards: {}, stages: {} });
+    }
+
+    function saveWipSettings(settings) {
+        writeJsonStorage(getScopedStorageKey(KANBAN_WIP_SETTINGS_KEY), settings || { boards: {}, stages: {} });
+    }
+
+    function getBoardWipSetting(boardId) {
+        const s = getWipSettings();
+        return s.boards?.[String(boardId)] || { enabled: false, limit: 0 };
+    }
+
+    function getStageWipSetting(boardId, stageName) {
+        const s = getWipSettings();
+        return s.stages?.[String(boardId)]?.[stageName] || { enabled: false, limit: 0 };
+    }
+
+    function countBoardActiveTasks(boardId) {
+        return kanbanTasks.filter(t => Number(t.boardId) === Number(boardId) && String(t.stage || '').trim() !== 'Готово').length;
+    }
+
+    function countStageActiveTasks(boardId, stageName) {
+        return kanbanTasks.filter(t => Number(t.boardId) === Number(boardId) && String(t.stage || '').trim() === String(stageName || '').trim()).length;
+    }
+
+    function getArchiveTaskMap() {
+        return readJsonStorage(getScopedStorageKey(KANBAN_TASK_ARCHIVE_KEY), {});
+    }
+
+    function saveArchiveTaskMap(map) {
+        writeJsonStorage(getScopedStorageKey(KANBAN_TASK_ARCHIVE_KEY), map || {});
+    }
+
+    function applyArchivedTasksMapToState() {
+        const map = getArchiveTaskMap();
+        if (!map || typeof map !== 'object') return;
+        Object.entries(map).forEach(([key, meta]) => {
+            const [boardIdStr, taskIdStr] = String(key).split(':');
+            const boardId = Number(boardIdStr);
+            const taskId = Number(taskIdStr);
+            if (!boardId || !taskId) return;
+            const board = kanbanBoards.find(b => Number(b.id) === boardId);
+            if (!board) return;
+            if (!Array.isArray(board.archivedTasks)) board.archivedTasks = [];
+            if (board.archivedTasks.some(t => Number(t.id) === taskId)) return;
+            const idx = kanbanTasks.findIndex(t => Number(t.id) === taskId && Number(t.boardId) === boardId);
+            if (idx === -1) return;
+            const task = kanbanTasks[idx];
+            board.archivedTasks.push({
+                ...task,
+                archivedDate: meta?.archivedDate || new Date().toISOString(),
+                archivedReason: meta?.archivedReason || 'Перенос из «Готово»'
+            });
+            kanbanTasks.splice(idx, 1);
+        });
     }
 
     function formatDueDate(dateStr) {
@@ -539,6 +622,7 @@
                 kanbanTasks.push(normalized);
             });
         }
+        applyArchivedTasksMapToState();
         migrateKanbanData();
     }
 
@@ -696,6 +780,12 @@
             <li class="dropdown-item text-basic" data-action="board-export-json">
             <span>Экспорт данных (JSON)</span>
         </li>
+            <li class="dropdown-item text-basic" data-action="board-wip-config">
+                <span>WIP-лимит доски</span>
+            </li>
+            <li class="dropdown-item text-basic" data-action="board-wip-toggle">
+                <span>Вкл/выкл WIP доски</span>
+            </li>
             <li class="dropdown-item text-basic pink" data-action="archive-board">
                 <span>Архивировать доску</span>
             </li>
@@ -734,6 +824,12 @@
             </li>
             <li class="dropdown-item text-basic" data-action="clear-stage">
                 <span>Очистить колонку</span>
+            </li>
+            <li class="dropdown-item text-basic" data-action="stage-wip-config">
+                <span>WIP-лимит этапа</span>
+            </li>
+            <li class="dropdown-item text-basic" data-action="stage-wip-toggle">
+                <span>Вкл/выкл WIP этапа</span>
             </li>
             <li class="dropdown-item text-basic pink" data-action="delete-stage">
                 <span>Удалить этап</span>
@@ -776,6 +872,16 @@
             left.appendChild(dragHandle);
         } else {
             left.appendChild(title);
+        }
+        const boardWip = getBoardWipSetting(board.id);
+        if (boardWip.enabled && Number(boardWip.limit) > 0) {
+            const used = countBoardActiveTasks(board.id);
+            const wipBadge = document.createElement('span');
+            wipBadge.className = 'kanban-count-badge';
+            wipBadge.textContent = `WIP ${used}/${boardWip.limit}`;
+            wipBadge.style.whiteSpace = 'nowrap';
+            if (used > boardWip.limit) wipBadge.style.color = '#F8085C';
+            left.appendChild(wipBadge);
         }
         header.appendChild(left);
 
@@ -831,13 +937,28 @@
     function createColumnHeadContent(board, boardIndex, stageName, count) {
         const wrap = document.createElement('div');
         wrap.className = 'kanban-column-head-inner';
+        const stageWip = getStageWipSetting(board.id, stageName);
+        const showStageCount = !(stageWip.enabled && Number(stageWip.limit) > 0);
 
         const titles = document.createElement('div');
         titles.className = 'kanban-column-head-titles';
+        titles.style.display = 'flex';
+        titles.style.alignItems = 'center';
+        titles.style.gap = '0.4rem';
+        titles.style.flexWrap = 'nowrap';
         titles.innerHTML = `
         <span class="text-basic">${escapeHtml(stageName)}</span>
-        <span class="kanban-count-badge">${count}</span>
+        ${showStageCount ? `<span class="kanban-count-badge">${count}</span>` : ''}
     `;
+        if (stageWip.enabled && Number(stageWip.limit) > 0) {
+            const wip = document.createElement('span');
+            wip.className = 'kanban-count-badge';
+            const used = countStageActiveTasks(board.id, stageName);
+            wip.textContent = `WIP ${used}/${stageWip.limit}`;
+            wip.style.whiteSpace = 'nowrap';
+            if (used > stageWip.limit) wip.style.color = '#F8085C';
+            titles.appendChild(wip);
+        }
 
         const info = document.createElement('div');
         info.className = 'info';
@@ -1538,7 +1659,8 @@
     }
 
     function archiveDoneTask(task) {
-        if (!task || task.stage !== 'Готово') {
+        const stage = String(task?.stage || '').trim();
+        if (!task || stage !== 'Готово') {
             showToast('В архив можно переместить только задачи из колонки «Готово»');
             return;
         }
@@ -1555,6 +1677,12 @@
             archivedDate: new Date().toISOString(),
             archivedReason: 'Перенос из «Готово»'
         });
+        const map = getArchiveTaskMap();
+        map[`${board.id}:${task.id}`] = {
+            archivedDate: new Date().toISOString(),
+            archivedReason: 'Перенос из «Готово»'
+        };
+        saveArchiveTaskMap(map);
         kanbanTasks = kanbanTasks.filter(t => !(Number(t.id) === Number(task.id) && Number(t.boardId) === Number(task.boardId)));
         saveKanbanToLocalStorage();
         renderCurrentView();
@@ -2069,6 +2197,13 @@
                         }
                         try {
                             await postBoardApi('/boards/stages/rename', { boardId: board.id, oldName, newName: nn });
+                            const s = getWipSettings();
+                            const perBoard = s.stages?.[String(board.id)];
+                            if (perBoard && perBoard[oldName]) {
+                                perBoard[nn] = perBoard[oldName];
+                                delete perBoard[oldName];
+                                saveWipSettings(s);
+                            }
                             close();
                             await loadKanbanData();
                             renderCurrentView();
@@ -2105,6 +2240,39 @@
                         .then(() => loadKanbanData().then(renderCurrentView))
                         .catch(() => showToast('Не удалось очистить этап'))
                 });
+                return;
+            }
+            if (action === 'stage-wip-config') {
+                const cur = getStageWipSetting(board.id, oldName);
+                showKanbanTextModal({
+                    title: 'WIP-лимит этапа',
+                    label: 'Лимит задач в этапе',
+                    value: cur.limit ? String(cur.limit) : '',
+                    submitLabel: 'Сохранить',
+                    onSubmit: (val, close) => {
+                        const n = Number(val);
+                        if (!Number.isFinite(n) || n <= 0) {
+                            showToast('Введите число больше 0');
+                            return;
+                        }
+                        const s = getWipSettings();
+                        if (!s.stages[String(board.id)]) s.stages[String(board.id)] = {};
+                        s.stages[String(board.id)][oldName] = { enabled: true, limit: Math.round(n) };
+                        saveWipSettings(s);
+                        close();
+                        renderCurrentView();
+                    }
+                });
+                return;
+            }
+            if (action === 'stage-wip-toggle') {
+                const s = getWipSettings();
+                if (!s.stages[String(board.id)]) s.stages[String(board.id)] = {};
+                const cur = s.stages[String(board.id)][oldName] || { enabled: false, limit: 0 };
+                s.stages[String(board.id)][oldName] = { ...cur, enabled: !cur.enabled };
+                saveWipSettings(s);
+                renderCurrentView();
+                showToast(s.stages[String(board.id)][oldName].enabled ? 'WIP этапа включен' : 'WIP этапа отключен');
                 return;
             }
             if (action === 'delete-stage') {
@@ -2259,6 +2427,39 @@
                     showToast('Файл сохранён');
                 })
                 .catch(() => showToast('Не удалось выгрузить доску'));
+            return;
+        }
+        if (action === 'board-wip-config') {
+            if (!b) return;
+            const cur = getBoardWipSetting(b.id);
+            showKanbanTextModal({
+                title: 'WIP-лимит доски',
+                label: 'Лимит активных задач',
+                value: cur.limit ? String(cur.limit) : '',
+                submitLabel: 'Сохранить',
+                onSubmit: (val, close) => {
+                    const n = Number(val);
+                    if (!Number.isFinite(n) || n <= 0) {
+                        showToast('Введите число больше 0');
+                        return;
+                    }
+                    const s = getWipSettings();
+                    s.boards[String(b.id)] = { enabled: true, limit: Math.round(n) };
+                    saveWipSettings(s);
+                    close();
+                    renderCurrentView();
+                }
+            });
+            return;
+        }
+        if (action === 'board-wip-toggle') {
+            if (!b) return;
+            const s = getWipSettings();
+            const cur = s.boards[String(b.id)] || { enabled: false, limit: 0 };
+            s.boards[String(b.id)] = { ...cur, enabled: !cur.enabled };
+            saveWipSettings(s);
+            renderCurrentView();
+            showToast(s.boards[String(b.id)].enabled ? 'WIP доски включен' : 'WIP доски отключен');
         }
     }
 
@@ -2295,7 +2496,22 @@
         head.className = 'kanban-stage-table-head';
         const left = document.createElement('div');
         left.className = 'kanban-stage-table-head-main';
-        left.innerHTML = `<p class="text-basic">${escapeHtml(stageName)}</p><span class="kanban-count-badge">${tasks.length}</span>`;
+        const stageWip = getStageWipSetting(board.id, stageName);
+        const showStageCount = !(stageWip.enabled && Number(stageWip.limit) > 0);
+        left.style.display = 'flex';
+        left.style.alignItems = 'center';
+        left.style.gap = '0.4rem';
+        left.style.flexWrap = 'nowrap';
+        left.innerHTML = `<p class="text-basic">${escapeHtml(stageName)}</p>${showStageCount ? `<span class="kanban-count-badge">${tasks.length}</span>` : ''}`;
+        if (stageWip.enabled && Number(stageWip.limit) > 0) {
+            const wip = document.createElement('span');
+            wip.className = 'kanban-count-badge';
+            const used = countStageActiveTasks(board.id, stageName);
+            wip.textContent = `WIP ${used}/${stageWip.limit}`;
+            wip.style.whiteSpace = 'nowrap';
+            if (used > stageWip.limit) wip.style.color = '#F8085C';
+            left.appendChild(wip);
+        }
         const info = document.createElement('div');
         info.className = 'info';
         info.style.position = 'relative';
@@ -2587,66 +2803,153 @@
         fetch(apiUrl('/reports/projects?mode=kanban'))
             .then(r => r.ok ? r.json() : Promise.reject(new Error('reports api failed')))
             .then(data => {
-                const summaryData = data.summary || {};
-                const rows = Array.isArray(data.rows) ? data.rows : [];
+                const executive = data.executive || {};
+                const currentCode = (currentProjectCodeFromUrl() || '').toUpperCase();
+                const sourceRows = Array.isArray(data.rows) ? data.rows : [];
+                const rows = currentCode
+                    ? sourceRows.filter(r => String(r.code || '').toUpperCase() === currentCode)
+                    : sourceRows;
+                const withWip = rows.map(r => {
+                    const boards = Number(r.boards ?? 0);
+                    const inProgress = Number(r.inProgress ?? 0);
+                    const wipLimit = Math.max(5, boards * 5);
+                    const wipOverflow = Math.max(0, inProgress - wipLimit);
+                    return { ...r, wipLimit, wipOverflow };
+                });
+                const wipBreaches = withWip.filter(r => r.wipOverflow > 0).length;
+                const wipOverflowTotal = withWip.reduce((acc, r) => acc + r.wipOverflow, 0);
+                const localSummary = withWip.reduce((acc, r) => {
+                    acc.projects += 1;
+                    acc.tasks += Number(r.total ?? 0);
+                    acc.done += Number(r.done ?? 0);
+                    acc.inProgress += Number(r.inProgress ?? 0);
+                    acc.urgent += Number(r.urgent ?? 0);
+                    acc.overdue += Number(r.overdue ?? 0);
+                    return acc;
+                }, { projects: 0, tasks: 0, done: 0, inProgress: 0, urgent: 0, overdue: 0 });
+                const doneRate = localSummary.tasks ? Math.round((localSummary.done / localSummary.tasks) * 100) : (executive.doneRate ?? 0);
+                const overdueRate = localSummary.tasks ? Math.round((localSummary.overdue / localSummary.tasks) * 100) : (executive.overdueRate ?? 0);
                 const card = document.createElement('div');
                 card.className = 'card board-reports-card';
                 const header = document.createElement('div');
                 header.className = 'tasks-header flex-row-between';
-                header.innerHTML = '<p class="text-header">Отчёты (Kanban)</p>';
+                header.innerHTML = '<p class="text-header">Отчёт по проекту</p>';
                 card.appendChild(header);
 
                 const summary = document.createElement('div');
                 summary.className = 'reports-summary';
                 summary.innerHTML = `
                     <div class="reports-summary-grid">
-                        <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.projects ?? 0}</span><span class="reports-stat-label">проектов</span></div>
-                        <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.tasks ?? 0}</span><span class="reports-stat-label">задач</span></div>
-                        <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.done ?? 0}</span><span class="reports-stat-label">готово</span></div>
-                        <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.urgent ?? 0}</span><span class="reports-stat-label">срочных</span></div>
-                        <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.overdue ?? 0}</span><span class="reports-stat-label">просрочено</span></div>
+                        <div class="reports-stat-chip"><span class="reports-stat-value">${localSummary.projects}</span><span class="reports-stat-label">проектов</span></div>
+                        <div class="reports-stat-chip"><span class="reports-stat-value">${localSummary.tasks}</span><span class="reports-stat-label">задач</span></div>
+                        <div class="reports-stat-chip"><span class="reports-stat-value">${localSummary.done}</span><span class="reports-stat-label">готово</span></div>
+                        <div class="reports-stat-chip"><span class="reports-stat-value">${localSummary.inProgress}</span><span class="reports-stat-label">в работе</span></div>
+                        <div class="reports-stat-chip"><span class="reports-stat-value">${localSummary.urgent}</span><span class="reports-stat-label">срочных</span></div>
+                        <div class="reports-stat-chip"><span class="reports-stat-value">${localSummary.overdue}</span><span class="reports-stat-label">просрочено</span></div>
+                    </div>
+                    <div class="reports-summary-grid" style="margin-top: 0.75rem;">
+                        <div class="reports-stat-chip"><span class="reports-stat-value">${doneRate}%</span><span class="reports-stat-label">выполнение плана</span></div>
+                        <div class="reports-stat-chip"><span class="reports-stat-value">${overdueRate}%</span><span class="reports-stat-label">доля просрочки</span></div>
+                        <div class="reports-stat-chip"><span class="reports-stat-value">${wipBreaches}</span><span class="reports-stat-label">нарушений WIP</span></div>
+                        <div class="reports-stat-chip"><span class="reports-stat-value">${wipOverflowTotal}</span><span class="reports-stat-label">сверх лимита</span></div>
                     </div>
                     <p class="reports-hint text-signature">Метрики формируются по данным БД.</p>
                 `;
                 card.appendChild(summary);
 
-                const gridWrap = document.createElement('div');
-                gridWrap.className = 'tasks-grid-wrapper';
-                const grid = document.createElement('div');
-                grid.className = 'tasks-grid reports-assignee-grid reports-kanban-grid';
-                const headerRow = document.createElement('div');
-                headerRow.className = 'grid-header';
-                ['Проект', 'Доски', 'Всего задач', 'Очередь', 'В работе / тест', 'Готово', 'Срочные', 'Просрочено']
-                    .forEach((title, i) => {
-                        const cls = ['project', 'boards', 'total', 'queue', 'inprogress', 'done', 'urgent', 'overdue'][i];
-                        const cell = document.createElement('div');
-                        cell.className = `col-${cls}`;
-                        const titleSpan = document.createElement('span');
-                        titleSpan.className = 'header-title';
-                        titleSpan.textContent = title;
-                        cell.appendChild(titleSpan);
-                        headerRow.appendChild(cell);
-                    });
-                grid.appendChild(headerRow);
-
-                rows.forEach((r) => {
-                    const row = document.createElement('div');
-                    row.className = 'grid-row';
-                    row.innerHTML = `
-                        <div class="col-project"><p class="text-basic">${escapeHtml(r.project || '')} <span class="text-signature">${escapeHtml(r.code || '')}</span></p></div>
-                        <div class="col-boards"><p>${r.boards ?? 0}</p></div>
-                        <div class="col-total"><p>${r.total ?? 0}</p></div>
-                        <div class="col-queue"><p>${r.queue ?? 0}</p></div>
-                        <div class="col-inprogress"><p>${r.inProgress ?? 0}</p></div>
-                        <div class="col-done"><p>${r.done ?? 0}</p></div>
-                        <div class="col-urgent"><p>${r.urgent ?? 0}</p></div>
-                        <div class="col-overdue"><p>${r.overdue ?? 0}</p></div>
-                    `;
-                    grid.appendChild(row);
+                const byMember = {};
+                kanbanTasks.forEach(t => {
+                    const name = String(t.assignee || 'Без исполнителя').trim() || 'Без исполнителя';
+                    if (!byMember[name]) byMember[name] = { total: 0, done: 0, inProgress: 0, queue: 0, urgent: 0 };
+                    byMember[name].total += 1;
+                    if (String(t.stage || '').trim() === 'Готово') byMember[name].done += 1;
+                    else if (['В работе', 'Тестирование'].includes(String(t.stage || '').trim())) byMember[name].inProgress += 1;
+                    else byMember[name].queue += 1;
+                    if (String(t.priority || '').trim() === 'срочно') byMember[name].urgent += 1;
                 });
+                const memberRows = Object.entries(byMember)
+                    .map(([name, m]) => ({ name, ...m }))
+                    .sort((a, b) => b.total - a.total);
+                if (memberRows.length) {
+                    const memberBlock = document.createElement('div');
+                    memberBlock.className = 'reports-summary';
+                    memberBlock.innerHTML = `
+                        <p class="text-header" style="margin-bottom:0.5rem;">Статистика по участникам команды</p>
+                        <div style="overflow-x:auto;">
+                            <table style="width:100%;min-width:760px;border-collapse:collapse;background:rgba(255,255,255,0.25);border-radius:8px;">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align:left;padding:8px;border-bottom:1px solid #b8c8ad;">Участник</th>
+                                        <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">Всего</th>
+                                        <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">Очередь</th>
+                                        <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">В работе/тест</th>
+                                        <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">Готово</th>
+                                        <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">Срочные</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${memberRows.map(m => `
+                                        <tr>
+                                            <td style="padding:8px;border-bottom:1px solid #d7e2cf;">${escapeHtml(m.name)}</td>
+                                            <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${m.total}</td>
+                                            <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${m.queue}</td>
+                                            <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${m.inProgress}</td>
+                                            <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${m.done}</td>
+                                            <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${m.urgent}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                    card.appendChild(memberBlock);
+                }
 
-                gridWrap.appendChild(grid);
-                card.appendChild(gridWrap);
+                const tableWrap = document.createElement('div');
+                tableWrap.style.overflowX = 'auto';
+                tableWrap.style.marginTop = '10px';
+                const table = document.createElement('table');
+                table.style.width = '100%';
+                table.style.minWidth = '980px';
+                table.style.borderCollapse = 'collapse';
+                table.style.background = 'rgba(255,255,255,0.25)';
+                table.style.borderRadius = '8px';
+                table.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;padding:8px;border-bottom:1px solid #b8c8ad;">Проект</th>
+                            <th style="text-align:left;padding:8px;border-bottom:1px solid #b8c8ad;">Код</th>
+                            <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">Доски</th>
+                            <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">Всего задач</th>
+                            <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">Очередь</th>
+                            <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">В работе/тест</th>
+                            <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">WIP лимит</th>
+                            <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">Сверх WIP</th>
+                            <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">Готово</th>
+                            <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">Срочные</th>
+                            <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">Просрочено</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${withWip.map(r => `
+                            <tr>
+                                <td style="padding:8px;border-bottom:1px solid #d7e2cf;">${escapeHtml(r.project || '')}</td>
+                                <td style="padding:8px;border-bottom:1px solid #d7e2cf;">${escapeHtml(r.code || '—')}</td>
+                                <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${r.boards ?? 0}</td>
+                                <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${r.total ?? 0}</td>
+                                <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${r.queue ?? 0}</td>
+                                <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${r.inProgress ?? 0}</td>
+                                <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${r.wipLimit}</td>
+                                <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;${r.wipOverflow > 0 ? 'color:#F8085C;font-weight:700;' : ''}">${r.wipOverflow}</td>
+                                <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${r.done ?? 0}</td>
+                                <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${r.urgent ?? 0}</td>
+                                <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${r.overdue ?? 0}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                `;
+                tableWrap.appendChild(table);
+                card.appendChild(tableWrap);
                 container.innerHTML = '';
                 container.appendChild(card);
             })

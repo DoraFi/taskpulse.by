@@ -1284,55 +1284,99 @@ function renderReportsView() {
     fetch(apiUrl('/reports/projects?mode=list'))
         .then(r => r.ok ? r.json() : Promise.reject(new Error('reports api failed')))
         .then(data => {
-            const summaryData = data.summary || {};
             const executive = data.executive || {};
-            const topRisks = Array.isArray(data.topRisks) ? data.topRisks : [];
-            const rows = Array.isArray(data.rows) ? data.rows : [];
+            const currentCode = (currentProjectCodeFromUrl() || '').toUpperCase();
+            const sourceRows = Array.isArray(data.rows) ? data.rows : [];
+            const rows = currentCode
+                ? sourceRows.filter(r => String(r.code || '').toUpperCase() === currentCode)
+                : sourceRows;
+            const localSummary = rows.reduce((acc, r) => {
+                acc.projects += 1;
+                acc.tasks += Number(r.total ?? 0);
+                acc.done += Number(r.done ?? 0);
+                acc.inProgress += Number(r.inProgress ?? 0);
+                acc.urgent += Number(r.urgent ?? 0);
+                acc.overdue += Number(r.overdue ?? 0);
+                return acc;
+            }, { projects: 0, tasks: 0, done: 0, inProgress: 0, urgent: 0, overdue: 0 });
+            const doneRate = localSummary.tasks ? Math.round((localSummary.done / localSummary.tasks) * 100) : (executive.doneRate ?? 0);
+            const overdueRate = localSummary.tasks ? Math.round((localSummary.overdue / localSummary.tasks) * 100) : (executive.overdueRate ?? 0);
 
             const card = document.createElement('div');
             card.className = 'card board-reports-card';
             const header = document.createElement('div');
             header.className = 'tasks-header flex-row-between';
-            header.innerHTML = '<p class="text-header">Отчёт по проектам (List)</p>';
+            header.innerHTML = '<p class="text-header">Отчёт по проекту</p>';
             card.appendChild(header);
 
             const summary = document.createElement('div');
             summary.className = 'reports-summary';
-            const healthLabel = executive.health === 'high_risk'
-                ? 'Высокий риск'
-                : (executive.health === 'attention' ? 'Зона внимания' : 'Стабильно');
             summary.innerHTML = `
                 <div class="reports-summary-grid">
-                    <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.projects ?? 0}</span><span class="reports-stat-label">проектов</span></div>
-                    <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.tasks ?? 0}</span><span class="reports-stat-label">задач</span></div>
-                    <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.done ?? 0}</span><span class="reports-stat-label">готово</span></div>
-                    <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.inProgress ?? 0}</span><span class="reports-stat-label">в работе</span></div>
-                    <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.urgent ?? 0}</span><span class="reports-stat-label">срочных</span></div>
-                    <div class="reports-stat-chip"><span class="reports-stat-value">${summaryData.overdue ?? 0}</span><span class="reports-stat-label">просрочено</span></div>
+                    <div class="reports-stat-chip"><span class="reports-stat-value">${localSummary.projects}</span><span class="reports-stat-label">проектов</span></div>
+                    <div class="reports-stat-chip"><span class="reports-stat-value">${localSummary.tasks}</span><span class="reports-stat-label">задач</span></div>
+                    <div class="reports-stat-chip"><span class="reports-stat-value">${localSummary.done}</span><span class="reports-stat-label">готово</span></div>
+                    <div class="reports-stat-chip"><span class="reports-stat-value">${localSummary.inProgress}</span><span class="reports-stat-label">в работе</span></div>
+                    <div class="reports-stat-chip"><span class="reports-stat-value">${localSummary.urgent}</span><span class="reports-stat-label">срочных</span></div>
+                    <div class="reports-stat-chip"><span class="reports-stat-value">${localSummary.overdue}</span><span class="reports-stat-label">просрочено</span></div>
                 </div>
                 <div class="reports-summary-grid" style="margin-top: 0.75rem;">
-                    <div class="reports-stat-chip"><span class="reports-stat-value">${executive.doneRate ?? 0}%</span><span class="reports-stat-label">выполнение плана</span></div>
-                    <div class="reports-stat-chip"><span class="reports-stat-value">${executive.overdueRate ?? 0}%</span><span class="reports-stat-label">доля просрочки</span></div>
-                    <div class="reports-stat-chip"><span class="reports-stat-value">${healthLabel}</span><span class="reports-stat-label">оценка портфеля</span></div>
+                    <div class="reports-stat-chip"><span class="reports-stat-value">${doneRate}%</span><span class="reports-stat-label">выполнение плана</span></div>
+                    <div class="reports-stat-chip"><span class="reports-stat-value">${overdueRate}%</span><span class="reports-stat-label">доля просрочки</span></div>
                 </div>
                 <p class="reports-hint text-signature">Метрики формируются по данным БД.</p>
             `;
             card.appendChild(summary);
 
-            if (topRisks.length > 0) {
-                const risks = document.createElement('div');
-                risks.className = 'reports-summary';
-                risks.innerHTML = `
-                    <p class="text-header" style="margin-bottom:0.5rem;">Риски для руководителя</p>
-                    <ul style="margin:0;padding-left:18px;">
-                        ${topRisks.map(r => `
-                            <li class="text-basic" style="margin-bottom:4px;">
-                                ${escapeHtml(r.project || 'Проект')} — срочные: ${r.urgent ?? 0}, просрочено: ${r.overdue ?? 0}
-                            </li>
-                        `).join('')}
-                    </ul>
+            const byMember = {};
+            boardsData.forEach(board => {
+                (board.tasks || []).forEach(task => {
+                    const name = String(task.assignee || 'Без исполнителя').trim() || 'Без исполнителя';
+                    if (!byMember[name]) byMember[name] = { total: 0, done: 0, inProgress: 0, queue: 0, urgent: 0 };
+                    byMember[name].total += 1;
+                    const stage = String(task.stage || '').trim();
+                    if (stage === 'Готово') byMember[name].done += 1;
+                    else if (stage === 'В работе' || stage === 'Тестирование') byMember[name].inProgress += 1;
+                    else byMember[name].queue += 1;
+                    if (String(task.priority || '').trim() === 'срочно') byMember[name].urgent += 1;
+                });
+            });
+            const memberRows = Object.entries(byMember)
+                .map(([name, m]) => ({ name, ...m }))
+                .sort((a, b) => b.total - a.total);
+            if (memberRows.length) {
+                const memberBlock = document.createElement('div');
+                memberBlock.className = 'reports-summary';
+                memberBlock.innerHTML = `
+                    <p class="text-header" style="margin-bottom:0.5rem;">Статистика по участникам команды</p>
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%;min-width:760px;border-collapse:collapse;background:rgba(255,255,255,0.25);border-radius:8px;">
+                            <thead>
+                                <tr>
+                                    <th style="text-align:left;padding:8px;border-bottom:1px solid #b8c8ad;">Участник</th>
+                                    <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">Всего</th>
+                                    <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">Очередь</th>
+                                    <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">В работе/тест</th>
+                                    <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">Готово</th>
+                                    <th style="text-align:right;padding:8px;border-bottom:1px solid #b8c8ad;">Срочные</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${memberRows.map(m => `
+                                    <tr>
+                                        <td style="padding:8px;border-bottom:1px solid #d7e2cf;">${escapeHtml(m.name)}</td>
+                                        <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${m.total}</td>
+                                        <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${m.queue}</td>
+                                        <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${m.inProgress}</td>
+                                        <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${m.done}</td>
+                                        <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${m.urgent}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
                 `;
-                card.appendChild(risks);
+                card.appendChild(memberBlock);
             }
 
             const tableWrap = document.createElement('div');

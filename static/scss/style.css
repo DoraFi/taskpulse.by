@@ -383,32 +383,32 @@ a.button-secondary, .button-basic {
   height: 1.5rem;
 }
 
-.search-panel {
+.header .search-panel {
   position: relative;
   display: flex;
   align-items: center;
   width: 33vw;
 }
-.search-panel img {
+.header .search-panel img {
   position: absolute;
   left: 0.75rem;
   opacity: 0.75;
   pointer-events: none;
 }
-.search-panel input {
+.header .search-panel input {
   all: unset;
   box-sizing: border-box;
   width: 100%;
-  padding: 0.2rem 0.75rem 0.2rem 2rem;
-  border: 0.125rem solid #7F8C7380;
+  padding: 0.25rem 0.75rem 0.25rem 2rem;
+  border: 0.0625rem solid #7F8C73;
   border-radius: 0.3rem;
   transition: all 0.2s ease;
 }
-.search-panel input:focus {
+.header .search-panel input:focus {
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.1);
 }
-.search-panel input::placeholder {
+.header .search-panel input::placeholder {
   color: rgba(45, 50, 41, 0.5);
 }
 
@@ -417,11 +417,11 @@ body[data-theme=dark] .header {
   border-bottom-color: rgba(127, 140, 115, 0.1);
 }
 
-body[data-theme=dark] .search-panel {
+body[data-theme=dark] .header .search-panel {
   border-color: #F6FBF2;
 }
 
-body[data-theme=dark] .search-panel input {
+body[data-theme=dark] .header .search-panel input {
   color: #F6FBF2;
 }
 
