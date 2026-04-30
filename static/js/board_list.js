@@ -18,6 +18,53 @@ function apiUrl(path) {
     return `${getApiBasePath()}${path}`;
 }
 
+function currentProjectCodeFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('project') || null;
+}
+
+async function createBoardServer(name, view = 'list') {
+    const projectCode = currentProjectCodeFromUrl();
+    if (!projectCode) throw new Error('Не определен проект');
+    const res = await fetch(apiUrl('/boards/create'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectCode, name, view })
+    });
+    if (!res.ok) throw new Error('create board failed');
+    return res.json();
+}
+
+async function renameBoardServer(boardId, name) {
+    const res = await fetch(apiUrl('/boards/rename'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ boardId, name })
+    });
+    if (!res.ok) throw new Error('rename board failed');
+    return res.json();
+}
+
+async function cloneBoardServer(boardId) {
+    const res = await fetch(apiUrl('/boards/duplicate'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ boardId })
+    });
+    if (!res.ok) throw new Error('duplicate board failed');
+    return res.json();
+}
+
+async function archiveBoardServer(boardId) {
+    const res = await fetch(apiUrl('/boards/archive'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ boardId })
+    });
+    if (!res.ok) throw new Error('archive board failed');
+    return res.json();
+}
+
 let VanillaCalendarReady = false;
 let VanillaCalendarConstructor = null;
 
@@ -2747,17 +2794,17 @@ function handleDropdownItemClick(e) {
                 label: 'Название доски',
                 value: '',
                 submitLabel: 'Создать',
-                onSubmit: (name, close) => {
+                onSubmit: async (name, close) => {
                     const n = (name || '').trim();
                     if (!n) return;
-                    const newBoard = { id: Date.now(), name: n, tasks: [], archivedTasks: [] };
-                    boardsData.push(newBoard);
-                    reorderBoardsForColumnCount();
-                    saveBoardsToLocalStorage();
-                    close();
-                    renderCurrentView();
-                    initBoardEvents();
-                    showToast('Доска создана');
+                    try {
+                        await createBoardServer(n, 'list');
+                        close();
+                        await loadBoardsData();
+                        showToast('Доска создана');
+                    } catch {
+                        showToast('Не удалось создать доску');
+                    }
                 }
             });
             break;
@@ -2773,33 +2820,36 @@ function handleDropdownItemClick(e) {
         case 'board-export-json': {
             const b = boardsData?.[boardIndex];
             if (!b) break;
-            const payload = { board: b };
-            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `board-${b.id || boardIndex}.json`;
-            a.click();
-            URL.revokeObjectURL(a.href);
-            showToast('Файл сохранён');
+            fetch(apiUrl(`/boards/export?boardId=${encodeURIComponent(String(b.id))}`))
+                .then(r => r.ok ? r.json() : Promise.reject(new Error('export failed')))
+                .then(payload => {
+                    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `board-${b.id || boardIndex}.json`;
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                    showToast('Файл сохранён');
+                })
+                .catch(() => showToast('Не удалось выгрузить доску'));
             break;
         }
         case 'archive-board': {
             openConfirmModal({
                 title: 'Архивировать доску',
-                message: 'Переместить доску в архив? (Её можно будет восстановить позже через localStorage)',
+                message: 'Переместить доску в архив?',
                 confirmLabel: 'Архивировать',
                 danger: true,
-                onConfirm: () => {
+                onConfirm: async () => {
                     const b = boardsData?.[boardIndex];
                     if (!b) return;
-                    const archivedBoards = JSON.parse(localStorage.getItem('archivedBoards') || '[]');
-                    archivedBoards.push({ ...b, archivedAt: new Date().toISOString() });
-                    localStorage.setItem('archivedBoards', JSON.stringify(archivedBoards));
-                    boardsData.splice(boardIndex, 1);
-                    saveBoardsToLocalStorage();
-                    renderCurrentView();
-                    initBoardEvents();
-                    showToast('Доска архивирована');
+                    try {
+                        await archiveBoardServer(b.id);
+                        await loadBoardsData();
+                        showToast('Доска архивирована');
+                    } catch {
+                        showToast('Не удалось архивировать доску');
+                    }
                 }
             });
             break;
@@ -2930,29 +2980,30 @@ function renameBoard(boardIndex) {
         label: 'Название',
         value: board?.name || '',
         submitLabel: 'Сохранить',
-        onSubmit: (newName, close) => {
+        onSubmit: async (newName, close) => {
             if (!newName || !newName.trim()) return;
-            board.name = newName.trim();
-            saveBoardsToLocalStorage();
-            close();
-            renderCurrentView();
-            initBoardEvents();
-            showToast('Доска переименована');
+            try {
+                await renameBoardServer(board.id, newName.trim());
+                close();
+                await loadBoardsData();
+                showToast('Доска переименована');
+            } catch {
+                showToast('Не удалось переименовать доску');
+            }
         }
     });
 }
 
-function cloneBoard(boardIndex) {
+async function cloneBoard(boardIndex) {
     const originalBoard = boardsData[boardIndex];
-    const newBoard = JSON.parse(JSON.stringify(originalBoard));
-    newBoard.id = Date.now();
-    newBoard.name = `${originalBoard.name} (копия)`;
-    boardsData.push(newBoard);
-    reorderBoardsForColumnCount();
-    saveBoardsToLocalStorage();
-    renderCurrentView();
-    initBoardEvents();
-    showToast('Доска скопирована');
+    if (!originalBoard) return;
+    try {
+        await cloneBoardServer(originalBoard.id);
+        await loadBoardsData();
+        showToast('Доска скопирована');
+    } catch {
+        showToast('Не удалось скопировать доску');
+    }
 }
 
 function clearBoard(boardIndex) {

@@ -41,6 +41,8 @@ function applyContextNavLinks(base) {
     document.querySelectorAll('[data-context-link="home"]').forEach(el => el.dataset.href = base);
     document.querySelectorAll('[data-context-link="tasks"]').forEach(el => el.dataset.href = `${base}/tasks`);
     document.querySelectorAll('[data-context-link="projects"]').forEach(el => el.dataset.href = `${base}/projects`);
+    document.querySelectorAll('[data-context-link="projects-org"]').forEach(el => el.dataset.href = `${base}/projects/org`);
+    document.querySelectorAll('[data-context-link="projects-archive"]').forEach(el => el.dataset.href = `${base}/projects/archive`);
     document.querySelectorAll('a.logo-link, .header .logo[href="/"], .header a[href="/"]').forEach(a => a.setAttribute('href', base));
 }
 
@@ -57,6 +59,13 @@ function clearActiveMenuState() {
 async function hydrateTeamProjectsMenu() {
     const menu = document.getElementById('teamProjectsMenu');
     if (!menu) return;
+    const renderFallbackMenu = (orgId, teamId) => {
+        menu.innerHTML = `
+            <li><button class="nav-link" data-href="${orgId && teamId ? `/o/${encodeURIComponent(orgId)}/t/${encodeURIComponent(teamId)}/projects/org` : '#'}">Проекты организации</button></li>
+            <li><button class="nav-link" data-href="${orgId && teamId ? `/o/${encodeURIComponent(orgId)}/t/${encodeURIComponent(teamId)}/projects/archive` : '#'}">Архивные проекты</button></li>
+            <li><span class="text-signature">Нет доступных проектов</span></li>
+        `;
+    };
     try {
         const base = await resolveContextBase();
         applyContextNavLinks(base);
@@ -64,14 +73,20 @@ async function hydrateTeamProjectsMenu() {
             fetch(apiUrlForBase(base, '/me')),
             fetch(apiUrlForBase(base, '/projects'))
         ]);
-        if (!meRes.ok || !projectsRes.ok) return;
+        if (!meRes.ok || !projectsRes.ok) {
+            renderFallbackMenu(null, null);
+            return;
+        }
         const me = await meRes.json();
         const projects = await projectsRes.json();
-        if (!Array.isArray(projects) || !projects.length) return;
         const orgId = me.organizationPublicId;
         const teamId = me.teamPublicId;
         if (orgId && teamId) applyContextNavLinks(`/o/${encodeURIComponent(orgId)}/t/${encodeURIComponent(teamId)}`);
-        menu.innerHTML = projects.map((p) => {
+        if (!Array.isArray(projects) || !projects.length) {
+            renderFallbackMenu(orgId, teamId);
+            return;
+        }
+        const projectsLinks = projects.map((p) => {
             const projectCode = encodeURIComponent(p.code || '');
             const fallback = '#';
             const href = orgId && teamId && projectCode
@@ -81,12 +96,18 @@ async function hydrateTeamProjectsMenu() {
                 : fallback;
             return `<li><button class="nav-link" data-href="${href}">${p.name || 'Проект'}</button></li>`;
         }).join('');
+        const staticLinks = `
+            <li><button class="nav-link" data-href="${orgId && teamId ? `/o/${encodeURIComponent(orgId)}/t/${encodeURIComponent(teamId)}/projects/org` : '#'}">Проекты организации</button></li>
+            <li><button class="nav-link" data-href="${orgId && teamId ? `/o/${encodeURIComponent(orgId)}/t/${encodeURIComponent(teamId)}/projects/archive` : '#'}">Архивные проекты</button></li>
+        `;
+        menu.innerHTML = projectsLinks + staticLinks;
 
         if (isErrorPage()) {
             clearActiveMenuState();
         }
     } catch (e) {
         console.error(e);
+        renderFallbackMenu(null, null);
     }
 }
 

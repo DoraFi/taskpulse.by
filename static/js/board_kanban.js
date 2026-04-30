@@ -22,6 +22,21 @@
         return `${getApiBasePath()}${path}`;
     }
 
+    function currentProjectCodeFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('project') || null;
+    }
+
+    async function postBoardApi(path, payload) {
+        const res = await fetch(apiUrl(path), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload || {})
+        });
+        if (!res.ok) throw new Error(path);
+        return res.json().catch(() => ({}));
+    }
+
     function scopedApiUrl(url) {
         if (!url) return url;
         if (url.startsWith('/api/')) {
@@ -1416,6 +1431,19 @@
         }
         const tag = createTagBlock(task);
         if (tag) item.appendChild(tag);
+        if (task.stage === 'Готово') {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'button-secondary';
+            btn.style.marginTop = '0.5rem';
+            btn.textContent = 'В архив';
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                archiveDoneTask(task);
+            });
+            item.appendChild(btn);
+        }
 
         return item;
     }
@@ -1443,6 +1471,18 @@
             }
         });
         topRow.appendChild(nameSpan);
+        if (task.stage === 'Готово') {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'button-secondary';
+            btn.textContent = 'В архив';
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                archiveDoneTask(task);
+            });
+            topRow.appendChild(btn);
+        }
 
         let subtasksList = null;
         let trigger = null;
@@ -1495,6 +1535,30 @@
         container.appendChild(topRow);
         if (subtasksList) container.appendChild(subtasksList);
         return container;
+    }
+
+    function archiveDoneTask(task) {
+        if (!task || task.stage !== 'Готово') {
+            showToast('В архив можно переместить только задачи из колонки «Готово»');
+            return;
+        }
+        const board = kanbanBoards.find(b => Number(b.id) === Number(task.boardId));
+        if (!board) return;
+        if (!Array.isArray(board.archivedTasks)) board.archivedTasks = [];
+        const exists = board.archivedTasks.some(t => Number(t.id) === Number(task.id));
+        if (exists) {
+            showToast('Задача уже в архиве');
+            return;
+        }
+        board.archivedTasks.push({
+            ...task,
+            archivedDate: new Date().toISOString(),
+            archivedReason: 'Перенос из «Готово»'
+        });
+        kanbanTasks = kanbanTasks.filter(t => !(Number(t.id) === Number(task.id) && Number(t.boardId) === Number(task.boardId)));
+        saveKanbanToLocalStorage();
+        renderCurrentView();
+        showToast('Задача перемещена в архив');
     }
 
     function createPrioritySection(board, priorityLabel, priorityKey, tasks, boardIndex) {
@@ -1998,30 +2062,33 @@
                     title: 'Переименовать этап',
                     label: 'Название этапа',
                     value: oldName,
-                    onSubmit: (nn, close) => {
+                    onSubmit: async (nn, close) => {
                         if (!nn || nn === oldName) {
                             close();
                             return;
                         }
-                        const n = nn;
-                        const idx = board.stages.indexOf(oldName);
-                        if (idx !== -1) board.stages[idx] = n;
-                        kanbanTasks.forEach(t => {
-                            if (Number(t.boardId) === Number(board.id) && t.stage === oldName) t.stage = n;
-                        });
-                        saveKanbanToLocalStorage();
-                        close();
-                        renderCurrentView();
+                        try {
+                            await postBoardApi('/boards/stages/rename', { boardId: board.id, oldName, newName: nn });
+                            close();
+                            await loadKanbanData();
+                            renderCurrentView();
+                        } catch {
+                            showToast('Не удалось переименовать этап');
+                        }
                     }
                 });
                 return;
             }
             if (action === 'stage-move-up') {
-                moveKanbanStage(boardIndex, oldName, 'up');
+                postBoardApi('/boards/stages/move', { boardId: board.id, stageName: oldName, direction: 'up' })
+                    .then(() => loadKanbanData().then(renderCurrentView))
+                    .catch(() => showToast('Не удалось изменить порядок этапов'));
                 return;
             }
             if (action === 'stage-move-down') {
-                moveKanbanStage(boardIndex, oldName, 'down');
+                postBoardApi('/boards/stages/move', { boardId: board.id, stageName: oldName, direction: 'down' })
+                    .then(() => loadKanbanData().then(renderCurrentView))
+                    .catch(() => showToast('Не удалось изменить порядок этапов'));
                 return;
             }
             if (action === 'stage-collapse-toggle') {
@@ -2034,7 +2101,9 @@
                     message: `Переместить все задачи этапа «${oldName}» в «Очередь»?`,
                     confirmLabel: 'Переместить',
                     danger: false,
-                    onConfirm: () => clearKanbanStageTasks(boardIndex, oldName)
+                    onConfirm: () => postBoardApi('/boards/stages/clear', { boardId: board.id, stageName: oldName })
+                        .then(() => loadKanbanData().then(renderCurrentView))
+                        .catch(() => showToast('Не удалось очистить этап'))
                 });
                 return;
             }
@@ -2048,15 +2117,9 @@
                     message: `Удалить этап «${oldName}»? Задачи будут перенесены в «Очередь» (или в первый доступный этап).`,
                     confirmLabel: 'Удалить',
                     danger: true,
-                    onConfirm: () => {
-                        const fallback = board.stages.includes('Очередь') ? 'Очередь' : board.stages[0];
-                        board.stages = board.stages.filter(s => s !== oldName);
-                        kanbanTasks.forEach(t => {
-                            if (Number(t.boardId) === Number(board.id) && t.stage === oldName) t.stage = fallback;
-                        });
-                        saveKanbanToLocalStorage();
-                        renderCurrentView();
-                    }
+                    onConfirm: () => postBoardApi('/boards/stages/delete', { boardId: board.id, stageName: oldName })
+                        .then(() => loadKanbanData().then(renderCurrentView))
+                        .catch(() => showToast('Не удалось удалить этап'))
                 });
             }
             return;
@@ -2073,10 +2136,18 @@
                 label: 'Название доски',
                 value: '',
                 submitLabel: 'Создать',
-                onSubmit: (name, close) => {
-                    createNewKanbanBoard(name);
-                    close();
-                    showToast('Доска создана');
+                onSubmit: async (name, close) => {
+                    const n = (name || '').trim();
+                    if (!n) return;
+                    try {
+                        await postBoardApi('/boards/create', { projectCode: currentProjectCodeFromUrl(), name: n, view: 'kanban' });
+                        close();
+                        await loadKanbanData();
+                        renderCurrentView();
+                        showToast('Доска создана');
+                    } catch {
+                        showToast('Не удалось создать доску');
+                    }
                 }
             });
             return;
@@ -2087,12 +2158,16 @@
                 title: 'Переименовать доску',
                 label: 'Название',
                 value: b.name || '',
-                onSubmit: (newName, close) => {
+                onSubmit: async (newName, close) => {
                     if (!newName) return;
-                    b.name = newName;
-                    saveKanbanToLocalStorage();
-                    close();
-                    renderCurrentView();
+                    try {
+                        await postBoardApi('/boards/rename', { boardId: b.id, name: newName });
+                        close();
+                        await loadKanbanData();
+                        renderCurrentView();
+                    } catch {
+                        showToast('Не удалось переименовать доску');
+                    }
                 }
             });
             return;
@@ -2127,22 +2202,18 @@
                 message: 'Переместить доску в архив? Задачи и настройки будут сохранены.',
                 confirmLabel: 'Архивировать',
                 danger: true,
-                onConfirm: () => {
-                    const archived = JSON.parse(localStorage.getItem('archivedKanbanBoards') || '[]');
-                    const tasks = kanbanTasks.filter(t => Number(t.boardId) === Number(b.id));
-                    archived.push({ board: { ...b }, tasks, archivedAt: new Date().toISOString() });
-                    localStorage.setItem('archivedKanbanBoards', JSON.stringify(archived));
-                    kanbanBoards.splice(boardIndex, 1);
-                    kanbanTasks = kanbanTasks.filter(t => Number(t.boardId) !== Number(b.id));
-                    saveKanbanToLocalStorage();
-                    renderCurrentView();
-                    showToast('Доска архивирована');
-                }
+                onConfirm: () => postBoardApi('/boards/archive', { boardId: b.id })
+                    .then(() => loadKanbanData().then(renderCurrentView))
+                    .then(() => showToast('Доска архивирована'))
+                    .catch(() => showToast('Не удалось архивировать доску'))
             });
             return;
         }
         if (action === 'duplicate-board') {
-            duplicateKanbanBoard(boardIndex);
+            postBoardApi('/boards/duplicate', { boardId: b.id })
+                .then(() => loadKanbanData().then(renderCurrentView))
+                .then(() => showToast('Доска скопирована'))
+                .catch(() => showToast('Не удалось скопировать доску'));
             return;
         }
         if (action === 'toggle-timeline-done') {
@@ -2168,27 +2239,26 @@
                 message: 'Сбросить этапы к стандартным: Очередь / В работе / Готово?',
                 confirmLabel: 'Сбросить',
                 danger: true,
-                onConfirm: () => {
-                    b.stages = ['Очередь', 'В работе', 'Готово'];
-                    saveKanbanToLocalStorage();
-                    renderCurrentView();
-                }
+                onConfirm: () => postBoardApi('/boards/stages/reset', { boardId: b.id })
+                    .then(() => loadKanbanData().then(renderCurrentView))
+                    .catch(() => showToast('Не удалось сбросить этапы'))
             });
             return;
         }
         if (action === 'board-export-json') {
             if (!b) return;
-            const payload = {
-                board: b,
-                tasks: kanbanTasks.filter(t => Number(t.boardId) === Number(b.id))
-            };
-            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `kanban-board-${b.id}.json`;
-            a.click();
-            URL.revokeObjectURL(a.href);
-            showToast('Файл сохранён');
+            fetch(apiUrl(`/boards/export?boardId=${encodeURIComponent(String(b.id))}`))
+                .then(r => r.ok ? r.json() : Promise.reject(new Error('export failed')))
+                .then(payload => {
+                    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `kanban-board-${b.id}.json`;
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                    showToast('Файл сохранён');
+                })
+                .catch(() => showToast('Не удалось выгрузить доску'));
         }
     }
 
@@ -2200,18 +2270,16 @@
             label: 'Название этапа',
             value: 'Тестирование',
             submitLabel: 'Добавить',
-            onSubmit: (name, close) => {
+            onSubmit: async (name, close) => {
                 if (!name) return;
-                if (board.stages.includes(name)) {
-                    showToast('Такой этап уже есть');
-                    return;
+                try {
+                    await postBoardApi('/boards/stages/add', { boardId: board.id, stageName: name });
+                    close();
+                    await loadKanbanData();
+                    renderCurrentView();
+                } catch {
+                    showToast('Не удалось добавить этап');
                 }
-                const doneIdx = board.stages.indexOf('Готово');
-                if (doneIdx !== -1) board.stages.splice(doneIdx, 0, name);
-                else board.stages.push(name);
-                saveKanbanToLocalStorage();
-                close();
-                renderCurrentView();
             }
         });
     }
@@ -2593,6 +2661,52 @@
         if (!container) return;
         container.className = 'cards archive-view';
         container.innerHTML = '';
+        const projectCode = currentProjectCodeFromUrl();
+        if (projectCode) {
+            fetch(apiUrl(`/boards/archived?projectCode=${encodeURIComponent(projectCode)}`))
+                .then(r => r.ok ? r.json() : Promise.reject(new Error('archived boards failed')))
+                .then(archivedBoards => {
+                    if (!Array.isArray(archivedBoards) || !archivedBoards.length) return;
+                    const block = document.createElement('div');
+                    block.className = 'card board-archive-section kanban-archive-board';
+                    const title = document.createElement('p');
+                    title.className = 'text-header';
+                    title.textContent = 'Архивные доски';
+                    block.appendChild(title);
+                    const list = document.createElement('div');
+                    list.className = 'archive-board-body';
+                    archivedBoards.forEach(b => {
+                        const row = document.createElement('div');
+                        row.className = 'grid-row';
+                        row.style.display = 'flex';
+                        row.style.justifyContent = 'space-between';
+                        row.style.gap = '0.75rem';
+                        row.innerHTML = `
+                            <div>
+                                <p class="text-basic">${escapeHtml(b.name || '')}</p>
+                                <p class="text-signature">${b.archivedDate ? new Date(b.archivedDate).toLocaleString('ru-RU') : ''}</p>
+                            </div>
+                            <div style="display:flex; gap:0.5rem;">
+                                <button class="button-secondary" data-action="restore-board-empty" data-board-id="${b.id}">Без задач</button>
+                                <button class="button-basic" data-action="restore-board-full" data-board-id="${b.id}">С задачами</button>
+                            </div>
+                        `;
+                        list.appendChild(row);
+                    });
+                    block.appendChild(list);
+                    container.appendChild(block);
+                    block.querySelectorAll('button[data-board-id]').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const boardId = Number(btn.dataset.boardId);
+                            const withTasks = btn.dataset.action === 'restore-board-full';
+                            postBoardApi('/boards/restore', { boardId, withTasks })
+                                .then(() => loadKanbanData().then(renderCurrentView))
+                                .catch(() => showToast('Не удалось восстановить доску'));
+                        });
+                    });
+                })
+                .catch(() => null);
+        }
 
         kanbanBoards.forEach((board, boardIndex) => {
             const archived = board.archivedTasks || [];

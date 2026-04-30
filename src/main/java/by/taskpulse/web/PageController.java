@@ -164,6 +164,23 @@ public class PageController {
     public String projectsContext(@PathVariable String orgId, @PathVariable String teamId, HttpServletRequest request, Model model) {
         String contextError = validateContextAccess(orgId, teamId);
         if (contextError != null) return contextErrorView(model, request, 404, contextError);
+        model.addAttribute("projectsView", "team");
+        return "pages/projects";
+    }
+
+    @GetMapping("/o/{orgId}/t/{teamId}/projects/org")
+    public String projectsOrgContext(@PathVariable String orgId, @PathVariable String teamId, HttpServletRequest request, Model model) {
+        String contextError = validateContextAccess(orgId, teamId);
+        if (contextError != null) return contextErrorView(model, request, 404, contextError);
+        model.addAttribute("projectsView", "org");
+        return "pages/projects";
+    }
+
+    @GetMapping("/o/{orgId}/t/{teamId}/projects/archive")
+    public String projectsArchiveContext(@PathVariable String orgId, @PathVariable String teamId, HttpServletRequest request, Model model) {
+        String contextError = validateContextAccess(orgId, teamId);
+        if (contextError != null) return contextErrorView(model, request, 404, contextError);
+        model.addAttribute("projectsView", "archive");
         return "pages/projects";
     }
 
