@@ -9,9 +9,13 @@
             'В работе': 'В работе',
             Тестирование: 'В работе',
             Готово: 'Готово',
-            Отложено: 'Отложено'
+            Отложено: 'Отложено',
+            'Новые задачи': 'Новые задачи',
+            'Следующий спринт': 'Следующий спринт',
+            'Через 2 спринта': 'Через 2 спринта',
+            'Через 3+ спринта': 'Через 3+ спринта'
         };
-        return m[stage] || 'Новая';
+        return m[stage] || stage || 'Новая';
     }
 
     function statusValueToStage(status) {
@@ -20,9 +24,13 @@
             'Назначена': 'В работе',
             'В работе': 'В работе',
             'Готово': 'Готово',
-            'Отложено': 'Отложено'
+            'Отложено': 'Отложено',
+            'Новые задачи': 'Новые задачи',
+            'Следующий спринт': 'Следующий спринт',
+            'Через 2 спринта': 'Через 2 спринта',
+            'Через 3+ спринта': 'Через 3+ спринта'
         };
-        return m[status] || 'Очередь';
+        return m[status] || status || 'Очередь';
     }
 
     function parseHours(task) {
@@ -114,6 +122,27 @@
     let currentProjectType = 'kanban';
     let currentProjectCode = null;
     let taskDetailSearchTimer = null;
+    const SCRUM_BACKLOG_STAGES = new Set(['Новые задачи', 'Следующий спринт', 'Через 2 спринта', 'Через 3+ спринта', 'Отложено']);
+    const SCRUM_SPRINT_STAGES = ['Очередь', 'В работе', 'Тестирование', 'Готово'];
+
+    function isScrumTask(task) {
+        return String(task?.projectType || '').trim().toLowerCase() === 'scrum';
+    }
+
+    function isScrumBacklogTask(task) {
+        return isScrumTask(task) && SCRUM_BACKLOG_STAGES.has(String(task?.stage || '').trim());
+    }
+
+    function buildStatusOptionsForTask(task) {
+        if (!task) return [];
+        if (isScrumBacklogTask(task)) {
+            return ['Новые задачи', 'Следующий спринт', 'Через 2 спринта', 'Через 3+ спринта', 'Отложено'];
+        }
+        if (isScrumTask(task)) {
+            return SCRUM_SPRINT_STAGES.slice();
+        }
+        return ['Очередь', 'В работе', 'Тестирование', 'Готово', 'Отложено'];
+    }
 
     function apiBasePath() {
         const m = window.location.pathname.match(/^\/o\/([^/]+)\/t\/([^/]+)/);
@@ -382,23 +411,26 @@
         return { ok, failed };
     }
 
-    function applyModeUI(projectType) {
+    function applyModeUI(projectType, task = null) {
         const isList = projectType === 'list';
-        currentProjectType = isList ? 'list' : 'kanban';
+        currentProjectType = isList ? 'list' : (projectType || 'kanban');
         const root = document.getElementById('taskDetailModal');
         if (!root) return;
         const depField = root.querySelector('#taskDetailDepType')?.closest('.auth-field');
         const hoursField = root.querySelector('#taskDetailHours')?.closest('.auth-field');
         const spField = root.querySelector('#taskDetailSp')?.closest('.auth-field');
+        const deadlineField = root.querySelector('#taskDetailDeadlineFrom')?.closest('.filter-section');
         if (depField) depField.style.display = isList ? 'none' : '';
         if (hoursField) hoursField.style.display = isList ? 'none' : '';
         if (spField) spField.style.display = isList ? 'none' : '';
+        if (deadlineField) deadlineField.style.display = currentProjectType === 'scrum' ? 'none' : '';
         const status = document.getElementById('taskDetailStatus');
         if (!status) return;
         if (isList) {
             status.innerHTML = '<option value="todo">Не готово</option><option value="done">Готово</option>';
-        } else if (status.options.length <= 2) {
-            status.innerHTML = '<option value="Новая">Новая</option><option value="Назначена">Назначена</option><option value="В работе">В работе</option><option value="Готово">Готово</option><option value="Отложено">Отложено</option>';
+        } else {
+            const options = buildStatusOptionsForTask(task);
+            status.innerHTML = options.map(v => `<option value="${v}">${v}</option>`).join('');
         }
         const sideCol = root.querySelector('.task-detail-static__col-side');
         if (sideCol) sideCol.style.display = '';
@@ -411,7 +443,7 @@
         const overlay = document.getElementById('taskDetailModal');
         if (!overlay) return;
 
-        applyModeUI(task.projectType || 'kanban');
+        applyModeUI(task.projectType || 'kanban', task);
         const displayId = task.displayId || task.publicId || task.taskCode || 'TSK-?';
         const titleEl = document.getElementById('taskDetailTitle');
         if (titleEl) titleEl.textContent = `${displayId} · ${task.name || ''}`;
@@ -437,7 +469,16 @@
         const statusSelect = document.getElementById('taskDetailStatus');
         if (statusSelect) {
             if (currentProjectType === 'list') statusSelect.value = task.stage === 'Готово' ? 'done' : 'todo';
-            else statusSelect.value = stageToStatusValue(task.stage);
+            else {
+                const stageValue = stageToStatusValue(task.stage);
+                if (![...statusSelect.options].some(o => o.value === stageValue)) {
+                    const opt = document.createElement('option');
+                    opt.value = stageValue;
+                    opt.textContent = stageValue;
+                    statusSelect.appendChild(opt);
+                }
+                statusSelect.value = stageValue;
+            }
         }
         const prioritySelect = document.getElementById('taskDetailPriority');
         if (prioritySelect) prioritySelect.value = task.priority || 'обычный';
@@ -584,9 +625,9 @@
 
                 const priority = document.getElementById('taskDetailPriority')?.value || 'обычный';
 
-                const from = document.getElementById('taskDetailDeadlineFrom')?.value || '';
-                const to = document.getElementById('taskDetailDeadlineTo')?.value || '';
-                const dueDate = (to || from) || null;
+                const from = currentProjectType === 'scrum' ? '' : (document.getElementById('taskDetailDeadlineFrom')?.value || '');
+                const to = currentProjectType === 'scrum' ? '' : (document.getElementById('taskDetailDeadlineTo')?.value || '');
+                const dueDate = currentProjectType === 'scrum' ? null : ((to || from) || null);
                 const depLabel = document.getElementById('taskDetailDepSearch')?.value?.trim() || '';
                 const depMatch = (currentOptions.dependencies || []).find(d => `${d.displayId} — ${d.name}` === depLabel);
 

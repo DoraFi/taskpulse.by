@@ -92,6 +92,8 @@ async function hydrateTeamProjectsMenu() {
             const href = orgId && teamId && projectCode
                 ? (p.view === 'kanban'
                     ? `/o/${encodeURIComponent(orgId)}/t/${encodeURIComponent(teamId)}/p/${projectCode}/kanban?project=${projectCode}`
+                    : p.view === 'scrum'
+                        ? `/o/${encodeURIComponent(orgId)}/t/${encodeURIComponent(teamId)}/p/${projectCode}/scrum?project=${projectCode}`
                     : `/o/${encodeURIComponent(orgId)}/t/${encodeURIComponent(teamId)}/p/${projectCode}/boards?project=${projectCode}`)
                 : fallback;
             return `<li><button class="nav-link" data-href="${href}">${p.name || 'Проект'}</button></li>`;

@@ -2,6 +2,8 @@
     let kanbanBoards = [];
     let kanbanTasks = [];
     let teamMembers = [];
+    let kanbanLoadError = '';
+    let scrumDisplayBoardIds = null;
     let currentView = 'board';
     const KANBAN_VIEW_STORAGE_KEY = 'boardKanbanCurrentView';
     const KANBAN_ALLOWED_VIEWS = new Set(['board', 'tables', 'timeline', 'reports', 'archive']);
@@ -13,6 +15,70 @@
     const KANBAN_TIMELINE_SHOW_DONE_KEY = 'kanbanTimelineShowDone';
     const KANBAN_WIP_SETTINGS_KEY = 'kanbanWipSettings';
     const KANBAN_TASK_ARCHIVE_KEY = 'kanbanTaskArchiveMap';
+    const SCRUM_BACKLOG_LEGACY = Object.freeze({
+        'Неотсортированные задачи': 'Новые задачи',
+        'Задачи на несколько спринтов вперед': 'Через 3+ спринта',
+        'То, что сделают позже': 'Отложено',
+        'На уточнении': 'Следующий спринт',
+        'Готовность к планированию': 'Следующий спринт',
+        'Кандидаты в спринт': 'Следующий спринт',
+        'Отдалённый горизонт': 'Через 3+ спринта',
+        'Идеи и наброски': 'Новые задачи'
+    });
+
+    /** Бэклог: промежутки по спринтам (`task.stage` в API). Заголовок в UI можно задать в `displayTitle`. */
+    const SCRUM_BACKLOG_COLUMNS = Object.freeze([
+        { stage: 'Новые задачи', displayTitle: null, createForm: true, legacyAliases: Object.freeze(['Неотсортированные задачи']) },
+        { stage: 'Следующий спринт', displayTitle: null, createForm: false, legacyAliases: Object.freeze([]) },
+        { stage: 'Через 2 спринта', displayTitle: null, createForm: false, legacyAliases: Object.freeze([]) },
+        { stage: 'Через 3+ спринта', displayTitle: 'Через 3 спринта', createForm: false, legacyAliases: Object.freeze(['Задачи на несколько спринтов вперед']) },
+        { stage: 'Отложено', displayTitle: null, createForm: false, legacyAliases: Object.freeze(['То, что сделают позже']) }
+    ]);
+
+    function scrumBacklogColumnHeading(col) {
+        return col.displayTitle || col.stage;
+    }
+
+    const SCRUM_BACKLOG_PRIORITY_KEY = 'backlog';
+
+    function taskBelongsToScrumBacklog(board, task) {
+        const raw = String(task?.stage ?? '').trim();
+        if (!raw) return true;
+        return !board.stages.includes(raw);
+    }
+
+    function effectiveScrumBacklogColumnStage(task) {
+        const raw = String(task?.stage ?? '').trim();
+        for (let i = 0; i < SCRUM_BACKLOG_COLUMNS.length; i++) {
+            const col = SCRUM_BACKLOG_COLUMNS[i];
+            if ((col.legacyAliases || []).includes(raw)) return col.stage;
+        }
+        const mapped = SCRUM_BACKLOG_LEGACY[raw];
+        if (mapped && SCRUM_BACKLOG_COLUMNS.some(c => c.stage === mapped)) return mapped;
+        if (SCRUM_BACKLOG_COLUMNS.some(c => c.stage === raw)) return raw;
+        return 'Новые задачи';
+    }
+
+    function extractSprintNumber(name) {
+        const m = String(name || '').match(/спринт\s*(\d+)/i);
+        if (!m) return null;
+        const n = Number(m[1]);
+        return Number.isFinite(n) && n > 0 ? n : null;
+    }
+
+    function normalizeScrumBoardsForView() {
+        scrumDisplayBoardIds = null;
+        if (!isScrumView() || !Array.isArray(kanbanBoards) || kanbanBoards.length <= 1) return;
+        const allBoards = [...kanbanBoards];
+        const active = allBoards.find(b => !!b.sprintStartedAt && !b.sprintFinishedAt);
+        const primary = active || allBoards[0];
+        if (!primary) return;
+        const knownNums = allBoards.map(b => extractSprintNumber(b.name)).filter(Boolean);
+        const sprintNum = extractSprintNumber(primary.name) || (knownNums.length ? Math.max(...knownNums) : 1);
+        primary.name = `Спринт ${sprintNum}`;
+        scrumDisplayBoardIds = new Set(allBoards.map(b => Number(b.id)));
+        kanbanBoards = [primary];
+    }
 
     function getApiBasePath() {
         const m = window.location.pathname.match(/^\/o\/([^/]+)\/t\/([^/]+)/);
@@ -29,7 +95,25 @@
         return params.get('project') || null;
     }
 
+    function isScrumView() {
+        return /\/scrum(?:\?|$)/.test(window.location.pathname);
+    }
+
+    function displayStageName(stageName) {
+        return stageName;
+    }
+
     async function postBoardApi(path, payload) {
+        const res = await fetch(apiUrl(path), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload || {})
+        });
+        if (!res.ok) throw new Error(path);
+        return res.json().catch(() => ({}));
+    }
+
+    async function postScrumSprintApi(path, payload) {
         const res = await fetch(apiUrl(path), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -316,7 +400,7 @@
         return overlay;
     }
 
-    function showKanbanConfirmModal({ title, message, confirmLabel, danger, onConfirm }) {
+    function showKanbanConfirmModal({ title, message, confirmLabel, danger, onConfirm, onCancel }) {
         const p = document.createElement('p');
         p.className = 'text-basic';
         p.textContent = message;
@@ -335,7 +419,10 @@
         btnOk.textContent = confirmLabel || 'OK';
         footer.append(btnCancel, btnOk);
         const { close, body } = openKanbanModal({ title, bodyEl: p, footerEl: footer });
-        btnCancel.addEventListener('click', close);
+        btnCancel.addEventListener('click', () => {
+            if (typeof onCancel === 'function') onCancel();
+            close();
+        });
         btnOk.addEventListener('click', () => {
             onConfirm();
             close();
@@ -595,10 +682,47 @@
         const params = new URLSearchParams(window.location.search);
         const project = params.get('project');
         const boardsUrl = project ? apiUrl(`/kanban/boards?project=${encodeURIComponent(project)}`) : apiUrl('/kanban/boards');
-        const res = await fetch(boardsUrl);
-        if (!res.ok) throw new Error('Ошибка загрузки kanban boards');
-        const data = await res.json();
+        const fetchBoards = async () => {
+            const r = await fetch(boardsUrl);
+            if (!r.ok) {
+                const txt = await r.text().catch(() => '');
+                throw new Error(`boards ${r.status}: ${txt || 'empty response'}`);
+            }
+            return r.json();
+        };
+        let data;
+        try {
+            data = await fetchBoards();
+        } catch (err) {
+            console.error(err);
+            kanbanBoards = [];
+            kanbanTasks = [];
+            kanbanLoadError = `Не удалось загрузить доски: ${String(err?.message || err)}`;
+            return;
+        }
+        kanbanLoadError = '';
         kanbanBoards = data.boards || [];
+        if (isScrumView() && project && kanbanBoards.length > 1) {
+            try {
+                await postScrumSprintApi('/scrum/boards/consolidate', { projectCode: project });
+                data = await fetchBoards();
+                kanbanBoards = data.boards || [];
+            } catch (err) {
+                console.error(err);
+            }
+        }
+        if (project && !kanbanBoards.length) {
+            try {
+                const fallback = await fetch(apiUrl('/kanban/boards'));
+                if (fallback.ok) {
+                    const fallbackData = await fallback.json();
+                    const allBoards = Array.isArray(fallbackData?.boards) ? fallbackData.boards : [];
+                    kanbanBoards = allBoards;
+                }
+            } catch {
+                // keep empty state
+            }
+        }
         kanbanTasks = [];
         kanbanBoards.forEach(b => {
             if (!Array.isArray(b.stages) || b.stages.length === 0) b.stages = ['Очередь', 'В работе', 'Готово'];
@@ -611,7 +735,11 @@
         const seenTasks = new Set();
         for (const url of sources) {
             const tRes = await fetch(url);
-            if (!tRes.ok) continue;
+            if (!tRes.ok) {
+                const txt = await tRes.text().catch(() => '');
+                kanbanLoadError = `Ошибка загрузки задач (${tRes.status}) для ${url}: ${txt || 'empty response'}`;
+                continue;
+            }
             const tData = await tRes.json();
             const tasks = tData.tasks || [];
             tasks.forEach(t => {
@@ -624,6 +752,27 @@
         }
         applyArchivedTasksMapToState();
         migrateKanbanData();
+        normalizeScrumBoardsForView();
+    }
+
+    function tasksForRenderedBoard(board) {
+        if (isScrumView() && scrumDisplayBoardIds && scrumDisplayBoardIds.size) {
+            return kanbanTasks.filter(t => scrumDisplayBoardIds.has(Number(t.boardId)));
+        }
+        return kanbanTasks.filter(t => Number(t.boardId) === Number(board.id));
+    }
+
+    function renderKanbanLoadError(container) {
+        if (!container || !kanbanLoadError) return false;
+        container.innerHTML = `
+            <div class="card">
+                <div class="board-card-collapsible">
+                    <p class="text-basic">Ошибка загрузки данных досок.</p>
+                    <p class="text-signature" style="white-space: normal; margin-top: 0.5rem;">${escapeHtml(kanbanLoadError)}</p>
+                </div>
+            </div>
+        `;
+        return true;
     }
 
     function getBoardListNavButtons() {
@@ -650,9 +799,20 @@
     }
 
     function syncActiveViewButton() {
+        syncScrumTabCaptions();
         getBoardListNavButtons().forEach(btn => {
             const isActive = btn.dataset.tab === currentView;
             btn.classList.toggle('active', isActive);
+        });
+    }
+
+    function syncScrumTabCaptions() {
+        const isScrum = isScrumView();
+        getBoardListNavButtons().forEach(btn => {
+            if (btn.dataset.tab !== 'archive') return;
+            const textTarget = btn.querySelector('span') || btn;
+            textTarget.textContent = isScrum ? 'Предыдущие спринты' : 'Архив задач';
+            btn.setAttribute('title', isScrum ? 'Предыдущие спринты' : 'Архив задач');
         });
     }
 
@@ -720,11 +880,20 @@
     function renderCurrentView() {
         destroyKanbanBoardsSortable();
         syncActiveViewButton();
-        if (currentView === 'board') renderKanbanBoardView();
-        else if (currentView === 'tables') renderKanbanTablesView();
+        if (currentView === 'board') {
+            if (isScrumView()) renderScrumBoardView();
+            else renderKanbanBoardView();
+        }
+        else if (currentView === 'tables') {
+            if (isScrumView()) renderScrumTablesView();
+            else renderKanbanTablesView();
+        }
         else if (currentView === 'timeline') renderKanbanTimelineView();
         else if (currentView === 'reports') renderKanbanReportsView();
-        else if (currentView === 'archive') renderKanbanArchiveView();
+        else if (currentView === 'archive') {
+            if (isScrumView()) renderScrumSprintHistoryView();
+            else renderKanbanArchiveView();
+        }
     }
 
     function findKanbanTask(taskId, boardId) {
@@ -740,10 +909,11 @@
         return (all.length ? Math.max(...all) : 0) + 1;
     }
 
-    function createKanbanDropdownMenu(board, boardIndex) {
+    function createKanbanDropdownMenu(board, boardIndex, idSuffix = '') {
         const dropdown = document.createElement('div');
         dropdown.className = 'dropdown-menu border-dark-1 br-5';
-        dropdown.id = `actionsMenu-kanban-${boardIndex}`;
+        const suf = idSuffix ? `-${idSuffix}` : '';
+        dropdown.id = `actionsMenu-kanban-${boardIndex}${suf}`;
         dropdown.dataset.boardId = board.id;
         const timelineToggle = `
             <li class="dropdown-item text-basic kanban-timeline-toggle-item" data-action="toggle-timeline-done">
@@ -947,7 +1117,7 @@
         titles.style.gap = '0.4rem';
         titles.style.flexWrap = 'nowrap';
         titles.innerHTML = `
-        <span class="text-basic">${escapeHtml(stageName)}</span>
+        <span class="text-basic">${escapeHtml(displayStageName(stageName))}</span>
         ${showStageCount ? `<span class="kanban-count-badge">${count}</span>` : ''}
     `;
         if (stageWip.enabled && Number(stageWip.limit) > 0) {
@@ -996,7 +1166,7 @@
         return row;
     }
 
-    function createKanbanQueueTaskForm(boardId, boardIndex, priorityKey) {
+    function createKanbanQueueTaskForm(boardId, boardIndex, priorityKey, stageTarget = 'Очередь') {
         const form = document.createElement('form');
         form.className = 'form-add-task';
         form.dataset.boardId = boardId;
@@ -1372,7 +1542,7 @@
                         boardId: board.id,
                         name: taskName,
                         priority: pr,
-                        stage: 'Очередь',
+                        stage: stageTarget,
                         dueDate,
                         startDate,
                         endDate,
@@ -1730,7 +1900,9 @@
         showToast('Создана копия задачи');
     }
 
-    function createPrioritySection(board, priorityLabel, priorityKey, tasks, boardIndex) {
+    function createPrioritySection(board, priorityLabel, priorityKey, tasks, boardIndex, opts = {}) {
+        const enableQueueCreate = opts.enableQueueCreate !== false;
+        const queueStageName = opts.queueStageName || 'Очередь';
         const section = document.createElement('div');
         section.className = `kanban-priority-section ${priorityKey === 'urgent' ? 'urgent' : 'normal'}`;
         const collapsed = isCollapsed(KANBAN_SECTION_COLLAPSE_KEY, `${board.id}:${priorityKey}`);
@@ -1760,7 +1932,12 @@
 
         const body = document.createElement('div');
         body.className = 'kanban-priority-body';
-        body.style.display = collapsed ? 'none' : '';
+        if (collapsed) {
+            body.style.maxHeight = '0';
+            body.style.overflow = 'hidden';
+            body.style.visibility = 'hidden';
+            body.style.paddingTop = '0';
+        }
 
         const stagesRow = document.createElement('div');
         stagesRow.className = 'kanban-stages-row';
@@ -1785,8 +1962,8 @@
             });
             sortedStageTasks.forEach(t => list.appendChild(createKanbanTaskItem(t)));
 
-            if (stage === 'Очередь') {
-                list.appendChild(createKanbanQueueTaskForm(board.id, boardIndex, priorityKey));
+            if (enableQueueCreate && stage === queueStageName) {
+                list.appendChild(createKanbanQueueTaskForm(board.id, boardIndex, priorityKey, queueStageName));
             }
 
             col.appendChild(list);
@@ -1805,7 +1982,17 @@
         toggle.addEventListener('click', () => {
             const isOpen = toggle.classList.toggle('open');
             toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-            body.style.display = isOpen ? '' : 'none';
+            if (isOpen) {
+                body.style.maxHeight = '';
+                body.style.overflow = '';
+                body.style.visibility = '';
+                body.style.paddingTop = '';
+            } else {
+                body.style.maxHeight = '0';
+                body.style.overflow = 'hidden';
+                body.style.visibility = 'hidden';
+                body.style.paddingTop = '0';
+            }
             setCollapsed(KANBAN_SECTION_COLLAPSE_KEY, `${board.id}:${priorityKey}`, !isOpen);
         });
 
@@ -1865,7 +2052,13 @@
                 const fromStage = fromList.dataset.stage;
 
                 task.stage = toStage;
-                task.priority = toPriorityKey === 'urgent' ? 'срочно' : 'обычный';
+                if (toPriorityKey === SCRUM_BACKLOG_PRIORITY_KEY) {
+                    /* бэклог: сохраняем срочность при перетаскивании между колонками */
+                } else if (toPriorityKey === 'urgent') {
+                    task.priority = 'срочно';
+                } else {
+                    task.priority = 'обычный';
+                }
 
                 const movedToDone = toStage === 'Готово' && fromStage !== 'Готово';
                 const movedFromDone = fromStage === 'Готово' && toStage !== 'Готово';
@@ -2118,6 +2311,10 @@
             btn.removeEventListener('click', handleAddStageClick);
             btn.addEventListener('click', handleAddStageClick);
         });
+        document.querySelectorAll('.board-kanban .scrum-sprint-action').forEach(btn => {
+            btn.removeEventListener('click', handleScrumSprintActionClick);
+            btn.addEventListener('click', handleScrumSprintActionClick);
+        });
 
         document.querySelectorAll('.board-kanban .kanban-task-list').forEach(list => initKanbanDnD(list));
 
@@ -2130,6 +2327,39 @@
         });
 
         initKanbanStagesSortable();
+    }
+
+    async function handleScrumSprintActionClick(e) {
+        e.preventDefault();
+        const btn = e.currentTarget;
+        const boardId = Number(btn.dataset.boardId);
+        const action = String(btn.dataset.action || '').trim();
+        if (!boardId || !action) return;
+        const endpoint = action === 'finish' ? '/scrum/sprints/finish' : '/scrum/sprints/start';
+        const isStart = action === 'start';
+        if (isStart) {
+            const accepted = await new Promise(resolve => {
+                showKanbanConfirmModal({
+                    title: 'Начать спринт',
+                    message: 'Подтвердите начало спринта: задачи из «Следующий спринт» перейдут в «Очередь», а бэклог сдвинется.',
+                    confirmLabel: 'Начать',
+                    onConfirm: () => resolve(true),
+                    onCancel: () => resolve(false)
+                });
+            });
+            if (!accepted) return;
+        }
+        try {
+            btn.disabled = true;
+            await postScrumSprintApi(endpoint, { boardId });
+            await loadKanbanData();
+            renderCurrentView();
+            showToast(action === 'finish' ? 'Спринт завершён' : 'Спринт начат');
+        } catch {
+            showToast('Не удалось обновить состояние спринта');
+        } finally {
+            btn.disabled = false;
+        }
     }
 
     function initKanbanStagesSortable() {
@@ -2174,8 +2404,14 @@
 
     function handleMoreActionsClick(e) {
         e.stopPropagation();
-        const card = e.currentTarget.closest('.card');
-        const dropdown = card?.querySelector('.dropdown-menu:not(.kanban-stage-dropdown)');
+        const trigger = e.currentTarget;
+        let dropdown = null;
+        const info = trigger.closest('.info');
+        if (info) dropdown = info.querySelector('.dropdown-menu:not(.kanban-stage-dropdown)');
+        if (!dropdown) {
+            const card = trigger.closest('.card');
+            dropdown = card?.querySelector('.dropdown-menu:not(.kanban-stage-dropdown)');
+        }
         if (!dropdown) return;
         const isOpen = dropdown.classList.contains('show');
         document.querySelectorAll('.board-kanban .dropdown-menu').forEach(m => {
@@ -2349,7 +2585,11 @@
                     const n = (name || '').trim();
                     if (!n) return;
                     try {
-                        await postBoardApi('/boards/create', { projectCode: currentProjectCodeFromUrl(), name: n, view: 'kanban' });
+                        await postBoardApi('/boards/create', {
+                            projectCode: currentProjectCodeFromUrl(),
+                            name: n,
+                            view: isScrumView() ? 'scrum' : 'kanban'
+                        });
                         close();
                         await loadKanbanData();
                         renderCurrentView();
@@ -2543,7 +2783,7 @@
         left.style.alignItems = 'center';
         left.style.gap = '0.4rem';
         left.style.flexWrap = 'nowrap';
-        left.innerHTML = `<p class="text-basic">${escapeHtml(stageName)}</p>${showStageCount ? `<span class="kanban-count-badge">${tasks.length}</span>` : ''}`;
+        left.innerHTML = `<p class="text-basic">${escapeHtml(displayStageName(stageName))}</p>${showStageCount ? `<span class="kanban-count-badge">${tasks.length}</span>` : ''}`;
         if (stageWip.enabled && Number(stageWip.limit) > 0) {
             const wip = document.createElement('span');
             wip.className = 'kanban-count-badge';
@@ -2649,7 +2889,7 @@
         table.appendChild(rowsContainer);
         tableWrapper.appendChild(table);
 
-        if (stageName === 'Очередь') {
+        if (!isScrumView() && stageName === 'Очередь') {
             const queueForms = document.createElement('div');
             queueForms.className = 'kanban-stage-table-queue-forms';
             queueForms.appendChild(createKanbanQueueTaskForm(board.id, boardIndex, 'normal'));
@@ -2683,11 +2923,316 @@
         return true;
     }
 
+    function createScrumQueueBoardHead(board, boardIndex, backlogTasks, backlogPanelRoot) {
+        const wrap = document.createElement('div');
+        wrap.className = 'scrum-queue-board-head flex-row-between';
+
+        const left = document.createElement('div');
+        left.className = 'scrum-queue-board-head-left';
+        const headline = document.createElement('p');
+        headline.className = 'text-header';
+        headline.textContent = 'Очередь задач';
+        left.append(headline);
+
+        const right = document.createElement('div');
+        right.className = 'scrum-queue-board-head-actions';
+        const quickAdd = document.createElement('button');
+        quickAdd.type = 'button';
+        quickAdd.className = 'scrum-queue-quick-add';
+        quickAdd.setAttribute('aria-label', 'Новая задача в очереди');
+        quickAdd.title = 'Новая задача';
+        quickAdd.innerHTML = '<img class="h-32" src="/static/source/icons/plus.svg" alt="">';
+        right.appendChild(quickAdd);
+
+        wrap.append(left, right);
+
+        quickAdd.addEventListener('click', () => {
+            const bucket = SCRUM_BACKLOG_COLUMNS[0].stage;
+            const sec = backlogPanelRoot.querySelector(`.scrum-backlog-accordion[data-scrum-backlog-bucket="${bucket}"]`);
+            const toggle = sec?.querySelector('.kanban-priority-toggle');
+            if (toggle && !toggle.classList.contains('open')) toggle.click();
+            const body = sec?.querySelector('.kanban-priority-body');
+            if (body) body.style.display = '';
+            toggle?.classList.add('open');
+            toggle?.setAttribute('aria-expanded', 'true');
+            setCollapsed(KANBAN_SECTION_COLLAPSE_KEY, `${board.id}:bl:${bucket}`, false);
+            const input = sec?.querySelector('.form-add-task input');
+            queueMicrotask(() => input?.focus());
+        });
+
+        return wrap;
+    }
+
+    function createScrumBacklogAccordionSection(board, boardIndex, col, bucketTasks) {
+        const collapseId = `${board.id}:bl:${col.stage}`;
+        const collapsed = isCollapsed(KANBAN_SECTION_COLLAPSE_KEY, collapseId);
+
+        const section = document.createElement('div');
+        section.className = 'kanban-priority-section normal scrum-backlog-accordion';
+        section.dataset.scrumBacklogBucket = col.stage;
+
+        const head = document.createElement('div');
+        head.className = 'kanban-priority-head';
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.classList.add('kanban-priority-toggle', 'kanban-priority-toggle--normal');
+        if (!collapsed) toggle.classList.add('open');
+        toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+
+        const arrow = document.createElement('span');
+        arrow.className = 'kanban-priority-arrow';
+        arrow.setAttribute('aria-hidden', 'true');
+        const label = document.createElement('span');
+        label.className = 'text-basic';
+        label.textContent = scrumBacklogColumnHeading(col);
+        const badge = document.createElement('span');
+        badge.className = 'kanban-count-chip';
+        badge.textContent = String(bucketTasks.length);
+
+        toggle.append(arrow, label, badge);
+        head.appendChild(toggle);
+        section.appendChild(head);
+
+        const body = document.createElement('div');
+        body.className = 'kanban-priority-body scrum-backlog-accordion-body';
+        body.style.display = collapsed ? 'none' : '';
+
+        const list = document.createElement('div');
+        list.className = 'kanban-task-list';
+        list.dataset.boardId = board.id;
+        list.dataset.boardIndex = boardIndex;
+        list.dataset.priorityKey = SCRUM_BACKLOG_PRIORITY_KEY;
+        list.dataset.stage = col.stage;
+
+        const sortedStageTasks = [...bucketTasks].sort((a, b) => {
+            const ad = a.dueDate ? parseDateBoard(a.dueDate).getTime() : 9999999999999;
+            const bd = b.dueDate ? parseDateBoard(b.dueDate).getTime() : 9999999999999;
+            if (ad !== bd) return ad - bd;
+            return String(a.name || '').localeCompare(String(b.name || ''), 'ru');
+        });
+        sortedStageTasks.forEach(t => list.appendChild(createKanbanTaskItem(t)));
+        if (col.createForm) {
+            list.appendChild(createKanbanQueueTaskForm(board.id, boardIndex, SCRUM_BACKLOG_PRIORITY_KEY, col.stage));
+        }
+
+        body.appendChild(list);
+        section.appendChild(body);
+
+        toggle.addEventListener('click', () => {
+            const isOpen = toggle.classList.toggle('open');
+            toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            body.style.display = isOpen ? '' : 'none';
+            setCollapsed(KANBAN_SECTION_COLLAPSE_KEY, collapseId, !isOpen);
+        });
+
+        return section;
+    }
+
+    function createScrumBacklogBoard(board, boardIndex, backlogTasks) {
+        const panel = document.createElement('div');
+        panel.className = 'scrum-backlog-panel';
+        panel.appendChild(createScrumQueueBoardHead(board, boardIndex, backlogTasks, panel));
+
+        const stack = document.createElement('div');
+        stack.className = 'scrum-backlog-accordion-stack';
+        SCRUM_BACKLOG_COLUMNS.forEach(col => {
+            const bucketTasks = backlogTasks.filter(t => effectiveScrumBacklogColumnStage(t) === col.stage);
+            stack.appendChild(createScrumBacklogAccordionSection(board, boardIndex, col, bucketTasks));
+        });
+        panel.appendChild(stack);
+
+        return panel;
+    }
+
+    function attachScrumSprintControls(header, board) {
+        if (!header || !board) return;
+        const infoList = header.querySelector('.info > ul');
+        if (!infoList) return;
+        const started = !!board.sprintStartedAt;
+        const finished = !!board.sprintFinishedAt;
+        const actionItem = document.createElement('li');
+        const actionBtn = document.createElement('button');
+        actionBtn.type = 'button';
+        actionBtn.className = 'button-small scrum-sprint-action';
+        actionBtn.dataset.boardId = String(board.id);
+        actionBtn.dataset.action = (!started || finished) ? 'start' : 'finish';
+        actionBtn.textContent = (!started || finished) ? 'Начать спринт' : 'Завершить спринт';
+        actionItem.appendChild(actionBtn);
+        infoList.prepend(actionItem);
+    }
+
+    function renderScrumBoardView() {
+        const container = document.querySelector('#cards-container');
+        if (!container) return;
+        container.className = 'cards board-view scrum-board-view';
+        container.innerHTML = '';
+        if (renderKanbanLoadError(container)) return;
+        if (!kanbanBoards.length) {
+            container.innerHTML = '<div class="card"><div class="board-card-collapsible"><p class="text-basic">Спринты еще не созданы. Создайте первую Scrum-доску в проекте.</p></div></div>';
+            return;
+        }
+        kanbanBoards.forEach((board, boardIndex) => {
+            const tasksForBoard = tasksForRenderedBoard(board);
+            const backlogTasksOnly = tasksForBoard.filter(t => taskBelongsToScrumBacklog(board, t));
+            const sprintTasksOnly = tasksForBoard.filter(t => !taskBelongsToScrumBacklog(board, t));
+
+            const queueCard = document.createElement('div');
+            queueCard.className = 'card kanban-board-card scrum-queue-board';
+            queueCard.dataset.boardId = board.id;
+            queueCard.dataset.boardIndex = boardIndex;
+            const queueBody = document.createElement('div');
+            queueBody.className = 'board-card-collapsible';
+            queueBody.appendChild(createScrumBacklogBoard(board, boardIndex, backlogTasksOnly));
+            queueCard.appendChild(queueBody);
+            container.appendChild(queueCard);
+
+            const sprintCard = document.createElement('div');
+            sprintCard.className = 'card kanban-board-card scrum-sprint-board';
+            sprintCard.dataset.boardId = board.id;
+            sprintCard.dataset.boardIndex = boardIndex;
+            const sprintHeader = createKanbanCardHeader(board, boardIndex, { boardDrag: false });
+            attachScrumSprintControls(sprintHeader, board);
+            const sprintBody = document.createElement('div');
+            sprintBody.className = 'board-card-collapsible';
+            const sprintScroll = document.createElement('div');
+            sprintScroll.className = 'scrum-sprint-inner-scroll';
+            sprintScroll.appendChild(createColumnsHeader(board, boardIndex, sprintTasksOnly));
+            const urgentTasks = sprintTasksOnly.filter(t => t.priority === 'срочно');
+            const normalTasks = sprintTasksOnly.filter(t => (t.priority || 'обычный') !== 'срочно');
+            sprintScroll.appendChild(createPrioritySection(board, 'Срочно', 'urgent', urgentTasks, boardIndex, {
+                enableQueueCreate: false,
+                queueStageName: 'Очередь'
+            }));
+            sprintScroll.appendChild(createPrioritySection(board, 'Обычный приоритет', 'normal', normalTasks, boardIndex, { enableQueueCreate: false }));
+            sprintBody.appendChild(sprintScroll);
+            sprintCard.appendChild(sprintHeader);
+            sprintCard.appendChild(sprintBody);
+            sprintHeader._attachCollapse(sprintBody);
+            container.appendChild(sprintCard);
+        });
+        initKanbanEvents();
+    }
+
+    function renderScrumTablesView() {
+        const container = document.querySelector('#cards-container');
+        if (!container) return;
+        container.className = 'cards tables-view';
+        container.innerHTML = '';
+        if (renderKanbanLoadError(container)) return;
+        if (!kanbanBoards.length) {
+            container.innerHTML = '<div class="card"><div class="board-card-collapsible"><p class="text-basic">Спринты еще не созданы.</p></div></div>';
+            return;
+        }
+        kanbanBoards.forEach((board, boardIndex) => {
+            const tasksForBoard = tasksForRenderedBoard(board);
+            const backlogTasksOnly = tasksForBoard.filter(t => taskBelongsToScrumBacklog(board, t));
+            const sprintTasksOnly = tasksForBoard.filter(t => !taskBelongsToScrumBacklog(board, t));
+
+            const queueCard = document.createElement('div');
+            queueCard.className = 'card kanban-board-card';
+            queueCard.dataset.boardId = board.id;
+            queueCard.dataset.boardIndex = boardIndex;
+            const queueBody = document.createElement('div');
+            queueBody.className = 'board-card-collapsible kanban-tables-body';
+            const queueHead = createScrumQueueBoardHead(board, boardIndex, backlogTasksOnly, queueBody);
+            queueBody.appendChild(queueHead);
+            SCRUM_BACKLOG_COLUMNS.forEach((col, idx) => {
+                const stageTasks = backlogTasksOnly.filter(t => effectiveScrumBacklogColumnStage(t) === col.stage);
+                queueBody.appendChild(createKanbanStageTable(board, boardIndex, scrumBacklogColumnHeading(col), stageTasks));
+                if (idx !== SCRUM_BACKLOG_COLUMNS.length - 1) {
+                    const hr = document.createElement('div');
+                    hr.className = 'kanban-divider';
+                    queueBody.appendChild(hr);
+                }
+            });
+            queueCard.appendChild(queueBody);
+            container.appendChild(queueCard);
+
+            const sprintCard = document.createElement('div');
+            sprintCard.className = 'card kanban-board-card';
+            sprintCard.dataset.boardId = board.id;
+            sprintCard.dataset.boardIndex = boardIndex;
+            const sprintHeader = createKanbanCardHeader(board, boardIndex, { boardDrag: false });
+            attachScrumSprintControls(sprintHeader, board);
+            const sprintBody = document.createElement('div');
+            sprintBody.className = 'board-card-collapsible kanban-tables-body';
+            board.stages.forEach((stage, idx) => {
+                const stageTasks = sprintTasksOnly.filter(t => t.stage === stage);
+                sprintBody.appendChild(createKanbanStageTable(board, boardIndex, stage, stageTasks));
+                if (idx !== board.stages.length - 1) {
+                    const hr = document.createElement('div');
+                    hr.className = 'kanban-divider';
+                    sprintBody.appendChild(hr);
+                }
+            });
+            sprintCard.append(sprintHeader, sprintBody);
+            sprintHeader._attachCollapse(sprintBody);
+            container.appendChild(sprintCard);
+        });
+        initKanbanEvents();
+        initKanbanTableRowsSortable();
+    }
+
+    function renderScrumSprintHistoryView() {
+        const container = document.querySelector('#cards-container');
+        if (!container) return;
+        container.className = 'cards archive-view scrum-history-view';
+        container.innerHTML = '';
+
+        const finishedBoards = kanbanBoards
+            .filter(b => !!b.sprintFinishedAt)
+            .sort((a, b) => new Date(b.sprintFinishedAt).getTime() - new Date(a.sprintFinishedAt).getTime());
+
+        if (!finishedBoards.length) {
+            container.innerHTML = '<div class="card"><div class="board-card-collapsible"><p class="text-basic">Нет завершенных спринтов.</p></div></div>';
+            return;
+        }
+
+        finishedBoards.forEach((board, idx) => {
+            const card = document.createElement('div');
+            card.className = 'card board-archive-section kanban-archive-board';
+            const title = document.createElement('p');
+            title.className = 'text-header';
+            title.textContent = `${board.name}`;
+            const meta = document.createElement('p');
+            meta.className = 'text-signature';
+            const finishedAt = board.sprintFinishedAt ? new Date(board.sprintFinishedAt).toLocaleString('ru-RU') : '';
+            meta.textContent = `Завершен: ${finishedAt}`;
+            card.append(title, meta);
+            const body = document.createElement('div');
+            body.className = 'archive-board-body';
+            const tasksForBoard = kanbanTasks.filter(t => Number(t.boardId) === Number(board.id));
+            if (!tasksForBoard.length) {
+                body.innerHTML = '<div class="empty-state">Нет задач</div>';
+            } else {
+                const done = tasksForBoard.filter(t => String(t.stage || '').trim() === 'Готово').length;
+                const inProgress = tasksForBoard.filter(t => ['В работе', 'Тестирование'].includes(String(t.stage || '').trim())).length;
+                const queue = tasksForBoard.length - done - inProgress;
+                body.innerHTML = `
+                    <div class="reports-summary-grid">
+                        <div class="reports-stat-chip"><span class="reports-stat-value">${tasksForBoard.length}</span><span class="reports-stat-label">задач</span></div>
+                        <div class="reports-stat-chip"><span class="reports-stat-value">${queue}</span><span class="reports-stat-label">в очереди</span></div>
+                        <div class="reports-stat-chip"><span class="reports-stat-value">${inProgress}</span><span class="reports-stat-label">в работе</span></div>
+                        <div class="reports-stat-chip"><span class="reports-stat-value">${done}</span><span class="reports-stat-label">готово</span></div>
+                    </div>
+                `;
+            }
+            card.appendChild(body);
+            container.appendChild(card);
+        });
+        initKanbanEvents();
+    }
+
     function renderKanbanBoardView() {
         const container = document.querySelector('#cards-container');
         if (!container) return;
         container.className = 'cards board-view';
         container.innerHTML = '';
+        if (renderKanbanLoadError(container)) return;
+        if (!kanbanBoards.length) {
+            container.innerHTML = '<div class="card"><div class="board-card-collapsible"><p class="text-basic">Доски не найдены для выбранного проекта.</p></div></div>';
+            return;
+        }
 
         kanbanBoards.forEach((board, boardIndex) => {
             const tasksForBoard = kanbanTasks.filter(t => Number(t.boardId) === Number(board.id));
@@ -2731,6 +3276,11 @@
         if (!container) return;
         container.className = 'cards tables-view';
         container.innerHTML = '';
+        if (renderKanbanLoadError(container)) return;
+        if (!kanbanBoards.length) {
+            container.innerHTML = '<div class="card"><div class="board-card-collapsible"><p class="text-basic">Доски не найдены для выбранного проекта.</p></div></div>';
+            return;
+        }
 
         kanbanBoards.forEach((board, boardIndex) => {
             const tasksForBoard = kanbanTasks.filter(t => Number(t.boardId) === Number(board.id));
@@ -2841,7 +3391,8 @@
         container.className = 'cards reports-view';
         container.innerHTML = '<div class="card board-reports-card"><p class="text-basic">Загрузка отчёта...</p></div>';
 
-        fetch(apiUrl('/reports/projects?mode=kanban'))
+        const reportsMode = isScrumView() ? 'scrum' : 'kanban';
+        fetch(apiUrl(`/reports/projects?mode=${encodeURIComponent(reportsMode)}`))
             .then(r => r.ok ? r.json() : Promise.reject(new Error('reports api failed')))
             .then(data => {
                 const executive = data.executive || {};
@@ -3140,6 +3691,10 @@
 
     async function initBoardKanbanPage() {
         if (!document.querySelector('.board-kanban')) return;
+        const app = document.querySelector('.app-container.board-kanban');
+        if (app) {
+            app.classList.toggle('board-scrum', isScrumView());
+        }
         restoreCurrentView();
         await loadTeamData();
         await loadKanbanData();

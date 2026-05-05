@@ -103,6 +103,23 @@ public class PageController {
         return "pages/board_kanban";
     }
 
+    @GetMapping("/o/{orgId}/t/{teamId}/p/{projectCode}/scrum")
+    public String boardScrumContext(@PathVariable String orgId,
+                                    @PathVariable String teamId,
+                                    @PathVariable String projectCode,
+                                    @RequestParam(required = false) String project,
+                                    HttpServletRequest request,
+                                    Model model) {
+        String contextError = validateContextAccess(orgId, teamId);
+        if (contextError != null) return contextErrorView(model, request, 404, contextError);
+        if (project != null && !project.isBlank() && !projectCode.equalsIgnoreCase(project)) {
+            return contextErrorView(model, request, 400, "Параметр project не совпадает с projectCode в пути");
+        }
+        String projectError = validateProjectAccess(orgId, teamId, projectCode, "scrum");
+        if (projectError != null) return contextErrorView(model, request, 404, projectError);
+        return "pages/board_kanban";
+    }
+
     @GetMapping("/o/{orgId}/t/{teamId}")
     public String homeContext(@PathVariable String orgId, @PathVariable String teamId, HttpServletRequest request, Model model) {
         String contextError = validateContextAccess(orgId, teamId);

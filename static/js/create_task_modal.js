@@ -342,13 +342,15 @@
 
     function applyModeUI(modal, projectType) {
         const isList = projectType === 'list';
-        currentProjectType = isList ? 'list' : 'kanban';
+        currentProjectType = isList ? 'list' : (projectType || 'kanban');
         const depField = modal.querySelector('#createTaskDepType')?.closest('.auth-field');
         const hoursField = modal.querySelector('#createTaskHours')?.closest('.auth-field');
         const spField = modal.querySelector('#createTaskSp')?.closest('.auth-field');
+        const deadlineField = modal.querySelector('#createTaskDeadlineFrom')?.closest('.filter-section');
         if (depField) depField.style.display = isList ? 'none' : '';
         if (hoursField) hoursField.style.display = isList ? 'none' : '';
         if (spField) spField.style.display = isList ? 'none' : '';
+        if (deadlineField) deadlineField.style.display = currentProjectType === 'scrum' ? 'none' : '';
 
         const statusSelect = modal.querySelector('#createTaskStatus');
         if (statusSelect) {
@@ -482,8 +484,8 @@
                     return;
                 }
 
-                const dateFrom = overlay.querySelector('#createTaskDeadlineFrom')?.value || '';
-                const dateTo = overlay.querySelector('#createTaskDeadlineTo')?.value || '';
+                const dateFrom = currentProjectType === 'scrum' ? '' : (overlay.querySelector('#createTaskDeadlineFrom')?.value || '');
+                const dateTo = currentProjectType === 'scrum' ? '' : (overlay.querySelector('#createTaskDeadlineTo')?.value || '');
                 const assignee = overlay.querySelector('#createTaskAssignee')?.value?.trim() || null;
                 const hoursRaw = overlay.querySelector('#createTaskHours')?.value || '';
                 const spRaw = overlay.querySelector('#createTaskSp')?.value || '';
@@ -504,9 +506,9 @@
                         description: overlay.querySelector('#createTaskDesc')?.value || '',
                         stage,
                         priority,
-                        dueDate: dateTo || dateFrom || null,
-                        startDate: dateFrom || null,
-                        endDate: dateTo || null,
+                        dueDate: currentProjectType === 'scrum' ? null : (dateTo || dateFrom || null),
+                        startDate: currentProjectType === 'scrum' ? null : (dateFrom || null),
+                        endDate: currentProjectType === 'scrum' ? null : (dateTo || null),
                         assignee,
                         storyPoints: currentProjectType === 'list' ? null : (spRaw ? Number(spRaw) : null),
                         estimateHours: currentProjectType === 'list' ? null : (hoursRaw ? Number(hoursRaw) : null),

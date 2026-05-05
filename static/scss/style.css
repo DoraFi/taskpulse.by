@@ -3239,7 +3239,7 @@ body.tp-no-enter .app-container {
 }
 
 .board-timeline-card .tag, .kanban-task-item.sortable-fallback .tag, .kanban-board-card .kanban-stage-col .tag,
-.kanban-archive-board .kanban-stage-col .tag, .board-list .card .list .tag {
+.kanban-archive-board .kanban-stage-col .tag, .board-list .card .list .tag, .scrum-backlog-panel .scrum-backlog-accordion-body .tag {
   width: 100%;
   display: flex;
   justify-content: flex-end;
@@ -3248,12 +3248,12 @@ body.tp-no-enter .app-container {
 }
 
 .board-timeline-card .tag .executor, .kanban-task-item.sortable-fallback .tag .executor, .kanban-board-card .kanban-stage-col .tag .executor,
-.kanban-archive-board .kanban-stage-col .tag .executor, .board-list .card .list .tag .executor {
+.kanban-archive-board .kanban-stage-col .tag .executor, .board-list .card .list .tag .executor, .scrum-backlog-panel .scrum-backlog-accordion-body .tag .executor {
   display: flex;
   align-items: center;
 }
 .board-timeline-card .tag .executor img, .kanban-task-item.sortable-fallback .tag .executor img, .kanban-board-card .kanban-stage-col .tag .executor img,
-.kanban-archive-board .kanban-stage-col .tag .executor img, .board-list .card .list .tag .executor img {
+.kanban-archive-board .kanban-stage-col .tag .executor img, .board-list .card .list .tag .executor img, .scrum-backlog-panel .scrum-backlog-accordion-body .tag .executor img {
   height: calc(1em + 0.75rem);
   border-radius: 0.3rem;
 }
@@ -3264,7 +3264,8 @@ body.tp-no-enter .app-container {
 .kanban-board-card .kanban-stage-col .tag .priority-normal,
 .kanban-archive-board .kanban-stage-col .tag .priority-high,
 .kanban-archive-board .kanban-stage-col .tag .priority-normal, .board-list .card .list .tag .priority-high,
-.board-list .card .list .tag .priority-normal {
+.board-list .card .list .tag .priority-normal, .scrum-backlog-panel .scrum-backlog-accordion-body .tag .priority-high,
+.scrum-backlog-panel .scrum-backlog-accordion-body .tag .priority-normal {
   border-radius: 0.3rem;
   display: flex;
   justify-content: center;
@@ -3275,7 +3276,8 @@ body.tp-no-enter .app-container {
 }
 
 .kanban-task-item.sortable-fallback .tag .deadline, .kanban-board-card .kanban-stage-col .tag .deadline,
-.kanban-archive-board .kanban-stage-col .tag .deadline, .board-list .card .list .tag .deadline {
+.kanban-archive-board .kanban-stage-col .tag .deadline, .board-list .card .list .tag .deadline,
+.scrum-backlog-panel .scrum-backlog-accordion-body .tag .deadline {
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -3288,7 +3290,8 @@ body.tp-no-enter .app-container {
   border-radius: 0.3rem;
 }
 .kanban-task-item.sortable-fallback .tag .deadline::before, .kanban-board-card .kanban-stage-col .tag .deadline::before,
-.kanban-archive-board .kanban-stage-col .tag .deadline::before, .board-list .card .list .tag .deadline::before {
+.kanban-archive-board .kanban-stage-col .tag .deadline::before, .board-list .card .list .tag .deadline::before,
+.scrum-backlog-panel .scrum-backlog-accordion-body .tag .deadline::before {
   content: "";
   display: inline-block;
   width: 1em;
@@ -3592,8 +3595,7 @@ body:not([data-theme=dark]) .board-list .card .list .item {
 }
 .kanban-board-card[data-kanban-scroll=true] .kanban-priority-section,
 .kanban-archive-board[data-kanban-scroll=true] .kanban-priority-section {
-  width: -moz-fit-content;
-  width: fit-content;
+  width: 100%;
   margin-right: 0.0625rem;
 }
 .kanban-board-card[data-kanban-scroll=true] .kanban-priority-section.normal,
@@ -5726,6 +5728,129 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   min-width: 100%;
   overflow-x: auto;
 }
+
+.app-container.board-kanban.board-scrum {
+  overflow-x: auto;
+}
+.app-container.board-kanban.board-scrum .cards.scrum-board-view {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 1rem;
+  width: -moz-max-content;
+  width: max-content;
+  min-width: 100%;
+}
+.scrum-board-view > .card {
+  margin-bottom: 0;
+}
+.scrum-board-view .kanban-board-card {
+  width: auto;
+  max-width: none;
+  flex: 0 0 auto;
+}
+.scrum-board-view .scrum-queue-board {
+  width: clamp(280px, 34vw, 440px);
+  min-width: 260px;
+}
+.scrum-board-view .scrum-sprint-board {
+  width: -moz-max-content;
+  width: max-content;
+  min-width: 420px;
+}
+.scrum-backlog-panel {
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: 0;
+}
+.scrum-queue-board-head {
+  align-items: center;
+  margin-bottom: 0.625rem;
+  gap: 0.5rem;
+}
+.scrum-queue-board-head-left {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.scrum-queue-board-head-actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.scrum-queue-board-head .text-header {
+  margin: 0;
+}
+.scrum-queue-quick-add {
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 0.25rem;
+}
+.scrum-queue-quick-add:focus-visible {
+  outline: 0.125rem solid #61A039;
+  outline-offset: 0.125rem;
+}
+.scrum-backlog-accordion-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.scrum-backlog-panel .scrum-backlog-accordion.kanban-priority-section.normal {
+  margin: 0;
+  padding: 0;
+  border-radius: 0.625rem;
+  overflow: hidden;
+  border-width: 0.0625rem;
+  box-shadow: none;
+}
+.scrum-backlog-panel .scrum-backlog-accordion .kanban-priority-head {
+  padding: 0.45rem 0.625rem;
+  border-radius: 0.625rem 0.625rem 0 0;
+}
+.scrum-backlog-panel .scrum-backlog-accordion .kanban-priority-body {
+  padding: 0.45rem 0.55rem 0.65rem;
+}
+.scrum-backlog-panel .scrum-backlog-accordion-body .kanban-task-list .item:last-child {
+  margin-bottom: 0;
+}
+.scrum-sprint-inner-scroll {
+  overflow: visible;
+  overflow-y: visible;
+  padding-bottom: 0.25rem;
+}
+.scrum-sprint-inner-scroll .kanban-columns-head,
+.scrum-sprint-inner-scroll .kanban-priority-section .kanban-stages-row {
+  width: -moz-max-content;
+  width: max-content;
+  min-width: 0;
+}
+.scrum-sprint-inner-scroll .kanban-stage-group {
+  flex: 0 0 22vw;
+  min-width: 11rem;
+}
+.scrum-sprint-inner-scroll .kanban-priority-section.normal,
+.scrum-sprint-inner-scroll .kanban-priority-section.urgent {
+  width: 100%;
+  margin: 0;
+}
+.scrum-sprint-inner-scroll .kanban-priority-section + .kanban-priority-section {
+  margin-top: 0.625rem;
+}
+.scrum-sprint-inner-scroll .kanban-priority-section .kanban-priority-body {
+  padding-top: 0;
+}
+.scrum-sprint-action {
+  white-space: nowrap;
+}
 .tasks-grid .grid-header,
 .tasks-grid .grid-row {
   display: grid;
@@ -6020,21 +6145,24 @@ body[data-theme=dark] .toast-notification {
 
 .kanban-board-card .kanban-stage-col .tag,
 .kanban-archive-board .kanban-stage-col .tag,
-.board-list .card .list .tag {
+.board-list .card .list .tag,
+.scrum-backlog-panel .scrum-backlog-accordion-body .tag {
   flex-wrap: wrap;
   row-gap: 0.25rem;
 }
 
 .kanban-board-card .kanban-stage-col .tag .deadline,
 .kanban-archive-board .kanban-stage-col .tag .deadline,
-.board-list .card .list .tag .deadline {
+.board-list .card .list .tag .deadline,
+.scrum-backlog-panel .scrum-backlog-accordion-body .tag .deadline {
   min-width: 0;
   max-width: 100%;
 }
 
 .kanban-board-card .kanban-stage-col .tag .deadline.dependency-chip,
 .kanban-archive-board .kanban-stage-col .tag .deadline.dependency-chip,
-.board-list .card .list .tag .deadline.dependency-chip {
+.board-list .card .list .tag .deadline.dependency-chip,
+.scrum-backlog-panel .scrum-backlog-accordion-body .tag .deadline.dependency-chip {
   display: inline-flex;
   align-items: center;
   flex-wrap: wrap;
@@ -6048,7 +6176,9 @@ body[data-theme=dark] .toast-notification {
 .kanban-archive-board .kanban-stage-col .tag .deadline.dependency-chip .text-signature,
 .kanban-archive-board .kanban-stage-col .tag .deadline.dependency-chip .dependency-chip-id,
 .board-list .card .list .tag .deadline.dependency-chip .text-signature,
-.board-list .card .list .tag .deadline.dependency-chip .dependency-chip-id {
+.board-list .card .list .tag .deadline.dependency-chip .dependency-chip-id,
+.scrum-backlog-panel .scrum-backlog-accordion-body .tag .deadline.dependency-chip .text-signature,
+.scrum-backlog-panel .scrum-backlog-accordion-body .tag .deadline.dependency-chip .dependency-chip-id {
   white-space: normal;
   overflow-wrap: anywhere;
   word-break: break-word;

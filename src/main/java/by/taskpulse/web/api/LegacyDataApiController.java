@@ -300,45 +300,89 @@ public class LegacyDataApiController {
 
     @GetMapping("/api/kanban/boards")
     public Map<String, Object> kanbanBoards(@RequestParam(required = false) String project) {
-        String visibleProjectsSql = inClauseSql(visibleProjectIds());
+        try {
+        boolean withProjectFilter = project != null && !project.isBlank();
+        String visibleProjectsSql = withProjectFilter ? null : inClauseSql(visibleProjectIdsSafe());
+        boolean hasBoardStageTable = hasTable("board_stage");
+        boolean hasTaskItemTable = hasTable("task_item");
+        boolean hasSprintStartedAt = hasColumn("board", "sprint_started_at");
+        boolean hasSprintFinishedAt = hasColumn("board", "sprint_finished_at");
+        boolean hasProjectPublicId = hasColumn("project", "public_id");
         String archiveFilter = hasColumn("board", "archived_at") && hasColumn("project", "archived_at")
                 ? " and b.archived_at is null and p.archived_at is null "
                 : "";
+        String boardKindFilter = withProjectFilter ? "" : " and (b.code like 'KANBAN%' or b.code like 'SCRUM%') ";
+        String projectTypeFilter = withProjectFilter ? "" : " and p.project_type in ('kanban', 'scrum', 'scrumban') ";
+        String projectFilter = withProjectFilter
+                ? (hasProjectPublicId
+                ? " and (lower(cast(p.code as text)) = lower(?) or lower(cast(p.public_id as text)) = lower(?) or lower(cast(p.name as text)) = lower(?) or cast(p.id as text) = ?) "
+                : " and (lower(p.code) = lower(?) or lower(p.name) = lower(?) or cast(p.id as text) = ?) ")
+                : " and b.project_id in (" + visibleProjectsSql + ") ";
         String sql = """
                 select b.id, b.name
+                """ + (hasSprintStartedAt ? ", b.sprint_started_at" : ", null as sprint_started_at")
+                + (hasSprintFinishedAt ? ", b.sprint_finished_at" : ", null as sprint_finished_at") + """
                 from board b
                 join project p on p.id = b.project_id
-                where b.code like 'KANBAN%'
+                where 1=1
                 """ + archiveFilter + """
-                  and p.project_type in ('kanban', 'scrum', 'scrumban')
-                  and b.project_id in (""" + visibleProjectsSql + """
-                ) """ + (project != null && !project.isBlank() ? " and p.code = ? " : "") + " order by b.id";
-        List<Map<String, Object>> boards = (project != null && !project.isBlank())
-                ? jdbcTemplate.queryForList(sql, project)
-                : jdbcTemplate.queryForList(sql);
+                """ + boardKindFilter + projectTypeFilter + projectFilter + " order by b.id";
+        List<Map<String, Object>> boards;
+        try {
+            if (withProjectFilter && hasProjectPublicId) {
+                boards = jdbcTemplate.queryForList(sql, project, project, project, project);
+            } else if (withProjectFilter) {
+                boards = jdbcTemplate.queryForList(sql, project, project, project);
+            } else {
+                boards = jdbcTemplate.queryForList(sql);
+            }
+        } catch (Exception ex) {
+            if (!withProjectFilter) throw ex;
+            String fallbackSql = """
+                    select b.id, b.name
+                    """ + (hasSprintStartedAt ? ", b.sprint_started_at" : ", null as sprint_started_at")
+                    + (hasSprintFinishedAt ? ", b.sprint_finished_at" : ", null as sprint_finished_at") + """
+                    from board b
+                    join project p on p.id = b.project_id
+                    where (lower(cast(p.code as text)) = lower(?) or lower(cast(p.name as text)) = lower(?) or cast(p.id as text) = ?)
+                    order by b.id
+                    """;
+            boards = jdbcTemplate.queryForList(fallbackSql, project, project, project);
+        }
 
         List<Map<String, Object>> resultBoards = new ArrayList<>();
         for (Map<String, Object> b : boards) {
             Long boardId = ((Number) b.get("id")).longValue();
-            List<String> stages = jdbcTemplate.query(
-                    """
-                    select bs.stage_name
-                    from board_stage bs
-                    where bs.board_id = ?
-                    order by bs.position
-                    """,
-                    (rs, rowNum) -> rs.getString("stage_name"),
-                    boardId);
-            if (stages.isEmpty()) {
-                stages = jdbcTemplate.query(
-                        """
-                        select distinct coalesce(nullif(t.stage,''), 'Очередь') as st
-                        from task_item t
-                        where t.board_id = ?
-                        order by st
-                        """,
-                        (rs, rowNum) -> rs.getString("st"),
-                        boardId);
+            List<String> stages = new ArrayList<>();
+            if (hasBoardStageTable) {
+                try {
+                    stages = jdbcTemplate.query(
+                            """
+                            select bs.stage_name
+                            from board_stage bs
+                            where bs.board_id = ?
+                            order by bs.position
+                            """,
+                            (rs, rowNum) -> rs.getString("stage_name"),
+                            boardId);
+                } catch (Exception ignored) {
+                    stages = new ArrayList<>();
+                }
+            }
+            if (stages.isEmpty() && hasTaskItemTable) {
+                try {
+                    stages = jdbcTemplate.query(
+                            """
+                            select distinct coalesce(nullif(t.stage,''), 'Очередь') as st
+                            from task_item t
+                            where t.board_id = ?
+                            order by st
+                            """,
+                            (rs, rowNum) -> rs.getString("st"),
+                            boardId);
+                } catch (Exception ignored) {
+                    stages = new ArrayList<>();
+                }
             }
             stages.sort(Comparator.comparingInt(this::stageOrder).thenComparing(s -> s));
             if (stages.isEmpty()) {
@@ -348,6 +392,8 @@ public class LegacyDataApiController {
             row.put("id", boardId);
             row.put("name", b.get("name"));
             row.put("stages", stages);
+            row.put("sprintStartedAt", toIsoDateTime(b.get("sprint_started_at")));
+            row.put("sprintFinishedAt", toIsoDateTime(b.get("sprint_finished_at")));
             row.put("tasksSource", "/api/kanban/tasks?boardId=" + boardId + (project != null && !project.isBlank() ? "&project=" + project : ""));
             row.put("archivedTasks", List.of());
             resultBoards.add(row);
@@ -355,15 +401,27 @@ public class LegacyDataApiController {
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("boards", resultBoards);
         return out;
+        } catch (Exception ex) {
+            return kanbanBoardsFallback(project);
+        }
     }
 
     @GetMapping("/api/kanban/tasks")
     public Map<String, Object> kanbanTasks(@RequestParam(required = false) Long boardId,
                                            @RequestParam(required = false) String project) {
-        String visibleProjectsSql = inClauseSql(visibleProjectIds());
+        try {
+        boolean withProjectFilter = project != null && !project.isBlank();
+        String visibleProjectsSql = withProjectFilter ? null : inClauseSql(visibleProjectIdsSafe());
+        boolean hasProjectPublicId = hasColumn("project", "public_id");
         String archiveFilter = hasColumn("board", "archived_at") && hasColumn("project", "archived_at")
                 ? " and b.archived_at is null and p.archived_at is null "
                 : "";
+        String boardKindFilter = withProjectFilter ? "" : " and (b.code like 'KANBAN%' or b.code like 'SCRUM%') ";
+        String projectFilter = withProjectFilter
+                ? (hasProjectPublicId
+                ? " and (lower(cast(p.code as text)) = lower(?) or lower(cast(p.public_id as text)) = lower(?) or lower(cast(p.name as text)) = lower(?) or cast(p.id as text) = ?) "
+                : " and (lower(cast(p.code as text)) = lower(?) or lower(cast(p.name as text)) = lower(?) or cast(p.id as text) = ?) ")
+                : " and b.project_id in (" + visibleProjectsSql + ") ";
         String sql = """
                 select
                     t.id,
@@ -409,21 +467,64 @@ public class LegacyDataApiController {
                     limit 1
                 ) dep_in on true
                 left join task_item dep_in_t on dep_in_t.id = dep_in.task_id
-                where b.code like 'KANBAN%'
+                where 1=1
                 """ + archiveFilter + """
-                  and b.project_id in (""" + visibleProjectsSql + """
-                ) """ + (project != null && !project.isBlank() ? " and p.code = ? " : "")
+                """ + boardKindFilter + projectFilter
                 + (boardId != null ? " and t.board_id = ? " : "") + " order by t.id";
 
         List<Map<String, Object>> rows;
-        if (project != null && !project.isBlank() && boardId != null) {
-            rows = jdbcTemplate.queryForList(sql, project, boardId);
-        } else if (project != null && !project.isBlank()) {
-            rows = jdbcTemplate.queryForList(sql, project);
-        } else if (boardId != null) {
-            rows = jdbcTemplate.queryForList(sql, boardId);
-        } else {
-            rows = jdbcTemplate.queryForList(sql);
+        try {
+            if (withProjectFilter && hasProjectPublicId && boardId != null) {
+                rows = jdbcTemplate.queryForList(sql, project, project, project, project, boardId);
+            } else if (withProjectFilter && hasProjectPublicId) {
+                rows = jdbcTemplate.queryForList(sql, project, project, project, project);
+            } else if (withProjectFilter && boardId != null) {
+                rows = jdbcTemplate.queryForList(sql, project, project, project, boardId);
+            } else if (withProjectFilter) {
+                rows = jdbcTemplate.queryForList(sql, project, project, project);
+            } else if (boardId != null) {
+                rows = jdbcTemplate.queryForList(sql, boardId);
+            } else {
+                rows = jdbcTemplate.queryForList(sql);
+            }
+        } catch (Exception ex) {
+            if (!withProjectFilter) throw ex;
+            String fallbackSql = """
+                    select
+                        t.id,
+                        coalesce(t.public_id, t.task_code, 'TSK-' || t.id::text) as public_id,
+                        t.board_id,
+                        t.name,
+                        t.description,
+                        t.priority,
+                        t.due_date,
+                        t.start_date,
+                        t.end_date,
+                        t.stage,
+                        t.story_points,
+                        t.estimate_hours,
+                        t.archived_at,
+                        p.name as project_name,
+                        p.project_type as project_type,
+                        u.full_name as assignee_name,
+                        u.avatar_file as assignee_avatar,
+                        null::bigint as dep_out_task_id,
+                        null::text as dep_out_task_public_id,
+                        null::text as dep_out_task_name,
+                        null::bigint as dep_in_task_id,
+                        null::text as dep_in_task_public_id,
+                        null::text as dep_in_task_name
+                    from task_item t
+                    join board b on b.id = t.board_id
+                    join project p on p.id = b.project_id
+                    left join app_user u on u.id = t.assignee_id
+                    where (lower(cast(p.code as text)) = lower(?) or lower(cast(p.name as text)) = lower(?) or cast(p.id as text) = ?)
+                    """ + (boardId != null ? " and t.board_id = ? " : "") + """
+                    order by t.id
+                    """;
+            rows = boardId != null
+                    ? jdbcTemplate.queryForList(fallbackSql, project, project, project, boardId)
+                    : jdbcTemplate.queryForList(fallbackSql, project, project, project);
         }
 
         Map<Long, List<Map<String, Object>>> subtasksByTask = loadSubtasksByTaskId();
@@ -471,6 +572,9 @@ public class LegacyDataApiController {
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("tasks", tasks);
         return out;
+        } catch (Exception ex) {
+            return kanbanTasksFallback(boardId, project);
+        }
     }
 
     @PostMapping("/api/kanban/tasks/move")
@@ -1062,7 +1166,7 @@ public class LegacyDataApiController {
                 + "(select count(*) from task_item ti join board b on b.id = ti.board_id where b.project_id = p.id and coalesce(ti.stage,'') = 'Готово') as done_count, "
                 + "(select count(*) from task_item ti join board b on b.id = ti.board_id where b.project_id = p.id and coalesce(ti.stage,'') in ('В работе','Тестирование')) as in_progress_count, "
                 + "(select count(*) from task_item ti join board b on b.id = ti.board_id where b.project_id = p.id and coalesce(ti.stage,'') in ('Очередь','Новая','Назначена')) as todo_count, "
-                + "(select count(*) from board b where b.project_id = p.id and coalesce(b.code,'') like 'KANBAN%') as kanban_board_count, "
+                + "(select count(*) from board b where b.project_id = p.id and (coalesce(b.code,'') like 'KANBAN%' or coalesce(b.code,'') like 'SCRUM%')) as kanban_board_count, "
                 + "(select count(*) from board b where b.project_id = p.id and coalesce(b.code,'') like 'LIST%') as list_board_count "
                 + "from project p where " + scopeWhere + " "
                 + archivedCond + " order by p.id";
@@ -1084,7 +1188,13 @@ public class LegacyDataApiController {
                     row.put("todoCount", rs.getInt("todo_count"));
                     row.put("kanbanBoardCount", rs.getInt("kanban_board_count"));
                     row.put("listBoardCount", rs.getInt("list_board_count"));
-                    row.put("view", "kanban".equals(rs.getString("project_type")) ? "kanban" : "list");
+                    String projectType = rs.getString("project_type");
+                    String view = switch (projectType) {
+                        case "kanban" -> "kanban";
+                        case "scrum" -> "scrum";
+                        default -> "list";
+                    };
+                    row.put("view", view);
                     return row;
                 },
                 params.toArray()
@@ -1206,7 +1316,9 @@ public class LegacyDataApiController {
         Long projectId = ((Number) prj.get("id")).longValue();
         String projectType = String.valueOf(prj.get("project_type"));
         boolean isKanban = "kanban".equals(view) || "kanban".equals(projectType) || "scrum".equals(projectType) || "scrumban".equals(projectType);
-        String prefix = isKanban ? "KANBAN" : "LIST";
+        String prefix;
+        if ("scrum".equals(view) || "scrum".equals(projectType)) prefix = "SCRUM";
+        else prefix = isKanban ? "KANBAN" : "LIST";
         Integer nextNo = jdbcTemplate.queryForObject(
                 """
                 select coalesce(max((nullif(regexp_replace(coalesce(code,''), '[^0-9]', '', 'g'), ''))::int),0) + 1
@@ -1245,6 +1357,181 @@ public class LegacyDataApiController {
             }
         }
         return Map.of("ok", true, "boardId", boardId, "boardCode", boardCode);
+    }
+
+    @PostMapping("/api/scrum/sprints/start")
+    public Map<String, Object> startSprint(@RequestBody Map<String, Object> payload) {
+        Number boardIdNum = payload.get("boardId") instanceof Number n ? n : null;
+        if (boardIdNum == null) throw new IllegalArgumentException("boardId обязателен");
+        Long teamId = currentTeamId();
+        Long boardId = boardIdNum.longValue();
+        boolean hasSprintStartedAt = hasColumn("board", "sprint_started_at");
+        boolean hasSprintFinishedAt = hasColumn("board", "sprint_finished_at");
+        String sprintSql;
+        if (hasSprintStartedAt && hasSprintFinishedAt) {
+            sprintSql = """
+                update board b
+                set sprint_started_at = coalesce(sprint_started_at, now()),
+                    sprint_finished_at = null
+                where b.id = ?
+                  and b.project_id in (select pt.project_id from project_team pt where pt.team_id = ?)
+                """;
+        } else {
+            sprintSql = """
+                update board b
+                set name = b.name
+                where b.id = ?
+                  and b.project_id in (select pt.project_id from project_team pt where pt.team_id = ?)
+                """;
+        }
+        int updated = jdbcTemplate.update(sprintSql, boardId, teamId);
+        if (updated == 0) throw new IllegalArgumentException("Доска не найдена");
+        jdbcTemplate.update(
+                """
+                update task_item
+                set stage = case
+                    when stage = 'Следующий спринт' then 'Очередь'
+                    when stage = 'Через 2 спринта' then 'Следующий спринт'
+                    when stage = 'Через 3+ спринта' then 'Через 2 спринта'
+                    else stage
+                end
+                where board_id = ?
+                  and stage in ('Следующий спринт', 'Через 2 спринта', 'Через 3+ спринта')
+                """,
+                boardId
+        );
+        Integer backlogCount = jdbcTemplate.queryForObject(
+                """
+                select count(*)
+                from task_item
+                where board_id = ?
+                  and stage in ('Новые задачи', 'Следующий спринт', 'Через 2 спринта', 'Через 3+ спринта', 'Отложено')
+                """,
+                Integer.class,
+                boardId
+        );
+        if (backlogCount == null || backlogCount == 0) {
+            Long creatorId = currentUserId();
+            Long assigneeId = creatorId;
+            List<Map<String, String>> seeds = List.of(
+                    Map.of("name", "Уточнить критерии приёмки для пользовательских историй", "stage", "Новые задачи"),
+                    Map.of("name", "Подготовить задачи для следующего планирования спринта", "stage", "Следующий спринт"),
+                    Map.of("name", "Сверить технические зависимости со смежной командой", "stage", "Через 2 спринта"),
+                    Map.of("name", "Сформировать идеи улучшений для будущих релизов", "stage", "Через 3+ спринта"),
+                    Map.of("name", "Вернуться к задаче после стабилизации текущего релиза", "stage", "Отложено")
+            );
+            for (Map<String, String> seed : seeds) {
+                jdbcTemplate.update(
+                        """
+                        insert into task_item(name, stage, priority, due_date, board_id, assignee_id, creator_id)
+                        values (?, ?, 'обычный', null, ?, ?, ?)
+                        """,
+                        seed.get("name"),
+                        seed.get("stage"),
+                        boardId,
+                        assigneeId,
+                        creatorId
+                );
+            }
+        }
+        return Map.of("ok", true);
+    }
+
+    @PostMapping("/api/scrum/sprints/finish")
+    public Map<String, Object> finishSprint(@RequestBody Map<String, Object> payload) {
+        Number boardIdNum = payload.get("boardId") instanceof Number n ? n : null;
+        if (boardIdNum == null) throw new IllegalArgumentException("boardId обязателен");
+        Long teamId = currentTeamId();
+        boolean hasSprintStartedAt = hasColumn("board", "sprint_started_at");
+        boolean hasSprintFinishedAt = hasColumn("board", "sprint_finished_at");
+        String sprintSql;
+        if (hasSprintStartedAt && hasSprintFinishedAt) {
+            sprintSql = """
+                update board b
+                set sprint_started_at = coalesce(sprint_started_at, now()),
+                    sprint_finished_at = now()
+                where b.id = ?
+                  and b.project_id in (select pt.project_id from project_team pt where pt.team_id = ?)
+                """;
+        } else {
+            sprintSql = """
+                update board b
+                set name = b.name
+                where b.id = ?
+                  and b.project_id in (select pt.project_id from project_team pt where pt.team_id = ?)
+                """;
+        }
+        int updated = jdbcTemplate.update(sprintSql, boardIdNum.longValue(), teamId);
+        if (updated == 0) throw new IllegalArgumentException("Доска не найдена");
+        return Map.of("ok", true);
+    }
+
+    @PostMapping("/api/scrum/boards/consolidate")
+    public Map<String, Object> consolidateScrumBoards(@RequestBody Map<String, Object> payload) {
+        String projectCode = payload.get("projectCode") == null ? null : String.valueOf(payload.get("projectCode")).trim();
+        if (projectCode == null || projectCode.isBlank()) {
+            throw new IllegalArgumentException("projectCode обязателен");
+        }
+        Long teamId = currentTeamId();
+        List<Map<String, Object>> boards = jdbcTemplate.queryForList(
+                """
+                select b.id, b.name, b.sprint_started_at, b.sprint_finished_at
+                from board b
+                join project p on p.id = b.project_id
+                join project_team pt on pt.project_id = p.id
+                where pt.team_id = ?
+                  and (lower(cast(p.code as text)) = lower(?) or lower(cast(p.name as text)) = lower(?) or cast(p.id as text) = ?)
+                  and p.project_type = 'scrum'
+                order by b.id
+                """,
+                teamId, projectCode, projectCode, projectCode
+        );
+        if (boards.size() <= 1) return Map.of("ok", true, "movedBoards", 0);
+
+        Map<String, Object> primary = null;
+        for (Map<String, Object> b : boards) {
+            if (b.get("sprint_started_at") != null && b.get("sprint_finished_at") == null) {
+                primary = b;
+                break;
+            }
+        }
+        if (primary == null) primary = boards.get(0);
+        Long primaryBoardId = ((Number) primary.get("id")).longValue();
+        String primaryName = String.valueOf(primary.get("name"));
+        Integer sprintNum = null;
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("(?i)спринт\\s*(\\d+)").matcher(primaryName);
+        if (m.find()) {
+            try { sprintNum = Integer.parseInt(m.group(1)); } catch (Exception ignored) {}
+        }
+        if (sprintNum == null) {
+            int maxNum = 0;
+            for (Map<String, Object> b : boards) {
+                String nm = String.valueOf(b.get("name"));
+                java.util.regex.Matcher mm = java.util.regex.Pattern.compile("(?i)спринт\\s*(\\d+)").matcher(nm);
+                if (mm.find()) {
+                    try { maxNum = Math.max(maxNum, Integer.parseInt(mm.group(1))); } catch (Exception ignored) {}
+                }
+            }
+            sprintNum = Math.max(1, maxNum);
+        }
+        jdbcTemplate.update("update board set name = ? where id = ?", "Спринт " + sprintNum, primaryBoardId);
+
+        boolean hasBoardArchivedAt = hasColumn("board", "archived_at");
+        boolean hasBoardArchivedBy = hasColumn("board", "archived_by");
+        Long uid = currentUserId();
+        int movedBoards = 0;
+        for (Map<String, Object> b : boards) {
+            Long bid = ((Number) b.get("id")).longValue();
+            if (bid.equals(primaryBoardId)) continue;
+            jdbcTemplate.update("update task_item set board_id = ? where board_id = ?", primaryBoardId, bid);
+            if (hasBoardArchivedAt && hasBoardArchivedBy) {
+                jdbcTemplate.update("update board set archived_at = now(), archived_by = ? where id = ?", uid, bid);
+            } else if (hasBoardArchivedAt) {
+                jdbcTemplate.update("update board set archived_at = now() where id = ?", bid);
+            }
+            movedBoards++;
+        }
+        return Map.of("ok", true, "primaryBoardId", primaryBoardId, "movedBoards", movedBoards);
     }
 
     @PostMapping("/api/boards/rename")
@@ -1865,7 +2152,8 @@ public class LegacyDataApiController {
         String visibleProjectsSql = inClauseSql(visibleProjectIds());
         String boardCondition = switch (mode) {
             case "list" -> " and b.code like 'LIST%'";
-            case "kanban" -> " and b.code like 'KANBAN%'";
+            case "kanban" -> " and (b.code like 'KANBAN%' or b.code like 'SCRUM%')";
+            case "scrum" -> " and (b.code like 'KANBAN%' or b.code like 'SCRUM%')";
             default -> "";
         };
 
@@ -2067,7 +2355,6 @@ public class LegacyDataApiController {
                 join project p on p.id = pt.project_id
                 where pt.team_id = ?
                 order by p.id
-                limit 4
                 """,
                 (rs, rowNum) -> rs.getLong("id"),
                 teamId
@@ -2075,7 +2362,21 @@ public class LegacyDataApiController {
         if (!ids.isEmpty()) {
             return ids;
         }
-        return jdbcTemplate.query("select id from project order by id limit 4", (rs, rowNum) -> rs.getLong("id"));
+        return jdbcTemplate.query("select id from project order by id", (rs, rowNum) -> rs.getLong("id"));
+    }
+
+    private List<Long> visibleProjectIdsSafe() {
+        try {
+            List<Long> ids = visibleProjectIds();
+            if (ids != null && !ids.isEmpty()) return ids;
+        } catch (Exception ignored) {
+            // fallback below
+        }
+        try {
+            return jdbcTemplate.query("select id from project order by id", (rs, rowNum) -> rs.getLong("id"));
+        } catch (Exception ignored) {
+            return List.of(-1L);
+        }
     }
 
     private String inClauseSql(List<Long> ids) {
@@ -2103,6 +2404,118 @@ public class LegacyDataApiController {
                 tableName, columnName
         );
         return c != null && c > 0;
+    }
+
+    private boolean hasTable(String tableName) {
+        Integer c = jdbcTemplate.queryForObject(
+                """
+                select count(*)
+                from information_schema.tables
+                where table_schema = current_schema()
+                  and table_name = ?
+                """,
+                Integer.class,
+                tableName
+        );
+        return c != null && c > 0;
+    }
+
+    private Map<String, Object> kanbanBoardsFallback(String project) {
+        boolean withProjectFilter = project != null && !project.isBlank();
+        String visibleProjectsSql = withProjectFilter ? null : inClauseSql(visibleProjectIdsSafe());
+        String sql = """
+                select b.id, b.name
+                from board b
+                join project p on p.id = b.project_id
+                where 1=1
+                """ + (withProjectFilter
+                ? " and (lower(cast(p.code as text)) = lower(?) or lower(cast(p.name as text)) = lower(?) or cast(p.id as text) = ?) "
+                : " and b.project_id in (" + visibleProjectsSql + ") ")
+                + " order by b.id";
+        List<Map<String, Object>> boards = withProjectFilter
+                ? jdbcTemplate.queryForList(sql, project, project, project)
+                : jdbcTemplate.queryForList(sql);
+        List<Map<String, Object>> outBoards = new ArrayList<>();
+        for (Map<String, Object> b : boards) {
+            Long boardId = ((Number) b.get("id")).longValue();
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("id", boardId);
+            row.put("name", b.get("name"));
+            row.put("stages", List.of("Очередь", "В работе", "Тестирование", "Готово"));
+            row.put("sprintStartedAt", null);
+            row.put("sprintFinishedAt", null);
+            row.put("tasksSource", "/api/kanban/tasks?boardId=" + boardId + (withProjectFilter ? "&project=" + project : ""));
+            row.put("archivedTasks", List.of());
+            outBoards.add(row);
+        }
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("boards", outBoards);
+        return out;
+    }
+
+    private Map<String, Object> kanbanTasksFallback(Long boardId, String project) {
+        boolean withProjectFilter = project != null && !project.isBlank();
+        String visibleProjectsSql = withProjectFilter ? null : inClauseSql(visibleProjectIdsSafe());
+        String sql = """
+                select
+                    t.id,
+                    coalesce(t.public_id, t.task_code, 'TSK-' || t.id::text) as public_id,
+                    t.board_id,
+                    t.name,
+                    t.description,
+                    t.priority,
+                    t.due_date,
+                    t.start_date,
+                    t.end_date,
+                    t.stage,
+                    p.name as project_name,
+                    p.project_type as project_type,
+                    u.full_name as assignee_name,
+                    u.avatar_file as assignee_avatar
+                from task_item t
+                join board b on b.id = t.board_id
+                join project p on p.id = b.project_id
+                left join app_user u on u.id = t.assignee_id
+                where 1=1
+                """ + (withProjectFilter
+                ? " and (lower(cast(p.code as text)) = lower(?) or lower(cast(p.name as text)) = lower(?) or cast(p.id as text) = ?) "
+                : " and b.project_id in (" + visibleProjectsSql + ") ")
+                + (boardId != null ? " and t.board_id = ? " : "")
+                + " order by t.id";
+        List<Map<String, Object>> rows;
+        if (withProjectFilter && boardId != null) rows = jdbcTemplate.queryForList(sql, project, project, project, boardId);
+        else if (withProjectFilter) rows = jdbcTemplate.queryForList(sql, project, project, project);
+        else if (boardId != null) rows = jdbcTemplate.queryForList(sql, boardId);
+        else rows = jdbcTemplate.queryForList(sql);
+        List<Map<String, Object>> tasks = new ArrayList<>();
+        for (Map<String, Object> row : rows) {
+            Map<String, Object> t = new LinkedHashMap<>();
+            t.put("id", ((Number) row.get("id")).longValue());
+            t.put("displayId", row.get("public_id"));
+            t.put("boardId", ((Number) row.get("board_id")).longValue());
+            t.put("name", row.get("name"));
+            t.put("description", row.get("description"));
+            t.put("priority", row.get("priority"));
+            t.put("dueDate", toUiDate(row.get("due_date")));
+            t.put("startDate", toUiDate(row.get("start_date")));
+            t.put("endDate", toUiDate(row.get("end_date")));
+            t.put("assignee", row.get("assignee_name"));
+            t.put("assigneeAvatar", row.get("assignee_avatar"));
+            t.put("stage", row.get("stage"));
+            t.put("storyPoints", null);
+            t.put("timeEstimateHours", null);
+            t.put("project", row.get("project_name"));
+            t.put("projectType", row.get("project_type"));
+            t.put("archivedDate", null);
+            t.put("dependencyTaskId", null);
+            t.put("dependencyType", null);
+            t.put("dependencyLabel", null);
+            t.put("subtasks", List.of());
+            tasks.add(t);
+        }
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("tasks", tasks);
+        return out;
     }
 
     private String toHumanProjectRole(String role) {

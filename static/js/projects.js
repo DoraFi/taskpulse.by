@@ -39,6 +39,7 @@ function initProjectsPage() {
                 }
                 grid.innerHTML = filtered.map((p) => {
                     const isKanban = p.view === 'kanban';
+                    const isScrum = p.view === 'scrum';
                     const projectCode = encodeURIComponent(p.code || '');
                     const totalTasks = Number(p.taskCount ?? 0);
                     const doneTasks = Number(p.doneCount ?? 0);
@@ -51,15 +52,17 @@ function initProjectsPage() {
                     const href = (orgId && teamId && projectCode)
                         ? (isKanban
                             ? `/o/${encodeURIComponent(orgId)}/t/${encodeURIComponent(teamId)}/p/${projectCode}/kanban?project=${projectCode}`
-                            : `/o/${encodeURIComponent(orgId)}/t/${encodeURIComponent(teamId)}/p/${projectCode}/boards?project=${projectCode}`)
-                        : (isKanban ? `/kanban?project=${projectCode}` : `/boards?project=${projectCode}`);
-                    const mode = isKanban ? 'Kanban' : 'List';
+                            : isScrum
+                                ? `/o/${encodeURIComponent(orgId)}/t/${encodeURIComponent(teamId)}/p/${projectCode}/scrum?project=${projectCode}`
+                                : `/o/${encodeURIComponent(orgId)}/t/${encodeURIComponent(teamId)}/p/${projectCode}/boards?project=${projectCode}`)
+                        : (isKanban ? `/kanban?project=${projectCode}` : isScrum ? `/scrum?project=${projectCode}` : `/boards?project=${projectCode}`);
+                    const mode = isKanban ? 'Kanban' : isScrum ? 'Scrum' : 'List';
                     const chip = doneTasks > 0 ? 'Активен' : 'Новый';
                     const projectAction = isArchiveView
                         ? `<button class="button-basic project-action" data-project-code="${p.code}" data-action="restore-project">Восстановить</button>`
                         : `<button class="button-secondary project-action" data-project-code="${p.code}" data-action="archive-project">В архив</button>`;
                     return `
-                        <a class="project-card ${isKanban ? 'project-card--kanban' : 'project-card--list'}" href="${href}" aria-label="Открыть проект">
+                        <a class="project-card ${(isKanban || isScrum) ? 'project-card--kanban' : 'project-card--list'}" href="${href}" aria-label="Открыть проект">
                             <div class="project-card__body">
                                 <div class="project-card__head">
                                     <div class="project-card__icon" aria-hidden="true">${(p.code || 'PRJ').slice(0,1)}</div>
