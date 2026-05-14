@@ -303,8 +303,6 @@ public class LegacyDataApiController {
         try {
         boolean withProjectFilter = project != null && !project.isBlank();
         String visibleProjectsSql = withProjectFilter ? null : inClauseSql(visibleProjectIdsSafe());
-        boolean hasBoardStageTable = hasTable("board_stage");
-        boolean hasTaskItemTable = hasTable("task_item");
         boolean hasSprintStartedAt = hasColumn("board", "sprint_started_at");
         boolean hasSprintFinishedAt = hasColumn("board", "sprint_finished_at");
         boolean hasProjectPublicId = hasColumn("project", "public_id");
@@ -319,7 +317,7 @@ public class LegacyDataApiController {
                 : " and (lower(p.code) = lower(?) or lower(p.name) = lower(?) or cast(p.id as text) = ?) ")
                 : " and b.project_id in (" + visibleProjectsSql + ") ";
         String sql = """
-                select b.id, b.name
+                select b.id, b.name, p.project_type
                 """ + (hasSprintStartedAt ? ", b.sprint_started_at" : ", null as sprint_started_at")
                 + (hasSprintFinishedAt ? ", b.sprint_finished_at" : ", null as sprint_finished_at") + """
                 from board b
@@ -339,7 +337,7 @@ public class LegacyDataApiController {
         } catch (Exception ex) {
             if (!withProjectFilter) throw ex;
             String fallbackSql = """
-                    select b.id, b.name
+                    select b.id, b.name, p.project_type
                     """ + (hasSprintStartedAt ? ", b.sprint_started_at" : ", null as sprint_started_at")
                     + (hasSprintFinishedAt ? ", b.sprint_finished_at" : ", null as sprint_finished_at") + """
                     from board b
@@ -353,41 +351,9 @@ public class LegacyDataApiController {
         List<Map<String, Object>> resultBoards = new ArrayList<>();
         for (Map<String, Object> b : boards) {
             Long boardId = ((Number) b.get("id")).longValue();
-            List<String> stages = new ArrayList<>();
-            if (hasBoardStageTable) {
-                try {
-                    stages = jdbcTemplate.query(
-                            """
-                            select bs.stage_name
-                            from board_stage bs
-                            where bs.board_id = ?
-                            order by bs.position
-                            """,
-                            (rs, rowNum) -> rs.getString("stage_name"),
-                            boardId);
-                } catch (Exception ignored) {
-                    stages = new ArrayList<>();
-                }
-            }
-            if (stages.isEmpty() && hasTaskItemTable) {
-                try {
-                    stages = jdbcTemplate.query(
-                            """
-                            select distinct coalesce(nullif(t.stage,''), 'Очередь') as st
-                            from task_item t
-                            where t.board_id = ?
-                            order by st
-                            """,
-                            (rs, rowNum) -> rs.getString("st"),
-                            boardId);
-                } catch (Exception ignored) {
-                    stages = new ArrayList<>();
-                }
-            }
-            stages.sort(Comparator.comparingInt(this::stageOrder).thenComparing(s -> s));
-            if (stages.isEmpty()) {
-                stages = List.of("Очередь", "В работе", "Тестирование", "Готово");
-            }
+            String projectType = b.get("project_type") == null ? "kanban" : String.valueOf(b.get("project_type"));
+            String boardName = b.get("name") == null ? "" : String.valueOf(b.get("name"));
+            List<String> stages = resolveBoardStages(boardId, projectType, boardName);
             Map<String, Object> row = new LinkedHashMap<>();
             row.put("id", boardId);
             row.put("name", b.get("name"));
@@ -1346,7 +1312,7 @@ public class LegacyDataApiController {
                 projectId, boardCode
         );
         if (isKanban) {
-            List<String> stages = List.of("Очередь", "В работе", "Готово");
+            List<String> stages = loadDefaultBoardStages(projectType, name);
             for (int i = 0; i < stages.size(); i++) {
                 jdbcTemplate.update(
                         "insert into board_stage(board_id, stage_name, position) values (?, ?, ?)",
@@ -2421,7 +2387,7 @@ public class LegacyDataApiController {
         boolean withProjectFilter = project != null && !project.isBlank();
         String visibleProjectsSql = withProjectFilter ? null : inClauseSql(visibleProjectIdsSafe());
         String sql = """
-                select b.id, b.name
+                select b.id, b.name, p.project_type
                 from board b
                 join project p on p.id = b.project_id
                 where 1=1
@@ -2438,7 +2404,9 @@ public class LegacyDataApiController {
             Map<String, Object> row = new LinkedHashMap<>();
             row.put("id", boardId);
             row.put("name", b.get("name"));
-            row.put("stages", List.of("Очередь", "В работе", "Тестирование", "Готово"));
+            String projectType = b.get("project_type") == null ? "kanban" : String.valueOf(b.get("project_type"));
+            String boardName = b.get("name") == null ? "" : String.valueOf(b.get("name"));
+            row.put("stages", resolveBoardStages(boardId, projectType, boardName));
             row.put("sprintStartedAt", null);
             row.put("sprintFinishedAt", null);
             row.put("tasksSource", "/api/kanban/tasks?boardId=" + boardId + (withProjectFilter ? "&project=" + project : ""));
@@ -2536,6 +2504,97 @@ public class LegacyDataApiController {
             case "Отложено" -> 6;
             default -> 99;
         };
+    }
+
+    /**
+     * Этапы доски: {@code board_stage}, иначе уникальные стадии из задач, иначе шаблоны сидов.
+     */
+    private List<String> resolveBoardStages(Long boardId, String projectType, String boardName) {
+        boolean hasBoardStageTable = hasTable("board_stage");
+        boolean hasTaskItemTable = hasTable("task_item");
+        List<String> stages = new ArrayList<>();
+        if (hasBoardStageTable) {
+            try {
+                stages = jdbcTemplate.query(
+                        """
+                                select bs.stage_name
+                                from board_stage bs
+                                where bs.board_id = ?
+                                order by bs.position
+                                """,
+                        (rs, rowNum) -> rs.getString("stage_name"),
+                        boardId);
+            } catch (Exception ignored) {
+                stages = new ArrayList<>();
+            }
+        }
+        if (stages.isEmpty() && hasTaskItemTable) {
+            try {
+                stages = jdbcTemplate.query(
+                        """
+                                select distinct coalesce(nullif(t.stage,''), 'Очередь') as st
+                                from task_item t
+                                where t.board_id = ?
+                                order by st
+                                """,
+                        (rs, rowNum) -> rs.getString("st"),
+                        boardId);
+            } catch (Exception ignored) {
+                stages = new ArrayList<>();
+            }
+        }
+        stages.sort(Comparator.comparingInt(this::stageOrder).thenComparing(s -> s));
+        if (stages.isEmpty()) {
+            String pt = projectType == null || projectType.isBlank() ? "kanban" : projectType;
+            String bn = boardName == null ? "" : boardName;
+            stages = loadDefaultBoardStages(pt, bn);
+        }
+        return stages;
+    }
+
+    /**
+     * Этапы доски из seed_board_stage_template (имя доски) или seed_stage_template (тип проекта), иначе дефолт Kanban.
+     */
+    private List<String> loadDefaultBoardStages(String projectType, String boardName) {
+        String pt = projectType == null || projectType.isBlank() ? "kanban" : projectType;
+        String bn = boardName == null ? "" : boardName;
+        if (hasTable("seed_board_stage_template")) {
+            try {
+                List<String> fromBoard = jdbcTemplate.query(
+                        """
+                                select stage_name
+                                from seed_board_stage_template
+                                where project_type = ?
+                                  and board_name = ?
+                                order by position_no
+                                """,
+                        (rs, rowNum) -> rs.getString("stage_name"),
+                        pt,
+                        bn);
+                if (!fromBoard.isEmpty()) {
+                    return new ArrayList<>(fromBoard);
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        if (hasTable("seed_stage_template")) {
+            try {
+                List<String> fromType = jdbcTemplate.query(
+                        """
+                                select stage_name
+                                from seed_stage_template
+                                where project_type = ?
+                                order by position_no
+                                """,
+                        (rs, rowNum) -> rs.getString("stage_name"),
+                        pt);
+                if (!fromType.isEmpty()) {
+                    return new ArrayList<>(fromType);
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        return new ArrayList<>(List.of("Очередь", "В работе", "Тестирование", "Готово"));
     }
 
     private Map<String, Object> activityRow(String key, String value) {

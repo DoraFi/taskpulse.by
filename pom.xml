@@ -84,6 +84,19 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+            <!-- repair при checksum mismatch: .\mvnw.cmd flyway:repair "-Dflyway.url=..." "-Dflyway.user=..." "-Dflyway.password=..." -->
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <configuration>
+                    <locations>
+                        <location>classpath:db/migration</location>
+                    </locations>
+                    <url>${flyway.url:jdbc:postgresql://localhost:5432/taskpulse}</url>
+                    <user>${flyway.user:postgres}</user>
+                    <password>${flyway.password:655650}</password>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

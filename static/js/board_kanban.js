@@ -40,10 +40,22 @@
 
     const SCRUM_BACKLOG_PRIORITY_KEY = 'backlog';
 
+    const SCRUM_SPRINT_WORKFLOW_STAGES = Object.freeze(new Set(['Очередь', 'В работе', 'Тестирование', 'Готово', 'Отложено']));
+
+    function scrumSprintStages(board) {
+        const all = Array.isArray(board?.stages) ? board.stages.map(s => String(s).trim()) : [];
+        const sprint = all.filter(s => SCRUM_SPRINT_WORKFLOW_STAGES.has(s));
+        return sprint.length ? sprint : ['Очередь', 'В работе', 'Тестирование', 'Готово'];
+    }
+
     function taskBelongsToScrumBacklog(board, task) {
         const raw = String(task?.stage ?? '').trim();
         if (!raw) return true;
-        return !board.stages.includes(raw);
+        if (SCRUM_SPRINT_WORKFLOW_STAGES.has(raw)) return false;
+        if (SCRUM_BACKLOG_COLUMNS.some(c => c.stage === raw || (c.legacyAliases || []).includes(raw))) return true;
+        const mapped = SCRUM_BACKLOG_LEGACY[raw];
+        if (mapped && SCRUM_BACKLOG_COLUMNS.some(c => c.stage === mapped)) return true;
+        return true;
     }
 
     function effectiveScrumBacklogColumnStage(task) {
@@ -551,7 +563,7 @@
         const board = {
             id: newId,
             name: name && name.trim() ? name.trim() : `Доска ${newId}`,
-            stages: ['Очередь', 'В работе', 'Готово'],
+            stages: ['Очередь', 'В работе', 'Тестирование', 'Готово'],
             archivedTasks: []
         };
         kanbanBoards.push(board);
@@ -596,7 +608,7 @@
             const stagesFromTasks = Array.from(
                 new Set(kanbanTasks.filter(t => Number(t.boardId) === id).map(t => t.stage).filter(Boolean))
             );
-            const stages = stagesFromTasks.length ? stagesFromTasks : ['Очередь', 'В работе', 'Готово'];
+            const stages = stagesFromTasks.length ? stagesFromTasks : ['Очередь', 'В работе', 'Тестирование', 'Готово'];
             kanbanBoards.push({
                 id,
                 name: `Доска ${id}`,
@@ -623,6 +635,15 @@
             });
         });
         ensureBoardsForTasks();
+    }
+
+    function sortKanbanStageNames(stages) {
+        const order = (name) => {
+            const n = String(name || '');
+            const m = { Новая: 1, Очередь: 2, 'В работе': 3, Тестирование: 4, Готово: 5, Отложено: 6 };
+            return m[n] ?? 99;
+        };
+        return [...stages].sort((a, b) => order(a) - order(b) || String(a).localeCompare(String(b), 'ru'));
     }
 
     function loadKanbanFromLocalStorage() {
@@ -721,7 +742,6 @@
         }
         kanbanTasks = [];
         kanbanBoards.forEach(b => {
-            if (!Array.isArray(b.stages) || b.stages.length === 0) b.stages = ['Очередь', 'В работе', 'Готово'];
             if (!Array.isArray(b.archivedTasks)) b.archivedTasks = [];
         });
 
@@ -748,6 +768,22 @@
         }
         applyArchivedTasksMapToState();
         migrateKanbanData();
+        kanbanBoards.forEach(b => {
+            if (!Array.isArray(b.stages)) b.stages = [];
+            const known = new Set(b.stages.map(s => String(s)));
+            kanbanTasks.filter(t => Number(t.boardId) === Number(b.id)).forEach(t => {
+                const st = (t.stage && String(t.stage).trim()) || 'Очередь';
+                if (!known.has(st)) {
+                    b.stages.push(st);
+                    known.add(st);
+                }
+            });
+            if (!b.stages.length) {
+                b.stages = ['Очередь', 'В работе', 'Тестирование', 'Готово'];
+            } else {
+                b.stages = sortKanbanStageNames(b.stages);
+            }
+        });
         normalizeScrumBoardsForView();
     }
 
@@ -1145,7 +1181,8 @@
     function createColumnsHeader(board, boardIndex, tasksForBoard) {
         const row = document.createElement('div');
         row.className = 'kanban-columns-head';
-        board.stages.forEach((stage, idx) => {
+        const headStages = isScrumView() ? scrumSprintStages(board) : board.stages;
+        headStages.forEach((stage, idx) => {
             const el = document.createElement('div');
             el.className = 'kanban-column-head';
             const count = tasksForBoard.filter(t => t.stage === stage).length;
@@ -1154,7 +1191,7 @@
                 createKanbanStageGroup({
                     stageName: stage,
                     childEl: el,
-                    withSeparator: idx !== board.stages.length - 1
+                    withSeparator: idx !== headStages.length - 1
                 })
             );
         });
@@ -1863,8 +1900,9 @@
         const restored = { ...task };
         delete restored.archivedDate;
         delete restored.archivedReason;
-        if (!restored.stage || !board.stages.includes(restored.stage)) {
-            restored.stage = board.stages[0] || 'Очередь';
+        const stagesPool = isScrumView() ? scrumSprintStages(board) : board.stages;
+        if (!restored.stage || !stagesPool.includes(restored.stage)) {
+            restored.stage = stagesPool[0] || 'Очередь';
         }
         board.archivedTasks.splice(idx, 1);
         kanbanTasks.push(restored);
@@ -1886,8 +1924,9 @@
         delete copy.archivedDate;
         delete copy.archivedReason;
         copy.boardId = board.id;
-        if (!copy.stage || !board.stages.includes(copy.stage)) {
-            copy.stage = board.stages[0] || 'Очередь';
+        const stagesPool = isScrumView() ? scrumSprintStages(board) : board.stages;
+        if (!copy.stage || !stagesPool.includes(copy.stage)) {
+            copy.stage = stagesPool[0] || 'Очередь';
         }
         kanbanTasks.push(copy);
         saveKanbanToLocalStorage();
@@ -1937,7 +1976,8 @@
         const stagesRow = document.createElement('div');
         stagesRow.className = 'kanban-stages-row';
 
-        board.stages.forEach((stage, idx) => {
+        const rowStages = isScrumView() ? scrumSprintStages(board) : board.stages;
+        rowStages.forEach((stage, idx) => {
             const col = document.createElement('div');
             col.className = 'kanban-stage-col';
 
@@ -1965,7 +2005,7 @@
                 createKanbanStageGroup({
                     stageName: stage,
                     childEl: col,
-                    withSeparator: idx !== board.stages.length - 1
+                    withSeparator: idx !== rowStages.length - 1
                 })
             );
         });
@@ -3148,10 +3188,11 @@
             attachScrumSprintControls(sprintHeader, board);
             const sprintBody = document.createElement('div');
             sprintBody.className = 'board-card-collapsible kanban-tables-body';
-            board.stages.forEach((stage, idx) => {
+            const sprintStages = scrumSprintStages(board);
+            sprintStages.forEach((stage, idx) => {
                 const stageTasks = sprintTasksOnly.filter(t => t.stage === stage);
                 sprintBody.appendChild(createKanbanStageTable(board, boardIndex, stage, stageTasks));
-                if (idx !== board.stages.length - 1) {
+                if (idx !== sprintStages.length - 1) {
                     const hr = document.createElement('div');
                     hr.className = 'kanban-divider';
                     sprintBody.appendChild(hr);
