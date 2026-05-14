@@ -439,6 +439,10 @@ async function loadPage(url) {
                     currentContent.innerHTML = newContent.innerHTML;
                     currentContent.style.opacity = '1';
                     history.pushState({}, '', url);
+                    const t = doc.title && doc.title.trim();
+                    if (t) {
+                        document.title = t;
+                    }
                     
                     executeInlineScripts(currentContent);
                     
