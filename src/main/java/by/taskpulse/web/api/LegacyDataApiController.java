@@ -984,6 +984,8 @@ public class LegacyDataApiController {
                 select
                     t.id, t.task_code, t.name, t.stage, t.priority, t.due_date, t.created_at, t.updated_at,
                     t.story_points, t.estimate_hours,
+                    coalesce(t.description, '') as description,
+                    coalesce(p.project_type, 'list') as project_type,
                     a.full_name as assignee_name,
                     a.avatar_file as assignee_avatar,
                     c.full_name as creator_name,
@@ -1002,14 +1004,19 @@ public class LegacyDataApiController {
                     Map<String, Object> m = new LinkedHashMap<>();
                     String dueDate = toUiDate(rs.getDate("due_date"));
                     String stage = rs.getString("stage");
+                    m.put("taskDbId", rs.getLong("id"));
                     m.put("id", rs.getString("task_code") != null ? rs.getString("task_code") : "TSK-" + rs.getLong("id"));
                     m.put("name", rs.getString("name"));
+                    m.put("stage", stage);
+                    m.put("description", rs.getString("description"));
+                    m.put("projectType", rs.getString("project_type"));
                     m.put("status", toLegacyStatus(stage));
                     m.put("dueDate", dueDate);
                     m.put("completedDate", "Готово".equals(stage) ? toUiDate(rs.getDate("updated_at")) : null);
                     m.put("priority", rs.getString("priority"));
                     m.put("createdDate", toUiDate(rs.getDate("created_at")));
                     m.put("complexity", rs.getObject("story_points") != null ? rs.getInt("story_points") : 3);
+                    m.put("storyPoints", rs.getObject("story_points") != null ? rs.getInt("story_points") : null);
                     String estimate = rs.getObject("estimate_hours") != null ? formatEstimateHours(rs.getBigDecimal("estimate_hours")) : "8";
                     m.put("timeEstimate", estimate + "ч");
                     m.put("creator", rs.getString("creator_name"));
@@ -1032,6 +1039,8 @@ public class LegacyDataApiController {
                 select
                     t.id, t.task_code, t.name, t.stage, t.priority, t.due_date, t.created_at, t.updated_at,
                     t.story_points, t.estimate_hours,
+                    coalesce(t.description, '') as description,
+                    coalesce(p.project_type, 'list') as project_type,
                     a.full_name as assignee_name,
                     a.avatar_file as assignee_avatar,
                     c.full_name as creator_name,
@@ -1055,14 +1064,19 @@ public class LegacyDataApiController {
                     Map<String, Object> m = new LinkedHashMap<>();
                     String dueDate = toUiDate(rs.getDate("due_date"));
                     String stage = rs.getString("stage");
+                    m.put("taskDbId", rs.getLong("id"));
                     m.put("id", rs.getString("task_code") != null ? rs.getString("task_code") : "TSK-" + rs.getLong("id"));
                     m.put("name", rs.getString("name"));
+                    m.put("stage", stage);
+                    m.put("description", rs.getString("description"));
+                    m.put("projectType", rs.getString("project_type"));
                     m.put("status", toLegacyStatus(stage));
                     m.put("dueDate", dueDate);
                     m.put("completedDate", null);
                     m.put("priority", rs.getString("priority"));
                     m.put("createdDate", toUiDate(rs.getDate("created_at")));
                     m.put("complexity", rs.getObject("story_points") != null ? rs.getInt("story_points") : 3);
+                    m.put("storyPoints", rs.getObject("story_points") != null ? rs.getInt("story_points") : null);
                     String estimate = rs.getObject("estimate_hours") != null ? formatEstimateHours(rs.getBigDecimal("estimate_hours")) : "8";
                     m.put("timeEstimate", estimate + "ч");
                     m.put("creator", rs.getString("creator_name"));
@@ -1363,10 +1377,8 @@ public class LegacyDataApiController {
         return "lower(regexp_replace(replace(btrim(coalesce(" + col + ", '')), chr(160), ' '), '[[:space:]]+', ' ', 'g'))";
     }
 
-    /** Сдвиг бакетов бэклога при старте спринта: по всем доскам проекта. Нормализация NBSP, пробелов, похожих названий. */
     private int shiftScrumBacklogBucketsForProject(long projectId) {
         String n = normStageSql("t.stage");
-        /* «Следующий спринт» и синонимы → Очередь; фразы с «следующ…»+«сприн…» (в т.ч. «в следующий спринт»); исключаем «через N» и «…вперёд». */
         String sql = "update task_item t set stage = case "
                 + "when " + n + " in ('следующий спринт', 'на уточнении', 'готовность к планированию', 'кандидаты в спринт', "
                 + "'планирование спринта') then 'Очередь' "
@@ -1385,10 +1397,7 @@ public class LegacyDataApiController {
         return jdbcTemplate.update(sql, projectId);
     }
 
-    /**
-     * Дополнительно к {@link #shiftScrumBacklogBucketsForProject}: ловит нестандартные строки stage
-     * (другие пробелы, окончания), где есть «следующ» и «сприн», плюс явные синонимы колонки.
-     */
+
     private int promoteNextSprintLikeStagesToQueue(long projectId) {
         String s = "lower(trim(replace(coalesce(t.stage, ''), chr(160), ' ')))";
         String sql = "update task_item t set stage = 'Очередь' "
@@ -1407,7 +1416,6 @@ public class LegacyDataApiController {
         return jdbcTemplate.update(sql, projectId);
     }
 
-    /** Явное совпадение с канонической колонкой «Следующий спринт» после trim/NBSP (без regexp_replace). */
     private int promoteExactNextSprintLabelToQueue(long projectId) {
         return jdbcTemplate.update(
                 """
@@ -1450,7 +1458,6 @@ public class LegacyDataApiController {
         return maxNum;
     }
 
-    /** После старта спринта: «Спринт N»; N+1 если только что завершённый спринт (есть sprint_finished_at). */
     private int renameSprintBoardsForStartedSprint(long projectId, long teamId, boolean incrementAfterCompletedSprint) {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(
                 """
@@ -2206,9 +2213,14 @@ public class LegacyDataApiController {
         List<Map<String, Object>> todo = jdbcTemplate.query(
                 """
                 select
+                    t.id as task_db_id,
                     coalesce(t.public_id, t.task_code, 'TSK-' || t.id::text) as task_public_id,
                     t.name,
                     p.name as project_name,
+                    p.code as project_code,
+                    coalesce(p.project_type, 'list') as project_type,
+                    coalesce(t.description, '') as description,
+                    coalesce(t.stage, 'Очередь') as stage_name,
                     t.due_date,
                     t.priority
                 from task_item t
@@ -2223,9 +2235,14 @@ public class LegacyDataApiController {
                 """,
                 (rs, rowNum) -> {
                     Map<String, Object> row = new LinkedHashMap<>();
+                    row.put("taskDbId", rs.getLong("task_db_id"));
                     row.put("id", rs.getString("task_public_id"));
                     row.put("name", rs.getString("name"));
                     row.put("project", rs.getString("project_name"));
+                    row.put("projectCode", rs.getString("project_code"));
+                    row.put("projectType", rs.getString("project_type"));
+                    row.put("description", rs.getString("description"));
+                    row.put("stage", rs.getString("stage_name"));
                     row.put("dueDate", toUiDate(rs.getDate("due_date")));
                     row.put("priority", rs.getString("priority"));
                     return row;

@@ -968,6 +968,15 @@ function createBoardTable(board, tasks, boardIndex) {
 
                     const nameSpan = document.createElement('span');
                     nameSpan.textContent = task.name;
+                    nameSpan.style.cursor = 'pointer';
+                    nameSpan.title = 'Открыть карточку задачи';
+                    nameSpan.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (typeof window.tpOpenTaskDetailModal === 'function') {
+                            window.tpOpenTaskDetailModal(task);
+                        }
+                    });
                     topRow.appendChild(nameSpan);
 
                     let subtasksList = null;
@@ -1163,6 +1172,15 @@ function createTimelineTaskCard(task, boardIndex) {
     const nameSpan = document.createElement('span');
     nameSpan.className = 'timeline-task-card__name';
     nameSpan.textContent = task.name;
+    nameSpan.style.cursor = 'pointer';
+    nameSpan.title = 'Открыть карточку задачи';
+    nameSpan.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (typeof window.tpOpenTaskDetailModal === 'function') {
+            window.tpOpenTaskDetailModal(task);
+        }
+    });
 
     row.appendChild(checkboxLabel);
     row.appendChild(nameSpan);

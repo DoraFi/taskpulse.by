@@ -155,6 +155,14 @@ function createCell(col, task, tab) {
             const nameP = document.createElement('p');
             nameP.className = 'task-name';
             nameP.textContent = task.name;
+            nameP.style.cursor = 'pointer';
+            nameP.title = 'Открыть карточку задачи';
+            nameP.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (typeof window.tpOpenTaskDetailModal !== 'function') return;
+                if (task.taskDbId == null) return;
+                window.tpOpenTaskDetailModal(task);
+            });
             div.appendChild(nameP);
             break;
         case 'status':
@@ -1041,6 +1049,17 @@ function initTasksPage() {
     initFilters();
     initTabs();
     initMoreActions();
+    window.tpRefreshTasksPage = async function tpRefreshTasksPage() {
+        if (!document.getElementById('tasks-grid')) return;
+        const tab = document.querySelector('.tab-btn.active')?.dataset.tab || 'assigned';
+        if (tab === 'assigned') {
+            await loadAssignedTasks();
+        } else {
+            await loadTasks();
+        }
+        hydrateFilterCheckboxesFromDb();
+        renderTasks(tab);
+    };
     loadCurrentUser().then(() => Promise.all([loadTasks(), loadAssignedTasks()]).then(() => {
         hydrateFilterCheckboxesFromDb();
         renderTasks('assigned');

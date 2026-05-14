@@ -42,6 +42,18 @@
         return m ? m[1].replace(',', '.') : '';
     }
 
+    function resolveTaskDbId(task) {
+        if (!task) return null;
+        if (task.taskDbId != null && task.taskDbId !== '') {
+            const n = Number(task.taskDbId);
+            if (Number.isFinite(n) && n > 0) return n;
+        }
+        if (typeof task.id === 'number' && Number.isFinite(task.id) && task.id > 0) return task.id;
+        const n2 = Number(task.id);
+        if (Number.isFinite(n2) && n2 > 0) return n2;
+        return null;
+    }
+
     function uiDueToIso(due) {
         if (!due) return null;
         if (typeof due !== 'string') due = String(due);
@@ -372,7 +384,7 @@
                 e.preventDefault();
                 e.stopPropagation();
                 const attachmentId = Number(btn.getAttribute('data-attachment-id'));
-                if (!attachmentId || !currentTask?.id) {
+                if (!attachmentId || !resolveTaskDbId(currentTask)) {
                     safeShowToast('Не удалось определить вложение для удаления');
                     return;
                 }
@@ -387,7 +399,7 @@
                     return;
                 }
                 safeShowToast('Вложение удалено');
-                const refreshed = await fetchTaskAttachments(currentTask.id);
+                const refreshed = await fetchTaskAttachments(resolveTaskDbId(currentTask));
                 renderUploadedAttachments(refreshed);
             });
             host.dataset.deleteBind = '1';
@@ -435,14 +447,17 @@
     }
 
     window.tpOpenTaskDetailModal = function tpOpenTaskDetailModal(task) {
-        if (!task || !task.id) return;
+        const dbId = resolveTaskDbId(task);
+        if (!task || dbId == null) return;
         currentTask = task;
 
         const overlay = document.getElementById('taskDetailModal');
         if (!overlay) return;
 
         applyModeUI(task.projectType || 'kanban', task);
-        const displayId = task.displayId || task.publicId || task.taskCode || 'TSK-?';
+        const displayId = task.displayId || task.publicId || task.taskCode
+            || (typeof task.id === 'string' && task.id.trim() ? task.id.trim() : '')
+            || ('#' + dbId);
         const titleEl = document.getElementById('taskDetailTitle');
         if (titleEl) titleEl.textContent = `${displayId} · ${task.name || ''}`;
 
@@ -503,7 +518,7 @@
 
         selectedFiles = [];
         renderAttachmentHint();
-        fetchTaskAttachments(task.id).then(renderUploadedAttachments).catch(() => renderUploadedAttachments([]));
+        fetchTaskAttachments(resolveTaskDbId(task)).then(renderUploadedAttachments).catch(() => renderUploadedAttachments([]));
 
         openModal(overlay);
     };
@@ -641,11 +656,13 @@
                 const estimateHours = hoursRaw ? Number(hoursRaw) : null;
 
                 try {
+                    const tid = resolveTaskDbId(currentTask);
+                    if (tid == null) throw new Error('task id');
                     const res = await fetch(apiUrl('/kanban/tasks/update'), {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            taskId: currentTask.id,
+                            taskId: tid,
                             name,
                             description,
                             stage,
@@ -666,16 +683,27 @@
                     }
 
                     safeShowToast('Изменения сохранены');
-                    const uploadResult = await uploadAttachments(currentTask.id);
+                    const uploadResult = await uploadAttachments(tid);
                     if (uploadResult.failed > 0) safeShowToast(`Не загрузилось файлов: ${uploadResult.failed}`);
-                    const refreshed = await fetchTaskAttachments(currentTask.id);
-                    renderUploadedAttachments(refreshed);
+                    const attachmentList = await fetchTaskAttachments(tid);
+                    renderUploadedAttachments(attachmentList);
                     closeModal(overlay);
                     currentTask = null;
-                    if (typeof window.tpRefreshKanban === 'function') {
-                        await window.tpRefreshKanban();
-                    } else if (typeof window.tpRefreshBoardList === 'function') {
-                        await window.tpRefreshBoardList();
+                    let navRefreshed = false;
+                    if (document.getElementById('tasks-grid') && typeof window.tpRefreshTasksPage === 'function') {
+                        await window.tpRefreshTasksPage();
+                        navRefreshed = true;
+                    }
+                    if (!navRefreshed && document.getElementById('indexTodoTasks') && typeof window.tpRefreshIndexPage === 'function') {
+                        await window.tpRefreshIndexPage();
+                        navRefreshed = true;
+                    }
+                    if (!navRefreshed) {
+                        if (typeof window.tpRefreshKanban === 'function') {
+                            await window.tpRefreshKanban();
+                        } else if (typeof window.tpRefreshBoardList === 'function') {
+                            await window.tpRefreshBoardList();
+                        }
                     }
                 } catch (err) {
                     console.error(err);

@@ -33,25 +33,93 @@ function navigateTo(url) {
     else window.location.href = url;
 }
 
+function escapeIndexHtml(s) {
+    if (s == null || s === '') return '';
+    return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function indexTodoTaskForModal(t) {
+    if (!t || t.taskDbId == null) return null;
+    const pt = String(t.projectType || 'list').toLowerCase();
+    return {
+        taskDbId: t.taskDbId,
+        id: t.taskDbId,
+        displayId: t.id,
+        name: t.name,
+        project: t.project,
+        projectType: pt === 'scrum' ? 'scrum' : (pt === 'kanban' ? 'kanban' : 'list'),
+        stage: t.stage || 'Очередь',
+        priority: t.priority || 'обычный',
+        dueDate: t.dueDate,
+        description: t.description || ''
+    };
+}
+
+function wireIndexTodoClicks(grid, todo) {
+    if (!grid || !Array.isArray(todo)) return;
+    grid.querySelectorAll('.index-todo-row').forEach((row) => {
+        row.addEventListener('click', (e) => {
+            if (e.target.closest('button,a')) return;
+            const idx = Number(row.getAttribute('data-todo-idx'));
+            const task = todo[idx];
+            const payload = indexTodoTaskForModal(task);
+            if (payload && typeof window.tpOpenTaskDetailModal === 'function') {
+                window.tpOpenTaskDetailModal(payload);
+            }
+        });
+    });
+}
+
 function initIndexPage() {
-    fetch(apiUrl('/index/summary'))
+    const grid = document.getElementById('indexTodoTasks');
+    if (!grid) return Promise.resolve();
+
+    window.tpRefreshIndexPage = async function tpRefreshIndexPage() {
+        if (!document.getElementById('indexTodoTasks')) return;
+        await initIndexPage();
+    };
+
+    resolveContextBasePath().then((base) => {
+        if (!base) return;
+        const hrefByNav = {
+            'tasks-all': `${base}/tasks`,
+            'tasks-history': `${base}/tasks`,
+            'tasks-calendar': `${base}/tasks`,
+            'projects-team': `${base}/projects`
+        };
+        document.querySelectorAll('[data-index-nav]').forEach((el) => {
+            const key = el.getAttribute('data-index-nav');
+            const href = hrefByNav[key];
+            if (!href) return;
+            el.onclick = (e) => {
+                e.preventDefault();
+                navigateTo(href);
+            };
+        });
+    });
+
+    return fetch(apiUrl('/index/summary'))
         .then(r => r.ok ? r.json() : Promise.reject(new Error('index summary failed')))
         .then(data => {
-            const grid = document.getElementById('indexTodoTasks');
-            if (grid) {
+            const gridEl = document.getElementById('indexTodoTasks');
+            if (gridEl) {
                 const todo = Array.isArray(data.todo) ? data.todo : [];
                 if (todo.length === 0) {
-                    grid.innerHTML = '<div class="empty-message">Пока нет задач к выполнению</div>';
+                    gridEl.innerHTML = '<div class="empty-message">Пока нет задач к выполнению</div>';
                 } else {
-                    grid.innerHTML = todo.slice(0, 7).map(task => {
+                    gridEl.innerHTML = todo.slice(0, 7).map((task, idx) => {
                         const overdue = isOverdueDate(task.dueDate);
                         const dueClass = isAttentionDate(task.dueDate) ? 'pink' : 'light-gray';
                         return `
-                                <div class="grid-row">
+                                <div class="grid-row index-todo-row" data-todo-idx="${idx}" role="button" tabindex="0" style="cursor:pointer">
                                     <div class="col-task">
                                         <div class="basic-and-signature">
-                                            <p class="text-basic">${task.name || ''}</p>
-                                            <p class="text-signature">${task.project || ''}</p>
+                                            <p class="text-basic">${escapeIndexHtml(task.name || '')}</p>
+                                            <p class="text-signature">${escapeIndexHtml(task.project || '')}</p>
                                         </div>
                                     </div>
                                     <div class="col-date">
@@ -63,6 +131,7 @@ function initIndexPage() {
                                 </div>
                             `;
                     }).join('');
+                    wireIndexTodoClicks(gridEl, todo);
                 }
             }
 
@@ -134,25 +203,6 @@ function initIndexPage() {
             }
         })
         .catch(err => console.error(err));
-
-    resolveContextBasePath().then((base) => {
-        if (!base) return;
-        const hrefByNav = {
-            'tasks-all': `${base}/tasks`,
-            'tasks-history': `${base}/tasks`,
-            'tasks-calendar': `${base}/tasks`,
-            'projects-team': `${base}/projects`
-        };
-        document.querySelectorAll('[data-index-nav]').forEach((el) => {
-            const key = el.getAttribute('data-index-nav');
-            const href = hrefByNav[key];
-            if (!href) return;
-            el.onclick = (e) => {
-                e.preventDefault();
-                navigateTo(href);
-            };
-        });
-    });
 }
 
 function statusName(status) {
