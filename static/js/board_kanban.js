@@ -71,7 +71,9 @@
     }
 
     function extractSprintNumber(name) {
-        const m = String(name || '').match(/спринт\s*(\d+)/i);
+        const raw = String(name || '').replace(/\u00a0/g, ' ').replace(/\u202f/g, ' ');
+        let m = raw.match(/спринт\s*№?\s*(\d+)/i);
+        if (!m) m = raw.match(/sprint\s*#?\s*(\d+)/i);
         if (!m) return null;
         const n = Number(m[1]);
         return Number.isFinite(n) && n > 0 ? n : null;
@@ -128,10 +130,21 @@
         const res = await fetch(apiUrl(path), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload || {})
+            body: JSON.stringify(payload || {}),
+            cache: 'no-store'
         });
-        if (!res.ok) throw new Error(path);
-        return res.json().catch(() => ({}));
+        let data = {};
+        try {
+            data = await res.json();
+        } catch {
+            data = {};
+        }
+        if (!res.ok) {
+            const base = data.message || data.error || (typeof data.status === 'string' ? data.status : null);
+            const detail = typeof data.detail === 'string' && data.detail.trim() ? `: ${data.detail.trim()}` : '';
+            throw new Error((base || `Запрос не выполнен (${res.status})`) + detail);
+        }
+        return data;
     }
 
     function scopedApiUrl(url) {
@@ -701,7 +714,7 @@
         const project = params.get('project');
         const boardsUrl = project ? apiUrl(`/kanban/boards?project=${encodeURIComponent(project)}`) : apiUrl('/kanban/boards');
         const fetchBoards = async () => {
-            const r = await fetch(boardsUrl);
+            const r = await fetch(boardsUrl, { cache: 'no-store' });
             if (!r.ok) {
                 const txt = await r.text().catch(() => '');
                 throw new Error(`boards ${r.status}: ${txt || 'empty response'}`);
@@ -731,7 +744,7 @@
         }
         if (project && !kanbanBoards.length) {
             try {
-                const fallback = await fetch(apiUrl('/kanban/boards'));
+                const fallback = await fetch(apiUrl('/kanban/boards'), { cache: 'no-store' });
                 if (fallback.ok) {
                     const fallbackData = await fallback.json();
                     const allBoards = Array.isArray(fallbackData?.boards) ? fallbackData.boards : [];
@@ -750,7 +763,7 @@
         const sources = new Set(boardSources.length ? boardSources : [defaultSource]);
         const seenTasks = new Set();
         for (const url of sources) {
-            const tRes = await fetch(url);
+            const tRes = await fetch(url, { cache: 'no-store' });
             if (!tRes.ok) {
                 const txt = await tRes.text().catch(() => '');
                 kanbanLoadError = `Ошибка загрузки задач (${tRes.status}) для ${url}: ${txt || 'empty response'}`;
@@ -2381,6 +2394,7 @@
         if (!boardId || !action) return;
         const endpoint = action === 'finish' ? '/scrum/sprints/finish' : '/scrum/sprints/start';
         const isStart = action === 'start';
+        const isFinish = action === 'finish';
         if (isStart) {
             const accepted = await new Promise(resolve => {
                 showKanbanConfirmModal({
@@ -2393,14 +2407,43 @@
             });
             if (!accepted) return;
         }
+        if (isFinish) {
+            const accepted = await new Promise(resolve => {
+                showKanbanConfirmModal({
+                    title: 'Завершить спринт',
+                    message: 'Незавершённые задачи этапов «Очередь», «В работе», «Тестирование» вернутся в «Следующий спринт». Завершённые («Готово») останутся в колонке «Готово».',
+                    confirmLabel: 'Завершить',
+                    onConfirm: () => resolve(true),
+                    onCancel: () => resolve(false)
+                });
+            });
+            if (!accepted) return;
+        }
         try {
             btn.disabled = true;
-            await postScrumSprintApi(endpoint, { boardId });
+            const sprintPayload = await postScrumSprintApi(endpoint, { boardId });
             await loadKanbanData();
+            if (isStart && sprintPayload?.sprintStartedAt) {
+                kanbanBoards.forEach(b => {
+                    b.sprintStartedAt = sprintPayload.sprintStartedAt;
+                    b.sprintFinishedAt = sprintPayload.sprintFinishedAt != null ? sprintPayload.sprintFinishedAt : null;
+                });
+            } else if (isFinish && sprintPayload && (sprintPayload.sprintStartedAt != null || sprintPayload.sprintFinishedAt != null)) {
+                kanbanBoards.forEach(b => {
+                    if (sprintPayload.sprintStartedAt !== undefined) b.sprintStartedAt = sprintPayload.sprintStartedAt;
+                    if (sprintPayload.sprintFinishedAt !== undefined) b.sprintFinishedAt = sprintPayload.sprintFinishedAt;
+                });
+            }
             renderCurrentView();
-            showToast(action === 'finish' ? 'Спринт завершён' : 'Спринт начат');
-        } catch {
-            showToast('Не удалось обновить состояние спринта');
+            let toastMsg = isFinish ? 'Спринт завершён' : 'Спринт начат';
+            if (isStart && sprintPayload?.needsBacklogShift && Number(sprintPayload?.backlogTasksUpdated || 0) === 0) {
+                toastMsg = 'Спринт начат, но ни одна задача не сдвинута по этапам (0 обновлений). '
+                    + 'Частая причина: в базе уже «идёт спринт» — сначала нажмите «Завершить спринт», затем снова «Начать». '
+                    + 'Или название этапа в task_item.stage не совпадает с колонкой «Следующий спринт».';
+            }
+            showToast(toastMsg);
+        } catch (err) {
+            showToast(err?.message || 'Не удалось обновить состояние спринта');
         } finally {
             btn.disabled = false;
         }

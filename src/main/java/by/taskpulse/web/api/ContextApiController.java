@@ -187,6 +187,21 @@ public class ContextApiController {
         return legacy.toggleSubtask(payload);
     }
 
+    @PostMapping("/api/scrum/sprints/start")
+    public Map<String, Object> scrumSprintStartAuto(@RequestBody Map<String, Object> payload) {
+        return legacy.startSprint(payload);
+    }
+
+    @PostMapping("/api/scrum/sprints/finish")
+    public Map<String, Object> scrumSprintFinishAuto(@RequestBody Map<String, Object> payload) {
+        return legacy.finishSprint(payload);
+    }
+
+    @PostMapping("/api/scrum/boards/consolidate")
+    public Map<String, Object> scrumBoardsConsolidateAuto(@RequestBody Map<String, Object> payload) {
+        return legacy.consolidateScrumBoards(payload);
+    }
+
     @GetMapping("/api/tasks")
     public List<Map<String, Object>> tasksAuto() {
         return legacy.tasksTable();
@@ -470,6 +485,30 @@ public class ContextApiController {
                                              @RequestBody Map<String, Object> payload) {
         ensureContextAccess(orgId, teamId);
         return legacy.toggleSubtask(payload);
+    }
+
+    @PostMapping("/o/{orgId}/t/{teamId}/api/scrum/sprints/start")
+    public Map<String, Object> scrumSprintStart(@PathVariable String orgId,
+                                               @PathVariable String teamId,
+                                               @RequestBody Map<String, Object> payload) {
+        ensureContextAccess(orgId, teamId);
+        return legacy.startSprint(payload);
+    }
+
+    @PostMapping("/o/{orgId}/t/{teamId}/api/scrum/sprints/finish")
+    public Map<String, Object> scrumSprintFinish(@PathVariable String orgId,
+                                                @PathVariable String teamId,
+                                                @RequestBody Map<String, Object> payload) {
+        ensureContextAccess(orgId, teamId);
+        return legacy.finishSprint(payload);
+    }
+
+    @PostMapping("/o/{orgId}/t/{teamId}/api/scrum/boards/consolidate")
+    public Map<String, Object> scrumBoardsConsolidate(@PathVariable String orgId,
+                                                      @PathVariable String teamId,
+                                                      @RequestBody Map<String, Object> payload) {
+        ensureContextAccess(orgId, teamId);
+        return legacy.consolidateScrumBoards(payload);
     }
 
     @GetMapping("/o/{orgId}/t/{teamId}/api/tasks")

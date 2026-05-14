@@ -20,6 +20,7 @@ D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\repository\Ta
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\repository\TaskItemRepository.java
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\repository\UserRepository.java
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\TaskpulseApplication.java
+D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\web\api\ApiExceptionControllerAdvice.java
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\web\api\ContextApiController.java
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\web\api\LegacyDataApiController.java
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\web\PageController.java
