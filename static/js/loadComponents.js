@@ -221,7 +221,7 @@ function updateActiveMenuItem() {
 }
 
 function initNavigation() {
-    document.querySelectorAll('.nav-link[data-href]').forEach(link => {
+    document.querySelectorAll('.nav-link[data-href], a.logo-link[data-href]').forEach(link => {
         link.removeEventListener('click', handleNavigationClick);
         link.addEventListener('click', handleNavigationClick);
     });
@@ -294,14 +294,21 @@ function initAsideCollapseToggle() {
 }
 
 function handleNavigationClick(e) {
-    e.preventDefault();
+    if (e.defaultPrevented) return;
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     const url = this.dataset.href;
-    
+    if (!url || url === '#') return;
+
+    e.preventDefault();
     if (isCurrentPage(url)) {
-        console.log('Уже на этой странице, переход не требуется');
+        if (typeof window.initIndexPage === 'function' && document.getElementById('indexTodoTasks')) {
+            window.initIndexPage({ forceFetch: true });
+        } else {
+            console.log('Уже на этой странице, переход не требуется');
+        }
         return;
     }
-    
+
     loadPage(url);
 }
 
@@ -385,7 +392,7 @@ function executeInlineScripts(container) {
 async function loadPage(url) {
     console.log('=== loadPage начат ===', url);
     try {
-        const response = await fetch(url);
+        const response = await fetch(url, { cache: 'no-store', credentials: 'same-origin' });
         const html = await response.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
@@ -453,7 +460,7 @@ async function loadPage(url) {
                     
                     if (currentContent.querySelector('#indexTodoTasks') && typeof window.initIndexPage === 'function') {
                         console.log('Вызов initIndexPage');
-                        window.initIndexPage();
+                        window.initIndexPage({ forceFetch: true });
                     }
                     if (currentContent.querySelector('.projects-grid') && typeof window.initProjectsPage === 'function') {
                         console.log('Вызов initProjectsPage');

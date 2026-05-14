@@ -522,6 +522,10 @@
                     return;
                 }
 
+                if (typeof window.tpPrefetchIndexSummary === 'function') {
+                    window.tpPrefetchIndexSummary().catch(() => {});
+                }
+
                 const taskId = Number(data.taskId || 0);
                 if (taskId > 0 && selectedFiles.length) {
                     const uploadResult = await uploadAttachments(taskId);

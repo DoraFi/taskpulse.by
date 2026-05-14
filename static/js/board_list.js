@@ -18,6 +18,12 @@ function apiUrl(path) {
     return `${getApiBasePath()}${path}`;
 }
 
+function prefetchIndexSummaryAfterTaskMutation() {
+    if (typeof window.tpPrefetchIndexSummary === 'function') {
+        window.tpPrefetchIndexSummary().catch(() => {});
+    }
+}
+
 function currentProjectCodeFromUrl() {
     const params = new URLSearchParams(window.location.search);
     return params.get('project') || null;
@@ -811,6 +817,7 @@ function createAddTaskForm(boardId, boardIndex) {
                 const err = await res.json().catch(() => ({}));
                 throw new Error(err.error || 'Ошибка создания задачи');
             }
+            prefetchIndexSummaryAfterTaskMutation();
             await loadBoardsData();
             showToast(`Задача "${taskName}" создана в доске "${board.name}"`);
             hideTagAndReset();
@@ -1741,7 +1748,11 @@ function restoreFromArchive(boardIndex, taskId) {
             dependencyType: task.dependencyType || null,
             dependencyTaskId: task.dependencyTaskId || null
         })
-    }).catch(() => {});
+    })
+        .then((res) => {
+            if (res.ok) prefetchIndexSummaryAfterTaskMutation();
+        })
+        .catch(() => {});
     board.archivedTasks.splice(idx, 1);
     delete task.archivedDate;
     task.stage = 'Очередь';
@@ -2533,6 +2544,7 @@ function createTaskItem(task, boardIndex, taskIndex) {
             });
             if (!res.ok) throw new Error('update failed');
             task.stage = stage;
+            prefetchIndexSummaryAfterTaskMutation();
             if (typeof window.tpRefreshBoardList === 'function') await window.tpRefreshBoardList();
             showToast(stage === 'Готово' ? 'Задача отмечена как выполненная' : 'Задача возвращена в работу');
         } catch (err) {

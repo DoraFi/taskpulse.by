@@ -682,6 +682,10 @@
                         throw new Error(data.error || 'Ошибка сохранения');
                     }
 
+                    if (typeof window.tpPrefetchIndexSummary === 'function') {
+                        window.tpPrefetchIndexSummary().catch(() => {});
+                    }
+
                     safeShowToast('Изменения сохранены');
                     const uploadResult = await uploadAttachments(tid);
                     if (uploadResult.failed > 0) safeShowToast(`Не загрузилось файлов: ${uploadResult.failed}`);

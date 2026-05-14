@@ -2,6 +2,7 @@ package by.taskpulse.web.api;
 
 import by.taskpulse.auth.CurrentUserProvider;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,6 +20,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,6 +39,8 @@ import org.springframework.web.server.ResponseStatusException;
 public class LegacyDataApiController {
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private static final DateTimeFormatter INDEX_RECENT_TIME = DateTimeFormatter.ofPattern("HH:mm");
+    private static final DateTimeFormatter INDEX_RECENT_FALLBACK = DateTimeFormatter.ofPattern("dd.MM HH:mm");
     private static final Path TASK_UPLOADS_ROOT = Paths.get("static", "uploads", "tasks");
     private final JdbcTemplate jdbcTemplate;
     private final CurrentUserProvider currentUserProvider;
@@ -553,7 +557,7 @@ public class LegacyDataApiController {
                 "select stage as old_stage, archived_at as old_archived_at from task_item where id = ?",
                 taskId
         );
-        String oldStage = oldRow.get("old_stage") == null ? null : String.valueOf(oldRow.get("old_stage"));
+        String oldStage = oldRow.get("old_stage") == null ? null : String.valueOf(oldRow.get("old_stage")).trim();
         Object oldArchivedAt = oldRow.get("old_archived_at");
         Object nextArchivedAt = "Готово".equals(stage)
                 ? ("Готово".equals(oldStage) ? oldArchivedAt : Timestamp.from(Instant.now()))
@@ -574,11 +578,29 @@ public class LegacyDataApiController {
         if (updated == 0) {
             throw new IllegalArgumentException("Задача не найдена");
         }
-        jdbcTemplate.update(
-                "insert into task_status_history(task_id, changed_by, old_stage, new_stage, changed_at) values (?, ?, ?, ?, now())",
-                taskId, uid, null, stage
-        );
+        if (!Objects.equals(oldStage, stage)) {
+            insertTaskStatusHistory(taskId, uid, oldStage, stage, "user");
+        }
         return Map.of("ok", true);
+    }
+
+    private void insertTaskStatusHistory(long taskId, long changedBy, String oldStage, String newStage, String changeSource) {
+        String src = changeSource == null || changeSource.isBlank() ? "user" : changeSource;
+        if (hasColumn("task_status_history", "change_source")) {
+            jdbcTemplate.update(
+                    """
+                    insert into task_status_history(task_id, changed_by, old_stage, new_stage, changed_at, change_source)
+                    values (?, ?, ?, ?, now(), ?)
+                    """,
+                    taskId, changedBy, oldStage, newStage, src);
+        } else {
+            if ("sprint_auto".equals(src)) {
+                return;
+            }
+            jdbcTemplate.update(
+                    "insert into task_status_history(task_id, changed_by, old_stage, new_stage, changed_at) values (?, ?, ?, ?, now())",
+                    taskId, changedBy, oldStage, newStage);
+        }
     }
 
     @PostMapping("/api/kanban/subtasks/toggle")
@@ -720,6 +742,7 @@ public class LegacyDataApiController {
                 Long.class,
                 taskCode
         );
+        insertTaskStatusHistory(taskId, creatorId, null, stage, "user");
         if (taskId != null && dependencyTaskIdNum != null && dependencyTaskIdNum.longValue() > 0
                 && dependencyType != null && !dependencyType.isBlank()) {
             saveTaskDependency(taskId, dependencyTaskIdNum.longValue(), dependencyType);
@@ -807,7 +830,7 @@ public class LegacyDataApiController {
                 """,
                 taskId, teamId
         );
-        String oldStage = String.valueOf(oldRow.get("old_stage"));
+        String oldStage = oldRow.get("old_stage") == null ? null : String.valueOf(oldRow.get("old_stage")).trim();
         Object oldArchivedAt = oldRow.get("old_archived_at");
         Object nextArchivedAt = "Готово".equals(stage)
                 ? ("Готово".equals(oldStage) ? oldArchivedAt : Timestamp.from(Instant.now()))
@@ -839,11 +862,8 @@ public class LegacyDataApiController {
             saveTaskDependency(taskId, dependencyTaskIdNum.longValue(), dependencyType);
         }
 
-        if (!stage.equals(oldStage)) {
-            jdbcTemplate.update(
-                    "insert into task_status_history(task_id, changed_by, old_stage, new_stage, changed_at) values (?, ?, ?, ?, now())",
-                    taskId, uid, oldStage, stage
-            );
+        if (!Objects.equals(oldStage, stage)) {
+            insertTaskStatusHistory(taskId, uid, oldStage, stage, "user");
         }
 
         if ("Готово".equals(stage)) {
@@ -2206,7 +2226,9 @@ public class LegacyDataApiController {
     }
 
     @GetMapping("/api/index/summary")
-    public Map<String, Object> indexSummary() {
+    public Map<String, Object> indexSummary(HttpServletResponse httpResponse) {
+        httpResponse.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+        httpResponse.setHeader("Pragma", "no-cache");
         Long uid = currentUserId();
         Long teamId = currentTeamId();
         String visibleProjectsSql = inClauseSql(visibleProjectIds());
@@ -2326,6 +2348,10 @@ public class LegacyDataApiController {
                 teamId
         );
 
+        String recentHistFilter = hasColumn("task_status_history", "change_source")
+                ? " and coalesce(h.change_source, 'user') <> 'sprint_auto' "
+                : "";
+
         List<Map<String, Object>> recentActions = jdbcTemplate.query(
                 """
                 select
@@ -2339,10 +2365,15 @@ public class LegacyDataApiController {
                 join task_item t on t.id = h.task_id
                 join board b on b.id = t.board_id
                 join project p on p.id = b.project_id
-                join app_user u on u.id = h.changed_by
+                join project_team pt on pt.project_id = p.id and pt.team_id = ?
+                left join app_user u on u.id = h.changed_by
                 where p.id in (""" + visibleProjectsSql + """
-                )
-                order by h.changed_at desc
+                )"""
+                        + recentHistFilter
+                        + """
+                  and h.changed_at <= now()
+                  and (h.old_stage is null or trim(h.old_stage) = '' or h.old_stage <> h.new_stage)
+                order by h.changed_at desc, h.id desc
                 limit 5
                 """,
                 (rs, rowNum) -> {
@@ -2352,42 +2383,11 @@ public class LegacyDataApiController {
                     row.put("name", rs.getString("task_name"));
                     row.put("project", rs.getString("project_name"));
                     row.put("status", toLegacyStatus(rs.getString("new_stage")));
-                    row.put("date", rs.getTimestamp("changed_at") == null ? "" : rs.getTimestamp("changed_at").toLocalDateTime().format(DateTimeFormatter.ofPattern("dd.MM HH:mm")));
+                    row.put("date", formatRecentActionTimestamp(rs.getTimestamp("changed_at")));
                     return row;
-                }
+                },
+                teamId
         );
-        if (recentActions.isEmpty()) {
-            recentActions = jdbcTemplate.query(
-                    """
-                    select
-                        coalesce(a.avatar_file, c.avatar_file, 'basic_avatar.png') as avatar,
-                        coalesce(t.public_id, t.task_code, 'TSK-' || t.id::text) as task_public_id,
-                        t.name as task_name,
-                        p.name as project_name,
-                        t.stage as stage_name,
-                        t.updated_at as changed_at
-                    from task_item t
-                    join board b on b.id = t.board_id
-                    join project p on p.id = b.project_id
-                    left join app_user a on a.id = t.assignee_id
-                    left join app_user c on c.id = t.creator_id
-                    where p.id in (""" + visibleProjectsSql + """
-                    )
-                    order by t.updated_at desc nulls last, t.id desc
-                    limit 5
-                    """,
-                    (rs, rowNum) -> {
-                        Map<String, Object> row = new LinkedHashMap<>();
-                        row.put("avatar", rs.getString("avatar"));
-                        row.put("id", rs.getString("task_public_id"));
-                        row.put("name", rs.getString("task_name"));
-                        row.put("project", rs.getString("project_name"));
-                        row.put("status", toLegacyStatus(rs.getString("stage_name")));
-                        row.put("date", rs.getTimestamp("changed_at") == null ? "" : rs.getTimestamp("changed_at").toLocalDateTime().format(DateTimeFormatter.ofPattern("dd.MM HH:mm")));
-                        return row;
-                    }
-            );
-        }
 
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("todo", todo);
@@ -2538,6 +2538,24 @@ public class LegacyDataApiController {
             list.add(st);
         }
         return map;
+    }
+
+    private String formatRecentActionTimestamp(Timestamp ts) {
+        if (ts == null) {
+            return "";
+        }
+        ZoneId z = ZoneId.systemDefault();
+        ZonedDateTime zdt = ts.toInstant().atZone(z);
+        LocalDate day = zdt.toLocalDate();
+        LocalDate today = LocalDate.now(z);
+        String timePart = zdt.format(INDEX_RECENT_TIME);
+        if (day.equals(today)) {
+            return "Сегодня, " + timePart;
+        }
+        if (day.equals(today.minusDays(1))) {
+            return "Вчера, " + timePart;
+        }
+        return zdt.format(INDEX_RECENT_FALLBACK);
     }
 
     private String toLegacyStatus(String stage) {

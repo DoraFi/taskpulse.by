@@ -495,32 +495,23 @@ body[data-theme="dark"] .app-container {
 
     .col-task {
         min-width: 0;
+        max-width: 100%;
 
         .basic-and-signature {
             display: flex;
             flex-direction: column;
             gap: $space-2;
-        }
-
-        .id-name {
-            display: flex;
-            gap: $space-4;
             min-width: 0;
         }
 
-        #tasknumber {
-            flex-shrink: 0;
-            white-space: nowrap;
+        .index-recent-title-line {
+            @include ellipsis-single-line(100%);
+            margin: 0;
         }
 
-        #taskname {
+        .index-recent-project-line {
             @include ellipsis-single-line(100%);
-            flex: 1;
-            min-width: 0;
-        }
-
-        #projectname {
-            @include ellipsis-single-line(100%);
+            margin: 0;
         }
     }
 

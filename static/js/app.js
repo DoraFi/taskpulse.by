@@ -94,3 +94,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 })();
+
+(function () {
+    function indexSummaryUrl() {
+        const m = window.location.pathname.match(/^\/o\/([^/]+)\/t\/([^/]+)/);
+        if (m) return `/o/${m[1]}/t/${m[2]}/api/index/summary`;
+        return '/api/index/summary';
+    }
+
+    window.tpPrefetchIndexSummary = async function tpPrefetchIndexSummary() {
+        try {
+            const u = `${indexSummaryUrl()}?_=${Date.now()}`;
+            const r = await fetch(u, { cache: 'no-store', credentials: 'same-origin' });
+            if (!r.ok) return;
+            window._tpIndexSummaryLast = await r.json();
+            window._tpIndexSummaryLastAt = Date.now();
+        } catch (_) {
+            /* сеть / контекст — игнорируем */
+        }
+    };
+})();

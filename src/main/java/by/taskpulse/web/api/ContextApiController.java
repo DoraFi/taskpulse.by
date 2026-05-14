@@ -4,6 +4,8 @@ import by.taskpulse.auth.CurrentUserProvider;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -213,8 +215,8 @@ public class ContextApiController {
     }
 
     @GetMapping("/api/index/summary")
-    public Map<String, Object> indexSummaryAuto() {
-        return legacy.indexSummary();
+    public Map<String, Object> indexSummaryAuto(HttpServletResponse response) {
+        return legacy.indexSummary(response);
     }
 
     @GetMapping("/api/index/mini-chart")
@@ -524,9 +526,9 @@ public class ContextApiController {
     }
 
     @GetMapping("/o/{orgId}/t/{teamId}/api/index/summary")
-    public Map<String, Object> indexSummary(@PathVariable String orgId, @PathVariable String teamId) {
+    public Map<String, Object> indexSummary(@PathVariable String orgId, @PathVariable String teamId, HttpServletResponse response) {
         ensureContextAccess(orgId, teamId);
-        return legacy.indexSummary();
+        return legacy.indexSummary(response);
     }
 
     @GetMapping("/o/{orgId}/t/{teamId}/api/index/mini-chart")

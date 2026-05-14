@@ -209,7 +209,10 @@ public class JsonDatabaseSeeder implements ApplicationRunner {
                                 Timestamp.valueOf(updatedDate.atTime(16, 0))
                         );
                         jdbcTemplate.update(
-                                "insert into task_status_history(task_id, changed_by, old_stage, new_stage, changed_at) values (?, ?, ?, ?, ?)",
+                                """
+                                insert into task_status_history(task_id, changed_by, old_stage, new_stage, changed_at, change_source)
+                                values (?, ?, ?, ?, ?, 'user')
+                                """,
                                 taskId,
                                 assigneeId != null ? assigneeId : creatorId,
                                 "Очередь",

@@ -6120,38 +6120,31 @@ aside .submenu .events-grid .col-event .nav-link,
 }
 .last-actions-grid .col-task {
   min-width: 0;
+  max-width: 100%;
 }
 .last-actions-grid .col-task .basic-and-signature {
   display: flex;
   flex-direction: column;
   gap: 0.125rem;
-}
-.last-actions-grid .col-task .id-name {
-  display: flex;
-  gap: 0.25rem;
   min-width: 0;
 }
-.last-actions-grid .col-task #tasknumber {
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-.last-actions-grid .col-task #taskname {
+.last-actions-grid .col-task .index-recent-title-line {
   display: block;
   max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   vertical-align: middle;
-  flex: 1;
-  min-width: 0;
+  margin: 0;
 }
-.last-actions-grid .col-task #projectname {
+.last-actions-grid .col-task .index-recent-project-line {
   display: block;
   max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   vertical-align: middle;
+  margin: 0;
 }
 .last-actions-grid .col-status {
   flex-shrink: 0;

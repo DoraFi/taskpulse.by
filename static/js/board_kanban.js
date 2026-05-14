@@ -672,6 +672,12 @@
         if (!res.ok) throw new Error('Не удалось сохранить перемещение задачи');
     }
 
+    function prefetchIndexSummaryAfterKanbanMutation() {
+        if (typeof window.tpPrefetchIndexSummary === 'function') {
+            window.tpPrefetchIndexSummary().catch(() => {});
+        }
+    }
+
     async function persistSubtaskToggle(subtaskId, completed) {
         const res = await fetch(apiUrl('/kanban/subtasks/toggle'), {
             method: 'POST',
@@ -1601,6 +1607,7 @@
                 }
 
                 hideTagAndReset();
+                prefetchIndexSummaryAfterKanbanMutation();
                 await loadKanbanData();
                 renderCurrentView();
                 showToast(`Задача «${taskName}» создана`);
@@ -2124,7 +2131,10 @@
                 }
 
                 persistTaskMove(task.id, Number(task.boardId), task.stage, task.priority)
-                    .then(() => loadKanbanData().then(renderCurrentView))
+                    .then(() => {
+                        prefetchIndexSummaryAfterKanbanMutation();
+                        return loadKanbanData().then(renderCurrentView);
+                    })
                     .catch(() => {
                         showToast('Не удалось сохранить перемещение');
                         loadKanbanData().then(renderCurrentView);
@@ -2326,7 +2336,10 @@
                         kanbanTasks = [...without.slice(0, insertAt), ...reordered, ...without.slice(insertAt)];
                     }
                     persistTaskMove(task.id, Number(task.boardId), task.stage, task.priority)
-                        .then(() => loadKanbanData().then(renderCurrentView))
+                        .then(() => {
+                            prefetchIndexSummaryAfterKanbanMutation();
+                            return loadKanbanData().then(renderCurrentView);
+                        })
                         .catch(() => {
                             showToast('Не удалось сохранить перемещение');
                             loadKanbanData().then(renderCurrentView);
@@ -2435,6 +2448,7 @@
                 });
             }
             renderCurrentView();
+            prefetchIndexSummaryAfterKanbanMutation();
             let toastMsg = isFinish ? 'Спринт завершён' : 'Спринт начат';
             if (isStart && sprintPayload?.needsBacklogShift && Number(sprintPayload?.backlogTasksUpdated || 0) === 0) {
                 toastMsg = 'Спринт начат, но ни одна задача не сдвинута по этапам (0 обновлений). '

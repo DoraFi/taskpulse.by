@@ -74,37 +74,61 @@ function wireIndexTodoClicks(grid, todo) {
     });
 }
 
-function initIndexPage() {
-    const grid = document.getElementById('indexTodoTasks');
-    if (!grid) return Promise.resolve();
+function initIndexPage(options) {
+    const forceFetch = options && options.forceFetch === true;
+    if (forceFetch) {
+        window._tpIndexSummaryLast = null;
+        window._tpIndexSummaryLastAt = null;
+    }
+    if (!document.getElementById('indexTodoTasks')) return Promise.resolve();
 
-    window.tpRefreshIndexPage = async function tpRefreshIndexPage() {
-        if (!document.getElementById('indexTodoTasks')) return;
-        await initIndexPage();
-    };
-
-    resolveContextBasePath().then((base) => {
-        if (!base) return;
-        const hrefByNav = {
-            'tasks-all': `${base}/tasks`,
-            'tasks-history': `${base}/tasks`,
-            'tasks-calendar': `${base}/tasks`,
-            'projects-team': `${base}/projects`
-        };
-        document.querySelectorAll('[data-index-nav]').forEach((el) => {
-            const key = el.getAttribute('data-index-nav');
-            const href = hrefByNav[key];
-            if (!href) return;
-            el.onclick = (e) => {
-                e.preventDefault();
-                navigateTo(href);
+    if (!window._tpIndexNavBound) {
+        window._tpIndexNavBound = true;
+        resolveContextBasePath().then((base) => {
+            if (!base) return;
+            const hrefByNav = {
+                'tasks-all': `${base}/tasks`,
+                'tasks-history': `${base}/tasks`,
+                'tasks-calendar': `${base}/tasks`,
+                'projects-team': `${base}/projects`
             };
+            document.querySelectorAll('[data-index-nav]').forEach((el) => {
+                const key = el.getAttribute('data-index-nav');
+                const href = hrefByNav[key];
+                if (!href) return;
+                el.onclick = (e) => {
+                    e.preventDefault();
+                    navigateTo(href);
+                };
+            });
         });
-    });
+    }
 
-    return fetch(apiUrl('/index/summary'))
-        .then(r => r.ok ? r.json() : Promise.reject(new Error('index summary failed')))
-        .then(data => {
+    const usePrefetch = !forceFetch && window._tpIndexSummaryLast != null;
+    if (!usePrefetch) {
+        const loadingHtml = '<div class="empty-message">Загрузка…</div>';
+        const todoEl = document.getElementById('indexTodoTasks');
+        if (todoEl) todoEl.innerHTML = loadingHtml;
+        const recentEl = document.getElementById('indexRecentActions');
+        if (recentEl) recentEl.innerHTML = loadingHtml;
+        const eventsEl = document.querySelector('.events-grid');
+        if (eventsEl) eventsEl.innerHTML = loadingHtml;
+        const teamList = document.querySelector('.card.team .team-members-list');
+        if (teamList) teamList.innerHTML = loadingHtml;
+    }
+
+    const summaryUrl = `${apiUrl('/index/summary')}${usePrefetch ? '' : `?_=${Date.now()}`}`;
+    const dataPromise = usePrefetch
+        ? Promise.resolve(window._tpIndexSummaryLast).then((d) => {
+            window._tpIndexSummaryLast = null;
+            window._tpIndexSummaryLastAt = null;
+            return d;
+        })
+        : fetch(summaryUrl, { cache: 'no-store', credentials: 'same-origin' })
+            .then((r) => (r.ok ? r.json() : Promise.reject(new Error('index summary failed'))));
+
+    return dataPromise
+        .then((data) => {
             const gridEl = document.getElementById('indexTodoTasks');
             if (gridEl) {
                 const todo = Array.isArray(data.todo) ? data.todo : [];
@@ -157,22 +181,24 @@ function initIndexPage() {
                 if (actions.length === 0) {
                     recentRoot.innerHTML = '<div class="empty-message">Пока нет последних действий</div>';
                 } else {
-                    recentRoot.innerHTML = actions.slice(0, 5).map((a) => `
+                    recentRoot.innerHTML = actions.slice(0, 5).map((a) => {
+                        const idPart = (a.id != null && String(a.id).trim() !== '') ? String(a.id).trim() : '';
+                        const namePart = (a.name != null && String(a.name).trim() !== '') ? String(a.name).trim() : '';
+                        const titleLine = [idPart, namePart].filter(Boolean).join(' — ');
+                        return `
                         <div class="grid-row">
                             <div class="col-avatar"><img class="avatar" src="/static/source/user_img/${a.avatar || 'basic_avatar.png'}" alt=""></div>
                             <div class="col-task">
                                 <div class="basic-and-signature">
-                                    <span class="id-name">
-                                        <p class="text-basic" id="tasknumber">${a.id || ''}</p>
-                                        <p class="text-basic" id="taskname">${a.name || ''}</p>
-                                    </span>
-                                    <p class="text-signature" id="projectname">${a.project || ''}</p>
+                                    <p class="text-basic index-recent-title-line">${escapeIndexHtml(titleLine)}</p>
+                                    <p class="text-signature index-recent-project-line">${escapeIndexHtml(a.project)}</p>
                                 </div>
                             </div>
                             <div class="col-status"><span class="status ${a.status || 'neutral'}">${statusName(a.status)}</span></div>
-                            <div class="col-date"><p class="text-basic light-gray">${a.date || ''}</p></div>
+                            <div class="col-date"><p class="text-basic light-gray">${escapeIndexHtml(a.date)}</p></div>
                         </div>
-                    `).join('');
+                    `;
+                    }).join('');
                 }
             }
 
@@ -202,8 +228,16 @@ function initIndexPage() {
                 }
             }
         })
-        .catch(err => console.error(err));
+        .catch((err) => console.error(err));
 }
+
+window.tpRefreshIndexPage = async function tpRefreshIndexPage() {
+    await initIndexPage({ forceFetch: true });
+};
+
+window.initIndexPage = initIndexPage;
+
+document.addEventListener('DOMContentLoaded', () => initIndexPage({ forceFetch: true }));
 
 function statusName(status) {
     switch (status) {
@@ -265,7 +299,3 @@ function isOverdueDate(dateStr) {
     if (diff == null) return false;
     return diff < 0;
 }
-
-window.initIndexPage = initIndexPage;
-
-document.addEventListener('DOMContentLoaded', initIndexPage);
