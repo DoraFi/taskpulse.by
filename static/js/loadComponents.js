@@ -256,7 +256,6 @@ function placeAsideToggleButton(collapsed) {
     const aside = document.getElementById('aside-container');
 
     if (collapsed) {
-        // В свернутом режиме кнопка в хедере слева от логотипа.
         if (headerLeft && logo) {
             headerLeft.insertBefore(btn, logo);
         } else if (headerLeft && !btn.parentElement) {
@@ -265,7 +264,6 @@ function placeAsideToggleButton(collapsed) {
         return;
     }
 
-    // В развернутом режиме кнопка внутри бокового меню.
     if (aside) {
         let slot = aside.querySelector('.aside-collapse-corner');
         if (!slot) {
@@ -449,7 +447,7 @@ async function loadPage(url) {
                         window.initTasksPage();
                     }
                     
-                    if (currentContent.querySelector('#miniChart') && typeof window.initIndexPage === 'function') {
+                    if (currentContent.querySelector('#indexTodoTasks') && typeof window.initIndexPage === 'function') {
                         console.log('Вызов initIndexPage');
                         window.initIndexPage();
                     }

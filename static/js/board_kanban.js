@@ -26,7 +26,6 @@
         'Идеи и наброски': 'Новые задачи'
     });
 
-    /** Бэклог: промежутки по спринтам (`task.stage` в API). Заголовок в UI можно задать в `displayTitle`. */
     const SCRUM_BACKLOG_COLUMNS = Object.freeze([
         { stage: 'Новые задачи', displayTitle: null, createForm: true, legacyAliases: Object.freeze(['Неотсортированные задачи']) },
         { stage: 'Следующий спринт', displayTitle: null, createForm: false, legacyAliases: Object.freeze([]) },
@@ -198,7 +197,6 @@
         try {
             localStorage.setItem(key, JSON.stringify(value));
         } catch {
-            // ignore storage errors
         }
     }
 
@@ -588,7 +586,6 @@
     }
 
     function saveKanbanToLocalStorage() {
-        // Источник правды — API сервера, не localStorage.
     }
 
     function ensureBoardsForTasks() {
@@ -720,7 +717,6 @@
                     kanbanBoards = allBoards;
                 }
             } catch {
-                // keep empty state
             }
         }
         kanbanTasks = [];
@@ -783,7 +779,6 @@
         try {
             localStorage.setItem(KANBAN_VIEW_STORAGE_KEY, currentView);
         } catch {
-            // ignore storage errors
         }
     }
 
@@ -1960,11 +1955,10 @@
                 if (ad !== bd) return ad - bd;
                 return String(a.name || '').localeCompare(String(b.name || ''), 'ru');
             });
-            sortedStageTasks.forEach(t => list.appendChild(createKanbanTaskItem(t)));
-
             if (enableQueueCreate && stage === queueStageName) {
                 list.appendChild(createKanbanQueueTaskForm(board.id, boardIndex, priorityKey, queueStageName));
             }
+            sortedStageTasks.forEach(t => list.appendChild(createKanbanTaskItem(t)));
 
             col.appendChild(list);
             stagesRow.appendChild(
@@ -2053,7 +2047,6 @@
 
                 task.stage = toStage;
                 if (toPriorityKey === SCRUM_BACKLOG_PRIORITY_KEY) {
-                    /* бэклог: сохраняем срочность при перетаскивании между колонками */
                 } else if (toPriorityKey === 'urgent') {
                     task.priority = 'срочно';
                 } else {
@@ -2811,6 +2804,12 @@
 
         const tableWrapper = document.createElement('div');
         tableWrapper.className = 'tasks-grid-wrapper';
+        if (!isScrumView() && stageName === 'Очередь') {
+            const queueForms = document.createElement('div');
+            queueForms.className = 'kanban-stage-table-queue-forms';
+            queueForms.appendChild(createKanbanQueueTaskForm(board.id, boardIndex, 'normal'));
+            tableWrapper.appendChild(queueForms);
+        }
         const table = document.createElement('div');
         table.className = 'tasks-grid kanban-tasks-grid';
         const vis = getKanbanTableColumnVisibility(board.id);
@@ -2888,13 +2887,6 @@
 
         table.appendChild(rowsContainer);
         tableWrapper.appendChild(table);
-
-        if (!isScrumView() && stageName === 'Очередь') {
-            const queueForms = document.createElement('div');
-            queueForms.className = 'kanban-stage-table-queue-forms';
-            queueForms.appendChild(createKanbanQueueTaskForm(board.id, boardIndex, 'normal'));
-            tableWrapper.appendChild(queueForms);
-        }
 
         wrap.appendChild(tableWrapper);
         return wrap;
@@ -3010,10 +3002,10 @@
             if (ad !== bd) return ad - bd;
             return String(a.name || '').localeCompare(String(b.name || ''), 'ru');
         });
-        sortedStageTasks.forEach(t => list.appendChild(createKanbanTaskItem(t)));
         if (col.createForm) {
             list.appendChild(createKanbanQueueTaskForm(board.id, boardIndex, SCRUM_BACKLOG_PRIORITY_KEY, col.stage));
         }
+        sortedStageTasks.forEach(t => list.appendChild(createKanbanTaskItem(t)));
 
         body.appendChild(list);
         section.appendChild(body);

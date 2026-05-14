@@ -885,7 +885,6 @@ public class LegacyDataApiController {
             );
         }
 
-        // Упростим правило по подзадачам: на "Готово" отмечаем все выполненными.
         if ("Готово".equals(stage)) {
             jdbcTemplate.update("update subtask set completed = true where task_id = ?", taskId);
         }
@@ -1200,7 +1199,6 @@ public class LegacyDataApiController {
                 params.toArray()
         );
 
-        // Exclude projects without real code: they can't be opened by contextual routes.
         return rows.stream()
                 .filter(r -> r.get("code") != null && !String.valueOf(r.get("code")).isBlank())
                 .toList();
@@ -2370,7 +2368,6 @@ public class LegacyDataApiController {
             List<Long> ids = visibleProjectIds();
             if (ids != null && !ids.isEmpty()) return ids;
         } catch (Exception ignored) {
-            // fallback below
         }
         try {
             return jdbcTemplate.query("select id from project order by id", (rs, rowNum) -> rs.getLong("id"));

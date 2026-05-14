@@ -6,6 +6,7 @@ aside {
     height: calc(100vh - $space-64);
     overflow-y: auto;
     flex-shrink: 0;
+    position: relative;
 
     &::-webkit-scrollbar {
         display: none;
@@ -53,6 +54,12 @@ aside {
             font-family: inherit;
             padding: 0;
             text-align: left;
+            display: inline-block;
+            max-width: 13.25vw;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: middle;
 
             &:hover {
                 color: $green;
@@ -85,7 +92,19 @@ aside {
             margin-bottom: $space-16;
             display: block;
             text-align: left;
+            max-width: 13.25vw;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             @extend .text-basic;
+        }
+
+        .text-signature {
+            display: block;
+            max-width: 13.25vw;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
     }
 
@@ -116,4 +135,64 @@ body[data-theme="dark"] aside .submenu .nav-link {
 
 body[data-theme="dark"] aside .submenu .nav-link.active {
     color: $green;
+}
+
+.aside-collapse-toggle-btn {
+    flex-shrink: 0;
+}
+
+.aside-collapse-item {
+    margin-bottom: $space-12;
+}
+
+aside .aside-collapse-item .aside-collapse-toggle-btn {
+    display: inline-flex;
+}
+
+aside .aside-collapse-corner {
+    position: absolute;
+    bottom: $space-48;
+    right: $space-32;
+    z-index: 2;
+}
+
+aside .aside-collapse-corner .aside-collapse-toggle-btn {
+    display: inline-flex;
+}
+
+.aside-toggle-icon {
+    transition: transform 0.2s ease;
+    transform: rotate(180deg);
+    opacity: 0.5;
+}
+
+body.aside-collapsed .aside-toggle-icon {
+    transform: rotate(0deg);
+}
+
+aside#aside-container {
+    transition:
+        min-width 0.2s ease,
+        width 0.2s ease,
+        padding 0.2s ease,
+        opacity 0.2s ease;
+}
+
+body.aside-collapsed aside#aside-container {
+    min-width: 0 !important;
+    width: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+body[data-theme="dark"] .aside-collapse-toggle-btn {
+    color: $light-light-green;
+}
+
+body[data-theme="dark"] .aside-toggle-icon {
+    opacity: 0.68;
+    filter: brightness(1.12);
 }

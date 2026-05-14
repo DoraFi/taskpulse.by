@@ -91,7 +91,7 @@ function initProjectsPage() {
                                         <div class="legend"><div class="circle bg-light-gray"></div><p>Не начато</p></div>
                                     </div>
                                 </div>
-                                <div class="project-card__footer"><button class="button-basic">Открыть проект</button>${projectAction}</div>
+                                <div class="project-card__footer">${projectAction}<button class="button-basic">Открыть проект</button></div>
                             </div>
                         </a>
                     `;

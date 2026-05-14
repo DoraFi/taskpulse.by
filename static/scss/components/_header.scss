@@ -12,32 +12,76 @@
             height: $space-32;   
         }
 
-}
+    .search-panel {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 33vw;
 
-.search-panel {
-    display: flex;
-    align-items: center;
-    padding: $space-8 $space-16;
-    gap: $space-8;
-    height: $space-32;
-    width: 33vw;
+        img {
+            position: absolute;
+            left: $space-16;
+            opacity: 0.75;
+            pointer-events: none;
+        }
 
-    input {
-        border: none;
-        outline: none;
-        background: transparent;
+        input {
+            all: unset;
+            box-sizing: border-box;
+            width: 100%;
+            padding: $space-4 $space-16 $space-4 2rem;
+            background-color: $light-light-green;
+            border: $space-1 solid rgba($green, 0.5);
+            border-radius: $radius-sm;
+            transition: all 0.2s ease;
+
+            &:hover {
+                border-color: $green;
+                box-shadow: 0 0 0 $space-2 rgba($green, 0.2);
+            }
+    
+            &:focus {
+                border-color: $green;
+                box-shadow: 0 0 0 $space-2 rgba($green, 0.4);
+            }
+
+            &::placeholder {
+                color: rgba($dark-gray, 0.5);
+            }
+        }
     }
 }
 
 body[data-theme="dark"] .header {
     background: $dark-gray;
     border-bottom-color: rgba($light-gray, 0.1);
-}
 
-body[data-theme="dark"] .search-panel {
-    border-color: $light-light-green;
-}
+    .search-panel {
+        border-color: rgba($light-light-green, 0.35);
 
-body[data-theme="dark"] .search-panel input {
-    color: $light-light-green;
+        img {
+            opacity: 0.55;
+            filter: brightness(0) invert(1);
+        }
+
+        input {
+            color: $light-light-green;
+            background-color: rgba($black, 0.35);
+            border-color: rgba($green, 0.28);
+
+            &:hover {
+                border-color: $green;
+                box-shadow: 0 0 0 $space-2 rgba($green, 0.22);
+            }
+
+            &:focus {
+                border-color: $green;
+                box-shadow: 0 0 0 $space-2 rgba($green, 0.38);
+            }
+
+            &::placeholder {
+                color: rgba($light-light-green, 0.45);
+            }
+        }
+    }
 }

@@ -43,6 +43,7 @@
     justify-content: flex-end;
     align-items: stretch;
     gap: $space-16;
+    flex-wrap: wrap;
 }
 
 %tp-board-tag-executor {
@@ -74,7 +75,7 @@
     height: calc(1em + $space-8 * 2);
     gap: $space-8;
     color: $light-gray;
-    background: rgba($green, 0.15);
+    background: rgba($light-gray, 0.15);
     border-radius: $radius-sm;
 
     &::before {

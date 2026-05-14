@@ -104,7 +104,6 @@ public class AuthController {
                     userId
             );
         } catch (DataAccessException ignored) {
-            // Колонка может отсутствовать в старых схемах.
         }
 
         jdbcTemplate.update(
@@ -150,8 +149,6 @@ public class AuthController {
                 userId, orgId, teamId, projectId
         );
 
-        // Для нового проекта сразу создаём базовый набор досок и этапов.
-        // Это нужно, чтобы пользователь мог продолжить работу в интерфейсе даже на "пустом" проекте.
         createDefaultBoardsAndStages(projectId, projectCode, projectType);
 
         List<Map<String, Object>> inviteResult = new ArrayList<>();
@@ -407,7 +404,6 @@ public class AuthController {
         String src = projectName.trim();
         if (src.isEmpty()) return randomLetters(3);
 
-        // Мини-транслит для кириллицы: генерируем первые 3 латинские буквы.
         String translit = src
                 .toLowerCase(Locale.ROOT)
                 .replace('а', 'a')

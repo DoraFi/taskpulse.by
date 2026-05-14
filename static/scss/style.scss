@@ -97,7 +97,8 @@ body.theme-transition .header,
 body.theme-transition .app-container,
 body.theme-transition .card,
 body.theme-transition .tabs,
-body.theme-transition .search-panel,
+body.theme-transition .header .search-panel,
+body.theme-transition .projects-search,
 body.theme-transition aside,
 body.theme-transition .dropdown-menu,
 body.theme-transition .modal-content {
@@ -186,6 +187,7 @@ body[data-theme="dark"] {
     height: calc(100vh - $space-32);
     overflow-y: auto;
     @extend .gap-32;
+    background-color: hsl(93, 53%, 98.5%);
     animation: app-surface-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 
     .column {
@@ -196,15 +198,14 @@ body[data-theme="dark"] {
         padding-bottom: $space-48;
     }
 
-    .column:first-child,
-    .team {
-        flex-shrink: 0;
-        width: auto;
+    .column:first-child {
+        flex: 1;
+        min-width: 0;
     }
 
-    .activ-projects,
     .column:last-child {
-        flex: 1;
+        flex-shrink: 0;
+        width: clamp(17rem, 28vw, 22rem);
         min-width: 0;
     }
 
@@ -216,6 +217,10 @@ body[data-theme="dark"] {
 
     scrollbar-width: none;
     -ms-overflow-style: none;
+}
+
+body[data-theme="dark"] .app-container {
+    background-color: $black;
 }
 
 @import 'components/card';
@@ -277,7 +282,9 @@ body[data-theme="dark"] {
     display: flex;
     flex-direction: column;
     gap: $space-16;
-    width: 24vw;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 
     .grid-row {
         display: grid;
@@ -395,45 +402,84 @@ body[data-theme="dark"] {
 
 
 .column .user-img-text p {
-    @include ellipsis-single-line(10vw);
+    @include ellipsis-single-line(100%);
 }
 
-#chartRoot {
-    .mc-grid {
-        stroke: $light-gray-transperent;
-        stroke-width: 1;
+.index-card-heading-link {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: $space-8;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    border: none;
+    background: transparent;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    border-radius: $radius-sm;
+    transition: color 0.2s ease;
+
+    &:hover,
+    &:focus-visible {
+        color: $green;
     }
 
-    #miniChart text {
-        font-weight: 400 !important;
-        font-family: "SN Pro", sans-serif !important;
-        fill: $dark-gray !important;
-        line-height: 1 !important;
-        font-size: $font-size-md;
-        margin: $space-4;
+    &:focus-visible {
+        outline: none;
     }
 
-    .mc-line-me {
-        stroke: $green;
-        stroke-width: 6;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        fill: none;
+    .text-header {
+        margin: 0;
+        flex: 0 1 auto;
+        min-width: 0;
+        display: inline-block;
+    }
+}
+
+.index-card-heading-arrow {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    pointer-events: none;
+    transition: transform 0.2s ease;
+
+    img {
+        display: block;
+        width: $space-24;
+        height: auto;
+        opacity: 1;
+        transition: opacity 0.2s ease;
     }
 
-    .mc-line-team {
-        stroke: $dark-green;
-        stroke-width: 6;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        fill: none;
+    &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: url('/static/source/icons/arrow_green_move.svg') center / contain no-repeat;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        pointer-events: none;
     }
+}
 
-    .mc-point {
-        r: 6;
-        fill: $light-light-green;
-        stroke-width: 3;
-    }
+.index-card-heading-link:hover .index-card-heading-arrow,
+.index-card-heading-link:focus-visible .index-card-heading-arrow {
+    transform: translateX($space-4);
+}
+
+.index-card-heading-link:hover .index-card-heading-arrow img,
+.index-card-heading-link:focus-visible .index-card-heading-arrow img {
+    opacity: 0;
+}
+
+.index-card-heading-link:hover .index-card-heading-arrow::after,
+.index-card-heading-link:focus-visible .index-card-heading-arrow::after {
+    opacity: 1;
 }
 
 .last-actions-grid {

@@ -111,7 +111,6 @@ async function loadBoardsData() {
                 const localBoards = JSON.parse(localBoardsRaw);
                 mergeArchivedDateMap(preservedArchivedDates, collectArchivedDateMap(localBoards));
             } catch {
-                // ignore broken localStorage payload
             }
         }
         const params = new URLSearchParams(window.location.search);
@@ -263,7 +262,6 @@ function persistCurrentView() {
     try {
         localStorage.setItem(BOARD_LIST_VIEW_STORAGE_KEY, currentView);
     } catch {
-        // ignore storage errors
     }
 }
 
@@ -367,6 +365,9 @@ function renderTableView() {
         const header = createCardHeader(board, boardIndex);
         boardCard.appendChild(header);
 
+        const addTaskForm = createAddTaskForm(board.id, boardIndex);
+        boardCard.appendChild(addTaskForm);
+
         const tasks = board.tasks || [];
         const tableOrMessage = createBoardTable(board, tasks, boardIndex);
         const bodyWrap = document.createElement('div');
@@ -374,9 +375,6 @@ function renderTableView() {
         bodyWrap.appendChild(tableOrMessage);
         boardCard.appendChild(bodyWrap);
         wireBoardCardCollapse(header, board, bodyWrap);
-
-        const addTaskForm = createAddTaskForm(board.id, boardIndex);
-        boardCard.appendChild(addTaskForm);
 
         container.appendChild(boardCard);
     });
@@ -859,8 +857,8 @@ function createBoardCard(board, boardIndex, sortedTasks) {
     bodyWrap.appendChild(list);
     const addTaskForm = createAddTaskForm(board.id, boardIndex);
     card.appendChild(header);
-    card.appendChild(bodyWrap);
     card.appendChild(addTaskForm);
+    card.appendChild(bodyWrap);
     wireBoardCardCollapse(header, board, bodyWrap);
     return card;
 }
@@ -1237,6 +1235,9 @@ function renderTimelineView() {
         const header = createCardHeader(board, boardIndex);
         boardCard.appendChild(header);
 
+        const addTaskForm = createAddTaskForm(board.id, boardIndex);
+        boardCard.appendChild(addTaskForm);
+
         const bodyWrap = document.createElement('div');
         bodyWrap.className = 'board-card-collapsible';
 
@@ -1252,9 +1253,6 @@ function renderTimelineView() {
         }
         boardCard.appendChild(bodyWrap);
         wireBoardCardCollapse(header, board, bodyWrap);
-
-        const addTaskForm = createAddTaskForm(board.id, boardIndex);
-        boardCard.appendChild(addTaskForm);
 
         container.appendChild(boardCard);
     });

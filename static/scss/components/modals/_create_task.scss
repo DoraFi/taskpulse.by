@@ -80,7 +80,7 @@
         }
     }
 
-    textarea.create-task-desc {
+    &:not(.task-detail-sheet) textarea.create-task-desc {
         @include tp-textarea-skin(40vh, 43vh);
     }
 
@@ -110,7 +110,7 @@
     }
 }
 
-body[data-theme="dark"] .modal-content.create-task-modal textarea.create-task-desc {
+body[data-theme="dark"] .modal-content.create-task-modal:not(.task-detail-sheet) textarea.create-task-desc {
     @include tp-textarea-skin-dark();
 }
 

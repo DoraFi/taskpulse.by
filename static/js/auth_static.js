@@ -50,7 +50,6 @@
             var emailInput = document.getElementById('reg-email');
             var passOk = false;
             if (password) {
-                // Требуем хотя бы 1 букву и 1 цифру
                 passOk = /[A-Za-zА-Яа-яЁё]/.test(password) && /\d/.test(password) && password.length >= 8;
             }
             if (!fullName || !email || !password || !password2) {
@@ -107,7 +106,6 @@
             }
         });
 
-        // Разрешаем переход по Enter (submit формы), чтобы пользователь не “застревал”
         var registerForm = document.getElementById('registerForm');
         if (registerForm) {
             registerForm.addEventListener('submit', function (e) {
@@ -383,7 +381,6 @@
         }).filter(function (i) { return i && i.email && i.email.length > 0; });
 
         if (invalidEmails.length > 0) {
-            // Не блокируем регистрацию, просто игнорируем неверные email.
             showToast('Некоторые email для приглашений некорректны и будут пропущены.');
         }
         return invites;

@@ -34,173 +34,19 @@ function navigateTo(url) {
 }
 
 function initIndexPage() {
-    console.log('initIndexPage вызван');
-
-    (function(){
-        const root = document.getElementById('chartRoot');
-        if(root){
-            root.style.width = '100%';
-            root.style.minWidth = '0';
-            root.style.boxSizing = 'border-box';
-        }
-        const s = document.getElementById('miniChart');
-        if(s){
-            s.style.display = 'block';
-            s.style.width = '100%';
-            s.style.height = 'auto';
-            s.style.minHeight = '160px';
-            s.style.maxWidth = '100%';
-            s.style.boxSizing = 'border-box';
-            s.style.overflow = 'visible';
-        }
-    })();
-
-    (function () {
-        const svg = document.getElementById('miniChart');
-        if (!svg) {
-            console.warn('miniChart не найден');
-            return;
-        }
-
-        const linesLayer = svg.querySelector('#linesLayer');
-        const pointsLayer = svg.querySelector('#pointsLayer');
-        const xLabelsGroup = svg.querySelector('#xLabels');
-
-        const left = 100, right = 1040, top = 0, bottom = 284;
-        const usableW = right - left;
-        const stepX = usableW / 4;
-
-        function clamp(v, a, b) { return Math.max(a, Math.min(b, Number(v) || a)); }
-
-        function computeY(value, minV, maxV) {
-            const stepY = (bottom - top) / (maxV - minV);
-            return top + (maxV - clamp(value, minV, maxV)) * stepY;
-        }
-
-        function isWorkingDay(date) {
-            const dayOfWeek = date.getDay();
-            return dayOfWeek >= 1 && dayOfWeek <= 5;
-        }
-
-        function getLastWorkingDays() {
-            const today = new Date();
-            const workingDays = [];
-            let currentDate = new Date(today);
-            while (workingDays.length < 5) {
-                if (isWorkingDay(currentDate)) {
-                    workingDays.unshift(new Date(currentDate));
-                }
-                currentDate.setDate(currentDate.getDate() - 1);
-            }
-            return workingDays;
-        }
-
-        function getWeekdayName(date) {
-            const weekdays = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
-            return weekdays[date.getDay()];
-        }
-
-        function formatDateWithLeadingZero(date) {
-            const day = date.getDate();
-            const month = date.getMonth() + 1;
-            const monthStr = month < 10 ? `0${month}` : `${month}`;
-            return `${day}.${monthStr}`;
-        }
-
-        function formatLabel(date, index, totalDays) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const targetDate = new Date(date);
-            targetDate.setHours(0, 0, 0, 0);
-            const isTodayWorking = isWorkingDay(today);
-            const isLastDay = (index === totalDays - 1);
-            const isSecondLast = (index === totalDays - 2);
-            const dateStr = formatDateWithLeadingZero(targetDate);
-            const weekdayName = getWeekdayName(targetDate);
-            if (isLastDay && isTodayWorking) return `Сегодня, ${dateStr}`;
-            if (isSecondLast) return `Вчера, ${dateStr}`;
-            return `${weekdayName}, ${dateStr}`;
-        }
-
-        function drawMiniChart(team, me, opts) {
-            const workingDays = getLastWorkingDays();
-            const xLabels = workingDays.map((date, index) => formatLabel(date, index, workingDays.length));
-            opts = opts || {};
-            const minV = ('min' in opts) ? opts.min : 2;
-            const maxV = ('max' in opts) ? opts.max : 14;
-            const normalize = (arr) => {
-                const out = Array.isArray(arr) ? arr.slice(0, 5) : [];
-                while (out.length < 5) out.push(minV);
-                return out;
-            };
-            const teamA = normalize(team);
-            const meA = normalize(me);
-            const xs = [];
-            for (let i = 0; i < 5; i++) xs.push(left + i * stepX);
-            xLabelsGroup.innerHTML = '';
-            for (let i = 0; i < 5; i++) {
-                const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                t.setAttribute('x', xs[i]);
-                t.setAttribute('y', 320);
-                t.setAttribute('text-anchor', 'middle');
-                t.setAttribute('class', 'x-label');
-                t.setAttribute('font-size', '12');
-                t.textContent = xLabels[i] || '';
-                xLabelsGroup.appendChild(t);
-            }
-            const teamYs = teamA.map(v => computeY(v, minV, maxV));
-            const meYs = meA.map(v => computeY(v, minV, maxV));
-            linesLayer.innerHTML = '';
-            const makePolyline = (xs, ys, cls) => {
-                const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-                poly.setAttribute('points', xs.map((x, i) => `${x},${ys[i]}`).join(' '));
-                poly.setAttribute('class', cls);
-                poly.setAttribute('filter', 'url(#blur)');
-                linesLayer.appendChild(poly);
-            };
-            makePolyline(xs, teamYs, 'mc-line-team');
-            makePolyline(xs, meYs, 'mc-line-me');
-            pointsLayer.innerHTML = '';
-            const drawPoint = (cx, cy, color) => {
-                const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                c.setAttribute('cx', cx);
-                c.setAttribute('cy', cy);
-                c.setAttribute('r', 6);
-                c.setAttribute('fill', '#F6FBF2');
-                c.setAttribute('stroke', color);
-                c.setAttribute('stroke-width', 3);
-                pointsLayer.appendChild(c);
-            };
-            for (let i = 0; i < 5; i++) drawPoint(xs[i], teamYs[i], '#2D3229');
-            for (let i = 0; i < 5; i++) drawPoint(xs[i], meYs[i], '#61A039');
-            return { xs, teamYs, meYs, xLabels, workingDays };
-        }
-
-        window.drawMiniChart = drawMiniChart;
-
-        fetch(apiUrl('/index/mini-chart'))
-            .then(r => r.ok ? r.json() : Promise.reject(new Error('mini chart api')))
-            .then(data => {
-                drawMiniChart(data.team || [], data.me || [], {
-                    min: Number.isFinite(data.min) ? data.min : 0,
-                    max: Number.isFinite(data.max) ? data.max : 14
-                });
-            })
-            .catch(err => console.error(err));
-
-        fetch(apiUrl('/index/summary'))
-            .then(r => r.ok ? r.json() : Promise.reject(new Error('index summary failed')))
-            .then(data => {
-                const grid = document.querySelector('.tasks-to-do-grid');
-                if (grid) {
-                    const todo = Array.isArray(data.todo) ? data.todo : [];
-                    if (todo.length === 0) {
-                        grid.innerHTML = '<div class="empty-message">Пока нет задач к выполнению</div>';
-                    } else {
-                        grid.innerHTML = todo.map(task => {
-                            const overdue = isOverdueDate(task.dueDate);
-                            const dueClass = isAttentionDate(task.dueDate) ? 'pink' : 'light-gray';
-                            return `
+    fetch(apiUrl('/index/summary'))
+        .then(r => r.ok ? r.json() : Promise.reject(new Error('index summary failed')))
+        .then(data => {
+            const grid = document.getElementById('indexTodoTasks');
+            if (grid) {
+                const todo = Array.isArray(data.todo) ? data.todo : [];
+                if (todo.length === 0) {
+                    grid.innerHTML = '<div class="empty-message">Пока нет задач к выполнению</div>';
+                } else {
+                    grid.innerHTML = todo.slice(0, 7).map(task => {
+                        const overdue = isOverdueDate(task.dueDate);
+                        const dueClass = isAttentionDate(task.dueDate) ? 'pink' : 'light-gray';
+                        return `
                                 <div class="grid-row">
                                     <div class="col-task">
                                         <div class="basic-and-signature">
@@ -216,44 +62,15 @@ function initIndexPage() {
                                     </div>
                                 </div>
                             `;
-                        }).join('');
-                    }
+                    }).join('');
                 }
+            }
 
-                const statCards = document.querySelectorAll('.cards .card .text-header');
-                if (statCards.length >= 3) {
-                    if (data.assigned != null) statCards[0].textContent = String(data.assigned);
-                    if (data.inProgress != null) statCards[1].textContent = String(data.inProgress);
-                    if (data.done != null) statCards[2].textContent = String(data.done);
-                }
-
-                const projectsCard = document.querySelector('.card.activ-projects');
-                if (projectsCard && Array.isArray(data.activeProjects) && data.activeProjects.length > 0) {
-                    projectsCard.querySelectorAll('.project').forEach(el => el.remove());
-                    const projectsHtml = data.activeProjects.map((p) => `
-                        <div class="project">
-                            <div class="basic-and-signature">
-                                <p class="text-basic">${p.name || ''}</p>
-                                <p class="text-signature">${p.summary || ''}</p>
-                            </div>
-                            <div class="project-percents">
-                                <div class="done" style="width: ${p.donePercent || 0}%;">${p.donePercent || 0}%</div>
-                                <div class="inprocess" style="width: ${p.inProgressPercent || 0}%;">${p.inProgressPercent || 0}%</div>
-                                <div class="todo" style="width: ${p.queuePercent || 0}%;">${p.queuePercent || 0}%</div>
-                            </div>
-                        </div>
-                    `).join('');
-                    const legends = projectsCard.querySelector('.legends');
-                    if (legends) {
-                        legends.insertAdjacentHTML('beforebegin', projectsHtml);
-                    }
-                }
-
-                const teamCard = document.querySelector('.card.team');
-                if (teamCard && Array.isArray(data.team) && data.team.length > 0) {
-                    const teamList = teamCard.querySelector('.team-members-list');
-                    if (!teamList) return;
-                    const teamHtml = data.team.map((m) => `
+            const teamCard = document.querySelector('.card.team');
+            if (teamCard && Array.isArray(data.team) && data.team.length > 0) {
+                const teamList = teamCard.querySelector('.team-members-list');
+                if (teamList) {
+                    teamList.innerHTML = data.team.map((m) => `
                         <div class="user-img-text">
                             ${m.online ? `<div class="status-online"><img src="/static/source/user_img/${m.avatar || 'basic_avatar.png'}" alt=""></div>` : `<img src="/static/source/user_img/${m.avatar || 'basic_avatar.png'}" alt="">`}
                             <div class="basic-and-signature">
@@ -262,16 +79,16 @@ function initIndexPage() {
                             </div>
                         </div>
                     `).join('');
-                    teamList.innerHTML = teamHtml;
                 }
+            }
 
-                const recentRoot = document.getElementById('indexRecentActions');
-                if (recentRoot) {
-                    const actions = Array.isArray(data.recentActions) ? data.recentActions : [];
-                    if (actions.length === 0) {
-                        recentRoot.innerHTML = '<div class="empty-message">Пока нет последних действий</div>';
-                    } else {
-                        recentRoot.innerHTML = actions.slice(0, 5).map((a) => `
+            const recentRoot = document.getElementById('indexRecentActions');
+            if (recentRoot) {
+                const actions = Array.isArray(data.recentActions) ? data.recentActions : [];
+                if (actions.length === 0) {
+                    recentRoot.innerHTML = '<div class="empty-message">Пока нет последних действий</div>';
+                } else {
+                    recentRoot.innerHTML = actions.slice(0, 5).map((a) => `
                         <div class="grid-row">
                             <div class="col-avatar"><img class="avatar" src="/static/source/user_img/${a.avatar || 'basic_avatar.png'}" alt=""></div>
                             <div class="col-task">
@@ -287,22 +104,22 @@ function initIndexPage() {
                             <div class="col-date"><p class="text-basic light-gray">${a.date || ''}</p></div>
                         </div>
                     `).join('');
-                    }
                 }
+            }
 
-                const eventsGrid = document.querySelector('.events-grid');
-                if (eventsGrid) {
-                    const todo = Array.isArray(data.todo) ? data.todo : [];
-                    const upcoming = todo
-                        .filter(t => t && t.dueDate)
-                        .slice(0, 6);
+            const eventsGrid = document.querySelector('.events-grid');
+            if (eventsGrid) {
+                const todoList = Array.isArray(data.todo) ? data.todo : [];
+                const upcoming = todoList
+                    .filter(t => t && t.dueDate)
+                    .slice(0, 6);
 
-                    if (upcoming.length === 0) {
-                        eventsGrid.innerHTML = '<div class="empty-message">Пока нет ближайших событий</div>';
-                    } else {
-                        eventsGrid.innerHTML = upcoming.map(e => {
-                            const dueClass = isAttentionDate(e.dueDate) ? 'pink' : 'light-gray';
-                            return `
+                if (upcoming.length === 0) {
+                    eventsGrid.innerHTML = '<div class="empty-message">Пока нет ближайших событий</div>';
+                } else {
+                    eventsGrid.innerHTML = upcoming.map(e => {
+                        const dueClass = isAttentionDate(e.dueDate) ? 'pink' : 'light-gray';
+                        return `
                                 <div class="grid-row">
                                     <div class="col-event">
                                         <p class="text-basic">${e.name || ''}</p>
@@ -312,27 +129,25 @@ function initIndexPage() {
                                     </div>
                                 </div>
                             `;
-                        }).join('');
-                    }
+                    }).join('');
                 }
-            })
-            .catch(err => console.error(err));
-    })();
+            }
+        })
+        .catch(err => console.error(err));
 
     resolveContextBasePath().then((base) => {
         if (!base) return;
-        const routes = {
-            indexBtnAllTasks: `${base}/tasks`,
-            indexBtnCalendar: `${base}/tasks`,
-            indexBtnAllProjects: `${base}/projects`,
-            indexBtnAllTeam: `${base}/projects`,
-            indexBtnChartDetails: `${base}/tasks`,
-            indexBtnAllHistory: `${base}/tasks`
+        const hrefByNav = {
+            'tasks-all': `${base}/tasks`,
+            'tasks-history': `${base}/tasks`,
+            'tasks-calendar': `${base}/tasks`,
+            'projects-team': `${base}/projects`
         };
-        Object.entries(routes).forEach(([id, href]) => {
-            const btn = document.getElementById(id);
-            if (!btn) return;
-            btn.onclick = (e) => {
+        document.querySelectorAll('[data-index-nav]').forEach((el) => {
+            const key = el.getAttribute('data-index-nav');
+            const href = hrefByNav[key];
+            if (!href) return;
+            el.onclick = (e) => {
                 e.preventDefault();
                 navigateTo(href);
             };
@@ -401,7 +216,6 @@ function isOverdueDate(dateStr) {
     return diff < 0;
 }
 
-console.log('index.js загружен, initIndexPage определена:', typeof window.initIndexPage);
 window.initIndexPage = initIndexPage;
 
 document.addEventListener('DOMContentLoaded', initIndexPage);

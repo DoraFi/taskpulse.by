@@ -3,7 +3,7 @@
     gap: $space-24;
     padding: $space-8 $space-24;
     @extend .br-5;
-    @extend .border-dark-1;
+    @extend .bg-light-green;
     width: fit-content;
 }
 
@@ -15,12 +15,14 @@
 
     >.button-basic[data-tab].active {
         box-shadow: none;
-        background-color: $light-light-green;
+        background-color: rgba($green, 0.15)
     }
 
     body[data-theme="dark"] & {
         > .button-basic[data-tab].active {
-            background-color: $dark-gray;
+            background-color: rgba($green, 0.22);
+            color: $light-light-green;
+            border-color: rgba($green, 0.45);
         }
     }
 }
@@ -244,13 +246,23 @@
     }
 
     body[data-theme="dark"] & .col-priority .priority-normal {
-        color: $light-green;
+        color: rgba($light-light-green, 0.92);
+    }
+
+    body[data-theme="dark"] & .grid-row {
+        &:hover {
+            background: rgba($green, 0.08);
+        }
+
+        &.dragging-active {
+            background: rgba($green, 0.05);
+        }
     }
 }
 
 body[data-theme="dark"] .deadline {
-    color: $light-green !important;
-    background: rgba($light-gray, 0.4) !important;
+    color: rgba($light-light-green, 0.92) !important;
+    background: rgba($light-light-green, 0.1) !important;
 }
 
 .tp-table-row-fallback {

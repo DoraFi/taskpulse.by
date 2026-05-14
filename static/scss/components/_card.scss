@@ -1,6 +1,6 @@
 .card, #indexTeamMembers {
     padding: $space-32;
-    @extend .border-dark-2;
+    @extend .bg-light-green;
     @extend .br-10;
     @extend .gap-24;
     @include flex-start(column);
@@ -8,8 +8,12 @@
     will-change: transform;
 }
 
-body[data-theme="dark"] .card {
-    border-color: $light-light-green;
+body[data-theme="dark"] .card,
+body[data-theme="dark"] #indexTeamMembers {
+    background-color: $dark-gray;
+    border: none;
+    box-shadow: none;
+    color: inherit;
 }
 
 .cards>* {

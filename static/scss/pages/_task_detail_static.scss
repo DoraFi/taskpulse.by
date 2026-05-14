@@ -124,12 +124,13 @@ $task-detail-col-side: 20vw;
         max-width: 100%;
     }
 
-    textarea.create-task-desc {
+    &.modal-content.create-task-modal textarea.create-task-desc {
+        @include tp-textarea-skin(35vh, 40vh);
         flex: 1 1 auto;
-        min-height: 6rem;
+        min-height: 35vh;
         height: auto !important;
         max-height: none !important;
-        resize: none;
+        resize: vertical;
         box-sizing: border-box;
     }
 
@@ -176,8 +177,9 @@ $task-detail-col-side: 20vw;
 body[data-theme='dark'] .task-detail-sheet.modal-content.create-task-modal textarea.create-task-desc {
     @include tp-textarea-skin-dark();
     flex: 1 1 auto;
-    min-height: 6rem;
+    min-height: 35vh;
     height: auto !important;
     max-height: none !important;
-    resize: none;
+    resize: vertical;
+    box-sizing: border-box;
 }

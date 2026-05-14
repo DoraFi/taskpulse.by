@@ -80,8 +80,6 @@
                     sessionStorage.removeItem('tpOnboardingBasePath');
                     return;
                 }
-                // Если нет контекста из шага регистрации, не подставляем старую сессию.
-                // Пользователь остается на нейтральных ссылках /auth/welcome.
                 return;
             } catch (_) {}
         })();

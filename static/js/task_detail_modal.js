@@ -48,10 +48,8 @@
         due = due.trim();
         if (!due) return null;
 
-        // уже ISO
         if (due.includes('-') && due.length >= 10) return due.slice(0, 10);
 
-        // формат dd.MM или dd.MM.YYYY
         if (!due.includes('.')) return null;
         const parts = due.split('.');
         if (parts.length === 2) {
