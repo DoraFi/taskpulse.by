@@ -62,7 +62,7 @@
   border: 0.125rem solid #7F8C73;
 }
 
-.text-signature, .tasks-grid .grid-header, .legends .legend, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .timeline-due, .board-list .tasks-grid-wrapper > .empty-state, .board-reports-card .reports-stat-label, .kanban-board-card .kanban-stage-col .subtasks .checkbox-text,
+.text-signature, .tasks-grid .grid-header, .legends .legend, .scrum-backlog-panel .kanban-task-item .subtasks .checkbox-text, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .timeline-due, .board-list .tasks-grid-wrapper > .empty-state, .board-reports-card .reports-stat-label, .kanban-board-card .kanban-stage-col .subtasks .checkbox-text,
 .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text, .kanban-board-card .kanban-count-chip,
 .kanban-archive-board .kanban-count-chip, .board-list .card .list .subtasks .checkbox-text, .auth-hint, .auth-field label, .auth-step-pill, .auth-mini-card__text, .form-auth .checkbox-item .checkbox-text,
 .form-auth .checkbox-item a, .auth-motif-board__head, .auth-hero__eyebrow, .modal-content.settings-modal .settings-modal__links, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-label, .button-small {
@@ -185,7 +185,7 @@ aside .submenu .nav-link {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-aside .submenu .text-signature, aside .submenu .tasks-grid .grid-header, .tasks-grid aside .submenu .grid-header, aside .submenu .legends .legend, .legends aside .submenu .legend, aside .submenu .board-table-card .subtasks .checkbox-text, .board-table-card .subtasks aside .submenu .checkbox-text, aside .submenu .board-list .tasks-grid .subtasks-list span, .board-list .tasks-grid .subtasks-list aside .submenu span, aside .submenu .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .subtasks .subtasks-list aside .submenu .checkbox-text, aside .submenu .board-timeline-card .timeline-due, .board-timeline-card aside .submenu .timeline-due, aside .submenu .board-list .tasks-grid-wrapper > .empty-state, .board-list aside .submenu .tasks-grid-wrapper > .empty-state, aside .submenu .board-reports-card .reports-stat-label, .board-reports-card aside .submenu .reports-stat-label, aside .submenu .kanban-board-card .kanban-stage-col .subtasks .checkbox-text, .kanban-board-card .kanban-stage-col .subtasks aside .submenu .checkbox-text,
+aside .submenu .text-signature, aside .submenu .tasks-grid .grid-header, .tasks-grid aside .submenu .grid-header, aside .submenu .legends .legend, .legends aside .submenu .legend, aside .submenu .scrum-backlog-panel .kanban-task-item .subtasks .checkbox-text, .scrum-backlog-panel .kanban-task-item .subtasks aside .submenu .checkbox-text, aside .submenu .board-table-card .subtasks .checkbox-text, .board-table-card .subtasks aside .submenu .checkbox-text, aside .submenu .board-list .tasks-grid .subtasks-list span, .board-list .tasks-grid .subtasks-list aside .submenu span, aside .submenu .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .subtasks .subtasks-list aside .submenu .checkbox-text, aside .submenu .board-timeline-card .timeline-due, .board-timeline-card aside .submenu .timeline-due, aside .submenu .board-list .tasks-grid-wrapper > .empty-state, .board-list aside .submenu .tasks-grid-wrapper > .empty-state, aside .submenu .board-reports-card .reports-stat-label, .board-reports-card aside .submenu .reports-stat-label, aside .submenu .kanban-board-card .kanban-stage-col .subtasks .checkbox-text, .kanban-board-card .kanban-stage-col .subtasks aside .submenu .checkbox-text,
 aside .submenu .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text,
 .kanban-archive-board .kanban-stage-col .subtasks aside .submenu .checkbox-text, aside .submenu .kanban-board-card .kanban-count-chip, .kanban-board-card aside .submenu .kanban-count-chip,
 aside .submenu .kanban-archive-board .kanban-count-chip,
@@ -578,7 +578,7 @@ body[data-theme=dark] .header .search-panel input::placeholder {
   background: rgba(97, 160, 57, 0.5);
 }
 
-.text-signature, .tasks-grid .grid-header, .legends .legend, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .timeline-due, .board-list .tasks-grid-wrapper > .empty-state, .board-reports-card .reports-stat-label, .kanban-board-card .kanban-stage-col .subtasks .checkbox-text,
+.text-signature, .tasks-grid .grid-header, .legends .legend, .scrum-backlog-panel .kanban-task-item .subtasks .checkbox-text, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .timeline-due, .board-list .tasks-grid-wrapper > .empty-state, .board-reports-card .reports-stat-label, .kanban-board-card .kanban-stage-col .subtasks .checkbox-text,
 .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text, .kanban-board-card .kanban-count-chip,
 .kanban-archive-board .kanban-count-chip, .board-list .card .list .subtasks .checkbox-text, .auth-hint, .auth-field label, .auth-step-pill, .auth-mini-card__text, .form-auth .checkbox-item .checkbox-text,
 .form-auth .checkbox-item a, .auth-motif-board__head, .auth-hero__eyebrow, .modal-content.settings-modal .settings-modal__links, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-label, .button-small {
@@ -3333,7 +3333,7 @@ body.tp-no-enter .app-container {
     display: none !important;
   }
 }
-.board-list .tasks-grid .name::after, .board-timeline-card .subtasks .name::after, .kanban-board-card .kanban-stage-col .subtasks .name::after,
+.scrum-backlog-panel .kanban-task-item .subtasks .name::after, .board-list .tasks-grid .name::after, .board-timeline-card .subtasks .name::after, .kanban-board-card .kanban-stage-col .subtasks .name::after,
 .kanban-archive-board .kanban-stage-col .subtasks .name::after, .board-list .card .list .subtasks .name::after {
   content: "";
   display: inline-block;
@@ -3360,16 +3360,16 @@ body.tp-no-enter .app-container {
   transition: transform 0.2s ease;
 }
 
-.kanban-board-card .kanban-stage-col .subtasks .progress-line,
+.scrum-backlog-panel .kanban-task-item .subtasks .progress-line, .kanban-board-card .kanban-stage-col .subtasks .progress-line,
 .kanban-archive-board .kanban-stage-col .subtasks .progress-line, .board-list .card .list .subtasks .progress-line {
   display: flex;
   width: 100%;
 }
-.kanban-board-card .kanban-stage-col .subtasks .progress-line .completed,
+.scrum-backlog-panel .kanban-task-item .subtasks .progress-line .completed, .kanban-board-card .kanban-stage-col .subtasks .progress-line .completed,
 .kanban-archive-board .kanban-stage-col .subtasks .progress-line .completed, .board-list .card .list .subtasks .progress-line .completed {
   border-bottom: 0.19rem solid #61A039;
 }
-.kanban-board-card .kanban-stage-col .subtasks .progress-line .todo,
+.scrum-backlog-panel .kanban-task-item .subtasks .progress-line .todo, .kanban-board-card .kanban-stage-col .subtasks .progress-line .todo,
 .kanban-archive-board .kanban-stage-col .subtasks .progress-line .todo, .board-list .card .list .subtasks .progress-line .todo {
   border-bottom: 0.19rem solid rgba(127, 140, 115, 0.5);
 }
@@ -3508,23 +3508,23 @@ body.tp-no-enter .app-container {
      -moz-user-select: none;
           user-select: none;
 }
-.board-list .cards.dragging-active {
+.board-list .cards.dragging-active:not(.scrum-board-view):not(.scrum-tables-view) {
   gap: 2.25rem;
   -moz-column-count: unset;
        column-count: unset;
   display: flex;
   flex-wrap: wrap;
 }
-.board-list .cards.dragging-active .card {
+.board-list .cards.dragging-active:not(.scrum-board-view):not(.scrum-tables-view) .card {
   width: calc((100% - 2.25rem) / 2);
 }
-.board-list .tables-view.dragging-active,
-.board-list .board-view.dragging-active {
+.board-list .tables-view.dragging-active:not(.scrum-board-view):not(.scrum-tables-view),
+.board-list .board-view.dragging-active:not(.scrum-board-view):not(.scrum-tables-view) {
   -moz-column-count: 1;
        column-count: 1;
 }
-.board-list .tables-view.dragging-active .card,
-.board-list .board-view.dragging-active .card {
+.board-list .tables-view.dragging-active:not(.scrum-board-view):not(.scrum-tables-view) .card,
+.board-list .board-view.dragging-active:not(.scrum-board-view):not(.scrum-tables-view) .card {
   width: 100%;
 }
 .board-list .board-card-collapsible,
@@ -4779,6 +4779,14 @@ body[data-theme=dark] .kanban-archive-board .kanban-stage-table {
   max-width: 440px;
 }
 
+.board-list .cards.scrum-board-view > .card.scrum-queue-board {
+  flex: 0 0 clamp(280px, 34vw, 440px);
+  width: clamp(280px, 34vw, 440px);
+  min-width: 260px;
+  max-width: 440px;
+  box-sizing: border-box;
+}
+
 .scrum-sprint-board {
   flex: 0 0 auto;
   min-width: 0;
@@ -4842,7 +4850,7 @@ body[data-theme=dark] .kanban-archive-board .kanban-stage-table {
 
 .scrum-backlog-panel .scrum-backlog-accordion {
   border-radius: 0.625rem;
-  overflow: hidden;
+  overflow: visible;
   padding: 0.75rem;
   background: rgba(97, 160, 57, 0.08);
 }
@@ -4855,6 +4863,50 @@ body[data-theme=dark] .kanban-archive-board .kanban-stage-table {
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
+  min-height: 3.5rem;
+}
+
+.scrum-backlog-panel .kanban-task-item .subtasks {
+  gap: 0.375rem;
+}
+.scrum-backlog-panel .kanban-task-item .subtasks .count {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.scrum-backlog-panel .kanban-task-item .subtasks .subtasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.scrum-backlog-panel .kanban-task-item .subtasks .subtasks-list .custom-checkbox {
+  width: 1rem;
+  height: 1rem;
+  border: 0.125rem solid #2D3229;
+}
+.scrum-backlog-panel .kanban-task-item .subtasks .subtasks-list .custom-checkbox::after {
+  width: 0.5625rem;
+  height: 0.375rem;
+}
+.scrum-backlog-panel .kanban-task-item .subtasks .name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.scrum-backlog-panel .kanban-task-item .subtasks .name.open::after {
+  transform: rotate(-90deg);
+}
+body[data-theme=dark] .scrum-backlog-panel .kanban-task-item .subtasks .checkbox-item {
+  color: hsl(93, 53%, 98%);
+}
+
+body[data-theme=dark] .scrum-backlog-panel .kanban-task-item .subtasks .checkbox-item .custom-checkbox,
+body[data-theme=dark] .scrum-backlog-panel .kanban-task-item .subtasks .subtasks-list .checkbox-item .custom-checkbox {
+  border-color: hsl(93, 53%, 98%);
+}
+
+body[data-theme=dark] .scrum-backlog-panel .kanban-task-item .subtasks .checkbox-item input[type=checkbox]:checked + .custom-checkbox {
+  border-color: #61A039;
 }
 
 .scrum-sprint-board .board-card-collapsible {
@@ -4874,6 +4926,10 @@ body[data-theme=dark] .kanban-archive-board .kanban-stage-table {
   flex: 0 0 auto;
   min-width: 0;
   align-items: stretch;
+}
+
+.scrum-board-view .kanban-board-card.scrum-sprint-board:has(.board-section-collapse-toggle[aria-expanded=false]) {
+  min-width: min(100%, max(18rem, 30vw));
 }
 
 .scrum-sprint-board .scrum-sprint-inner-scroll {
@@ -4925,10 +4981,6 @@ body[data-theme=dark] .scrum-backlog-panel {
 .scrum-backlog-panel .scrum-backlog-accordion-body .tag .priority-normal {
   background-color: rgba(97, 160, 57, 0.5);
 }
-body[data-theme=dark] .scrum-backlog-panel .scrum-backlog-accordion .kanban-priority-head {
-  background: rgba(97, 160, 57, 0.1);
-}
-
 body[data-theme=dark] .scrum-backlog-panel .scrum-backlog-accordion .kanban-priority-body {
   background: rgba(97, 160, 57, 0.06);
 }
@@ -5312,7 +5364,7 @@ body[data-theme=dark] {
 }
 
 .flex-col, .modal-content.create-task-modal .create-task-deps-block, .modal-content.create-task-modal .create-task-deps-row, .modal-content.create-task-modal .create-task-deps-suggest, .board-list .card .list, .board-list .card .list .item, .board-list .card .list .subtasks, .kanban-board-card .kanban-stage-col .subtasks,
-.kanban-archive-board .kanban-stage-col .subtasks, .kanban-task-item, .board-timeline-card .timeline-milestone-tasks, .board-timeline-card .timeline-task-card, .board-table-card .subtasks {
+.kanban-archive-board .kanban-stage-col .subtasks, .kanban-task-item, .board-timeline-card .timeline-milestone-tasks, .board-timeline-card .timeline-task-card, .board-table-card .subtasks, .scrum-backlog-panel .kanban-task-item .subtasks {
   display: flex;
   flex-direction: column;
 }
@@ -5485,7 +5537,9 @@ body[data-theme=dark] #indexTeamMembers {
 .due-attention .board-list .tasks-grid .subtasks-list span,
 .board-list .tasks-grid .subtasks-list .due-attention span,
 .due-attention .board-table-card .subtasks .checkbox-text,
-.board-table-card .subtasks .due-attention .checkbox-text {
+.board-table-card .subtasks .due-attention .checkbox-text,
+.due-attention .scrum-backlog-panel .kanban-task-item .subtasks .checkbox-text,
+.scrum-backlog-panel .kanban-task-item .subtasks .due-attention .checkbox-text {
   color: #F8085C;
   font-weight: 500;
 }
@@ -5610,6 +5664,8 @@ body[data-theme=dark] #indexTeamMembers {
 .board-list .tasks-grid .subtasks-list .tasks-to-do-grid .col-task span,
 .tasks-to-do-grid .col-task .board-table-card .subtasks .checkbox-text,
 .board-table-card .subtasks .tasks-to-do-grid .col-task .checkbox-text,
+.tasks-to-do-grid .col-task .scrum-backlog-panel .kanban-task-item .subtasks .checkbox-text,
+.scrum-backlog-panel .kanban-task-item .subtasks .tasks-to-do-grid .col-task .checkbox-text,
 .tasks-to-do-grid .col-event .text-basic,
 .tasks-to-do-grid .col-event .tp-table-row-fallback .tasks-grid .grid-row,
 .tp-table-row-fallback .tasks-grid .tasks-to-do-grid .col-event .grid-row,
@@ -5704,6 +5760,8 @@ aside .submenu .tasks-to-do-grid .col-event .nav-link,
 .board-list .tasks-grid .subtasks-list .tasks-to-do-grid .col-event span,
 .tasks-to-do-grid .col-event .board-table-card .subtasks .checkbox-text,
 .board-table-card .subtasks .tasks-to-do-grid .col-event .checkbox-text,
+.tasks-to-do-grid .col-event .scrum-backlog-panel .kanban-task-item .subtasks .checkbox-text,
+.scrum-backlog-panel .kanban-task-item .subtasks .tasks-to-do-grid .col-event .checkbox-text,
 .events-grid .col-task .text-basic,
 .events-grid .col-task .tp-table-row-fallback .tasks-grid .grid-row,
 .tp-table-row-fallback .tasks-grid .events-grid .col-task .grid-row,
@@ -5798,6 +5856,8 @@ aside .submenu .events-grid .col-task .nav-link,
 .board-list .tasks-grid .subtasks-list .events-grid .col-task span,
 .events-grid .col-task .board-table-card .subtasks .checkbox-text,
 .board-table-card .subtasks .events-grid .col-task .checkbox-text,
+.events-grid .col-task .scrum-backlog-panel .kanban-task-item .subtasks .checkbox-text,
+.scrum-backlog-panel .kanban-task-item .subtasks .events-grid .col-task .checkbox-text,
 .events-grid .col-event .text-basic,
 .events-grid .col-event .tp-table-row-fallback .tasks-grid .grid-row,
 .tp-table-row-fallback .tasks-grid .events-grid .col-event .grid-row,
@@ -5891,7 +5951,9 @@ aside .submenu .events-grid .col-event .nav-link,
 .events-grid .col-event .board-list .tasks-grid .subtasks-list span,
 .board-list .tasks-grid .subtasks-list .events-grid .col-event span,
 .events-grid .col-event .board-table-card .subtasks .checkbox-text,
-.board-table-card .subtasks .events-grid .col-event .checkbox-text {
+.board-table-card .subtasks .events-grid .col-event .checkbox-text,
+.events-grid .col-event .scrum-backlog-panel .kanban-task-item .subtasks .checkbox-text,
+.scrum-backlog-panel .kanban-task-item .subtasks .events-grid .col-event .checkbox-text {
   display: block;
   max-width: 100%;
   white-space: nowrap;

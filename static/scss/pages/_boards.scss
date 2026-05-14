@@ -5,7 +5,7 @@
         flex: 1;
         user-select: none;
 
-        &.dragging-active {
+        &.dragging-active:not(.scrum-board-view):not(.scrum-tables-view) {
             gap: $space-48;
             column-count: unset;
             display: flex;
@@ -19,7 +19,7 @@
 
     .tables-view,
     .board-view {
-        &.dragging-active {
+        &.dragging-active:not(.scrum-board-view):not(.scrum-tables-view) {
             column-count: 1;
 
             .card {
@@ -1420,6 +1420,14 @@ body[data-theme="dark"] .kanban-archive-board .kanban-stage-table {
     max-width: 440px;
 }
 
+.board-list .cards.scrum-board-view > .card.scrum-queue-board {
+    flex: 0 0 clamp(280px, 34vw, 440px);
+    width: clamp(280px, 34vw, 440px);
+    min-width: 260px;
+    max-width: 440px;
+    box-sizing: border-box;
+}
+
 .scrum-sprint-board {
     flex: 0 0 auto;
     min-width: 0;
@@ -1483,7 +1491,7 @@ body[data-theme="dark"] .kanban-archive-board .kanban-stage-table {
 
 .scrum-backlog-panel .scrum-backlog-accordion {
     border-radius: 0.625rem;
-    overflow: hidden;
+    overflow: visible;
     padding: $space-16;
     background: rgba($green, 0.08);
 }
@@ -1496,6 +1504,57 @@ body[data-theme="dark"] .kanban-archive-board .kanban-stage-table {
     min-width: 0;
     max-width: 100%;
     box-sizing: border-box;
+    min-height: 3.5rem;
+}
+
+.scrum-backlog-panel .kanban-task-item .subtasks {
+    @extend .flex-col;
+    gap: $space-8;
+
+    .count {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .subtasks-list {
+        @include tp-subtasks-list-skin();
+    }
+
+    .checkbox-text {
+        @extend .text-signature;
+    }
+
+    .name {
+        display: inline-flex;
+        align-items: center;
+        gap: $space-4;
+
+        &::after {
+            @extend %tp-board-name-chevron-after;
+        }
+
+        &.open::after {
+            transform: rotate(-90deg);
+        }
+    }
+
+    .progress-line {
+        @extend %tp-subtasks-progress-line-rows;
+    }
+}
+
+body[data-theme="dark"] .scrum-backlog-panel .kanban-task-item .subtasks .checkbox-item {
+    color: $light-light-green;
+}
+
+body[data-theme="dark"] .scrum-backlog-panel .kanban-task-item .subtasks .checkbox-item .custom-checkbox,
+body[data-theme="dark"] .scrum-backlog-panel .kanban-task-item .subtasks .subtasks-list .checkbox-item .custom-checkbox {
+    border-color: $light-light-green;
+}
+
+body[data-theme="dark"] .scrum-backlog-panel .kanban-task-item .subtasks .checkbox-item input[type="checkbox"]:checked + .custom-checkbox {
+    border-color: $green;
 }
 
 .scrum-sprint-board .board-card-collapsible {
@@ -1513,6 +1572,10 @@ body[data-theme="dark"] .kanban-archive-board .kanban-stage-table {
     flex: 0 0 auto;
     min-width: 0;
     align-items: stretch;
+}
+
+.scrum-board-view .kanban-board-card.scrum-sprint-board:has(.board-section-collapse-toggle[aria-expanded='false']) {
+    min-width: min(100%, max(18rem, 30vw));
 }
 
 .scrum-sprint-board .scrum-sprint-inner-scroll {
@@ -1581,10 +1644,6 @@ body[data-theme="dark"] .scrum-backlog-panel {
     .deadline {
         @extend %tp-board-tag-deadline;
     }
-}
-
-body[data-theme="dark"] .scrum-backlog-panel .scrum-backlog-accordion .kanban-priority-head {
-    background: rgba($green, 0.1);
 }
 
 body[data-theme="dark"] .scrum-backlog-panel .scrum-backlog-accordion .kanban-priority-body {

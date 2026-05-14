@@ -2506,9 +2506,6 @@ public class LegacyDataApiController {
         };
     }
 
-    /**
-     * Этапы доски: {@code board_stage}, иначе уникальные стадии из задач, иначе шаблоны сидов.
-     */
     private List<String> resolveBoardStages(Long boardId, String projectType, String boardName) {
         boolean hasBoardStageTable = hasTable("board_stage");
         boolean hasTaskItemTable = hasTable("task_item");
@@ -2552,9 +2549,6 @@ public class LegacyDataApiController {
         return stages;
     }
 
-    /**
-     * Этапы доски из seed_board_stage_template (имя доски) или seed_stage_template (тип проекта), иначе дефолт Kanban.
-     */
     private List<String> loadDefaultBoardStages(String projectType, String boardName) {
         String pt = projectType == null || projectType.isBlank() ? "kanban" : projectType;
         String bn = boardName == null ? "" : boardName;

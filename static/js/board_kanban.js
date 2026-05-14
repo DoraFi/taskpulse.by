@@ -40,7 +40,7 @@
 
     const SCRUM_BACKLOG_PRIORITY_KEY = 'backlog';
 
-    const SCRUM_SPRINT_WORKFLOW_STAGES = Object.freeze(new Set(['Очередь', 'В работе', 'Тестирование', 'Готово', 'Отложено']));
+    const SCRUM_SPRINT_WORKFLOW_STAGES = Object.freeze(new Set(['Очередь', 'В работе', 'Тестирование', 'Готово']));
 
     function scrumSprintStages(board) {
         const all = Array.isArray(board?.stages) ? board.stages.map(s => String(s).trim()) : [];
@@ -2049,6 +2049,7 @@
             forceFallback: true,
             fallbackOnBody: true,
             fallbackTolerance: 3,
+            emptyInsertThreshold: 80,
             ghostClass: 'task-dragging',
             dragClass: 'task-drag-over',
             onMove(evt) {
@@ -2064,6 +2065,15 @@
             },
             onStart() {
                 if (cardsContainer) cardsContainer.classList.add('dragging-active');
+                if (isScrumView()) {
+                    document.querySelectorAll('.scrum-queue-board .scrum-backlog-accordion-body').forEach(el => {
+                        el.style.display = '';
+                    });
+                    document.querySelectorAll('.scrum-queue-board .scrum-backlog-accordion .kanban-priority-toggle').forEach(t => {
+                        t.classList.add('open');
+                        t.setAttribute('aria-expanded', 'true');
+                    });
+                }
             },
             onEnd(evt) {
                 if (cardsContainer) cardsContainer.classList.remove('dragging-active');
@@ -2081,9 +2091,9 @@
                     return;
                 }
 
-                const toStage = toList.dataset.stage;
+                const toStage = toList.getAttribute('data-stage') || toList.dataset.stage;
                 const toPriorityKey = toList.dataset.priorityKey;
-                const fromStage = fromList.dataset.stage;
+                const fromStage = fromList.getAttribute('data-stage') || fromList.dataset.stage;
 
                 task.stage = toStage;
                 if (toPriorityKey === SCRUM_BACKLOG_PRIORITY_KEY) {
@@ -2109,6 +2119,7 @@
             },
             onCancel() {
                 if (cardsContainer) cardsContainer.classList.remove('dragging-active');
+                if (isScrumView()) renderCurrentView();
             }
         });
         container.sortable = sortable;
@@ -3116,7 +3127,6 @@
             queueBody.className = 'board-card-collapsible';
             queueBody.appendChild(createScrumBacklogBoard(board, boardIndex, backlogTasksOnly));
             queueCard.appendChild(queueBody);
-            container.appendChild(queueCard);
 
             const sprintCard = document.createElement('div');
             sprintCard.className = 'card kanban-board-card scrum-sprint-board';
@@ -3141,6 +3151,7 @@
             sprintCard.appendChild(sprintBody);
             sprintHeader._attachCollapse(sprintBody);
             container.appendChild(sprintCard);
+            container.appendChild(queueCard);
         });
         initKanbanEvents();
     }
@@ -3148,7 +3159,7 @@
     function renderScrumTablesView() {
         const container = document.querySelector('#cards-container');
         if (!container) return;
-        container.className = 'cards tables-view';
+        container.className = 'cards tables-view scrum-tables-view';
         container.innerHTML = '';
         if (renderKanbanLoadError(container)) return;
         if (!kanbanBoards.length) {
@@ -3178,7 +3189,6 @@
                 }
             });
             queueCard.appendChild(queueBody);
-            container.appendChild(queueCard);
 
             const sprintCard = document.createElement('div');
             sprintCard.className = 'card kanban-board-card';
@@ -3201,6 +3211,7 @@
             sprintCard.append(sprintHeader, sprintBody);
             sprintHeader._attachCollapse(sprintBody);
             container.appendChild(sprintCard);
+            container.appendChild(queueCard);
         });
         initKanbanEvents();
         initKanbanTableRowsSortable();
