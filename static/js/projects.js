@@ -8,10 +8,201 @@ function apiUrl(path) {
     return `${getApiBasePath()}${path}`;
 }
 
+function openCreateProjectModal(overlay) {
+    overlay.classList.add('show');
+    overlay.setAttribute('aria-hidden', 'false');
+}
+
+function closeCreateProjectModal(overlay) {
+    const picker = document.getElementById('createProjectTypePicker');
+    if (picker) picker.setAttribute('aria-hidden', 'true');
+    overlay.classList.remove('show');
+    overlay.setAttribute('aria-hidden', 'true');
+}
+
+const CREATE_PROJECT_TYPE_LABELS = {
+    list: 'Список',
+    kanban: 'Kanban',
+    scrum: 'Scrum',
+    scrumban: 'Scrumban',
+};
+
+function bindCreateProjectTypePicker(displayEl, hiddenEl, picker, closeBtn) {
+    if (!picker || !closeBtn || !displayEl || !hiddenEl) return;
+
+    function openPicker() {
+        picker.setAttribute('aria-hidden', 'false');
+    }
+
+    function closePicker() {
+        picker.setAttribute('aria-hidden', 'true');
+    }
+
+    displayEl.addEventListener('click', openPicker);
+    displayEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openPicker();
+        }
+    });
+    closeBtn.addEventListener('click', closePicker);
+    picker.addEventListener('click', (e) => {
+        if (e.target === picker) closePicker();
+    });
+
+    picker.querySelectorAll('.project-type-card').forEach((card) => {
+        card.addEventListener('click', () => {
+            const value = card.dataset.templateValue;
+            if (!value) return;
+            hiddenEl.value = value;
+            displayEl.value = CREATE_PROJECT_TYPE_LABELS[value] || value;
+            closePicker();
+        });
+    });
+}
+
+(function bindProjectTypePickerEscapeOnce() {
+    if (window._tpProjectTypePickerEscBound) return;
+    window._tpProjectTypePickerEscBound = true;
+    document.addEventListener(
+        'keydown',
+        (e) => {
+            if (e.key !== 'Escape') return;
+            const p = document.getElementById('createProjectTypePicker');
+            if (p && p.getAttribute('aria-hidden') === 'false') {
+                e.preventDefault();
+                e.stopPropagation();
+                p.setAttribute('aria-hidden', 'true');
+            }
+        },
+        true,
+    );
+})();
+
+function setupCreateProjectUi() {
+    const overlay = document.getElementById('createProjectModal');
+    const btn = document.getElementById('projectsCreateBtn');
+    if (!overlay || !btn) return;
+
+    const pathname = window.location.pathname;
+    const isArchiveView = pathname.endsWith('/projects/archive');
+    const isOrgView = pathname.endsWith('/projects/org');
+    btn.hidden = isArchiveView || isOrgView;
+
+    if (btn.dataset.tpCreateUi === '1') return;
+    btn.dataset.tpCreateUi = '1';
+
+    const nameEl = document.getElementById('createProjectName');
+    const summaryEl = document.getElementById('createProjectSummary');
+    const typeHiddenEl = document.getElementById('createProjectType');
+    const typeDisplayEl = document.getElementById('createProjectTypeDisplay');
+    const typePicker = document.getElementById('createProjectTypePicker');
+    const typePickerClose = document.getElementById('createProjectTypePickerClose');
+    const codeEl = document.getElementById('createProjectCode');
+    const errEl = document.getElementById('createProjectError');
+    const closeBtn = document.getElementById('createProjectModalClose');
+    const cancelBtn = document.getElementById('createProjectCancel');
+    const submitBtn = document.getElementById('createProjectSubmit');
+
+    bindCreateProjectTypePicker(typeDisplayEl, typeHiddenEl, typePicker, typePickerClose);
+
+    function resetForm() {
+        if (nameEl) nameEl.value = '';
+        if (summaryEl) summaryEl.value = '';
+        if (typeHiddenEl) typeHiddenEl.value = 'kanban';
+        if (typeDisplayEl) typeDisplayEl.value = CREATE_PROJECT_TYPE_LABELS.kanban;
+        if (typePicker) typePicker.setAttribute('aria-hidden', 'true');
+        if (codeEl) codeEl.value = '';
+        if (errEl) {
+            errEl.hidden = true;
+            errEl.textContent = '';
+        }
+    }
+
+    function showErr(msg) {
+        if (!errEl) return;
+        errEl.textContent = msg || '';
+        errEl.hidden = !msg;
+    }
+
+    btn.addEventListener('click', () => {
+        resetForm();
+        showErr('');
+        openCreateProjectModal(overlay);
+        nameEl?.focus();
+    });
+
+    const close = () => {
+        closeCreateProjectModal(overlay);
+        resetForm();
+    };
+
+    closeBtn?.addEventListener('click', close);
+    cancelBtn?.addEventListener('click', close);
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) close();
+    });
+
+    submitBtn?.addEventListener('click', async () => {
+        const name = String(nameEl?.value || '').trim();
+        if (!name) {
+            showErr('Введите название проекта');
+            return;
+        }
+        const body = {
+            name,
+            summary: String(summaryEl?.value || '').trim(),
+            projectType: typeHiddenEl?.value || 'kanban',
+        };
+        const codeRaw = String(codeEl?.value || '').trim();
+        if (codeRaw) body.code = codeRaw;
+
+        submitBtn.disabled = true;
+        showErr('');
+        try {
+            const res = await fetch(apiUrl('/projects/create'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+                credentials: 'same-origin',
+            });
+            const text = await res.text();
+            let data = {};
+            if (text) {
+                try {
+                    data = JSON.parse(text);
+                } catch {
+                    data = {};
+                }
+            }
+            const serverMsg = data.message || data.detail || data.error;
+            if (!res.ok || data.ok === false) {
+                showErr(
+                    serverMsg
+                        || (res.status === 401 || res.status === 403
+                            ? 'Нужна авторизация или нет доступа к этой команде'
+                            : null)
+                        || `Запрос не выполнен (${res.status})`,
+                );
+                return;
+            }
+            close();
+            initProjectsPage();
+        } catch (e) {
+            console.error(e);
+            showErr('Ошибка сети');
+        } finally {
+            submitBtn.disabled = false;
+        }
+    });
+}
+
 function initProjectsPage() {
     const grid = document.querySelector('.projects-grid');
     if (!grid) return;
-    const searchInput = document.querySelector('.projects-search input[type="text"]');
+    setupCreateProjectUi();
+    const searchInput = document.querySelector('.projects-toolbar .projects-search input[type="text"]')
+        || document.querySelector('.projects-search input[type="text"]');
     const pathname = window.location.pathname;
     const isArchiveView = pathname.endsWith('/projects/archive');
     const isOrgView = pathname.endsWith('/projects/org');
@@ -96,18 +287,18 @@ function initProjectsPage() {
                         </a>
                     `;
                 }).join('');
-                grid.querySelectorAll('.project-action').forEach(btn => {
-                    btn.addEventListener('click', async (e) => {
+                grid.querySelectorAll('.project-action').forEach(b => {
+                    b.addEventListener('click', async (e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        const code = btn.dataset.projectCode;
-                        const action = btn.dataset.action;
+                        const code = b.dataset.projectCode;
+                        const action = b.dataset.action;
                         const endpoint = action === 'restore-project' ? '/projects/restore' : '/projects/archive';
                         try {
                             const res = await fetch(apiUrl(endpoint), {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ projectCode: code })
+                                body: JSON.stringify({ projectCode: code }),
                             });
                             if (!res.ok) throw new Error('project action failed');
                             initProjectsPage();
@@ -129,4 +320,13 @@ function initProjectsPage() {
 }
 
 window.initProjectsPage = initProjectsPage;
-document.addEventListener('DOMContentLoaded', initProjectsPage);
+
+function bootProjectsPage() {
+    initProjectsPage();
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootProjectsPage);
+} else {
+    bootProjectsPage();
+}

@@ -1,0 +1,410 @@
+.project-type-field {
+    cursor: pointer;
+    background: var(--tp-surface, #fff);
+}
+
+.project-type-picker {
+    position: fixed;
+    inset: 0;
+    background: rgba($dark-gray, 0.52);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: $space-32;
+    z-index: 2100;
+}
+
+.project-type-picker[aria-hidden='false'] {
+    display: flex;
+}
+
+.project-type-picker__dialog {
+    width: min(1100px, 96vw);
+    min-height: min(760px, 92vh);
+    max-height: 92vh;
+    background: $light-green;
+    border: $space-1 solid rgba($green, 0.22);
+    border-radius: 1.125rem;
+    box-shadow: 0 $space-24 $space-48 rgba($dark-gray, 0.2);
+    display: grid;
+    grid-template-rows: auto 1fr;
+    overflow: hidden;
+}
+
+.project-type-picker__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: $space-16;
+    padding: $space-20 $space-24 $space-12;
+    border-bottom: $space-1 solid rgba($green, 0.22);
+}
+
+.project-type-picker__close {
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    width: $space-24;
+    height: $space-24;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0.78;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+
+    &:hover {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+}
+
+.project-type-picker__body {
+    padding: $space-16 $space-24 $space-24;
+    overflow-y: auto;
+}
+
+.project-type-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: $space-16;
+
+    @media (max-width: 720px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.project-type-card {
+    width: 100%;
+    background: var(--tp-surface, #fff);
+    border: $space-1 solid rgba($green, 0.22);
+    border-radius: 0.875rem;
+    padding: $space-16;
+    text-align: left;
+    cursor: pointer;
+    display: grid;
+    gap: $space-12;
+    color: inherit;
+    font: inherit;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+
+    &:hover {
+        border-color: $green;
+        box-shadow: 0 $space-8 $space-20 rgba($green, 0.16);
+        transform: translateY(-1px);
+    }
+}
+
+.project-type-card__image {
+    height: 170px;
+    border-radius: $radius-sm;
+    border: $space-1 solid rgba($green, 0.22);
+    background: linear-gradient(160deg, rgba($light-green, 1) 0%, rgba($green, 0.18) 100%);
+    position: relative;
+    overflow: hidden;
+    padding: $space-8;
+}
+
+.project-type-card__image::before {
+    content: '';
+    position: absolute;
+    inset: 14px;
+    border-radius: $radius-sm;
+    border: $space-1 dashed rgba($green, 0.55);
+}
+
+.project-type-mini {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    border-radius: $radius-sm;
+    background: $light-green;
+    border: $space-1 solid rgba($green, 0.2);
+    overflow: hidden;
+}
+
+.project-type-mini--list {
+    display: grid;
+    grid-template-rows: $space-24 1fr;
+}
+
+.mini-list-head {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr 0.8fr 0.7fr;
+    gap: $space-4;
+    padding: $space-4 $space-8;
+    border-bottom: $space-1 solid rgba($green, 0.2);
+    background: rgba($light-light-green, 0.9);
+}
+
+.mini-list-head span {
+    display: block;
+    height: 5px;
+    border-radius: 3px;
+    background: rgba($green, 0.45);
+}
+
+.mini-list-body {
+    padding: $space-8;
+    display: grid;
+    gap: 5px;
+}
+
+.mini-list-row {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr 0.8fr 0.7fr;
+    gap: $space-4;
+    align-items: center;
+    background: var(--tp-surface, #fff);
+    border: $space-1 solid rgba($green, 0.15);
+    border-radius: 5px;
+    padding: $space-4;
+}
+
+.mini-list-row span {
+    display: block;
+    height: $space-4;
+    border-radius: 3px;
+    background: rgba($green, 0.28);
+}
+
+.mini-list-row span:last-child {
+    width: $space-16;
+    height: $space-16;
+    border-radius: 50%;
+    background: rgba($green, 0.65);
+    justify-self: end;
+}
+
+.project-type-mini--kanban {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $space-8;
+    padding: $space-8;
+}
+
+.mini-kanban-col {
+    background: rgba($light-light-green, 0.95);
+    border: $space-1 solid rgba($green, 0.18);
+    border-radius: $space-8;
+    padding: $space-4;
+    display: grid;
+    grid-template-rows: 10px 1fr;
+    gap: $space-4;
+}
+
+.mini-kanban-col span {
+    display: block;
+    height: $space-4;
+    border-radius: 3px;
+    background: rgba($green, 0.55);
+}
+
+.mini-kanban-stack {
+    display: grid;
+    gap: $space-4;
+    align-content: start;
+}
+
+.mini-kanban-card {
+    height: 18px;
+    border-radius: $space-4;
+    background: var(--tp-surface, #fff);
+    border: $space-1 solid rgba($green, 0.2);
+}
+
+.project-type-mini--scrum {
+    display: grid;
+    grid-template-columns: 0.95fr 1.15fr;
+    gap: $space-8;
+    padding: $space-8;
+}
+
+.mini-scrum-backlog,
+.mini-scrum-sprint {
+    background: rgba($light-light-green, 0.95);
+    border: $space-1 solid rgba($green, 0.18);
+    border-radius: $space-8;
+    padding: $space-4;
+    display: grid;
+    grid-template-rows: 10px 1fr;
+    gap: $space-4;
+}
+
+.mini-scrum-backlog > span,
+.mini-scrum-sprint > span {
+    display: block;
+    height: $space-4;
+    border-radius: 3px;
+    background: rgba($green, 0.55);
+}
+
+.mini-scrum-list {
+    display: grid;
+    gap: $space-4;
+    align-content: start;
+}
+
+.mini-scrum-item {
+    height: $space-16;
+    border-radius: $space-4;
+    background: var(--tp-surface, #fff);
+    border: $space-1 solid rgba($green, 0.2);
+}
+
+.mini-scrum-footer {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $space-4;
+}
+
+.mini-scrum-footer div {
+    height: 14px;
+    border-radius: $space-4;
+    background: var(--tp-surface, #fff);
+    border: $space-1 solid rgba($green, 0.2);
+}
+
+.project-type-mini--scrumban {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $space-8;
+    padding: $space-8;
+}
+
+.mini-scrumban-col {
+    background: rgba($light-light-green, 0.95);
+    border: $space-1 solid rgba($green, 0.18);
+    border-radius: $space-8;
+    padding: $space-4;
+    display: grid;
+    grid-template-rows: 10px 1fr auto;
+    gap: $space-4;
+}
+
+.mini-scrumban-col > span {
+    display: block;
+    height: $space-4;
+    border-radius: 3px;
+    background: rgba($green, 0.55);
+}
+
+.mini-scrumban-stack {
+    display: grid;
+    gap: $space-4;
+    align-content: start;
+}
+
+.mini-scrumban-card {
+    height: $space-16;
+    border-radius: $space-4;
+    background: var(--tp-surface, #fff);
+    border: $space-1 solid rgba($green, 0.2);
+    position: relative;
+}
+
+.mini-scrumban-card--urgent::after {
+    content: '';
+    position: absolute;
+    right: 3px;
+    top: 3px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: $pink;
+}
+
+.mini-scrumban-wip {
+    height: $space-8;
+    border-radius: $space-4;
+    background: rgba($pink, 0.2);
+    border: $space-1 solid rgba($pink, 0.35);
+}
+
+.project-type-card__image[data-type='list']::after {
+    content: 'Мини-реестр задач';
+    position: absolute;
+    left: $space-20;
+    bottom: $space-16;
+    color: darken($green, 18%);
+    font-size: 0.78rem;
+}
+
+.project-type-card__image[data-type='kanban']::after {
+    content: 'Мини-kanban поток';
+    position: absolute;
+    left: $space-20;
+    bottom: $space-16;
+    color: darken($green, 18%);
+    font-size: 0.78rem;
+}
+
+.project-type-card__image[data-type='scrum']::after {
+    content: 'Мини-scrum цикл';
+    position: absolute;
+    left: $space-20;
+    bottom: $space-16;
+    color: darken($green, 18%);
+    font-size: 0.78rem;
+}
+
+.project-type-card__image[data-type='scrumban']::after {
+    content: 'Мини-scrumban гибрид';
+    position: absolute;
+    left: $space-20;
+    bottom: $space-16;
+    color: darken($green, 18%);
+    font-size: 0.78rem;
+}
+
+.project-type-card__title {
+    margin: 0;
+    font-size: 1.05rem;
+    color: $dark-gray;
+    font-weight: 600;
+}
+
+.project-type-card__text {
+    display: grid;
+    gap: 0.2rem;
+}
+
+body[data-theme='dark'] .project-type-picker__dialog {
+    background: $dark-gray;
+    border-color: rgba($green, 0.35);
+    box-shadow: 0 $space-24 $space-48 rgba(0, 0, 0, 0.35);
+}
+
+body[data-theme='dark'] .project-type-picker__head {
+    border-bottom-color: rgba($green, 0.28);
+}
+
+body[data-theme='dark'] .project-type-card {
+    background: rgba($black, 0.55);
+    border-color: rgba($green, 0.28);
+}
+
+body[data-theme='dark'] .project-type-card__title {
+    color: $light-light-green;
+}
+
+body[data-theme='dark'] .project-type-card__image {
+    background: linear-gradient(160deg, rgba($green, 0.12) 0%, rgba($black, 0.4) 100%);
+    border-color: rgba($green, 0.28);
+}
+
+body[data-theme='dark'] .project-type-mini {
+    background: rgba($black, 0.35);
+    border-color: rgba($green, 0.22);
+}
+
+body[data-theme='dark'] .project-type-field {
+    background: rgba($green, 0.08);
+    color: $light-light-green;
+}

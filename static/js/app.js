@@ -110,7 +110,6 @@ document.addEventListener('DOMContentLoaded', function() {
             window._tpIndexSummaryLast = await r.json();
             window._tpIndexSummaryLastAt = Date.now();
         } catch (_) {
-            /* сеть / контекст — игнорируем */
         }
     };
 })();

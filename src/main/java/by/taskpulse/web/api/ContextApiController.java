@@ -61,6 +61,11 @@ public class ContextApiController {
         return legacy.restoreProject(payload);
     }
 
+    @PostMapping("/api/projects/create")
+    public Map<String, Object> createProjectAuto(@RequestBody Map<String, Object> payload) {
+        return legacy.createProject(payload);
+    }
+
     @GetMapping("/api/task-form/options")
     public Map<String, Object> taskFormOptionsAuto(@RequestParam(required = false) String project,
                                                    @RequestParam(required = false) String q) {
@@ -284,6 +289,14 @@ public class ContextApiController {
                                               @RequestBody Map<String, Object> payload) {
         ensureContextAccess(orgId, teamId);
         return legacy.restoreProject(payload);
+    }
+
+    @PostMapping("/o/{orgId}/t/{teamId}/api/projects/create")
+    public Map<String, Object> createProject(@PathVariable String orgId,
+                                             @PathVariable String teamId,
+                                             @RequestBody Map<String, Object> payload) {
+        ensureContextAccess(orgId, teamId);
+        return legacy.createProject(payload);
     }
 
     @GetMapping("/o/{orgId}/t/{teamId}/api/task-form/options")
@@ -547,9 +560,9 @@ public class ContextApiController {
 
     private void ensureContextAccess(String orgId, String teamId) {
         Map<String, Object> row = currentContextRow();
-        String myOrg = String.valueOf(row.get("org_public_id"));
-        String myTeam = String.valueOf(row.get("team_public_id"));
-        if (!myOrg.equals(orgId) || !myTeam.equals(teamId)) {
+        String myOrg = String.valueOf(row.get("org_public_id")).trim();
+        String myTeam = String.valueOf(row.get("team_public_id")).trim();
+        if (!myOrg.equals(orgId.trim()) || !myTeam.equals(teamId.trim())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нет доступа к указанной организации/команде");
         }
     }

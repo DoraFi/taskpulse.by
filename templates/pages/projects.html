@@ -50,12 +50,179 @@
         <aside id="aside-container"></aside>
 
         <div class="app-container flex-col">
-            <div class="projects-search">
-                <img class="h-16" th:src="@{/static/source/icons/search.svg}" src="/static/source/icons/search.svg" alt="Поиск">
-                <input class="text-basic" type="text" placeholder="Поиск проектов по названию">
+            <div class="projects-toolbar">
+                <div class="projects-search">
+                    <img class="h-16" th:src="@{/static/source/icons/search.svg}" src="/static/source/icons/search.svg" alt="Поиск">
+                    <input class="text-basic" type="text" placeholder="Поиск проектов по названию">
+                </div>
+                <button type="button" class="button-basic" id="projectsCreateBtn" hidden>Создать проект</button>
             </div>
             <div class="projects-grid">
                 <p class="text-basic">Загрузка проектов...</p>
+            </div>
+
+            <div class="modal-overlay" id="createProjectModal" aria-hidden="true">
+        <div class="modal-content auth-flow-card auth-flow-card--signature create-project-modal" role="dialog" aria-labelledby="createProjectModalTitle">
+            <div class="modal-header">
+                <p class="text-header" id="createProjectModalTitle">Новый проект</p>
+                <button type="button" class="modal-close" id="createProjectModalClose" aria-label="Закрыть">
+                    <img th:src="@{/static/source/icons/cross.svg}" src="/static/source/icons/cross.svg" alt="" width="24" height="24">
+                </button>
+            </div>
+            <div class="modal-body form-auth">
+                <div class="auth-field">
+                    <label for="createProjectName">Название проекта <img class="required-icon" th:src="@{/static/source/icons/required.svg}" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>
+                    <input id="createProjectName" type="text" maxlength="150" placeholder="Например, Корпоративный портал" autocomplete="off">
+                </div>
+                <div class="auth-field">
+                    <label for="createProjectCode">
+                        Ключ проекта <span class="text-signature">(3 латинские буквы; можно оставить пустым)</span>
+                    </label>
+                    <input id="createProjectCode" type="text" placeholder="PORTAL" maxlength="3" style="text-transform: uppercase;" autocomplete="off">
+                </div>
+                <div class="auth-field">
+                    <label for="createProjectSummary">Описание</label>
+                    <textarea id="createProjectSummary" rows="3" maxlength="4000" placeholder="Цели, сроки, контекст для команды"></textarea>
+                </div>
+                <div class="auth-field">
+                    <label for="createProjectTypeDisplay">Тип проекта</label>
+                    <input id="createProjectTypeDisplay" class="project-type-field" type="text" value="Kanban" readonly aria-haspopup="dialog" aria-controls="createProjectTypePicker" tabindex="0">
+                    <input id="createProjectType" type="hidden" value="kanban">
+                </div>
+                <p class="text-signature" id="createProjectError" hidden></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="button-secondary" id="createProjectCancel">Отмена</button>
+                <button type="button" class="button-basic" id="createProjectSubmit">Создать</button>
+            </div>
+        </div>
+        <div class="project-type-picker" id="createProjectTypePicker" aria-hidden="true">
+            <section class="project-type-picker__dialog" role="dialog" aria-modal="true" aria-labelledby="createProjectTypePickerTitle">
+                <header class="project-type-picker__head">
+                    <div>
+                        <p id="createProjectTypePickerTitle" class="text-header">Выберите тип проекта</p>
+                    </div>
+                    <button type="button" class="project-type-picker__close" id="createProjectTypePickerClose" aria-label="Закрыть выбор типа проекта">
+                        <img th:src="@{/static/source/icons/cross.svg}" src="/static/source/icons/cross.svg" alt="" width="24" height="24">
+                    </button>
+                </header>
+                <div class="project-type-picker__body">
+                    <div class="project-type-grid">
+                        <button type="button" class="project-type-card" data-template-value="list">
+                            <div class="project-type-card__image" data-type="list">
+                                <div class="project-type-mini project-type-mini--list">
+                                    <div class="mini-list-head">
+                                        <span></span><span></span><span></span><span></span>
+                                    </div>
+                                    <div class="mini-list-body">
+                                        <div class="mini-list-row"><span></span><span></span><span></span><span></span></div>
+                                        <div class="mini-list-row"><span></span><span></span><span></span><span></span></div>
+                                        <div class="mini-list-row"><span></span><span></span><span></span><span></span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="project-type-card__text">
+                                <p class="project-type-card__title">Список</p>
+                                <p class="text-basic">Подходит для реестра обращений: карточки в виде записей таблицы, фильтры, приоритеты, SLA, сроки и исполнители.</p>
+                            </div>
+                        </button>
+                        <button type="button" class="project-type-card" data-template-value="kanban">
+                            <div class="project-type-card__image" data-type="kanban">
+                                <div class="project-type-mini project-type-mini--kanban">
+                                    <div class="mini-kanban-col">
+                                        <span></span>
+                                        <div class="mini-kanban-stack">
+                                            <div class="mini-kanban-card"></div>
+                                            <div class="mini-kanban-card"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mini-kanban-col">
+                                        <span></span>
+                                        <div class="mini-kanban-stack">
+                                            <div class="mini-kanban-card"></div>
+                                            <div class="mini-kanban-card"></div>
+                                            <div class="mini-kanban-card"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mini-kanban-col">
+                                        <span></span>
+                                        <div class="mini-kanban-stack">
+                                            <div class="mini-kanban-card"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="project-type-card__text">
+                                <p class="project-type-card__title">Kanban</p>
+                                <p class="text-basic">Непрерывный flow задач. Команда видит загрузку по колонкам, WIP-ограничения и узкие места в процессе.</p>
+                            </div>
+                        </button>
+                        <button type="button" class="project-type-card" data-template-value="scrum">
+                            <div class="project-type-card__image" data-type="scrum">
+                                <div class="project-type-mini project-type-mini--scrum">
+                                    <div class="mini-scrum-backlog">
+                                        <span></span>
+                                        <div class="mini-scrum-list">
+                                            <div class="mini-scrum-item"></div>
+                                            <div class="mini-scrum-item"></div>
+                                            <div class="mini-scrum-item"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mini-scrum-sprint">
+                                        <span></span>
+                                        <div class="mini-scrum-list">
+                                            <div class="mini-scrum-item"></div>
+                                            <div class="mini-scrum-item"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mini-scrum-footer">
+                                        <div></div><div></div><div></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="project-type-card__text">
+                                <p class="project-type-card__title">Scrum</p>
+                                <p class="text-basic">Итерационный режим: бэклог, планирование спринта, цель, демо и ретро. Удобно для предсказуемых релизов.</p>
+                            </div>
+                        </button>
+                        <button type="button" class="project-type-card" data-template-value="scrumban">
+                            <div class="project-type-card__image" data-type="scrumban">
+                                <div class="project-type-mini project-type-mini--scrumban">
+                                    <div class="mini-scrumban-col">
+                                        <span></span>
+                                        <div class="mini-scrumban-stack">
+                                            <div class="mini-scrumban-card"></div>
+                                            <div class="mini-scrumban-card mini-scrumban-card--urgent"></div>
+                                        </div>
+                                        <div class="mini-scrumban-wip"></div>
+                                    </div>
+                                    <div class="mini-scrumban-col">
+                                        <span></span>
+                                        <div class="mini-scrumban-stack">
+                                            <div class="mini-scrumban-card"></div>
+                                            <div class="mini-scrumban-card"></div>
+                                            <div class="mini-scrumban-card mini-scrumban-card--urgent"></div>
+                                        </div>
+                                        <div class="mini-scrumban-wip"></div>
+                                    </div>
+                                    <div class="mini-scrumban-col">
+                                        <span></span>
+                                        <div class="mini-scrumban-stack">
+                                            <div class="mini-scrumban-card"></div>
+                                        </div>
+                                        <div class="mini-scrumban-wip"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="project-type-card__text">
+                                <p class="project-type-card__title">Scrumban</p>
+                                <p class="text-basic">Гибрид Scrum и Kanban: планирование блоками плюс обработка срочных инцидентов без срыва всего цикла.</p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
             </div>
         </div>
     </div>

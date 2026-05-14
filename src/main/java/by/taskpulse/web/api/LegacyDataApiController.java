@@ -19,15 +19,18 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -1257,6 +1260,219 @@ public class LegacyDataApiController {
         return Map.of("ok", true);
     }
 
+    @Transactional
+    public Map<String, Object> createProject(Map<String, Object> payload) {
+        String name = payload.get("name") == null ? "" : String.valueOf(payload.get("name")).trim();
+        if (name.isBlank()) {
+            throw new IllegalArgumentException("Название проекта обязательно");
+        }
+        if (name.length() > 150) {
+            throw new IllegalArgumentException("Название не длиннее 150 символов");
+        }
+        String summary = payload.get("summary") == null ? "" : String.valueOf(payload.get("summary")).trim();
+        if (summary.length() > 4000) {
+            throw new IllegalArgumentException("Описание слишком длинное");
+        }
+        String projectType = normalizeCreateProjectType(payload.get("projectType"));
+        Long teamId = currentTeamId();
+        Long uid = currentUserId();
+        Map<String, Object> teamRow = jdbcTemplate.queryForMap(
+                "select organization_id from app_team where id = ?",
+                teamId);
+        String orgId = String.valueOf(teamRow.get("organization_id")).trim();
+
+        String projectCode;
+        Object codeRaw = payload.get("code");
+        if (codeRaw != null) {
+            String c = String.valueOf(codeRaw).trim().toUpperCase(Locale.ROOT).replaceAll("[^A-Z]", "");
+            if (!c.isBlank()) {
+                if (c.length() != 3) {
+                    throw new IllegalArgumentException("Код проекта — ровно 3 латинские буквы A–Z");
+                }
+                int taken = jdbcTemplate.queryForObject(
+                        "select count(*) from project where organization_id = ? and code = ?",
+                        Integer.class,
+                        orgId,
+                        c);
+                if (taken > 0) {
+                    throw new IllegalArgumentException("Проект с таким кодом уже существует");
+                }
+                projectCode = c;
+            } else {
+                projectCode = allocateProjectCode(orgId, name);
+            }
+        } else {
+            projectCode = allocateProjectCode(orgId, name);
+        }
+
+        jdbcTemplate.update(
+                """
+                insert into project(name, owner_id, organization_id, code, summary, project_type)
+                values (?, ?, ?, ?, ?, ?)
+                """,
+                name,
+                uid,
+                orgId,
+                projectCode,
+                summary,
+                projectType);
+        Long projectId = jdbcTemplate.queryForObject(
+                "select id from project where organization_id = ? and code = ?",
+                Long.class,
+                orgId,
+                projectCode);
+
+        jdbcTemplate.update("insert into project_team(project_id, team_id) values (?, ?)", projectId, teamId);
+        jdbcTemplate.update(
+                "insert into project_member(project_id, user_id, role) values (?, ?, 'owner')",
+                projectId,
+                uid);
+        jdbcTemplate.update(
+                """
+                insert into app_user_role(user_id, role_code, organization_id, team_id, project_id)
+                values (?, 'project_admin', ?, ?, ?)
+                """,
+                uid,
+                orgId,
+                teamId,
+                projectId);
+
+        createDefaultProjectBoard(projectId, projectType);
+
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("ok", true);
+        out.put("projectCode", projectCode);
+        out.put("projectId", projectId);
+        return out;
+    }
+
+    private String normalizeCreateProjectType(Object raw) {
+        if (raw == null) {
+            return "list";
+        }
+        String t = String.valueOf(raw).trim().toLowerCase(Locale.ROOT);
+        return switch (t) {
+            case "kanban", "scrum", "list", "scrumban" -> t;
+            default -> "list";
+        };
+    }
+
+    private String allocateProjectCode(String orgId, String projectName) {
+        String candidate = toProjectCodeFromName(projectName);
+        while (jdbcTemplate.queryForObject(
+                        "select count(*) from project where organization_id = ? and code = ?",
+                        Integer.class,
+                        orgId,
+                        candidate)
+                > 0) {
+            candidate = randomLetters(3);
+        }
+        return candidate;
+    }
+
+    private static String randomLetters(int len) {
+        String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        ThreadLocalRandom r = ThreadLocalRandom.current();
+        StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++) {
+            sb.append(alphabet.charAt(r.nextInt(alphabet.length())));
+        }
+        return sb.toString();
+    }
+
+    private static String toProjectCodeFromName(String projectName) {
+        if (projectName == null) {
+            return randomLetters(3);
+        }
+        String src = projectName.trim();
+        if (src.isEmpty()) {
+            return randomLetters(3);
+        }
+
+        String translit = src
+                .toLowerCase(Locale.ROOT)
+                .replace('а', 'a')
+                .replace('б', 'b')
+                .replace('в', 'v')
+                .replace('г', 'g')
+                .replace('д', 'd')
+                .replace('е', 'e')
+                .replace('ё', 'e')
+                .replace("ж", "zh")
+                .replace('з', 'z')
+                .replace('и', 'i')
+                .replace('й', 'y')
+                .replace('к', 'k')
+                .replace('л', 'l')
+                .replace('м', 'm')
+                .replace('н', 'n')
+                .replace('о', 'o')
+                .replace('п', 'p')
+                .replace('р', 'r')
+                .replace('с', 's')
+                .replace('т', 't')
+                .replace('у', 'u')
+                .replace('ф', 'f')
+                .replace('х', 'h')
+                .replace("ц", "ts")
+                .replace("ч", "ch")
+                .replace("ш", "sh")
+                .replace("щ", "sh")
+                .replace('ы', 'y')
+                .replace('э', 'e')
+                .replace("ю", "yu")
+                .replace("я", "ya");
+
+        String lettersOnly = translit.replaceAll("[^a-z]", "");
+        if (lettersOnly.length() < 3) {
+            lettersOnly = (lettersOnly + randomLetters(3)).substring(0, 3);
+        }
+        return lettersOnly.substring(0, 3).toUpperCase(Locale.ROOT);
+    }
+
+    private void createDefaultProjectBoard(Long projectId, String projectType) {
+        String boardCodePrefix = "list".equals(projectType) ? "LIST" : "KANBAN";
+        String boardName = "Название доски";
+        String boardCode = boardCodePrefix + "_1";
+        jdbcTemplate.update(
+                """
+                insert into board(name, project_id, code, created_at, archived_at, archived_by, position_no)
+                values (?, ?, ?, now(), null, null, 1)
+                """,
+                boardName,
+                projectId,
+                boardCode);
+        Long boardId = jdbcTemplate.queryForObject(
+                "select id from board where project_id = ? and code = ?",
+                Long.class,
+                projectId,
+                boardCode);
+        List<String> stages = loadDefaultBoardStages(projectType, boardName);
+        if (stages.isEmpty()) {
+            stages = new ArrayList<>(List.of("Очередь", "В работе", "Готово"));
+        }
+        LinkedHashMap<String, Boolean> seen = new LinkedHashMap<>();
+        List<String> uniqueStages = new ArrayList<>();
+        for (String s : stages) {
+            if (s == null || s.isBlank()) continue;
+            String key = s.trim();
+            if (Boolean.TRUE.equals(seen.putIfAbsent(key, Boolean.TRUE))) {
+                continue;
+            }
+            uniqueStages.add(key);
+        }
+        if (uniqueStages.isEmpty()) {
+            uniqueStages = new ArrayList<>(List.of("Очередь", "В работе", "Готово"));
+        }
+        for (int i = 0; i < uniqueStages.size(); i++) {
+            jdbcTemplate.update(
+                    "insert into board_stage(board_id, stage_name, position) values (?, ?, ?)",
+                    boardId,
+                    uniqueStages.get(i),
+                    i + 1);
+        }
+    }
+
     @GetMapping("/api/boards/archived")
     public List<Map<String, Object>> archivedBoards(@RequestParam String projectCode) {
         Long teamId = currentTeamId();
@@ -1403,49 +1619,20 @@ public class LegacyDataApiController {
                 + "when " + n + " in ('следующий спринт', 'на уточнении', 'готовность к планированию', 'кандидаты в спринт', "
                 + "'планирование спринта') then 'Очередь' "
                 + "when " + n + " = 'через 2 спринта' then 'Следующий спринт' "
-                + "when " + n + " in ('через 3+ спринта', 'задачи на несколько спринтов вперед') then 'Через 2 спринта' "
+                + "when " + n + " in ('через 3+ спринта', 'через 3 спринта', 'задачи на несколько спринтов вперед', "
+                + "'отдалённый горизонт', 'отдаленный горизонт') then 'Через 2 спринта' "
                 + "when (" + n + " like 'следующий%сприн%' or (" + n + " like '%следующ%' and " + n + " like '%сприн%')) "
                 + "and " + n + " not like '%через 2%' and " + n + " not like '%через 3%' and " + n + " not like '%через%сприн%вперед%' "
                 + "and " + n + " not like '%вперед%' then 'Очередь' "
                 + "else t.stage end "
                 + "where t.board_id in (select b.id from board b where b.project_id = ?) and ("
                 + n + " in ('следующий спринт', 'на уточнении', 'готовность к планированию', 'кандидаты в спринт', 'планирование спринта', "
-                + "'через 2 спринта', 'через 3+ спринта', 'задачи на несколько спринтов вперед') or ("
+                + "'через 2 спринта', 'через 3+ спринта', 'через 3 спринта', 'задачи на несколько спринтов вперед', "
+                + "'отдалённый горизонт', 'отдаленный горизонт') or ("
                 + "(" + n + " like 'следующий%сприн%' or (" + n + " like '%следующ%' and " + n + " like '%сприн%')) "
                 + "and " + n + " not like '%через 2%' and " + n + " not like '%через 3%' and " + n + " not like '%через%сприн%вперед%' "
                 + "and " + n + " not like '%вперед%'))";
         return jdbcTemplate.update(sql, projectId);
-    }
-
-
-    private int promoteNextSprintLikeStagesToQueue(long projectId) {
-        String s = "lower(trim(replace(coalesce(t.stage, ''), chr(160), ' ')))";
-        String sql = "update task_item t set stage = 'Очередь' "
-                + "from board b "
-                + "where b.id = t.board_id "
-                + "and b.project_id = ? "
-                + "and trim(replace(coalesce(t.stage, ''), chr(160), ' ')) <> '' "
-                + "and " + s + " not in ('очередь', 'в работе', 'тестирование', 'готово') "
-                + "and ( "
-                + "(" + s + " ilike '%следующ%сприн%' "
-                + "and " + s + " not ilike '%через 2%' "
-                + "and " + s + " not ilike '%через 3%' "
-                + "and " + s + " not ilike '%вперед%') "
-                + "or " + s + " in ('на уточнении', 'готовность к планированию', 'кандидаты в спринт', 'планирование спринта') "
-                + ")";
-        return jdbcTemplate.update(sql, projectId);
-    }
-
-    private int promoteExactNextSprintLabelToQueue(long projectId) {
-        return jdbcTemplate.update(
-                """
-                update task_item t set stage = 'Очередь'
-                from board b
-                where b.id = t.board_id
-                  and b.project_id = ?
-                  and lower(trim(replace(coalesce(t.stage, ''), chr(160), ' '))) = 'следующий спринт'
-                """,
-                projectId);
     }
 
     private static Object mapGetCi(Map<String, Object> row, String logicalName) {
@@ -1588,12 +1775,8 @@ public class LegacyDataApiController {
         }
 
         int bucketShifted = 0;
-        int promotedLoose = 0;
-        int promotedExact = 0;
         if (needsBacklogShift) {
             bucketShifted = shiftScrumBacklogBucketsForProject(projectId);
-            promotedLoose = promoteNextSprintLikeStagesToQueue(projectId);
-            promotedExact = promoteExactNextSprintLabelToQueue(projectId);
             renameSprintBoardsForStartedSprint(projectId, teamId, incrementSprintTitle);
         }
 
@@ -1638,7 +1821,7 @@ public class LegacyDataApiController {
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("ok", true);
         out.put("needsBacklogShift", needsBacklogShift);
-        out.put("backlogTasksUpdated", bucketShifted + promotedLoose + promotedExact);
+        out.put("backlogTasksUpdated", bucketShifted);
         if (sprintColumns) {
             try {
                 Map<String, Object> row = jdbcTemplate.queryForMap(

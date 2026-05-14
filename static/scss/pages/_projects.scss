@@ -8,6 +8,32 @@
     }
 }
 
+.projects-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $space-16;
+    margin-bottom: $space-20;
+    min-width: 0;
+
+    .projects-search {
+        margin-bottom: 0;
+    }
+}
+
+.modal-content.create-project-modal.auth-flow-card {
+    max-height: 92vh;
+
+    .modal-body {
+        flex: 0 1 auto;
+        overflow-y: auto;
+    }
+
+    .modal-footer {
+        flex-wrap: wrap;
+    }
+}
+
 .projects-search {
     position: relative;
     display: flex;

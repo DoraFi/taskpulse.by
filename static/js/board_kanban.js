@@ -81,13 +81,22 @@
 
     function normalizeScrumBoardsForView() {
         scrumDisplayBoardIds = null;
-        if (!isScrumView() || !Array.isArray(kanbanBoards) || kanbanBoards.length <= 1) return;
+        if (!isScrumView() || !Array.isArray(kanbanBoards) || kanbanBoards.length === 0) return;
         const allBoards = [...kanbanBoards];
         const active = allBoards.find(b => !!b.sprintStartedAt && !b.sprintFinishedAt);
         const primary = active || allBoards[0];
         if (!primary) return;
         const knownNums = allBoards.map(b => extractSprintNumber(b.name)).filter(Boolean);
-        const sprintNum = extractSprintNumber(primary.name) || (knownNums.length ? Math.max(...knownNums) : 1);
+        const maxKnown = knownNums.length ? Math.max(...knownNums) : 0;
+        const idleNeverStarted = allBoards.every(b => !b.sprintStartedAt);
+        let sprintNum;
+        if (active) {
+            sprintNum = extractSprintNumber(primary.name) || maxKnown || 1;
+        } else if (idleNeverStarted) {
+            sprintNum = extractSprintNumber(primary.name) || maxKnown || 1;
+        } else {
+            sprintNum = maxKnown > 0 ? maxKnown + 1 : 1;
+        }
         primary.name = `Спринт ${sprintNum}`;
         scrumDisplayBoardIds = new Set(allBoards.map(b => Number(b.id)));
         kanbanBoards = [primary];
