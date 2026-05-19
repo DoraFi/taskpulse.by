@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>TaskPulse - Команда</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/static/source/logo_rect.svg}" href="/static/source/logo_rect.svg">
+    <link rel="stylesheet" th:href="@{/static/scss/style.css}" href="/static/scss/style.css">
+</head>
+
+<body>
+    <div class="header">
+        <div class="gap-24 flex-row" style="align-items: center;">
+            <a class="logo-link" data-context-link="home" href="/"><img class="logo" th:src="@{/static/source/logo_rect.svg}" src="/static/source/logo_rect.svg" alt="TaskPulse"></a>
+            <div class="search-panel br-5">
+                <img class="h-16" th:src="@{/static/source/icons/search.svg}" src="/static/source/icons/search.svg" alt="Поиск">
+                <input class="text-basic" type="text" placeholder="Поиск">
+            </div>
+        </div>
+        <ul class="gap-24 flex-row header-toolbar">
+            <li>
+                <button type="button" class="header-toolbar__action" id="headerCreateTaskBtn" aria-label="Создать">
+                    <img class="h-32" th:src="@{/static/source/icons/plus.svg}" src="/static/source/icons/plus.svg" alt="">
+                </button>
+            </li>
+            <li>
+                <button type="button" class="header-toolbar__action" id="headerSettingsBtn" aria-label="Настройки">
+                    <img class="h-32" th:src="@{/static/source/icons/settings.svg}" src="/static/source/icons/settings.svg" alt="">
+                </button>
+            </li>
+            <li>
+                <button type="button" class="header-toolbar__action" id="headerProfileBtn" aria-label="Профиль">
+                    <img class="h-32" th:src="@{/static/source/icons/profile.svg}" src="/static/source/icons/profile.svg" alt="">
+                </button>
+            </li>
+            <li>
+                <a th:href="@{/auth/welcome}" href="/auth/welcome" class="header-toolbar__action" aria-label="Выйти">
+                    <img class="h-32" th:src="@{/static/source/icons/logout.svg}" src="/static/source/icons/logout.svg" alt="">
+                </a>
+            </li>
+            <li>
+                <button type="button" class="theme-toggle header-toolbar__action" id="themeToggle" aria-label="Переключить тему">
+                    <img class="h-32 theme-toggle__icon" th:src="@{/static/source/icons/lighttheme.svg}" src="/static/source/icons/lighttheme.svg" alt="" aria-hidden="true">
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-layout">
+        <aside id="aside-container"></aside>
+
+        <div class="app-container flex-col team-page">
+            <header class="team-page__hero br-5">
+                <div class="team-page__hero-main">
+                    <div class="team-page__title-row">
+                        <h1 class="text-header team-page__title" id="teamPageTitle">Загрузка...</h1>
+                        <span class="team-page__count project-card__chip text-signature" id="teamPageCountBadge">—</span>
+                    </div>
+                </div>
+                <div class="team-page__hero-side">
+                    <button type="button" class="button-basic team-page__add-btn" id="teamAddMemberBtn" hidden>Добавить участника</button>
+                </div>
+            </header>
+
+            <div class="team-toolbar">
+                <div class="team-search projects-search">
+                    <img class="h-16" th:src="@{/static/source/icons/search.svg}" src="/static/source/icons/search.svg" alt="Поиск">
+                    <input class="text-basic" id="teamSearchInput" type="text" placeholder="Поиск по имени, должности, отделу">
+                </div>
+                <div class="team-toolbar__position" id="teamDepartmentFilterWrap" hidden>
+                    <select id="teamDepartmentFilter" class="filter-input create-task-select profile-modal__select--full" aria-label="Фильтр по отделу">
+                        <option value="">Все отделы</option>
+                    </select>
+                </div>
+                <div class="team-toolbar__position" id="teamPositionFilterWrap" hidden>
+                    <select id="teamPositionFilter" class="filter-input create-task-select profile-modal__select--full" aria-label="Фильтр по должности">
+                        <option value="">Все должности</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="team-grid" id="teamMembersGrid">
+                <p class="text-basic">Загрузка участников...</p>
+            </div>
+
+            <div class="modal-overlay" id="teamAddMemberModal" aria-hidden="true">
+                <div class="modal-content auth-flow-card team-add-member-modal" role="dialog" aria-labelledby="teamAddMemberModalTitle" aria-modal="true">
+                    <div class="modal-header">
+                        <p class="text-header" id="teamAddMemberModalTitle">Добавить участника</p>
+                        <button type="button" class="modal-close" id="teamAddMemberModalClose" aria-label="Закрыть">
+                            <img th:src="@{/static/source/icons/cross.svg}" src="/static/source/icons/cross.svg" alt="" width="24" height="24">
+                        </button>
+                    </div>
+                    <div class="modal-body form-auth">
+                        <div class="auth-field">
+                            <label for="teamAddMemberEmail">Email</label>
+                            <input id="teamAddMemberEmail" type="email" class="team-add-member-modal__email" placeholder="colleague@company.com" autocomplete="email">
+                        </div>
+                        <div class="auth-field">
+                            <label for="teamAddMemberRole">Роль в команде</label>
+                            <select id="teamAddMemberRole" class="filter-input create-task-select profile-modal__select--full" aria-label="Роль в команде">
+                                <option value="member">Участник</option>
+                                <option value="team_admin">Администратор</option>
+                                <option value="observer">Наблюдатель</option>
+                            </select>
+                        </div>
+                        <p class="text-signature" id="teamAddMemberError" hidden></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="button-secondary" id="teamAddMemberCancel">Отмена</button>
+                        <button type="button" class="button-basic" id="teamAddMemberSubmit">Добавить</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-overlay" id="teamMemberModal" aria-hidden="true">
+                <div class="modal-content profile-modal team-member-modal" role="dialog" aria-labelledby="teamMemberModalTitle" aria-modal="true">
+                    <div class="modal-header">
+                        <p class="text-header" id="teamMemberModalTitle">Карточка участника</p>
+                        <button type="button" class="modal-close" id="teamMemberModalClose" aria-label="Закрыть">
+                            <img th:src="@{/static/source/icons/cross.svg}" src="/static/source/icons/cross.svg" alt="" width="24" height="24">
+                        </button>
+                    </div>
+                    <div class="modal-body profile-modal__body team-member-modal__body">
+                        <div class="profile-modal__hero">
+                            <img class="profile-modal__avatar" id="teamMemberModalAvatar" src="/static/source/user_img/basic_avatar.png" alt="">
+                            <div class="profile-modal__titles">
+                                <p class="text-header" id="teamMemberModalName">-</p>
+                                <p class="text-signature" id="teamMemberModalPosition">-</p>
+                                <p class="text-basic profile-modal__id" id="teamMemberModalMeta"></p>
+                            </div>
+                        </div>
+
+                        <div class="profile-modal__section profile-modal__section--card br-5" id="teamMemberPersonalSection" hidden>
+                            <p class="filter-label">Личные данные</p>
+                            <ul class="profile-modal__activity-list" id="teamMemberPersonalList"></ul>
+                        </div>
+
+                        <div class="profile-modal__section profile-modal__section--card br-5" id="teamMemberRoleSection">
+                            <p class="filter-label">Роль в команде</p>
+                            <div class="auth-field profile-modal__field profile-modal__field--full" id="teamMemberRoleWrap">
+                                <label for="teamMemberRoleSelect">Роль доступа</label>
+                                <select id="teamMemberRoleSelect" class="tp-field-plain create-task-select profile-modal__select--full team-member-role-edit">
+                                    <option value="team_admin">Администратор команды</option>
+                                    <option value="member">Участник</option>
+                                    <option value="observer">Наблюдатель</option>
+                                </select>
+                                <input type="text" class="tp-field-plain team-member-role-view" id="teamMemberRoleLabel" readonly tabindex="-1">
+                            </div>
+                            <div class="auth-field profile-modal__field profile-modal__field--full team-member-edit-only" id="teamMemberPositionField" hidden>
+                                <label for="teamMemberPositionEdit">Должность</label>
+                                <input type="text" id="teamMemberPositionEdit" maxlength="120" placeholder="Выберите или введите должность" autocomplete="off">
+                            </div>
+                            <div class="auth-field profile-modal__field profile-modal__field--full team-member-edit-only" id="teamMemberDepartmentField" hidden>
+                                <label for="teamMemberDepartmentEdit">Отдел</label>
+                                <input type="text" id="teamMemberDepartmentEdit" maxlength="120" placeholder="Выберите или введите отдел" autocomplete="off">
+                            </div>
+                        </div>
+
+                        <div class="profile-modal__section" id="teamMemberStatsSection">
+                            <p class="filter-label">Сводка по задачам</p>
+                            <div class="profile-modal__stats" id="teamMemberModalStats"></div>
+                        </div>
+
+                        <div class="profile-modal__section profile-modal__section--card profile-modal__section--activity br-5" id="teamMemberContactsSection" hidden>
+                            <p class="filter-label">Контакты</p>
+                            <ul class="profile-modal__activity-list" id="teamMemberModalContacts"></ul>
+                        </div>
+
+                        <div class="profile-modal__section profile-modal__section--card br-5" id="teamMemberMailSection" hidden>
+                            <p class="filter-label">Написать на email</p>
+                            <p class="text-signature team-mail-hint">Письмо уйдёт с вашего адреса из профиля на email участника.</p>
+                            <div class="team-mail-route">
+                                <span class="text-signature">От</span>
+                                <span class="text-basic" id="teamMailFrom">-</span>
+                                <span class="text-signature">Кому</span>
+                                <span class="text-basic" id="teamMailTo">-</span>
+                            </div>
+                            <div class="auth-field profile-modal__field profile-modal__field--full">
+                                <label for="teamMailSubject">Тема</label>
+                                <input id="teamMailSubject" type="text" class="filter-input" maxlength="300" placeholder="Тема письма">
+                            </div>
+                            <div class="auth-field profile-modal__field profile-modal__field--full">
+                                <label for="teamMailBody">Сообщение</label>
+                                <textarea id="teamMailBody" class="profile-modal__bio filter-input" rows="5" placeholder="Текст письма"></textarea>
+                            </div>
+                            <button type="button" class="button-basic team-mail-send-btn" id="teamMemberMailSend">Отправить</button>
+                        </div>
+
+                        <p class="text-signature" id="teamMemberModalError" hidden></p>
+                    </div>
+                    <div class="modal-footer profile-modal__footer">
+                        <div class="profile-modal__footer-actions">
+                            <button type="button" class="button-secondary" id="teamMemberModalRemove" hidden>Удалить из команды</button>
+                            <button type="button" class="button-secondary" id="teamMemberModalCancel">Закрыть</button>
+                            <button type="button" class="button-basic" id="teamMemberModalSave" hidden>Сохранить</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+            <div class="modal-overlay" id="teamConfirmModal" aria-hidden="true">
+                <div class="modal-content auth-flow-card team-confirm-modal" role="dialog" aria-labelledby="teamConfirmModalTitle" aria-modal="true">
+                    <div class="modal-header">
+                        <p class="text-header" id="teamConfirmModalTitle">Подтверждение</p>
+                        <button type="button" class="modal-close" id="teamConfirmModalClose" aria-label="Закрыть">
+                            <img th:src="@{/static/source/icons/cross.svg}" src="/static/source/icons/cross.svg" alt="" width="24" height="24">
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-basic" id="teamConfirmModalMessage"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="button-secondary" id="teamConfirmModalCancel">Отмена</button>
+                        <button type="button" class="button-basic" id="teamConfirmModalOk">Подтвердить</button>
+                    </div>
+                </div>
+            </div>
+
+    <script src="/static/js/loadComponents.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/theme.js"></script>
+    <script src="/static/js/create_task_modal.js"></script>
+    <script src="/static/js/tp_select.js"></script>
+    <script src="/static/js/tp_date_picker.js"></script>
+    <script src="/static/js/tp_combobox.js"></script>
+    <script src="/static/js/profile_modal.js"></script>
+    <script src="/static/js/settings_modal.js"></script>
+    <script src="/static/js/team.js"></script>
+</body>
+
+</html>

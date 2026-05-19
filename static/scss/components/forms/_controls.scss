@@ -1,21 +1,104 @@
+@mixin tp-field-skin-plain() {
+    box-sizing: border-box;
+    border: none;
+    background-color: $light-green;
+    border-radius: $radius-sm;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    color: $dark-gray;
+    width: 100%;
+    padding: $space-4 $space-16;
+
+    &:hover {
+        background-color: rgba($green, 0.12);
+    }
+
+    &:focus {
+        outline: none;
+        background-color: rgba($green, 0.16);
+        box-shadow: none;
+    }
+
+    &::placeholder {
+        color: rgba($dark-gray, 0.5);
+    }
+}
+
+@mixin tp-field-skin-plain-dark() {
+    color: $light-light-green;
+    background-color: rgba($green, 0.08);
+
+    &:hover {
+        background-color: rgba($green, 0.14);
+    }
+
+    &:focus {
+        background-color: rgba($green, 0.2);
+        box-shadow: none;
+    }
+
+    &::placeholder {
+        color: rgba($light-light-green, 0.45);
+    }
+}
+
+@mixin tp-field-skin-base() {
+    box-sizing: border-box;
+    border: $space-1 solid rgba($green, 0.05);
+    background-color: rgba($green, 0.07);
+    border-radius: $radius-sm;
+    transition: all 0.2s ease;
+    color: $dark-gray;
+
+    &:hover {
+        border-color: $green;
+        box-shadow: 0 0 0 $space-2 rgba($green, 0.2);
+    }
+
+    &:focus {
+        outline: none;
+        border-color: $green;
+        box-shadow: 0 0 0 $space-2 rgba($green, 0.4);
+    }
+
+    &::placeholder {
+        color: rgba($dark-gray, 0.5);
+    }
+}
+
+@mixin tp-field-skin-dark() {
+    color: $light-light-green;
+    background-color: rgba($green, 0.08);
+    border-color: rgba($green, 0.28);
+
+    &:hover {
+        border-color: $green;
+        box-shadow: 0 0 0 $space-2 rgba($green, 0.22);
+    }
+
+    &:focus {
+        border-color: $green;
+        box-shadow: 0 0 0 $space-2 rgba($green, 0.35);
+    }
+
+    &::placeholder {
+        color: rgba($light-light-green, 0.45);
+    }
+}
+
 @mixin tp-select-skin($w: 100%, $maxW: 100%) {
     $chevron-w: 0.625rem;
     $chevron-inset: $space-16;
 
     width: $w;
     max-width: $maxW;
-    box-sizing: border-box;
     cursor: pointer;
     appearance: none;
     -webkit-appearance: none;
     accent-color: $green;
-    color: $dark-gray;
     padding: $space-4 $space-16;
     padding-right: calc(#{$chevron-inset} + #{$chevron-w} + #{$space-8});
-    border: $space-1 solid $light-gray;
-    border-radius: $radius-sm;
     @extend .text-basic;
-    background-color: $light-light-green;
+    @include tp-field-skin-base();
     background-image: url('/static/source/icons/arrow_dark_cropped.svg');
     background-repeat: no-repeat;
     background-position: right $chevron-inset center;
@@ -24,27 +107,15 @@
     &::-ms-expand {
         display: none;
     }
-
-    &:focus {
-        outline: none;
-        border-color: $green;
-        box-shadow: 0 0 0 $space-2 rgba($green, 0.1);
-    }
 }
 
 @mixin tp-select-skin-dark() {
-    background-color: $black;
+    @include tp-field-skin-dark();
+    background-color: rgba($green, 0.08);
     background-image: url('/static/source/icons/arrow_light_cropped.svg');
     background-repeat: no-repeat !important;
     background-position: right $space-16 center !important;
     background-size: 0.625rem auto !important;
-    color: $light-light-green;
-    border-color: $light-light-green;
-
-    &:focus {
-        border-color: $green;
-        box-shadow: 0 0 0 $space-2 rgba($green, 0.18);
-    }
 
     option {
         background: $dark-gray;
@@ -58,32 +129,50 @@
     min-height: $minH;
     height: $h;
     resize: vertical;
-    box-sizing: border-box;
     padding: $space-16;
-    border: $space-1 solid $light-gray;
-    border-radius: $radius-sm;
     @extend .text-basic;
-    background: $light-light-green;
-    transition: all 0.2s ease;
-
-    &:focus {
-        outline: none;
-        border-color: $green;
-        box-shadow: 0 0 0 $space-2 rgba($green, 0.1);
-    }
-
-    &::placeholder {
-        color: rgba($dark-gray, 0.5);
-    }
+    @include tp-field-skin-base();
 }
 
 @mixin tp-textarea-skin-dark() {
-    border-color: $light-light-green;
-    color: $light-light-green;
-    background: $black;
+    @include tp-field-skin-dark();
+}
 
-    &::placeholder {
-        color: rgba($light-light-green, 0.45);
-    }
+select.create-task-select {
+    @include tp-select-skin(100%, 100%);
+}
+
+body[data-theme="dark"] select.create-task-select {
+    @include tp-select-skin-dark();
+}
+
+input.tp-field-plain,
+textarea.tp-field-plain,
+select.tp-field-plain {
+    all: unset;
+    box-sizing: border-box;
+    display: block;
+    @include tp-field-skin-plain();
+}
+
+body[data-theme="dark"] input.tp-field-plain,
+body[data-theme="dark"] textarea.tp-field-plain,
+body[data-theme="dark"] select.tp-field-plain {
+    @include tp-field-skin-plain-dark();
+}
+
+select.tp-field-plain {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: calc(#{$space-16} + 0.625rem + #{$space-8});
+    background-image: url('/static/source/icons/arrow_dark_cropped.svg');
+    background-repeat: no-repeat;
+    background-position: right $space-16 center;
+    background-size: 0.625rem auto;
+}
+
+body[data-theme="dark"] select.tp-field-plain {
+    background-image: url('/static/source/icons/arrow_light_cropped.svg');
 }
 

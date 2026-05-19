@@ -90,7 +90,7 @@ function initIndexPage(options) {
                 'tasks-all': `${base}/tasks`,
                 'tasks-history': `${base}/tasks`,
                 'tasks-calendar': `${base}/tasks`,
-                'projects-team': `${base}/projects`
+                'projects-team': `${base}/team`
             };
             document.querySelectorAll('[data-index-nav]').forEach((el) => {
                 const key = el.getAttribute('data-index-nav');
@@ -148,8 +148,8 @@ function initIndexPage(options) {
                                     </div>
                                     <div class="col-date">
                                         ${overdue
-                                            ? `<div class="due-attention"><p class="text-basic">Просрочено</p><p class="text-signature">${formatRelativeDate(task.dueDate) || '—'}</p></div>`
-                                            : `<p class="text-basic ${dueClass}">${formatRelativeDate(task.dueDate) || '—'}</p>`
+                                            ? `<div class="due-attention"><p class="text-basic">Просрочено</p><p class="text-signature">${formatRelativeDate(task.dueDate) || '-'}</p></div>`
+                                            : `<p class="text-basic ${dueClass}">${formatRelativeDate(task.dueDate) || '-'}</p>`
                                         }
                                     </div>
                                 </div>
@@ -163,15 +163,29 @@ function initIndexPage(options) {
             if (teamCard && Array.isArray(data.team) && data.team.length > 0) {
                 const teamList = teamCard.querySelector('.team-members-list');
                 if (teamList) {
-                    teamList.innerHTML = data.team.map((m) => `
-                        <div class="user-img-text">
+                    resolveContextBasePath().then((base) => {
+                        teamList.innerHTML = data.team.map((m) => {
+                            const shortName = [m.lastName, m.firstName].filter(Boolean).join(' ')
+                                || (m.name ? String(m.name).split(/\s+/).slice(0, 2).join(' ') : '');
+                            const memberId = m.publicId || '';
+                            return `
+                        <button type="button" class="user-img-text index-team-member" data-member-id="${escapeIndexHtml(memberId)}" ${memberId ? '' : 'disabled'} aria-label="Открыть карточку ${escapeIndexHtml(shortName)}">
                             ${m.online ? `<div class="status-online"><img src="/static/source/user_img/${m.avatar || 'basic_avatar.png'}" alt=""></div>` : `<img src="/static/source/user_img/${m.avatar || 'basic_avatar.png'}" alt="">`}
                             <div class="basic-and-signature">
-                                <p class="text-basic">${m.name || ''}</p>
-                                <p class="text-signature">${m.role || ''}</p>
+                                <p class="text-basic">${escapeIndexHtml(shortName)}</p>
+                                <p class="text-signature">${escapeIndexHtml(m.role || '')}</p>
                             </div>
-                        </div>
-                    `).join('');
+                        </button>
+                    `;
+                        }).join('');
+                        teamList.querySelectorAll('.index-team-member[data-member-id]').forEach((btn) => {
+                            const id = btn.getAttribute('data-member-id');
+                            if (!id) return;
+                            btn.addEventListener('click', () => {
+                                navigateTo(`${base}/team?member=${encodeURIComponent(id)}`);
+                            });
+                        });
+                    });
                 }
             }
 
@@ -184,7 +198,7 @@ function initIndexPage(options) {
                     recentRoot.innerHTML = actions.slice(0, 5).map((a) => {
                         const idPart = (a.id != null && String(a.id).trim() !== '') ? String(a.id).trim() : '';
                         const namePart = (a.name != null && String(a.name).trim() !== '') ? String(a.name).trim() : '';
-                        const titleLine = [idPart, namePart].filter(Boolean).join(' — ');
+                        const titleLine = [idPart, namePart].filter(Boolean).join(' - ');
                         return `
                         <div class="grid-row">
                             <div class="col-avatar"><img class="avatar" src="/static/source/user_img/${a.avatar || 'basic_avatar.png'}" alt=""></div>

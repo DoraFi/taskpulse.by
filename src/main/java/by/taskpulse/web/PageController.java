@@ -6,11 +6,13 @@ import java.util.UUID;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.ui.Model;
+import org.springframework.web.server.ResponseStatusException;
 
 @Controller
 public class PageController {
@@ -201,11 +203,22 @@ public class PageController {
         return "pages/projects";
     }
 
+    @GetMapping("/o/{orgId}/t/{teamId}/team")
+    public String teamContext(@PathVariable String orgId, @PathVariable String teamId, HttpServletRequest request, Model model) {
+        String contextError = validateContextAccess(orgId, teamId);
+        if (contextError != null) return contextErrorView(model, request, 404, contextError);
+        return "pages/team";
+    }
+
     @GetMapping("/o/{orgId}/t/{teamId}/{*rest}")
     public String invalidContextSubpath(@PathVariable String orgId,
                                         @PathVariable String teamId,
+                                        @PathVariable(required = false) String rest,
                                         HttpServletRequest request,
                                         Model model) {
+        if (rest != null && (rest.equals("api") || rest.startsWith("api/"))) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
         String contextError = validateContextAccess(orgId, teamId);
         if (contextError != null) return contextErrorView(model, request, 404, contextError);
         return contextErrorView(model, request, 404, "Страница в этом контексте не найдена");

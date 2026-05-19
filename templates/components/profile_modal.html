@@ -17,30 +17,54 @@
                 </div>
             </div>
 
-            <p class="text-signature profile-modal__settings-hint">Язык интерфейса, права, интеграции и оформление — в разделе «Настройки» в шапке.</p>
+            <p class="text-signature profile-modal__settings-hint">Язык интерфейса, права, интеграции и оформление - в разделе «Настройки» в шапке.</p>
 
-            <div class="profile-modal__section profile-modal__section--card border-dark-1 br-5">
+            <div class="profile-modal__section profile-modal__section--card br-5">
                 <p class="filter-label">Личные данные</p>
                 <div class="profile-modal__grid">
                     <div class="auth-field profile-modal__field">
-                        <label for="profileDisplayName">Имя и фамилия</label>
-                        <input id="profileDisplayName" type="text" class="filter-input" value="Дарья Швед" autocomplete="name">
+                        <label for="profileLogin">Логин</label>
+                        <input id="profileLogin" type="text" class="tp-field-plain" value="d.shved" readonly autocomplete="username">
                     </div>
                     <div class="auth-field profile-modal__field">
-                        <label for="profileLogin">Логин</label>
-                        <input id="profileLogin" type="text" class="filter-input" value="d.shved" readonly autocomplete="username">
+                        <label for="profileLastName">Фамилия</label>
+                        <input id="profileLastName" type="text" class="tp-field-plain" value="" autocomplete="family-name">
+                    </div>
+                    <div class="auth-field profile-modal__field">
+                        <label for="profileFirstName">Имя</label>
+                        <input id="profileFirstName" type="text" class="tp-field-plain" value="" autocomplete="given-name">
+                    </div>
+                    <div class="auth-field profile-modal__field">
+                        <label for="profilePatronymic">Отчество</label>
+                        <input id="profilePatronymic" type="text" class="tp-field-plain" value="" autocomplete="additional-name">
                     </div>
                     <div class="auth-field profile-modal__field">
                         <label for="profileEmail">Рабочий e-mail</label>
-                        <input id="profileEmail" type="email" class="filter-input" value="daria.shved@taskpulse.by" autocomplete="email">
+                        <input id="profileEmail" type="email" class="tp-field-plain" value="daria.shved@taskpulse.by" autocomplete="email">
                     </div>
                     <div class="auth-field profile-modal__field">
                         <label for="profilePhone">Телефон</label>
-                        <input id="profilePhone" type="tel" class="filter-input" value="+375 (29) 123-45-67" autocomplete="tel">
+                        <input id="profilePhone" type="tel" class="tp-field-plain" value="+375 (29) 123-45-67" autocomplete="tel">
+                    </div>
+                    <div class="auth-field profile-modal__field">
+                        <label for="profileBirthDateTrigger">Дата рождения</label>
+                        <input id="profileBirthDate" type="hidden">
+                        <div class="search-panel br-5 tp-date-field" id="profileBirthDateTrigger" role="button" tabindex="0" aria-haspopup="dialog">
+                            <img class="h-16" src="/static/source/icons/calendar.svg" alt="">
+                            <span id="profileBirthDateDisplay" class="tp-date-field__value text-basic">Не указана</span>
+                        </div>
+                    </div>
+                    <div class="auth-field profile-modal__field">
+                        <label for="profileBirthVisibility">Кто видит дату рождения</label>
+                        <select id="profileBirthVisibility" class="tp-field-plain create-task-select profile-modal__select--full">
+                            <option value="hidden">Никто</option>
+                            <option value="month_day">Только день и месяц</option>
+                            <option value="full">Полная дата</option>
+                        </select>
                     </div>
                     <div class="auth-field profile-modal__field">
                         <label for="profileTimezone">Часовой пояс</label>
-                        <select id="profileTimezone" class="filter-input create-task-select profile-modal__select--full">
+                        <select id="profileTimezone" class="tp-field-plain create-task-select profile-modal__select--full">
                             <option value="Europe/Minsk" selected>Минск (UTC+3)</option>
                             <option value="Europe/Moscow">Москва (UTC+3)</option>
                             <option value="Europe/Warsaw">Варшава (UTC+1)</option>
@@ -48,39 +72,39 @@
                     </div>
                     <div class="auth-field profile-modal__field">
                         <label for="profileOffice">Офис / локация</label>
-                        <input id="profileOffice" type="text" class="filter-input" value="Минск, ул. Немига, 12">
+                        <input id="profileOffice" type="text" class="tp-field-plain" value="Минск, ул. Немига, 12">
                     </div>
                 </div>
             </div>
 
             <div class="auth-field profile-modal__field profile-modal__field--full">
                 <label for="profileBio">О себе</label>
-                <textarea id="profileBio" class="profile-modal__bio" rows="4" placeholder="Например: направление работы, зона ответственности, чем можете помочь команде">Работаю над серверной частью и интеграциями между сервисами. В задачах опираюсь на согласованные требования, аккуратные код-ревью и предсказуемые релизы. Подключаюсь к обсуждению контрактов API и схем данных, когда это ускоряет поставку.</textarea>
+                <textarea id="profileBio" class="profile-modal__bio tp-field-plain" rows="4" placeholder="Например: направление работы, зона ответственности, чем можете помочь команде">Работаю над серверной частью и интеграциями между сервисами. В задачах опираюсь на согласованные требования, аккуратные код-ревью и предсказуемые релизы. Подключаюсь к обсуждению контрактов API и схем данных, когда это ускоряет поставку.</textarea>
             </div>
 
             <div class="profile-modal__section">
                 <p class="filter-label">Сводка по задачам</p>
                 <div class="profile-modal__stats">
-                    <div class="profile-modal__stat border-dark-1 br-5">
+                    <div class="profile-modal__stat br-5">
                         <span class="text-signature">Назначено</span>
                         <span class="text-header" id="profileStatAssigned">6</span>
                     </div>
-                    <div class="profile-modal__stat border-dark-1 br-5">
+                    <div class="profile-modal__stat br-5">
                         <span class="text-signature">В работе</span>
                         <span class="text-header" id="profileStatInProgress">4</span>
                     </div>
-                    <div class="profile-modal__stat border-dark-1 br-5">
+                    <div class="profile-modal__stat br-5">
                         <span class="text-signature">За неделю</span>
                         <span class="text-header" id="profileStatWeek">7</span>
                     </div>
-                    <div class="profile-modal__stat border-dark-1 br-5">
+                    <div class="profile-modal__stat br-5">
                         <span class="text-signature">Завершено (мес.)</span>
                         <span class="text-header" id="profileStatMonthDone">11</span>
                     </div>
                 </div>
             </div>
 
-            <div class="profile-modal__section profile-modal__section--card profile-modal__section--activity border-dark-1 br-5">
+            <div class="profile-modal__section profile-modal__section--card profile-modal__section--activity br-5">
                 <p class="filter-label">Проекты и роли</p>
                 <ul class="profile-modal__activity-list" id="profileProjectsRolesList">
                     <li class="profile-modal__activity-row">
@@ -98,7 +122,7 @@
                 </ul>
             </div>
 
-            <div class="profile-modal__section profile-modal__section--card border-dark-1 br-5">
+            <div class="profile-modal__section profile-modal__section--card br-5">
                 <p class="filter-label">Уведомления</p>
                 <p class="text-signature profile-modal__section-lead">Что присылать на почту и в центр уведомлений в приложении</p>
                 <div class="profile-modal__notify-list">
@@ -135,7 +159,7 @@
                 </div>
             </div>
 
-            <div class="profile-modal__section profile-modal__section--card profile-modal__password-block border-dark-1 br-5">
+            <div class="profile-modal__section profile-modal__section--card profile-modal__password-block br-5">
                 <p class="filter-label">Безопасность аккаунта</p>
                 <p class="text-signature profile-modal__section-lead">Смена пароля входа в TaskPulse</p>
                 <div class="auth-field profile-modal__field">
@@ -156,7 +180,7 @@
                 <button type="button" class="button-secondary profile-modal__password-btn" id="profileModalChangePassword">Обновить пароль</button>
             </div>
 
-            <div class="profile-modal__section profile-modal__section--card profile-modal__section--activity border-dark-1 br-5">
+            <div class="profile-modal__section profile-modal__section--card profile-modal__section--activity br-5">
                 <p class="filter-label">Активность</p>
                 <ul class="profile-modal__activity-list" id="profileActivityList">
                     <li class="profile-modal__activity-row">
@@ -184,6 +208,7 @@
                 </span>
             </div>
             <div class="profile-modal__footer-actions" id="profileModalFooterActions">
+                <button type="button" class="button-secondary profile-modal__danger-btn" id="profileModalLeaveTeam" hidden>Покинуть команду</button>
                 <button type="button" class="button-secondary" id="profileModalExitProfile">Выйти из профиля</button>
                 <button type="button" class="button-basic" id="profileModalSave">Сохранить изменения</button>
             </div>

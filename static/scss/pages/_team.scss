@@ -1,0 +1,369 @@
+.team-page__hero {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: $space-24;
+    padding: $space-32 $space-48;
+    margin-bottom: $space-32;
+    background: $light-green;
+}
+
+.team-page__hero-main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: $space-8;
+    min-width: 0;
+}
+
+.team-page__eyebrow {
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    opacity: 0.75;
+}
+
+.team-page__title-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $space-16;
+    min-width: 0;
+}
+
+.team-page__title {
+    margin: 0;
+    line-height: 1.15;
+
+    &.is-editable {
+        cursor: pointer;
+    }
+}
+
+.team-page__title-input {
+    margin: 0;
+    padding: $space-4 $space-8;
+    min-width: min(100%, 12rem);
+    max-width: 100%;
+    box-sizing: border-box;
+    border: $space-1 solid rgba($green, 0.35);
+    border-radius: $radius-sm;
+    background: $light-light-green;
+    color: inherit;
+    font: inherit;
+    line-height: 1.15;
+
+    &:focus {
+        outline: none;
+        border-color: $green;
+        box-shadow: 0 0 0 2px rgba($green, 0.15);
+    }
+}
+
+body[data-theme='dark'] .team-page__title-input {
+    background: $dark-gray;
+    border-color: rgba($light-light-green, 0.25);
+    color: $light-light-green;
+
+    &:focus {
+        border-color: rgba($green, 0.65);
+    }
+}
+
+.team-page__hero-side {
+    display: flex;
+    align-items: center;
+    gap: $space-16;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.team-page__add-btn {
+    white-space: nowrap;
+    background-color: rgba($green, 0.14);
+    padding: $space-8 $space-16;
+}
+
+.team-page__count.project-card__chip {
+    flex-shrink: 0;
+    padding: $space-8 $space-16;
+    white-space: nowrap;
+    background: rgba($green, 0.14);
+    border: none;
+}
+
+.team-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: $space-24;
+    margin-bottom: $space-32;
+}
+
+.team-search {
+    flex: 1 1 14rem;
+    min-width: min(100%, 14rem);
+    max-width: 22rem;
+    margin-bottom: 0;
+}
+
+.team-toolbar__position,
+.team-toolbar__department,
+.team-toolbar__role {
+    flex: 0 1 14rem;
+    min-width: 11rem;
+
+    select {
+        width: 100%;
+    }
+}
+
+.modal-content.team-add-member-modal.auth-flow-card {
+    .modal-body.form-auth {
+        gap: $space-16;
+    }
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: $space-48;
+
+    @media (max-width: 900px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.member-card {
+    all: unset;
+    display: flex;
+    flex-direction: column;
+    min-height: 16rem;
+
+    &--self {
+        min-height: auto;
+    }
+    border-radius: $radius-md;
+    overflow: hidden;
+    cursor: pointer;
+    color: inherit;
+    background: $light-green;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+
+    &:focus-visible {
+        outline: $space-2 solid rgba($green, 0.45);
+        outline-offset: $space-2;
+    }
+}
+
+.member-card__body {
+    height: 100%;
+}
+
+.member-card__head {
+    align-items: flex-start;
+}
+
+.member-card__avatar-img {
+    @include avatar-size(3.25rem);
+    border-radius: 0.8rem;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: $space-1 solid rgba($green, 0.28);
+}
+
+.member-card__stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+
+.member-card__self-badge {
+    margin-left: $space-8;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+.member-card__contacts {
+    display: flex;
+    gap: $space-8;
+    align-items: stretch;
+
+    &--email-only {
+        .member-card__contact--email {
+            flex: 1 1 100%;
+        }
+    }
+}
+
+.member-card__contact {
+    display: flex;
+    flex: 1 1 0;
+    min-width: 0;
+    flex-direction: column;
+    gap: $space-4;
+    padding: $space-12 $space-16;
+    border-radius: $radius-sm;
+    border: $space-1 solid rgba($dark-gray, 0.1);
+    background: rgba($green, 0.06);
+    text-align: left;
+    box-sizing: border-box;
+
+    &--email {
+        border-color: rgba($green, 0.28);
+        background: rgba($green, 0.1);
+    }
+
+    &--phone {
+        background: $light-light-green;
+    }
+
+    &--empty .member-card__contact-value {
+        opacity: 0.55;
+    }
+}
+
+button.member-card__contact--email {
+    all: unset;
+    display: flex;
+    flex: 1 1 0;
+    min-width: 0;
+    flex-direction: column;
+    gap: $space-4;
+    padding: $space-12 $space-16;
+    border-radius: $radius-sm;
+    border: $space-1 solid rgba($green, 0.28);
+    background: rgba($green, 0.1);
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+
+    &:hover,
+    &:focus-visible {
+        border-color: $green;
+        box-shadow: 0 0 0 $space-2 rgba($green, 0.2);
+        background: rgba($green, 0.16);
+        outline: none;
+    }
+}
+
+.member-card__contact-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.7;
+}
+
+.member-card__contact-value {
+    word-break: break-word;
+    line-height: 1.35;
+}
+
+.team-mail-hint {
+    margin: 0 0 $space-12;
+    line-height: 1.45;
+}
+
+.team-mail-route {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: $space-4 $space-16;
+    align-items: center;
+    margin-bottom: $space-16;
+    padding: $space-12 $space-16;
+    border-radius: $radius-sm;
+    background: rgba($green, 0.06);
+}
+
+#teamMemberModalRemove {
+    color: $pink;
+    border-color: rgba($pink, 0.45);
+}
+
+#teamMemberRoleWrap {
+    .team-member-role-edit {
+        display: none;
+    }
+
+    .team-member-role-view {
+        display: block;
+        margin-top: $space-4;
+    }
+
+    &.is-editing {
+        .team-member-role-edit {
+            display: block;
+            margin-top: $space-4;
+        }
+
+        .team-member-role-view {
+            display: none;
+        }
+    }
+}
+
+#teamMemberPersonalSection[hidden],
+#teamMemberContactsSection[hidden],
+#teamMemberMailSection[hidden] {
+    display: none !important;
+}
+
+#teamMemberMailSend {
+    width: auto;
+    align-self: flex-start;
+}
+
+.modal-content.profile-modal.team-member-modal {
+    width: min(44vw, 40rem);
+    max-width: calc(100vw - 2rem);
+    height: auto;
+    max-height: 92vh;
+    min-height: 0;
+
+    .modal-body.profile-modal__body {
+        overflow-x: visible;
+    }
+
+    .profile-modal__section--card,
+    #teamMemberRoleSection {
+        overflow: visible;
+    }
+}
+
+body[data-theme="dark"] .team-page__hero {
+    background: linear-gradient(135deg, rgba($green, 0.22) 0%, rgba($black, 0.55) 55%, rgba($dark-gray, 0.85) 100%);
+    border-color: rgba($light-light-green, 0.28);
+}
+
+body[data-theme="dark"] .team-page__count.project-card__chip {
+    background: rgba($green, 0.22);
+    color: $light-light-green;
+}
+
+body[data-theme="dark"] .member-card {
+    background: $dark-gray;
+
+    &:hover,
+    &:focus-visible {
+        box-shadow:
+            0 0 0 $space-1 rgba($green, 0.25),
+            0 $space-12 $space-48 rgba(0, 0, 0, 0.25);
+    }
+}
+
+body[data-theme="dark"] .member-card__avatar-img {
+    border-color: rgba($light-light-green, 0.35);
+}
+
+body[data-theme="dark"] .member-card__contact--phone {
+    background: rgba($green, 0.08);
+}
+
+body[data-theme="dark"] button.member-card__contact--email,
+body[data-theme="dark"] .member-card__contact--email {
+    background: rgba($green, 0.14);
+    border-color: rgba($green, 0.35);
+}
+
+body[data-theme="dark"] .team-mail-route {
+    background: rgba($green, 0.1);
+}

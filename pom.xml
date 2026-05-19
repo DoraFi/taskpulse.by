@@ -92,9 +92,9 @@
                     <locations>
                         <location>classpath:db/migration</location>
                     </locations>
-                    <url>${flyway.url:jdbc:postgresql://localhost:5432/taskpulse}</url>
-                    <user>${flyway.user:postgres}</user>
-                    <password>${flyway.password:655650}</password>
+                    <url>jdbc:postgresql://localhost:5432/taskpulse</url>
+                    <user>postgres</user>
+                    <password>655650</password>
                 </configuration>
             </plugin>
         </plugins>

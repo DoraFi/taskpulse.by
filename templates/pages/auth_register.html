@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaskPulse — Регистрация</title>
+    <title>TaskPulse - Регистрация</title>
     <link rel="icon" type="image/svg+xml" th:href="@{/static/source/logo_rect.svg}" href="/static/source/logo_rect.svg">
     <link rel="stylesheet" th:href="@{/static/scss/style.css}" href="/static/scss/style.css">
 </head>
@@ -14,7 +14,7 @@
         <a th:href="@{/auth/welcome}" href="/auth/welcome" class="flex-row gap-24" style="align-items: center;">
             <img class="logo" th:src="@{/static/source/logo_rect.svg}" src="/static/source/logo_rect.svg" alt="TaskPulse">
         </a>
-        <a class="text-basic" th:href="@{/auth/login}" href="/auth/login" style="text-decoration: underline;">Уже есть аккаунт — войти</a>
+        <a class="text-basic" th:href="@{/auth/login}" href="/auth/login" style="text-decoration: underline;">Уже есть аккаунт - войти</a>
     </header>
 
     <main class="auth-page__main auth-page__main--split" data-auth-parallax-root>
@@ -25,7 +25,7 @@
                     <span class="auth-hero__title-line">Соберите</span>
                     <span class="auth-hero__title-line auth-hero__title-line--accent">команду и задачи.</span>
                 </h1>
-                <p class="auth-hero__lead text-basic">Регистрация — старт проекта: потом подключите проект и приглашения в одном мастере.</p>
+                <p class="auth-hero__lead text-basic">Регистрация - старт проекта: потом подключите проект и приглашения в одном мастере.</p>
                 <div class="auth-motif auth-motif--signup">
                     <div class="auth-motif-profile">
                         <div class="auth-motif-profile__card">
@@ -59,8 +59,12 @@
             <div class="modal-body">
                 <form class="form-auth" data-static-form action="#" method="post" id="registerForm">
                     <div class="auth-field">
-                        <label for="reg-name">Имя и фамилия <img class="required-icon" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>
-                        <input id="reg-name" name="displayName" type="text" autocomplete="name" placeholder="Иван Иванов" required>
+                        <label for="reg-last-name">Фамилия <img class="required-icon" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>
+                        <input id="reg-last-name" name="lastName" type="text" autocomplete="family-name" placeholder="Иванов" required>
+                    </div>
+                    <div class="auth-field">
+                        <label for="reg-first-name">Имя <img class="required-icon" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>
+                        <input id="reg-first-name" name="firstName" type="text" autocomplete="given-name" placeholder="Иван" required>
                     </div>
                     <div class="auth-field">
                         <label for="reg-email">Электронная почта <img class="required-icon" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>

@@ -131,6 +131,9 @@
         if (!overlay) return null;
         document.body.appendChild(overlay);
         initModal(overlay);
+        if (typeof window.initAllTpSelects === 'function') {
+            window.initAllTpSelects(overlay);
+        }
         return overlay;
     }
 

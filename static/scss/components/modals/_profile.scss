@@ -88,18 +88,8 @@
         }
     }
 
-    .profile-modal__field .filter-input {
-        width: 100%;
-        box-sizing: border-box;
-        background-color: $light-light-green;
-    }
-
-    select.create-task-select.profile-modal__select--full {
-        @include tp-select-skin(100%, 100%);
-    }
-
     textarea.profile-modal__bio {
-        @include tp-textarea-skin(6.5rem, 7.5rem);
+        min-height: 6.5rem;
         max-height: min(28vh, 14rem);
     }
 
@@ -112,9 +102,23 @@
     .profile-modal__footer-actions {
         display: flex;
         justify-content: flex-end;
-        gap: $space-24;
         align-items: center;
         flex-wrap: wrap;
+        gap: $space-24;
+        width: 100%;
+    }
+
+    .profile-modal__danger-btn {
+        margin-right: auto;
+        color: $pink;
+        border-color: rgba($pink, 0.45);
+
+        &:hover,
+        &:focus-visible {
+            color: darken($pink, 8%);
+            border-color: rgba($pink, 0.65);
+            background: rgba($pink, 0.08);
+        }
     }
 
     .profile-modal__exit-confirm {
@@ -345,11 +349,4 @@ body[data-theme="dark"] .modal-content.profile-modal .profile-modal__settings-hi
     color: rgba($light-light-green, 0.92);
 }
 
-body[data-theme="dark"] .modal-content.profile-modal select.create-task-select.profile-modal__select--full {
-    @include tp-select-skin-dark();
-}
-
-body[data-theme="dark"] .modal-content.profile-modal textarea.profile-modal__bio {
-    @include tp-textarea-skin-dark();
-}
 

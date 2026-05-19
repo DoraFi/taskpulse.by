@@ -1701,7 +1701,7 @@
         const extractDependencyDisplayId = (label) => {
             const raw = String(label || '').trim();
             if (!raw) return '';
-            return raw.split('—')[0].trim();
+            return raw.split('-')[0].trim();
         };
         const tagBlock = document.createElement('div');
         tagBlock.className = 'tag';
@@ -1744,7 +1744,7 @@
             const depId = extractDependencyDisplayId(task.dependencyLabel);
             depDiv.innerHTML = `
                 <span class="text-signature">${escapeHtml(depPrefix)}</span>
-                <span class="text-basic dependency-chip-id">${escapeHtml(depId || '—')}</span>
+                <span class="text-basic dependency-chip-id">${escapeHtml(depId || '-')}</span>
             `;
             if (depPrefix === 'Блокируется' && isTaskBlocked(task)) depDiv.classList.add('dependency-chip--blocked');
             if (depId) {
@@ -2461,7 +2461,7 @@
             let toastMsg = isFinish ? 'Спринт завершён' : 'Спринт начат';
             if (isStart && sprintPayload?.needsBacklogShift && Number(sprintPayload?.backlogTasksUpdated || 0) === 0) {
                 toastMsg = 'Спринт начат, но ни одна задача не сдвинута по этапам (0 обновлений). '
-                    + 'Частая причина: в базе уже «идёт спринт» — сначала нажмите «Завершить спринт», затем снова «Начать». '
+                    + 'Частая причина: в базе уже «идёт спринт» - сначала нажмите «Завершить спринт», затем снова «Начать». '
                     + 'Или название этапа в task_item.stage не совпадает с колонкой «Следующий спринт».';
             }
             showToast(toastMsg);
@@ -2974,7 +2974,7 @@
                 }
                 if (col === 'dueDate') {
                     const p = document.createElement('p');
-                    p.textContent = task.dueDate ? formatDueDate(task.dueDate) : '—';
+                    p.textContent = task.dueDate ? formatDueDate(task.dueDate) : '-';
                     if (isAttentionDueDate(task.dueDate)) p.classList.add('pink');
                     cell.appendChild(p);
                 }
@@ -2994,7 +2994,7 @@
                         </div>
                     `;
                     } else {
-                        cell.textContent = '—';
+                        cell.textContent = '-';
                     }
                 }
                 row.appendChild(cell);
@@ -3012,7 +3012,7 @@
     function getDependencyDisplayId(label) {
         const raw = String(label || '').trim();
         if (!raw) return '';
-        return raw.split('—')[0].trim();
+        return raw.split('-')[0].trim();
     }
 
     function isTaskBlocked(task) {
@@ -3636,7 +3636,7 @@
                         ${withWip.map(r => `
                             <tr>
                                 <td style="padding:8px;border-bottom:1px solid #d7e2cf;">${escapeHtml(r.project || '')}</td>
-                                <td style="padding:8px;border-bottom:1px solid #d7e2cf;">${escapeHtml(r.code || '—')}</td>
+                                <td style="padding:8px;border-bottom:1px solid #d7e2cf;">${escapeHtml(r.code || '-')}</td>
                                 <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${r.boards ?? 0}</td>
                                 <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${r.total ?? 0}</td>
                                 <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${r.queue ?? 0}</td>
@@ -3767,8 +3767,8 @@
                         <div class="col-id">${getTaskDisplayId(t)}</div>
                         <div class="col-name"><p class="text-basic">${escapeHtml(t.name)}</p></div>
                         <div class="col-priority"><p>${t.priority === 'срочно' ? 'Срочно' : 'Обычный'}</p></div>
-                        <div class="col-archivedAt"><p>${t.archivedDate ? new Date(t.archivedDate).toLocaleString('ru-RU') : '—'}</p></div>
-                        <div class="col-reason"><p>${escapeHtml(t.archivedReason || '—')}</p></div>
+                        <div class="col-archivedAt"><p>${t.archivedDate ? new Date(t.archivedDate).toLocaleString('ru-RU') : '-'}</p></div>
+                        <div class="col-reason"><p>${escapeHtml(t.archivedReason || '-')}</p></div>
                     `;
                     const actions = document.createElement('div');
                     actions.className = 'col-actions';

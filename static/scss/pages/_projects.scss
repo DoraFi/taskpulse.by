@@ -50,27 +50,9 @@
 
     input {
         all: unset;
-        box-sizing: border-box;
         width: 100%;
         padding: $space-4 $space-16 $space-4 2rem;
-        border: $space-1 solid rgba($dark-gray, 0.12);
-        background-color: $light-green;
-        border-radius: $radius-sm;
-        transition: all 0.2s ease;
-
-        &:hover {
-            border-color: $green;
-            box-shadow: 0 0 0 $space-2 rgba($green, 0.2);
-        }
-
-        &:focus {
-            border-color: $green;
-            box-shadow: 0 0 0 $space-2 rgba($green, 0.4);
-        }
-
-        &::placeholder {
-            color: rgba($dark-gray, 0.5);
-        }
+        @include tp-field-skin-base();
     }
 }
 
@@ -81,23 +63,7 @@ body[data-theme="dark"] .projects-search {
     }
 
     input {
-        color: $light-light-green;
-        background-color: rgba($green, 0.08);
-        border-color: rgba($green, 0.28);
-
-        &:hover {
-            border-color: $green;
-            box-shadow: 0 0 0 $space-2 rgba($green, 0.22);
-        }
-
-        &:focus {
-            border-color: $green;
-            box-shadow: 0 0 0 $space-2 rgba($green, 0.35);
-        }
-
-        &::placeholder {
-            color: rgba($light-light-green, 0.45);
-        }
+        @include tp-field-skin-dark();
     }
 }
 

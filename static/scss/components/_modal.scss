@@ -203,28 +203,8 @@ body[data-theme="dark"] .modal-content .modal-header {
     border-top-color: transparent;
 }
 
-body[data-theme="dark"] .modal-content .modal-body input {
-    border-color: $light-light-green;
-    color: $light-light-green;
-}
-
-body[data-theme="dark"] .modal-content .modal-body input:focus {
-    border-color: $green;
-    box-shadow: 0 0 0 $space-2 rgba($green, 0.18);
-}
-
 body[data-theme="dark"] .modal-content .checkbox-text {
     color: #F6FBF2 !important;
-}
-
-body[data-theme="dark"] .modal-content .filter-input {
-    background: $dark-gray !important;
-    color: #F6FBF2 !important;
-    border-color: $light-light-green !important;
-}
-
-body[data-theme="dark"] .modal-content .filter-input::placeholder {
-    color: rgba($light-light-green, 0.55) !important;
 }
 
 body[data-theme="dark"] .modal-content .filter-date span {

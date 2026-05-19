@@ -1,3 +1,90 @@
+.tp-date-field__icon {
+    flex-shrink: 0;
+    opacity: 0.75;
+}
+
+.tp-date-field__value {
+    flex: 1;
+    min-width: 0;
+}
+
+.tp-date-picker {
+    .tp-date-picker__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: $space-12;
+        margin-bottom: $space-8;
+    }
+
+    .tp-date-picker__selects {
+        display: flex;
+        gap: $space-8;
+        flex: 1;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .tp-select {
+        flex: 0 0 auto;
+        width: auto;
+        max-width: none;
+    }
+
+    .tp-date-picker__selects > .tp-select:first-child {
+        width: 7.5rem;
+        min-width: 7.5rem;
+        max-width: 7.5rem;
+    }
+
+    .tp-date-picker__selects > .tp-select:last-child {
+        width: 5.5rem;
+        min-width: 5.5rem;
+        max-width: 5.5rem;
+    }
+
+    .tp-date-picker__selects .tp-select__trigger {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        @include tp-select-skin(100%, 100%);
+    }
+
+    select.tp-select__native.tp-date-picker-month,
+    select.tp-select__native.tp-date-picker-year {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        padding: 0 !important;
+        margin: -1px !important;
+        overflow: hidden !important;
+        clip: rect(0, 0, 0, 0) !important;
+        white-space: nowrap !important;
+        border: 0 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+    .tp-date-picker__title {
+        text-align: center;
+        margin: 0 0 $space-20;
+    }
+
+    .tp-date-picker__header {
+        margin-bottom: $space-16;
+    }
+
+    .tp-date-picker__month {
+        .custom-calendar-month {
+            flex: none;
+            width: 100%;
+            max-width: 22rem;
+            margin: 0 auto;
+        }
+    }
+}
+
 .custom-calendar-modal {
     .custom-calendar {
         background: $light-light-green;
@@ -12,7 +99,7 @@
             align-items: center;
             margin-bottom: $space-24;
 
-            button {
+            button:not(.tp-select__trigger) {
                 background: none;
                 border: none;
                 cursor: pointer;
@@ -140,6 +227,14 @@
     }
 }
 
+.tp-date-picker-modal .tp-dropdown-panel--floating {
+    z-index: 2200;
+}
+
+body[data-theme='dark'] .tp-date-picker .tp-date-picker__selects .tp-select__trigger {
+    @include tp-select-skin-dark();
+}
+
 body[data-theme="dark"] .modal-overlay.custom-calendar-modal {
     background: rgba($black, 0.65);
     backdrop-filter: blur($space-4);
@@ -156,7 +251,7 @@ body[data-theme="dark"] .custom-calendar-modal .custom-calendar {
         padding-bottom: $space-16;
         margin-bottom: $space-16;
 
-        button {
+        button:not(.tp-select__trigger) {
             color: $light-light-green;
             background: rgba($black, 0.35);
 

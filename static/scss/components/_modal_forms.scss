@@ -1,0 +1,212 @@
+@mixin tp-native-select-hidden() {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+@mixin modal-text-field() {
+    all: unset;
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    padding: $space-4 $space-16;
+    @include tp-field-skin-base();
+    @extend .text-basic;
+}
+
+@mixin modal-text-field-dark() {
+    @include tp-field-skin-dark();
+}
+
+.modal-content {
+    .modal-body,
+    .form-auth {
+        input:not([type='checkbox']):not([type='radio']):not([type='hidden']):not([type='file']):not(.tp-combobox__input):not(.tp-select__trigger),
+        textarea:not(.create-task-desc),
+        .filter-input,
+        input.tp-field-plain,
+        textarea.tp-field-plain,
+        input.team-add-member-modal__email {
+            @include modal-text-field();
+        }
+
+        textarea.create-task-desc,
+        textarea.profile-modal__bio {
+            @include modal-text-field();
+            resize: vertical;
+        }
+
+        .tp-select {
+            display: block;
+            width: 100%;
+        }
+
+        .tp-select__trigger,
+        select.create-task-select:not(.tp-select__native),
+        select.tp-field-plain.create-task-select:not(.tp-select__native) {
+            all: unset;
+            box-sizing: border-box;
+            display: block;
+            width: 100%;
+            @include tp-select-skin(100%, 100%);
+        }
+
+        select.tp-select__native {
+            @include tp-native-select-hidden();
+        }
+
+        select.tp-field-plain:not(.create-task-select) {
+            all: unset;
+            box-sizing: border-box;
+            display: block;
+            width: 100%;
+            @include tp-select-skin(100%, 100%);
+        }
+    }
+
+    .tp-combobox {
+        position: relative;
+        width: 100%;
+
+        &__control {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            box-sizing: border-box;
+            cursor: text;
+            @include tp-field-skin-base();
+
+            &:focus-within {
+                outline: none;
+                border-color: $green;
+                box-shadow: 0 0 0 $space-2 rgba($green, 0.4);
+            }
+
+            input.tp-combobox__input {
+                all: unset;
+                flex: 1;
+                min-width: 0;
+                width: 100%;
+                box-sizing: border-box;
+                padding: $space-4 $space-16;
+                border: none !important;
+                background: transparent !important;
+                margin: 0;
+                font: inherit;
+                color: inherit;
+                box-shadow: none !important;
+                cursor: text;
+
+                &:hover,
+                &:focus {
+                    outline: none;
+                    border: none !important;
+                    background: transparent !important;
+                    box-shadow: none !important;
+                }
+
+                &::placeholder {
+                    color: rgba($dark-gray, 0.5);
+                }
+            }
+        }
+
+        &.is-open {
+            position: relative;
+            z-index: 1;
+        }
+
+        .tp-combobox__list:not(.tp-dropdown-panel--floating) {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: calc(100% + $space-4);
+            z-index: 30;
+        }
+    }
+
+    .tp-date-field.search-panel {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: $space-8;
+        width: 100%;
+        box-sizing: border-box;
+        padding: $space-4 $space-16;
+        cursor: pointer;
+        @include tp-field-skin-base();
+
+        img {
+            position: static;
+            flex-shrink: 0;
+            width: $space-16;
+            height: $space-16;
+            opacity: 0.75;
+            pointer-events: none;
+        }
+
+        .tp-date-field__value {
+            flex: 1;
+            min-width: 0;
+            border: none;
+            background: transparent;
+            padding: 0;
+            margin: 0;
+            font: inherit;
+            color: inherit;
+            text-align: left;
+        }
+
+        &:focus-within {
+            outline: none;
+            border-color: $green;
+            box-shadow: 0 0 0 $space-2 rgba($green, 0.4);
+        }
+    }
+}
+
+body[data-theme='dark'] .modal-content {
+    .modal-body,
+    .form-auth {
+        input:not([type='checkbox']):not([type='radio']):not([type='hidden']):not([type='file']):not(.tp-combobox__input):not(.tp-select__trigger),
+        textarea:not(.create-task-desc),
+        .filter-input,
+        input.tp-field-plain,
+        textarea.tp-field-plain,
+        input.team-add-member-modal__email {
+            @include modal-text-field-dark();
+        }
+
+        textarea.create-task-desc,
+        textarea.profile-modal__bio {
+            @include modal-text-field-dark();
+        }
+
+        .tp-select__trigger,
+        select.create-task-select:not(.tp-select__native),
+        select.tp-field-plain.create-task-select:not(.tp-select__native),
+        select.tp-field-plain:not(.create-task-select) {
+            @include tp-select-skin-dark();
+        }
+    }
+
+    .tp-combobox__control {
+        @include tp-field-skin-dark();
+
+        input.tp-combobox__input::placeholder {
+            color: rgba($light-light-green, 0.45);
+        }
+    }
+
+    .tp-date-field.search-panel {
+        @include tp-field-skin-dark();
+    }
+}

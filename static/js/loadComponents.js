@@ -43,6 +43,7 @@ function applyContextNavLinks(base) {
     document.querySelectorAll('[data-context-link="projects"]').forEach(el => el.dataset.href = `${base}/projects`);
     document.querySelectorAll('[data-context-link="projects-org"]').forEach(el => el.dataset.href = `${base}/projects/org`);
     document.querySelectorAll('[data-context-link="projects-archive"]').forEach(el => el.dataset.href = `${base}/projects/archive`);
+    document.querySelectorAll('[data-context-link="team"]').forEach(el => el.dataset.href = `${base}/team`);
     document.querySelectorAll('a.logo-link, .header .logo[href="/"], .header a[href="/"]').forEach(a => a.setAttribute('href', base));
 }
 
@@ -421,14 +422,16 @@ async function loadPage(url) {
                         src.includes('board_kanban') ||
                         src.includes('tasks') ||
                         src.includes('index') ||
-                        src.includes('projects');
+                        src.includes('projects') ||
+                        src.includes('team');
 
                     const alreadyInited =
                         (src.includes('board_list') && window.initBoardListPage) ||
                         (src.includes('board_kanban') && window.initBoardKanbanPage) ||
                         (src.includes('tasks') && window.initTasksPage) ||
                         (src.includes('index') && window.initIndexPage) ||
-                        (src.includes('projects') && window.initProjectsPage);
+                        (src.includes('projects') && window.initProjectsPage) ||
+                        (src.includes('team') && window.initTeamPage);
 
                     if (!isPageScript || !alreadyInited) {
                         await loadExternalScript(src);
@@ -465,6 +468,10 @@ async function loadPage(url) {
                     if (currentContent.querySelector('.projects-grid') && typeof window.initProjectsPage === 'function') {
                         console.log('Вызов initProjectsPage');
                         window.initProjectsPage();
+                    }
+                    if (currentContent.querySelector('#teamMembersGrid') && typeof window.initTeamPage === 'function') {
+                        console.log('Вызов initTeamPage');
+                        window.initTeamPage();
                     }
 
                     const isBoardList = currentContent.classList.contains('board-list') && !currentContent.classList.contains('board-kanban');

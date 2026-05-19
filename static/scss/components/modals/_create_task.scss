@@ -19,10 +19,6 @@
         margin-bottom: $space-8;
     }
 
-    select.create-task-select {
-        @include tp-select-skin(22vw, 22vw);
-    }
-
     .create-task-deps-block {
         @extend .flex-col;
         gap: $space-16;
@@ -81,7 +77,8 @@
     }
 
     &:not(.task-detail-sheet) textarea.create-task-desc {
-        @include tp-textarea-skin(40vh, 43vh);
+        min-height: 40vh;
+        height: 43vh;
     }
 
     .create-task-attachments {
@@ -94,6 +91,7 @@
         padding: $space-12 $space-16;
         box-sizing: border-box;
         border-radius: $radius-sm;
+        background: rgba($green, 0.04);
 
         &--drag {
             background: rgba($green, 0.12);
@@ -110,16 +108,8 @@
     }
 }
 
-body[data-theme="dark"] .modal-content.create-task-modal:not(.task-detail-sheet) textarea.create-task-desc {
-    @include tp-textarea-skin-dark();
-}
-
 body[data-theme="dark"] .modal-content.create-task-modal .create-task-attachments.border-dark-1 {
     border-color: $light-light-green;
-}
-
-body[data-theme="dark"] .modal-content.create-task-modal select.create-task-select {
-    @include tp-select-skin-dark();
 }
 
 body[data-theme="dark"] .modal-content.create-task-modal .create-task-deps-block {

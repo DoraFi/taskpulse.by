@@ -103,39 +103,9 @@
     .settings-modal__field {
         margin: 0;
 
-        input.filter-input {
-            all: unset;
-            box-sizing: border-box;
-            width: 100%;
-            padding: $space-4 $space-16;
-            border: $space-1 solid $light-gray;
-            border-radius: $radius-sm;
-            @extend .text-basic;
-            transition: all 0.2s ease;
-
-            &:focus {
-                outline: none;
-                border-color: $green;
-                box-shadow: 0 0 0 $space-2 rgba($green, 0.1);
-            }
-
-            &::placeholder {
-                color: rgba($dark-gray, 0.5);
-            }
-        }
-
         &--max {
             max-width: 28rem;
         }
-    }
-
-    .settings-modal__field .filter-input {
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    select.create-task-select.settings-modal__select--full {
-        @include tp-select-skin(100%, 100%);
     }
 
     .settings-modal__hint {
@@ -346,10 +316,6 @@ body[data-theme="dark"] .modal-content.settings-modal .settings-modal__session-r
 body[data-theme="dark"] .modal-content.settings-modal .settings-modal__integration-card {
     background: $black;
     border-color: $light-light-green;
-}
-
-body[data-theme="dark"] .modal-content.settings-modal select.create-task-select.settings-modal__select--full {
-    @include tp-select-skin-dark();
 }
 
 body[data-theme="dark"] .modal-content.settings-modal .settings-modal__inline-link {

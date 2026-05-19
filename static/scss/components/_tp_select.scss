@@ -1,0 +1,48 @@
+.tp-select {
+    position: relative;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+
+    &.is-open {
+        z-index: 2;
+    }
+
+    &__native {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    &__trigger {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        text-align: left;
+        cursor: pointer;
+        @include tp-select-skin(100%, 100%);
+    }
+
+    &--searchable &__trigger {
+        cursor: text;
+        font: inherit;
+        color: inherit;
+
+        &:hover,
+        &:focus {
+            outline: none;
+        }
+    }
+}
+
+body[data-theme='dark'] .tp-select__trigger {
+    @include tp-select-skin-dark();
+}

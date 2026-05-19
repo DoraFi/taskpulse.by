@@ -987,38 +987,9 @@
     }
 }
 
-.auth-flow-card .modal-body {
+.auth-flow-card .modal-body,
+.auth-flow-card .form-auth {
     gap: $space-16;
-
-    textarea,
-    select {
-        all: unset;
-        box-sizing: border-box;
-        width: 100%;
-        padding: $space-4 $space-16;
-        border: $space-1 solid $light-gray;
-        border-radius: $radius-sm;
-        @extend .text-basic;
-        transition: all 0.2s ease;
-        display: block;
-
-        &:focus {
-            outline: none;
-            border-color: $green;
-            box-shadow: 0 0 0 $space-2 rgba($green, 0.1);
-        }
-    }
-
-    textarea {
-        min-height: 5rem;
-        resize: vertical;
-    }
-
-    select {
-        cursor: pointer;
-        background: $light-light-green;
-        accent-color: $green;
-    }
 }
 
 .auth-field {

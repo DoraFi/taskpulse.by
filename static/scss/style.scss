@@ -13,14 +13,18 @@
 @import 'components/project_type_picker';
 @import 'components/dropdown';
 @import 'components/checkbox';
-@import 'components/calendar';
 @import 'components/forms/controls';
+@import 'components/calendar';
+@import 'components/tp_dropdown';
+@import 'components/tp_select';
 @import 'components/boards/subtasks';
 @import 'components/modals/create_task';
 @import 'components/modals/profile';
 @import 'components/modals/settings';
 @import 'pages/projects';
+@import 'pages/team';
 @import 'pages/auth';
+@import 'components/modal_forms';
 @import 'util/motion_guards';
 @import 'util/print';
 @import 'components/boards/extends';
@@ -266,6 +270,30 @@ body[data-theme="dark"] .app-container {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+
+    .index-team-member {
+        border: none;
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+        width: 100%;
+        text-align: left;
+
+        &:hover,
+        &:focus-visible {
+            background: rgba($green, 0.06);
+            border-radius: $radius-sm;
+            outline: none;
+        }
+
+        &:disabled {
+            cursor: default;
+            opacity: 0.65;
+        }
+    }
 }
 
 .header-signature {

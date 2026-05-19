@@ -1058,7 +1058,7 @@ function createBoardTable(board, tasks, boardIndex) {
                     break;
                 case 'dueDate':
                     const dueSpan = document.createElement('span');
-                    const dueDate = task.dueDate ? formatDueDate(task.dueDate) : '—';
+                    const dueDate = task.dueDate ? formatDueDate(task.dueDate) : '-';
                     dueSpan.textContent = dueDate;
                     if (isAttentionDueDate(task.dueDate)) dueSpan.classList.add('pink');
                     cell.appendChild(dueSpan);
@@ -1090,7 +1090,7 @@ function createBoardTable(board, tasks, boardIndex) {
                         userDiv.appendChild(nameSpan);
                         cell.appendChild(userDiv);
                     } else {
-                        cell.textContent = '—';
+                        cell.textContent = '-';
                     }
                     break;
             }
@@ -1286,9 +1286,9 @@ function renderTimelineView() {
 }
 
 function formatArchivedTimestamp(iso) {
-    if (!iso) return '—';
+    if (!iso) return '-';
     const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return '—';
+    if (Number.isNaN(d.getTime())) return '-';
     return d.toLocaleString('ru-RU', {
         day: '2-digit',
         month: '2-digit',
@@ -1429,7 +1429,7 @@ function renderReportsView() {
                     ${rows.map(r => `
                         <tr>
                             <td style="padding:8px;border-bottom:1px solid #d7e2cf;">${escapeHtml(r.project || '')}</td>
-                            <td style="padding:8px;border-bottom:1px solid #d7e2cf;">${escapeHtml(r.code || '—')}</td>
+                            <td style="padding:8px;border-bottom:1px solid #d7e2cf;">${escapeHtml(r.code || '-')}</td>
                             <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${r.boards ?? 0}</td>
                             <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${r.total ?? 0}</td>
                             <td style="padding:8px;text-align:right;border-bottom:1px solid #d7e2cf;">${r.queue ?? 0}</td>
@@ -1560,7 +1560,7 @@ function createArchivedTaskRow(task, boardIndex) {
                     p.textContent = formatDueDate(task.dueDate);
                     if (isAttentionDueDate(task.dueDate)) p.classList.add('pink');
                 } else {
-                    p.textContent = '—';
+                    p.textContent = '-';
                 }
                 cell.appendChild(p);
                 break;
@@ -1581,7 +1581,7 @@ function createArchivedTaskRow(task, boardIndex) {
                         </div>
                     `;
                 } else {
-                    cell.innerHTML = '<p class="text-basic">—</p>';
+                    cell.innerHTML = '<p class="text-basic">-</p>';
                 }
                 break;
             case 'archivedAt': {
@@ -2726,13 +2726,13 @@ function createTagBlock(task) {
     if (hasDependency) {
         const depDiv = document.createElement('div');
         depDiv.className = 'deadline dependency-chip';
-        const depId = String(task.dependencyLabel || '').split('—')[0].trim();
+        const depId = String(task.dependencyLabel || '').split('-')[0].trim();
         const depPrefix = task.dependencyType === 'blocks'
             ? 'Блокирует'
             : (task.dependencyType === 'blocked_by' ? 'Блокируется' : 'Связана');
         depDiv.innerHTML = `
             <span class="text-signature">${escapeHtml(depPrefix)}</span>
-            <span class="text-basic dependency-chip-id">${escapeHtml(depId || '—')}</span>
+            <span class="text-basic dependency-chip-id">${escapeHtml(depId || '-')}</span>
         `;
         if (depPrefix === 'Блокируется' && isTaskBlocked(task)) depDiv.classList.add('dependency-chip--blocked');
         if (depId) {
@@ -2754,7 +2754,7 @@ function isTaskBlocked(task) {
     const depTypeBlocked = task.dependencyType === 'blocked_by'
         || rawLabel.toLowerCase().includes('блокируется');
     if (!depTypeBlocked) return false;
-    const blockerDisplayId = rawLabel.split('—')[0].trim();
+    const blockerDisplayId = rawLabel.split('-')[0].trim();
     if (!blockerDisplayId) return true;
     let blocker = null;
     for (const b of boardsData || []) {

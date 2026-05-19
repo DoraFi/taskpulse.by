@@ -90,7 +90,7 @@ function filterTasks(tab) {
                 return diffDays <= 3 && diffDays >= 0 && task.status !== 'done';
             }));
         case 'todo':
-            return sortByPriorityAndDate(tasksData.filter(task => task.assignee === '—'));
+            return sortByPriorityAndDate(tasksData.filter(task => task.assignee === '-'));
         case 'created':
             return sortByPriorityAndDate(tasksData.filter(task => task.creator === currentUser.name), true);
         default:
@@ -227,8 +227,8 @@ function createCell(col, task, tab) {
             div.textContent = task.timeEstimate;
             break;
         case 'assignee':
-            if (!task.assigneeAvatar || task.assignee === '—') {
-                div.innerHTML = `<p class="text-basic">—</p>`;
+            if (!task.assigneeAvatar || task.assignee === '-') {
+                div.innerHTML = `<p class="text-basic">-</p>`;
             } else {
                 div.innerHTML = `
                     <div class="user-img-text">
@@ -557,7 +557,7 @@ function hydrateFilterCheckboxesFromDb() {
     );
     renderCheckboxGroup(
         'filterAssigneeGroup',
-        uniqueSortedStrings(tasks.map(t => t.assignee).filter(a => a && a !== '—')).map(name => ({ value: name, label: name })),
+        uniqueSortedStrings(tasks.map(t => t.assignee).filter(a => a && a !== '-')).map(name => ({ value: name, label: name })),
         current.assignees
     );
     renderCheckboxGroup(

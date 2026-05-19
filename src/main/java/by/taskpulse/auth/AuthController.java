@@ -52,12 +52,15 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("error", "Пользователь с таким email уже существует"));
         }
         String username = nextUniqueUsername(email);
+        String lastName = req.lastName().trim();
+        String firstName = req.firstName().trim();
+        String fullName = composePersonName(lastName, firstName, "");
         jdbcTemplate.update(
                 """
-                insert into app_user(email, full_name, password_hash, username, is_active)
-                values (?, ?, ?, ?, true)
+                insert into app_user(email, last_name, first_name, full_name, password_hash, username, is_active)
+                values (?, ?, ?, ?, ?, ?, true)
                 """,
-                email, req.fullName().trim(), passwordEncoder.encode(req.password()), username
+                email, lastName, firstName, fullName, passwordEncoder.encode(req.password()), username
         );
         Long userId = jdbcTemplate.queryForObject("select id from app_user where email = ?", Long.class, email);
         String token = jwtService.generateToken(username, userId, List.of("member"));
@@ -90,12 +93,15 @@ public class AuthController {
 
         jdbcTemplate.update("insert into organization(id, name) values (?, ?)", orgId, req.organizationName().trim());
 
+        String lastName = req.lastName().trim();
+        String firstName = req.firstName().trim();
+        String fullName = composePersonName(lastName, firstName, "");
         jdbcTemplate.update(
                 """
-                insert into app_user(email, full_name, password_hash, organization_id, username, is_active)
-                values (?, ?, ?, ?, ?, true)
+                insert into app_user(email, last_name, first_name, full_name, password_hash, organization_id, username, is_active)
+                values (?, ?, ?, ?, ?, ?, ?, true)
                 """,
-                email, req.fullName().trim(), passwordEncoder.encode(req.password()), orgId, username
+                email, lastName, firstName, fullName, passwordEncoder.encode(req.password()), orgId, username
         );
         Long userId = jdbcTemplate.queryForObject("select id from app_user where email = ?", Long.class, email);
         try {
@@ -477,7 +483,8 @@ public class AuthController {
     }
 
     public record RegisterRequest(
-            @NotBlank @Size(max = 160) String fullName,
+            @NotBlank @Size(max = 80) String lastName,
+            @NotBlank @Size(max = 80) String firstName,
                    @NotBlank @Pattern(regexp = EMAIL_REGEX_STRICT) @Size(max = 160) String email,
             @NotBlank @Size(min = 8, max = 120) String password,
             @NotBlank @Size(max = 180) String organizationName,
@@ -498,10 +505,25 @@ public class AuthController {
     ) {}
 
     public record RegisterAccountRequest(
-            @NotBlank @Size(max = 160) String fullName,
+            @NotBlank @Size(max = 80) String lastName,
+            @NotBlank @Size(max = 80) String firstName,
             @NotBlank @Pattern(regexp = EMAIL_REGEX_STRICT) @Size(max = 160) String email,
             @NotBlank @Size(min = 8, max = 120) String password
     ) {}
+
+    private static String composePersonName(String lastName, String firstName, String patronymic) {
+        StringBuilder sb = new StringBuilder();
+        appendNamePart(sb, lastName);
+        appendNamePart(sb, firstName);
+        appendNamePart(sb, patronymic);
+        return sb.toString().trim();
+    }
+
+    private static void appendNamePart(StringBuilder sb, String part) {
+        if (part == null || part.isBlank()) return;
+        if (!sb.isEmpty()) sb.append(' ');
+        sb.append(part.trim());
+    }
 
     public record CompleteOnboardingRequest(
             @NotBlank @Size(max = 180) String organizationName,

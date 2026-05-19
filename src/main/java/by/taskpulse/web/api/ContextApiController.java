@@ -35,9 +35,54 @@ public class ContextApiController {
         return legacy.me();
     }
 
+    @PostMapping("/api/me/update")
+    public Map<String, Object> updateMeAuto(@RequestBody Map<String, Object> payload) {
+        return legacy.updateMeProfile(payload);
+    }
+
+    @PostMapping("/api/me/change-password")
+    public Map<String, Object> changeMePasswordAuto(@RequestBody Map<String, Object> payload) {
+        return legacy.changeMePassword(payload);
+    }
+
     @GetMapping("/api/team")
     public List<Map<String, Object>> teamAuto() {
         return legacy.team();
+    }
+
+    @GetMapping("/api/team/members")
+    public Map<String, Object> teamMembersAuto() {
+        return legacy.teamMembersPage();
+    }
+
+    @PostMapping("/api/team/members/role")
+    public Map<String, Object> updateTeamMemberRoleAuto(@RequestBody Map<String, Object> payload) {
+        return legacy.updateTeamMemberRole(payload);
+    }
+
+    @PostMapping("/api/team/members/remove")
+    public Map<String, Object> removeTeamMemberAuto(@RequestBody Map<String, Object> payload) {
+        return legacy.removeTeamMember(payload);
+    }
+
+    @PostMapping("/api/team/members/leave")
+    public Map<String, Object> leaveTeamAuto() {
+        return legacy.leaveTeam();
+    }
+
+    @PostMapping("/api/team/members/add")
+    public Map<String, Object> addTeamMemberAuto(@RequestBody Map<String, Object> payload) {
+        return legacy.addTeamMember(payload);
+    }
+
+    @PostMapping("/api/team/members/message")
+    public Map<String, Object> sendTeamMemberMessageAuto(@RequestBody Map<String, Object> payload) {
+        return legacy.sendTeamMemberMessage(payload);
+    }
+
+    @PostMapping("/api/team/rename")
+    public Map<String, Object> renameTeamAuto(@RequestBody Map<String, Object> payload) {
+        return legacy.renameTeam(payload);
     }
 
     @GetMapping("/api/projects")
@@ -252,10 +297,78 @@ public class ContextApiController {
         return legacy.me();
     }
 
+    @PostMapping("/o/{orgId}/t/{teamId}/api/me/update")
+    public Map<String, Object> updateMe(@PathVariable String orgId,
+                                        @PathVariable String teamId,
+                                        @RequestBody Map<String, Object> payload) {
+        ensureContextAccess(orgId, teamId);
+        return legacy.updateMeProfile(payload);
+    }
+
+    @PostMapping("/o/{orgId}/t/{teamId}/api/me/change-password")
+    public Map<String, Object> changeMePassword(@PathVariable String orgId,
+                                                @PathVariable String teamId,
+                                                @RequestBody Map<String, Object> payload) {
+        ensureContextAccess(orgId, teamId);
+        return legacy.changeMePassword(payload);
+    }
+
     @GetMapping("/o/{orgId}/t/{teamId}/api/team")
     public List<Map<String, Object>> team(@PathVariable String orgId, @PathVariable String teamId) {
         ensureContextAccess(orgId, teamId);
         return legacy.team();
+    }
+
+    @GetMapping("/o/{orgId}/t/{teamId}/api/team/members")
+    public Map<String, Object> teamMembers(@PathVariable String orgId, @PathVariable String teamId) {
+        ensureContextAccess(orgId, teamId);
+        return legacy.teamMembersPage();
+    }
+
+    @PostMapping("/o/{orgId}/t/{teamId}/api/team/members/role")
+    public Map<String, Object> updateTeamMemberRole(@PathVariable String orgId,
+                                                    @PathVariable String teamId,
+                                                    @RequestBody Map<String, Object> payload) {
+        ensureContextAccess(orgId, teamId);
+        return legacy.updateTeamMemberRole(payload);
+    }
+
+    @PostMapping("/o/{orgId}/t/{teamId}/api/team/members/remove")
+    public Map<String, Object> removeTeamMember(@PathVariable String orgId,
+                                                @PathVariable String teamId,
+                                                @RequestBody Map<String, Object> payload) {
+        ensureContextAccess(orgId, teamId);
+        return legacy.removeTeamMember(payload);
+    }
+
+    @PostMapping("/o/{orgId}/t/{teamId}/api/team/members/leave")
+    public Map<String, Object> leaveTeam(@PathVariable String orgId, @PathVariable String teamId) {
+        ensureContextAccess(orgId, teamId);
+        return legacy.leaveTeam();
+    }
+
+    @PostMapping("/o/{orgId}/t/{teamId}/api/team/members/add")
+    public Map<String, Object> addTeamMember(@PathVariable String orgId,
+                                             @PathVariable String teamId,
+                                             @RequestBody Map<String, Object> payload) {
+        ensureContextAccess(orgId, teamId);
+        return legacy.addTeamMember(payload);
+    }
+
+    @PostMapping("/o/{orgId}/t/{teamId}/api/team/members/message")
+    public Map<String, Object> sendTeamMemberMessage(@PathVariable String orgId,
+                                                     @PathVariable String teamId,
+                                                     @RequestBody Map<String, Object> payload) {
+        ensureContextAccess(orgId, teamId);
+        return legacy.sendTeamMemberMessage(payload);
+    }
+
+    @PostMapping("/o/{orgId}/t/{teamId}/api/team/rename")
+    public Map<String, Object> renameTeam(@PathVariable String orgId,
+                                          @PathVariable String teamId,
+                                          @RequestBody Map<String, Object> payload) {
+        ensureContextAccess(orgId, teamId);
+        return legacy.renameTeam(payload);
     }
 
     @GetMapping("/o/{orgId}/t/{teamId}/api/projects")

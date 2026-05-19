@@ -237,7 +237,7 @@
         const list = modal.querySelector('#createTaskDepSuggest');
         if (!list) return;
         list.innerHTML = dependencies.map(d => (
-            `<li class="create-task-deps-suggest__item" tabindex="0" data-task-id="${d.id}">${d.displayId} — ${d.name}</li>`
+            `<li class="create-task-deps-suggest__item" tabindex="0" data-task-id="${d.id}">${d.displayId} - ${d.name}</li>`
         )).join('');
         list.querySelectorAll('.create-task-deps-suggest__item').forEach(el => {
             el.addEventListener('click', () => {
@@ -359,6 +359,7 @@
             } else if (statusSelect.options.length <= 2) {
                 statusSelect.innerHTML = '<option value="Новая" selected>Новая</option><option value="Назначена">Назначена</option><option value="В работе">В работе</option><option value="Готово">Готово</option><option value="Отложено">Отложено</option>';
             }
+            statusSelect._tpSelectApi?.refresh?.();
         }
     }
 
@@ -421,7 +422,7 @@
             depInput,
             depMenu,
             [],
-            d => `${d.displayId} — ${d.name}`
+            d => `${d.displayId} - ${d.name}`
         );
         forceOpenMenu(projectInput, projectMenu, () => modal._updateProjectMenu?.(formOptions.projects || []));
         forceOpenMenu(boardInput, boardMenu, () => modal._updateBoardMenu?.(formOptions.boards || []));
@@ -495,7 +496,7 @@
                     ? (status === 'done' ? 'Готово' : 'Очередь')
                     : (status === 'Новая' ? 'Очередь' : status);
                 const depLabel = overlay.querySelector('#createTaskDepSearch')?.value?.trim() || '';
-                const depMatch = (formOptions.dependencies || []).find(d => `${d.displayId} — ${d.name}` === depLabel);
+                const depMatch = (formOptions.dependencies || []).find(d => `${d.displayId} - ${d.name}` === depLabel);
 
                 const res = await fetch(apiUrl('/kanban/tasks/create'), {
                     method: 'POST',
@@ -557,6 +558,9 @@
         if (!overlay) return null;
         document.body.appendChild(overlay);
         initModal(overlay);
+        if (typeof window.initAllTpSelects === 'function') {
+            window.initAllTpSelects(overlay);
+        }
         return overlay;
     }
 

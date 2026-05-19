@@ -553,7 +553,7 @@
             depInput,
             depMenu,
             [],
-            d => `${d.displayId} — ${d.name}`
+            d => `${d.displayId} - ${d.name}`
         );
         projectInput?.addEventListener('change', async () => {
             const rec = getProjectRecordByInput(projectInput.value);
@@ -642,7 +642,7 @@
                 const to = currentProjectType === 'scrum' ? '' : (document.getElementById('taskDetailDeadlineTo')?.value || '');
                 const dueDate = currentProjectType === 'scrum' ? null : ((to || from) || null);
                 const depLabel = document.getElementById('taskDetailDepSearch')?.value?.trim() || '';
-                const depMatch = (currentOptions.dependencies || []).find(d => `${d.displayId} — ${d.name}` === depLabel);
+                const depMatch = (currentOptions.dependencies || []).find(d => `${d.displayId} - ${d.name}` === depLabel);
 
                 const assigneeVal = document.getElementById('taskDetailAssignee')?.value || '';
                 const assignee = assigneeVal && String(assigneeVal).trim() ? String(assigneeVal).trim() : null;

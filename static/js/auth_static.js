@@ -41,23 +41,19 @@
     var registerContinueBtn = document.getElementById('registerContinueBtn');
     if (registerContinueBtn) {
         registerContinueBtn.addEventListener('click', async function () {
-            var fullName = value('reg-name');
+            var lastName = value('reg-last-name');
+            var firstName = value('reg-first-name');
             var email = value('reg-email').toLowerCase();
             var password = value('reg-password');
             var password2 = value('reg-password2');
             var terms = document.querySelector('input[name="terms"]');
-            var fullNameWords = fullName ? fullName.split(/\s+/).filter(Boolean) : [];
             var emailInput = document.getElementById('reg-email');
             var passOk = false;
             if (password) {
                 passOk = /[A-Za-zА-Яа-яЁё]/.test(password) && /\d/.test(password) && password.length >= 8;
             }
-            if (!fullName || !email || !password || !password2) {
+            if (!lastName || !firstName || !email || !password || !password2) {
                 showToast('Заполните все обязательные поля.');
-                return;
-            }
-            if (fullNameWords.length < 2) {
-                showToast('Введите имя и фамилию (минимум 2 слова).');
                 return;
             }
             if (emailInput && emailInput.checkValidity && !emailInput.checkValidity()) {
@@ -85,7 +81,7 @@
                 var res = await fetch('/api/auth/register-account', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ fullName: fullName, email: email, password: password })
+                    body: JSON.stringify({ lastName: lastName, firstName: firstName, email: email, password: password })
                 });
                 var data = await res.json().catch(function () { return {}; });
                 if (!res.ok) {
@@ -93,7 +89,8 @@
                     return;
                 }
                 sessionStorage.setItem(REGISTER_DRAFT_KEY, JSON.stringify({
-                    fullName: fullName,
+                    lastName: lastName,
+                    firstName: firstName,
                     email: email,
                     password: password
                 }));
@@ -236,7 +233,8 @@
                 projectType: onboardingDraft.projectType,
                 invites: invites
             } : {
-                fullName: registerDraft.fullName,
+                lastName: registerDraft.lastName,
+                firstName: registerDraft.firstName,
                 email: registerDraft.email,
                 password: registerDraft.password,
                 organizationName: onboardingDraft.organizationName,

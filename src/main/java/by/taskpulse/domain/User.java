@@ -21,6 +21,12 @@ public class User {
     @Column(nullable = false, length = 120)
     private String fullName;
 
+    @Column(length = 80)
+    private String lastName;
+
+    @Column(length = 80)
+    private String firstName;
+
     @Column(nullable = false, length = 255)
     private String passwordHash;
 
