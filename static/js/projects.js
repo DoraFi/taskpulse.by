@@ -267,7 +267,9 @@ function initProjectsPage() {
                     const todoPct = Math.max(0, 100 - donePct - inProcessPct);
                     const href = projectOpenHref(orgId, teamId, code, view);
                     const mode = isKanban ? 'Kanban' : isScrum ? 'Scrum' : 'List';
-                    const chip = doneTasks > 0 ? 'Активен' : 'Новый';
+                    const chip = isArchiveView
+                        ? 'Архивировано'
+                        : (p.statusLabel || (doneTasks > 0 ? 'Активен' : 'Новый'));
                     const projectAction = isArchiveView
                         ? `<button type="button" class="button-basic project-action" data-project-code="${escapeHtml(code)}" data-action="restore-project">Восстановить</button>`
                         : `<button type="button" class="button-secondary project-action" data-project-code="${escapeHtml(code)}" data-action="archive-project">В архив</button>`;

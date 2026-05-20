@@ -1907,6 +1907,12 @@ public class LegacyDataApiController {
                         default -> "list";
                     };
                     row.put("view", view);
+                    if (archived) {
+                        row.put("statusLabel", "Архивировано");
+                    } else {
+                        int done = rs.getInt("done_count");
+                        row.put("statusLabel", done > 0 ? "Активен" : "Новый");
+                    }
                     return row;
                 },
                 params.toArray());
