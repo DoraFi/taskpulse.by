@@ -3567,7 +3567,6 @@ public class LegacyDataApiController {
                 (rs, rowNum) -> rs.getLong("id"));
     }
 
-    /** Доски/задачи: при явном project= разрешаем архивный проект, иначе только активные. */
     private String boardProjectArchiveFilter(boolean explicitProjectRequest) {
         boolean hasBoardArchived = hasColumn("board", "archived_at");
         boolean hasProjectArchived = hasColumn("project", "archived_at");

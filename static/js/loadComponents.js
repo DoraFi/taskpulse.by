@@ -1,9 +1,24 @@
+function redirectToLoginExpired() {
+    const path = window.location.pathname + window.location.search;
+    const redirect = path.startsWith('/auth/') ? '' : `&redirect=${encodeURIComponent(path)}`;
+    window.location.replace(`/auth/login?session=expired${redirect}`);
+}
+
+function isSessionExpiredResponse(status) {
+    return status === 401 || status === 403;
+}
+
 (function() {
     const asideContainer = document.getElementById('aside-container');
     if (asideContainer && asideContainer.innerHTML.trim() === '') {
         const xhr = new XMLHttpRequest();
         xhr.open('GET', '/templates/components/aside.html', false);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         xhr.send();
+        if (isSessionExpiredResponse(xhr.status)) {
+            redirectToLoginExpired();
+            return;
+        }
         if (xhr.status === 200) {
             asideContainer.innerHTML = xhr.responseText;
         }
@@ -28,6 +43,10 @@ function apiUrlForBase(basePath, path) {
 async function resolveContextBase() {
     try {
         const res = await fetch('/api/bootstrap/context');
+        if (isSessionExpiredResponse(res.status)) {
+            redirectToLoginExpired();
+            return null;
+        }
         if (!res.ok) return null;
         const data = await res.json();
         return data && data.basePath ? data.basePath : null;

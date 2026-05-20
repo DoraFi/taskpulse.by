@@ -5,7 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Дефолтные колонки досок (раньше хранились в seed_* таблицах). */
 public final class BoardStageDefaults {
 
     private static final List<String> FALLBACK = List.of("Очередь", "В работе", "Тестирование", "Готово");

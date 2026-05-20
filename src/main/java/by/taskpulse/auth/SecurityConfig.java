@@ -14,9 +14,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final AuthExceptionHandlers authExceptionHandlers;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
+                          AuthExceptionHandlers authExceptionHandlers) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.authExceptionHandlers = authExceptionHandlers;
     }
 
     @Bean
@@ -40,6 +43,9 @@ public class SecurityConfig {
                         .requestMatchers("/", "/o/**", "/api/**", "/templates/**").authenticated()
                         .anyRequest().permitAll()
                 )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authExceptionHandlers)
+                        .accessDeniedHandler(authExceptionHandlers))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

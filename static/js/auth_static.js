@@ -279,11 +279,21 @@
         }
     }
 
+    var loginSessionNotice = document.getElementById('loginSessionNotice');
+    if (loginSessionNotice) {
+        var loginParams = new URLSearchParams(window.location.search);
+        if (loginParams.get('session') === 'expired') {
+            loginSessionNotice.hidden = false;
+        }
+    }
+
     var loginBtn = document.getElementById('loginSubmitBtn');
     if (loginBtn) {
         loginBtn.addEventListener('click', async function () {
             var email = value('login-email').toLowerCase();
             var password = value('login-password');
+            var rememberEl = document.querySelector('#loginForm input[name="remember"]');
+            var remember = rememberEl && rememberEl.checked;
             if (!email || !password) {
                 showToast('Укажите email и пароль.');
                 return;
@@ -293,15 +303,19 @@
                 var res = await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email, password: password })
+                    body: JSON.stringify({ email: email, password: password, remember: remember })
                 });
                 var data = await res.json().catch(function () { return {}; });
                 if (!res.ok) {
                     showToast(data.error || 'Неверный email или пароль.');
                     return;
                 }
+                var loginParams = new URLSearchParams(window.location.search);
+                var redirect = loginParams.get('redirect');
                 var base = data.context && data.context.basePath ? data.context.basePath : '/';
-                window.location.href = base;
+                window.location.href = (redirect && redirect.startsWith('/') && !redirect.startsWith('//'))
+                    ? redirect
+                    : base;
             } catch (e) {
                 showToast('Ошибка сети. Попробуйте еще раз.');
             } finally {

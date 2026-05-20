@@ -125,7 +125,6 @@
         return out;
     }
 
-    /** Шкала для подсчёта задач — только целые значения. */
     function countYScale(extraTicks) {
         return {
             beginAtZero: true,
@@ -140,7 +139,6 @@
         };
     }
 
-    /** Легенда Chart.js под графиком. */
     function chartLegendBottom(extra) {
         return {
             position: 'bottom',
@@ -188,7 +186,7 @@
                 document.fonts.load('400 12px "SN Pro"'),
                 document.fonts.load('500 13px "SN Pro"'),
             ]);
-        } catch (_) { /* локальный шрифт или уже загружен */ }
+        } catch (_) { }
     }
 
     function applyChartDefaults() {
@@ -333,7 +331,7 @@
         Object.values(charts).forEach((chart) => {
             try {
                 chart?.resize();
-            } catch (_) { /* canvas removed */ }
+            } catch (_) {}
         });
     }
 

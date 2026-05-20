@@ -20,8 +20,12 @@ public class JwtService {
     }
 
     public String generateToken(String username, Long userId, List<String> roles) {
+        return generateToken(username, userId, roles, properties.getExpirationMinutes());
+    }
+
+    public String generateToken(String username, Long userId, List<String> roles, long expirationMinutes) {
         Instant now = Instant.now();
-        Instant exp = now.plusSeconds(properties.getExpirationMinutes() * 60);
+        Instant exp = now.plusSeconds(expirationMinutes * 60);
         return Jwts.builder()
                 .subject(username)
                 .claim("uid", userId)

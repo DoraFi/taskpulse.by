@@ -49,6 +49,10 @@
                 </a>
             </div>
             <div class="modal-body">
+                <p id="loginSessionNotice" class="text-basic auth-session-notice" hidden role="status"
+                   style="margin: 0 0 1rem; padding: 0.75rem 1rem; border-radius: 8px; background: var(--color-surface-muted, #f0f4ec);">
+                    Сессия истекла (долго не было активности). Войдите снова — срок действия обновится с момента входа.
+                </p>
                 <form class="form-auth" data-static-form action="#" method="post" id="loginForm">
                     <div class="auth-field">
                         <label for="login-email">Электронная почта <img class="required-icon" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>

@@ -34,4 +34,5 @@ logging:
 app:
   jwt:
     secret: ${JWT_SECRET:taskpulse-dev-secret-key-taskpulse-dev-secret-key}
-    expiration-minutes: ${JWT_EXPIRATION_MINUTES:720}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:10080}
+    remember-expiration-minutes: ${JWT_REMEMBER_EXPIRATION_MINUTES:43200}

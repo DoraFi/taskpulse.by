@@ -286,14 +286,17 @@ public class AuthController {
         );
         if (roles.isEmpty()) roles = List.of("member");
 
-        String token = jwtService.generateToken(username, userId, roles);
+        long sessionMinutes = req.rememberMe()
+                ? jwtProperties.getRememberExpirationMinutes()
+                : jwtProperties.getExpirationMinutes();
+        String token = jwtService.generateToken(username, userId, roles, sessionMinutes);
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("token", token);
         body.put("userId", userId);
         body.put("username", username);
         body.put("context", contextByUserId(userId));
         body.put("roles", roles);
-        return withAuthCookie(token, body);
+        return withAuthCookie(token, body, sessionMinutes);
     }
 
     @PostMapping("/logout")
@@ -310,11 +313,15 @@ public class AuthController {
     }
 
     private ResponseEntity<Map<String, Object>> withAuthCookie(String token, Map<String, Object> body) {
+        return withAuthCookie(token, body, jwtProperties.getExpirationMinutes());
+    }
+
+    private ResponseEntity<Map<String, Object>> withAuthCookie(String token, Map<String, Object> body, long sessionMinutes) {
         ResponseCookie cookie = ResponseCookie.from(AUTH_COOKIE, token)
                 .path("/")
                 .httpOnly(true)
                 .sameSite("Lax")
-                .maxAge(Duration.ofMinutes(jwtProperties.getExpirationMinutes()))
+                .maxAge(Duration.ofMinutes(sessionMinutes))
                 .build();
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).body(body);
     }
@@ -539,7 +546,12 @@ public class AuthController {
     }
 
     public record LoginRequest(
-                   @NotBlank @Pattern(regexp = EMAIL_REGEX_STRICT) String email,
-            @NotBlank String password
-    ) {}
+            @NotBlank @Pattern(regexp = EMAIL_REGEX_STRICT) String email,
+            @NotBlank String password,
+            Boolean remember
+    ) {
+        public boolean rememberMe() {
+            return Boolean.TRUE.equals(remember);
+        }
+    }
 }
