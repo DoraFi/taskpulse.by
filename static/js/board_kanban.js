@@ -976,7 +976,7 @@
 
     function createKanbanDropdownMenu(board, boardIndex, idSuffix = '') {
         const dropdown = document.createElement('div');
-        dropdown.className = 'dropdown-menu border-dark-1 br-5';
+        dropdown.className = 'dropdown-menu br-5';
         const suf = idSuffix ? `-${idSuffix}` : '';
         dropdown.id = `actionsMenu-kanban-${boardIndex}${suf}`;
         dropdown.dataset.boardId = board.id;
@@ -1034,7 +1034,7 @@
 
     function createKanbanStageDropdown(boardIndex, stageName) {
         const dropdown = document.createElement('div');
-        dropdown.className = 'dropdown-menu border-dark-1 br-5 kanban-stage-dropdown';
+        dropdown.className = 'dropdown-menu br-5 kanban-stage-dropdown';
         dropdown.dataset.boardIndex = boardIndex;
         dropdown.dataset.stageName = stageName;
         dropdown.innerHTML = `

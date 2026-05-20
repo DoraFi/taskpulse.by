@@ -5,9 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "app.jwt")
 public class JwtProperties {
     private String secret;
-    /** Срок сессии после входа без «Запомнить меня» (по умолчанию 7 суток). */
     private long expirationMinutes = 10080;
-    /** Срок при включённом «Запомнить меня» (по умолчанию 30 суток). */
     private long rememberExpirationMinutes = 43200;
 
     public String getSecret() {

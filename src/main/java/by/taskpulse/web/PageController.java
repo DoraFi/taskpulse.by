@@ -37,7 +37,7 @@ public class PageController {
                     join app_team t on t.id = tm.team_id
                     join organization org on org.id = t.organization_id
                     where u.username = ?
-                    order by t.id
+                    order by t.id desc
                     limit 1
                     """,
                     currentUsername()
@@ -78,8 +78,8 @@ public class PageController {
                                     @RequestParam(required = false) String project,
                                     HttpServletRequest request,
                                     Model model) {
-        String contextError = validateContextAccess(orgId, teamId);
-        if (contextError != null) return contextErrorView(model, request, 404, contextError);
+        String blocked = openContextPage(orgId, teamId, request, model);
+        if (blocked != null) return blocked;
         if (project != null && !project.isBlank() && !projectCode.equalsIgnoreCase(project)) {
             return contextErrorView(model, request, 400, "Параметр project не совпадает с projectCode в пути");
         }
@@ -95,8 +95,8 @@ public class PageController {
                                      @RequestParam(required = false) String project,
                                      HttpServletRequest request,
                                      Model model) {
-        String contextError = validateContextAccess(orgId, teamId);
-        if (contextError != null) return contextErrorView(model, request, 404, contextError);
+        String blocked = openContextPage(orgId, teamId, request, model);
+        if (blocked != null) return blocked;
         if (project != null && !project.isBlank() && !projectCode.equalsIgnoreCase(project)) {
             return contextErrorView(model, request, 400, "Параметр project не совпадает с projectCode в пути");
         }
@@ -112,8 +112,8 @@ public class PageController {
                                     @RequestParam(required = false) String project,
                                     HttpServletRequest request,
                                     Model model) {
-        String contextError = validateContextAccess(orgId, teamId);
-        if (contextError != null) return contextErrorView(model, request, 404, contextError);
+        String blocked = openContextPage(orgId, teamId, request, model);
+        if (blocked != null) return blocked;
         if (project != null && !project.isBlank() && !projectCode.equalsIgnoreCase(project)) {
             return contextErrorView(model, request, 400, "Параметр project не совпадает с projectCode в пути");
         }
@@ -124,8 +124,8 @@ public class PageController {
 
     @GetMapping("/o/{orgId}/t/{teamId}")
     public String homeContext(@PathVariable String orgId, @PathVariable String teamId, HttpServletRequest request, Model model) {
-        String contextError = validateContextAccess(orgId, teamId);
-        if (contextError != null) return contextErrorView(model, request, 404, contextError);
+        String blocked = openContextPage(orgId, teamId, request, model);
+        if (blocked != null) return blocked;
         return "pages/index";
     }
 
@@ -147,15 +147,15 @@ public class PageController {
 
     @GetMapping("/o/{orgId}/t/{teamId}/index")
     public String homeContextIndex(@PathVariable String orgId, @PathVariable String teamId, HttpServletRequest request, Model model) {
-        String contextError = validateContextAccess(orgId, teamId);
-        if (contextError != null) return contextErrorView(model, request, 404, contextError);
+        String blocked = openContextPage(orgId, teamId, request, model);
+        if (blocked != null) return blocked;
         return "pages/index";
     }
 
     @GetMapping("/o/{orgId}/t/{teamId}/tasks")
     public String tasksTeamContext(@PathVariable String orgId, @PathVariable String teamId, HttpServletRequest request, Model model) {
-        String contextError = validateContextAccess(orgId, teamId);
-        if (contextError != null) return contextErrorView(model, request, 404, contextError);
+        String blocked = openContextPage(orgId, teamId, request, model);
+        if (blocked != null) return blocked;
         return "pages/tasks";
     }
 
@@ -165,8 +165,8 @@ public class PageController {
                                       @PathVariable String projectCode,
                                       HttpServletRequest request,
                                       Model model) {
-        String contextError = validateContextAccess(orgId, teamId);
-        if (contextError != null) return contextErrorView(model, request, 404, contextError);
+        String blocked = openContextPage(orgId, teamId, request, model);
+        if (blocked != null) return blocked;
         String projectError = validateProjectAccess(orgId, teamId, projectCode, null);
         if (projectError != null) return contextErrorView(model, request, 404, projectError);
         return "pages/tasks";
@@ -174,47 +174,54 @@ public class PageController {
 
     @GetMapping("/o/{orgId}/t/{teamId}/tasks/all")
     public String tasksAllContext(@PathVariable String orgId, @PathVariable String teamId, HttpServletRequest request, Model model) {
-        String contextError = validateContextAccess(orgId, teamId);
-        if (contextError != null) return contextErrorView(model, request, 404, contextError);
+        String blocked = openContextPage(orgId, teamId, request, model);
+        if (blocked != null) return blocked;
         return "pages/tasks";
     }
 
     @GetMapping("/o/{orgId}/t/{teamId}/projects")
     public String projectsContext(@PathVariable String orgId, @PathVariable String teamId, HttpServletRequest request, Model model) {
-        String contextError = validateContextAccess(orgId, teamId);
-        if (contextError != null) return contextErrorView(model, request, 404, contextError);
+        String blocked = openContextPage(orgId, teamId, request, model);
+        if (blocked != null) return blocked;
         model.addAttribute("projectsView", "team");
         return "pages/projects";
     }
 
     @GetMapping("/o/{orgId}/t/{teamId}/projects/org")
     public String projectsOrgContext(@PathVariable String orgId, @PathVariable String teamId, HttpServletRequest request, Model model) {
-        String contextError = validateContextAccess(orgId, teamId);
-        if (contextError != null) return contextErrorView(model, request, 404, contextError);
+        String blocked = openContextPage(orgId, teamId, request, model);
+        if (blocked != null) return blocked;
         model.addAttribute("projectsView", "org");
         return "pages/projects";
     }
 
     @GetMapping("/o/{orgId}/t/{teamId}/projects/archive")
     public String projectsArchiveContext(@PathVariable String orgId, @PathVariable String teamId, HttpServletRequest request, Model model) {
-        String contextError = validateContextAccess(orgId, teamId);
-        if (contextError != null) return contextErrorView(model, request, 404, contextError);
+        String blocked = openContextPage(orgId, teamId, request, model);
+        if (blocked != null) return blocked;
         model.addAttribute("projectsView", "archive");
         return "pages/projects";
     }
 
     @GetMapping("/o/{orgId}/t/{teamId}/team")
     public String teamContext(@PathVariable String orgId, @PathVariable String teamId, HttpServletRequest request, Model model) {
-        String contextError = validateContextAccess(orgId, teamId);
-        if (contextError != null) return contextErrorView(model, request, 404, contextError);
+        String blocked = openContextPage(orgId, teamId, request, model);
+        if (blocked != null) return blocked;
         return "pages/team";
     }
 
     @GetMapping("/o/{orgId}/t/{teamId}/analytics")
     public String analyticsContext(@PathVariable String orgId, @PathVariable String teamId, HttpServletRequest request, Model model) {
-        String contextError = validateContextAccess(orgId, teamId);
-        if (contextError != null) return contextErrorView(model, request, 404, contextError);
+        String blocked = openContextPage(orgId, teamId, request, model);
+        if (blocked != null) return blocked;
         return "pages/analytics";
+    }
+
+    @GetMapping("/o/{orgId}/t/{teamId}/help")
+    public String helpContext(@PathVariable String orgId, @PathVariable String teamId, HttpServletRequest request, Model model) {
+        String blocked = openContextPage(orgId, teamId, request, model);
+        if (blocked != null) return blocked;
+        return "pages/help";
     }
 
     @GetMapping("/o/{orgId}/t/{teamId}/{*rest}")
@@ -226,8 +233,8 @@ public class PageController {
         if (rest != null && (rest.equals("api") || rest.startsWith("api/"))) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-        String contextError = validateContextAccess(orgId, teamId);
-        if (contextError != null) return contextErrorView(model, request, 404, contextError);
+        String blocked = openContextPage(orgId, teamId, request, model);
+        if (blocked != null) return blocked;
         return contextErrorView(model, request, 404, "Страница в этом контексте не найдена");
     }
 
@@ -276,57 +283,70 @@ public class PageController {
         return "components/create_task_modal";
     }
 
-    private String validateContextAccess(String orgId, String teamId) {
-        if (!isValidUuid(orgId) || !isValidUuid(teamId)) {
-            return "Ссылка выглядит поврежденной. Проверьте, что вы открыли ее полностью.";
+    private String openContextPage(String orgId, String teamId, HttpServletRequest request, Model model) {
+        String redirect = buildCanonicalContextRedirect(orgId, teamId, request);
+        if (redirect != null) {
+            return redirect;
         }
-        Integer teamExists = jdbcTemplate.queryForObject(
-                """
-                select count(*)
-                from app_team t
-                join organization org on org.id = t.organization_id
-                where org.public_id = ? and t.public_id = ?
-                """,
-                Integer.class,
-                orgId, teamId
-        );
-        if (teamExists == null || teamExists == 0) {
+        String contextError = validateContextAccess(orgId, teamId);
+        if (contextError != null) {
+            return contextErrorView(model, request, 404, contextError);
+        }
+        return null;
+    }
+
+    private String buildCanonicalContextRedirect(String orgId, String teamId, HttpServletRequest request) {
+        if (!isValidUuid(teamId)) {
+            return null;
+        }
+        var resolved = TeamContextSupport.resolveByTeamPublicId(jdbcTemplate, teamId);
+        if (resolved.isEmpty()) {
+            return null;
+        }
+        String canonicalOrg = resolved.get().get("org_public_id");
+        if (canonicalOrg.equalsIgnoreCase(orgId.trim())) {
+            return null;
+        }
+        String uri = request.getRequestURI();
+        String fixed = uri.replaceFirst("/o/[^/]+/t/", "/o/" + canonicalOrg + "/t/");
+        if (fixed.equals(uri)) {
+            return null;
+        }
+        String qs = request.getQueryString();
+        return "redirect:" + fixed + (qs != null && !qs.isBlank() ? "?" + qs : "");
+    }
+
+    private String validateContextAccess(String orgId, String teamId) {
+        if (!isValidUuid(teamId)) {
+            return "Ссылка выглядит поврежденной. Проверьте, что вы открыли её полностью.";
+        }
+        var resolved = TeamContextSupport.resolveByTeamPublicId(jdbcTemplate, teamId);
+        if (resolved.isEmpty()) {
             return "Мы не нашли эту команду. Возможно, ссылка устарела или содержит опечатку.";
         }
-        Integer hasAccess = jdbcTemplate.queryForObject(
-                """
-                select count(*)
-                from app_user u
-                join team_membership tm on tm.user_id = u.id
-                join app_team t on t.id = tm.team_id
-                join organization org on org.id = t.organization_id
-                where u.username = ?
-                  and org.public_id = ?
-                  and t.public_id = ?
-                """,
-                Integer.class,
-                currentUsername(), orgId, teamId
-        );
-        if (hasAccess == null || hasAccess == 0) {
+        if (!TeamContextSupport.userCanAccessTeam(jdbcTemplate, currentUsername(), teamId)) {
             return "У вас пока нет доступа к этой команде.";
         }
         return null;
     }
 
     private String validateProjectAccess(String orgId, String teamId, String projectCode, String expectedType) {
+        String orgKey = TeamContextSupport.resolveByTeamPublicId(jdbcTemplate, teamId)
+                .map(m -> m.get("org_public_id"))
+                .orElse(orgId);
         String sql = """
                 select count(*)
                 from project p
                 join project_team pt on pt.project_id = p.id
                 join app_team t on t.id = pt.team_id
                 join organization org on org.id = t.organization_id
-                where org.public_id = ?
-                  and t.public_id = ?
+                where lower(trim(org.public_id)) = lower(trim(?))
+                  and lower(trim(t.public_id)) = lower(trim(?))
                   and p.code = ?
                 """ + (expectedType != null ? " and p.project_type = ? " : "");
         Integer count = expectedType != null
-                ? jdbcTemplate.queryForObject(sql, Integer.class, orgId, teamId, projectCode, expectedType)
-                : jdbcTemplate.queryForObject(sql, Integer.class, orgId, teamId, projectCode);
+                ? jdbcTemplate.queryForObject(sql, Integer.class, orgKey, teamId, projectCode, expectedType)
+                : jdbcTemplate.queryForObject(sql, Integer.class, orgKey, teamId, projectCode);
         if (count == null || count == 0) {
             return "Проект по этой ссылке не найден.";
         }

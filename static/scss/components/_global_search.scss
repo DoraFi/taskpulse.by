@@ -1,0 +1,91 @@
+.header-global-search {
+    position: relative;
+
+    .search-panel {
+        position: relative;
+        z-index: 20;
+    }
+}
+
+.header-global-search__dropdown {
+    position: absolute;
+    top: calc(100% + #{$space-8});
+    left: 0;
+    width: min(36rem, 92vw);
+    max-height: min(28rem, 60vh);
+    overflow: auto;
+    padding: $space-8;
+    background: $light-light-green;
+    border: $space-1 solid rgba($green, 0.35);
+    border-radius: $radius-md;
+    box-shadow: 0 $space-8 $space-24 rgba($black, 0.12);
+    z-index: 1200;
+}
+
+.header-global-search__group + .header-global-search__group {
+    margin-top: $space-8;
+    padding-top: $space-8;
+    border-top: $space-1 solid rgba($dark-gray, 0.08);
+}
+
+.header-global-search__group-label {
+    margin: 0 0 $space-4 $space-8;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.header-global-search__hit {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $space-2;
+    width: 100%;
+    padding: $space-8 $space-12;
+    border: none;
+    border-radius: $radius-sm;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s ease;
+
+    &:hover,
+    &.is-active {
+        background: rgba($green, 0.12);
+    }
+}
+
+.header-global-search__hit-title {
+    line-height: 1.3;
+}
+
+.header-global-search__hit-sub,
+.header-global-search__snippet {
+    line-height: 1.35;
+}
+
+.header-global-search__snippet {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.header-global-search__empty {
+    margin: $space-8 $space-12;
+}
+
+body[data-theme='dark'] .header-global-search__dropdown {
+    background: $dark-gray;
+    border-color: rgba($green, 0.35);
+    box-shadow: 0 $space-8 $space-24 rgba($black, 0.45);
+}
+
+body[data-theme='dark'] .header-global-search__group + .header-global-search__group {
+    border-top-color: rgba($light-light-green, 0.12);
+}
+
+body[data-theme='dark'] .header-global-search__hit:hover,
+body[data-theme='dark'] .header-global-search__hit.is-active {
+    background: rgba($green, 0.2);
+}

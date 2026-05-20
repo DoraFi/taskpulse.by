@@ -37,20 +37,16 @@
             </ul>
         </li>
         <li class="item">
-            <button class="nav-link text-basic">Документация</button>
-        </li>
-        <li class="item">
             <div class="item-header">
                 <span class="arrow-wrapper">
                     <img src="/static/source/icons/arrow_dark_cropped.svg" th:src="@{/static/source/icons/arrow_dark_cropped.svg}" alt="" class="arrow-img">
                 </span>
-                <button class="nav-link text-basic">Помощь</button>
+                <button class="nav-link text-basic nav-link--section" data-context-link="help-section">Помощь</button>
             </div>
             <ul class="submenu">
-                <li><button class="nav-link">Частые вопросы</button></li>
-                <li><button class="nav-link">Контактная поддержка</button></li>
-                <li><button class="nav-link">Документация</button></li>
-
+                <li><button class="nav-link" data-context-link="help-faq">Частые вопросы</button></li>
+                <li><button class="nav-link" data-context-link="help-support">Поддержка</button></li>
+                <li><button class="nav-link" data-context-link="help-docs">Документация</button></li>
             </ul>
         </li>
     </ul>

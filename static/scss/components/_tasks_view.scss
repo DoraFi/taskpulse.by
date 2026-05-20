@@ -167,7 +167,6 @@
             display: none;
             flex-direction: column;
             min-width: 120px;
-            @extend .border-dark-1;
 
             &.show {
                 display: flex;

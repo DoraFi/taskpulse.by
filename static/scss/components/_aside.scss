@@ -1,12 +1,38 @@
+aside#aside-container,
 aside {
-    padding: $space-48 $space-32 $space-48 $space-64;
+    padding: $space-48 $space-32 $space-24 $space-64;
     background-color: $light-green;
     margin: 0;
     min-width: 20vw;
     height: calc(100vh - $space-64);
-    overflow-y: auto;
     flex-shrink: 0;
     position: relative;
+}
+
+aside#aside-container {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+
+    > nav {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        padding-bottom: $space-8;
+
+        &::-webkit-scrollbar {
+            display: none;
+            width: 0;
+            background: transparent;
+        }
+
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+}
+
+aside {
+    overflow-y: auto;
 
     &::-webkit-scrollbar {
         display: none;
@@ -152,6 +178,15 @@ body[data-theme="dark"] aside .submenu .nav-link.active {
 
 aside .aside-collapse-item .aside-collapse-toggle-btn {
     display: inline-flex;
+}
+
+aside#aside-container .aside-collapse-corner {
+    flex-shrink: 0;
+    align-self: flex-end;
+    margin-top: auto;
+    position: sticky;
+    bottom: $space-24;
+    z-index: 2;
 }
 
 aside .aside-collapse-corner {

@@ -1,12 +1,14 @@
 package by.taskpulse.web.api;
 
 import by.taskpulse.auth.CurrentUserProvider;
+import by.taskpulse.web.TeamContextSupport;
 import java.util.List;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,11 +25,19 @@ public class ContextApiController {
     private final JdbcTemplate jdbcTemplate;
     private final LegacyDataApiController legacy;
     private final CurrentUserProvider currentUserProvider;
+    private final HelpCenterService helpCenter;
+    private final GlobalSearchService globalSearch;
 
-    public ContextApiController(JdbcTemplate jdbcTemplate, LegacyDataApiController legacy, CurrentUserProvider currentUserProvider) {
+    public ContextApiController(JdbcTemplate jdbcTemplate,
+                                LegacyDataApiController legacy,
+                                CurrentUserProvider currentUserProvider,
+                                HelpCenterService helpCenter,
+                                GlobalSearchService globalSearch) {
         this.jdbcTemplate = jdbcTemplate;
         this.legacy = legacy;
         this.currentUserProvider = currentUserProvider;
+        this.helpCenter = helpCenter;
+        this.globalSearch = globalSearch;
     }
 
     @GetMapping("/api/me")
@@ -684,12 +694,118 @@ public class ContextApiController {
         return legacy.analyticsDashboard(period);
     }
 
+    @GetMapping("/api/search")
+    public Map<String, Object> globalSearchAuto(@RequestParam(defaultValue = "") String q) {
+        return globalSearch.search(q);
+    }
+
+    @GetMapping("/o/{orgId}/t/{teamId}/api/search")
+    public Map<String, Object> globalSearch(@PathVariable String orgId,
+                                            @PathVariable String teamId,
+                                            @RequestParam(defaultValue = "") String q) {
+        ensureContextAccess(orgId, teamId);
+        return globalSearch.search(q);
+    }
+
+    @GetMapping("/api/help/faq")
+    public List<Map<String, Object>> helpFaqAuto() {
+        return helpCenter.listFaqByCategory();
+    }
+
+    @GetMapping("/api/help/faq/search")
+    public List<Map<String, Object>> helpFaqSearchAuto(@RequestParam(defaultValue = "") String q) {
+        return helpCenter.searchFaq(q);
+    }
+
+    @GetMapping("/api/help/support")
+    public Map<String, Object> helpSupportInfoAuto() {
+        return helpCenter.supportInfo();
+    }
+
+    @PostMapping(value = "/api/help/support/tickets", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Map<String, Object> helpSubmitTicketAuto(@RequestParam String subject,
+                                                    @RequestParam String message,
+                                                    @RequestParam(value = "files", required = false) List<MultipartFile> files) {
+        return helpCenter.submitSupportTicket(subject, message, files);
+    }
+
+    @GetMapping("/api/help/docs")
+    public Map<String, Object> helpDocsAuto() {
+        return helpCenter.listDocTree();
+    }
+
+    @GetMapping("/api/help/docs/search")
+    public List<Map<String, Object>> helpDocsSearchAuto(@RequestParam(defaultValue = "") String q) {
+        return helpCenter.searchDocs(q);
+    }
+
+    @GetMapping("/api/help/docs/{kind}/{sectionSlug}")
+    public Map<String, Object> helpDocArticleAuto(@PathVariable String kind,
+                                                 @PathVariable String sectionSlug,
+                                                 @RequestParam(defaultValue = "guide") String article) {
+        return helpCenter.getDocArticle(kind, sectionSlug, article);
+    }
+
+    @GetMapping("/o/{orgId}/t/{teamId}/api/help/faq")
+    public List<Map<String, Object>> helpFaq(@PathVariable String orgId, @PathVariable String teamId) {
+        ensureContextAccess(orgId, teamId);
+        return helpCenter.listFaqByCategory();
+    }
+
+    @GetMapping("/o/{orgId}/t/{teamId}/api/help/faq/search")
+    public List<Map<String, Object>> helpFaqSearch(@PathVariable String orgId,
+                                                   @PathVariable String teamId,
+                                                   @RequestParam(defaultValue = "") String q) {
+        ensureContextAccess(orgId, teamId);
+        return helpCenter.searchFaq(q);
+    }
+
+    @GetMapping("/o/{orgId}/t/{teamId}/api/help/support")
+    public Map<String, Object> helpSupportInfo(@PathVariable String orgId, @PathVariable String teamId) {
+        ensureContextAccess(orgId, teamId);
+        return helpCenter.supportInfo();
+    }
+
+    @PostMapping(value = "/o/{orgId}/t/{teamId}/api/help/support/tickets", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Map<String, Object> helpSubmitTicket(@PathVariable String orgId,
+                                                @PathVariable String teamId,
+                                                @RequestParam String subject,
+                                                @RequestParam String message,
+                                                @RequestParam(value = "files", required = false) List<MultipartFile> files) {
+        ensureContextAccess(orgId, teamId);
+        return helpCenter.submitSupportTicket(subject, message, files);
+    }
+
+    @GetMapping("/o/{orgId}/t/{teamId}/api/help/docs")
+    public Map<String, Object> helpDocs(@PathVariable String orgId, @PathVariable String teamId) {
+        ensureContextAccess(orgId, teamId);
+        return helpCenter.listDocTree();
+    }
+
+    @GetMapping("/o/{orgId}/t/{teamId}/api/help/docs/search")
+    public List<Map<String, Object>> helpDocsSearch(@PathVariable String orgId,
+                                                   @PathVariable String teamId,
+                                                   @RequestParam(defaultValue = "") String q) {
+        ensureContextAccess(orgId, teamId);
+        return helpCenter.searchDocs(q);
+    }
+
+    @GetMapping("/o/{orgId}/t/{teamId}/api/help/docs/{kind}/{sectionSlug}")
+    public Map<String, Object> helpDocArticle(@PathVariable String orgId,
+                                              @PathVariable String teamId,
+                                              @PathVariable String kind,
+                                              @PathVariable String sectionSlug,
+                                              @RequestParam(defaultValue = "guide") String article) {
+        ensureContextAccess(orgId, teamId);
+        return helpCenter.getDocArticle(kind, sectionSlug, article);
+    }
+
     private void ensureContextAccess(String orgId, String teamId) {
-        Map<String, Object> row = currentContextRow();
-        String myOrg = String.valueOf(row.get("org_public_id")).trim();
-        String myTeam = String.valueOf(row.get("team_public_id")).trim();
-        if (!myOrg.equals(orgId.trim()) || !myTeam.equals(teamId.trim())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нет доступа к указанной организации/команде");
+        if (!TeamContextSupport.resolveByTeamPublicId(jdbcTemplate, teamId).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Команда не найдена");
+        }
+        if (!TeamContextSupport.userCanAccessTeam(jdbcTemplate, currentUsername(), teamId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нет доступа к указанной команде");
         }
     }
 
@@ -704,7 +820,7 @@ public class ContextApiController {
                 join app_team t on t.id = tm.team_id
                 join organization org on org.id = t.organization_id
                 where u.username = ?
-                order by t.id
+                order by t.id desc
                 limit 1
                 """,
                 currentUsername()

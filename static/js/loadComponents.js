@@ -31,6 +31,44 @@ function getApiBasePath() {
     return `/o/${m[1]}/t/${m[2]}/api`;
 }
 
+window.getApiBasePath = getApiBasePath;
+
+function ensureGlobalToast() {
+    if (typeof window.showToast === 'function') return;
+    window.showToast = function showToast(message) {
+        if (!message) return;
+        let toast = document.querySelector('.toast-notification');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            document.body.appendChild(toast);
+        }
+        toast.textContent = message;
+        toast.classList.add('show');
+        clearTimeout(window.showToast._hideTimer);
+        window.showToast._hideTimer = setTimeout(() => toast.classList.remove('show'), 2800);
+    };
+}
+
+function ensureGlobalSearchScript() {
+    if (window.__tpGlobalSearchScriptLoading || window.__tpGlobalSearchBoot) return Promise.resolve();
+    window.__tpGlobalSearchScriptLoading = true;
+    return new Promise((resolve) => {
+        const s = document.createElement('script');
+        s.src = '/static/js/global_search.js';
+        s.async = true;
+        s.onload = () => resolve();
+        s.onerror = () => resolve();
+        document.head.appendChild(s);
+    });
+}
+
+function initGlobalSearchUi() {
+    if (typeof window.tpInitGlobalSearch === 'function') {
+        window.tpInitGlobalSearch();
+    }
+}
+
 function apiUrl(path) {
     return `${getApiBasePath()}${path}`;
 }
@@ -68,6 +106,10 @@ function applyContextNavLinks(base) {
     document.querySelectorAll('[data-context-link="analytics-reports"]').forEach(el => el.dataset.href = `${base}/analytics#reports`);
     document.querySelectorAll('[data-context-link="analytics-charts"]').forEach(el => el.dataset.href = `${base}/analytics#charts`);
     document.querySelectorAll('[data-context-link="analytics-compare"]').forEach(el => el.dataset.href = `${base}/analytics#compare`);
+    document.querySelectorAll('[data-context-link="help-section"]').forEach(el => el.dataset.href = `${base}/help#faq`);
+    document.querySelectorAll('[data-context-link="help-faq"]').forEach(el => el.dataset.href = `${base}/help#faq`);
+    document.querySelectorAll('[data-context-link="help-support"]').forEach(el => el.dataset.href = `${base}/help#support`);
+    document.querySelectorAll('[data-context-link="help-docs"]').forEach(el => el.dataset.href = `${base}/help#docs/page/index`);
     document.querySelectorAll('a.logo-link, .header .logo[href="/"], .header a[href="/"]').forEach(a => a.setAttribute('href', base));
 }
 
@@ -239,6 +281,7 @@ function applyAppContainerPageShell(target, source) {
     }
     delete target.dataset.controlsBound;
     delete target.dataset.tabsBound;
+    delete target.dataset.helpBound;
 }
 
 function isAnalyticsPath(pathname) {
@@ -250,14 +293,49 @@ function analyticsTabFromUrl(url) {
     return hash || 'overview';
 }
 
+function isHelpPage(container) {
+    if (!container) return false;
+    if (container.classList && container.classList.contains('help-page')) return true;
+    return Boolean(pageRoot(container, '#helpPage'));
+}
+
+function isHelpPath(pathname) {
+    return pathname.endsWith('/help');
+}
+
+function helpNavHash(url) {
+    return (url.hash || '').replace('#', '').trim();
+}
+
+function helpNavMatches(currentUrl, contextLink) {
+    if (!isHelpPath(currentUrl.pathname)) return false;
+    const hash = helpNavHash(currentUrl);
+    if (contextLink === 'help-faq') {
+        return hash === 'faq' || hash === '';
+    }
+    if (contextLink === 'help-support') {
+        return hash === 'support';
+    }
+    if (contextLink === 'help-docs') {
+        return hash === 'docs' || hash.startsWith('docs/');
+    }
+    return false;
+}
+
 function navLinkMatches(currentUrl, linkUrl, contextLink) {
     if (currentUrl.pathname !== linkUrl.pathname) return false;
     if (linkUrl.search && currentUrl.search !== linkUrl.search) return false;
-    if (contextLink === 'analytics-section') {
+    if (contextLink === 'analytics-section' || contextLink === 'help-section') {
         return false;
     }
     if (isAnalyticsPath(currentUrl.pathname)) {
         return analyticsTabFromUrl(currentUrl) === analyticsTabFromUrl(linkUrl);
+    }
+    if (isHelpPath(currentUrl.pathname)) {
+        if (contextLink === 'help-faq' || contextLink === 'help-support' || contextLink === 'help-docs') {
+            return helpNavMatches(currentUrl, contextLink);
+        }
+        return helpNavHash(currentUrl) === helpNavHash(linkUrl);
     }
     return true;
 }
@@ -278,12 +356,19 @@ function updateActiveMenuItem() {
     const currentUrl = new URL(window.location.href);
     
     const onAnalytics = isAnalyticsPath(currentUrl.pathname);
+    const onHelp = isHelpPath(currentUrl.pathname);
 
     document.querySelectorAll('.nav-link[data-href]').forEach(link => {
         const linkUrl = new URL(link.dataset.href, window.location.origin);
         const contextLink = link.dataset.contextLink || '';
         if (contextLink === 'analytics-section') {
             if (onAnalytics) {
+                link.classList.add('nav-link--in-section');
+            }
+            return;
+        }
+        if (contextLink === 'help-section') {
+            if (onHelp) {
                 link.classList.add('nav-link--in-section');
             }
             return;
@@ -384,6 +469,11 @@ function handleNavigationClick(e) {
                 .then(() => window.initAnalyticsPage())
                 .catch((err) => console.error('Chart.js не загружен для аналитики', err));
             updateActiveMenuItem();
+        } else if (typeof window.initHelpPage === 'function' && document.getElementById('helpPage')) {
+            const targetUrl = new URL(url, window.location.origin);
+            history.replaceState(null, '', `${targetUrl.pathname}${targetUrl.search}${targetUrl.hash || ''}`);
+            window.initHelpPage().catch((err) => console.error('help init', err));
+            updateActiveMenuItem();
         } else {
             console.log('Уже на этой странице, переход не требуется');
         }
@@ -446,6 +536,10 @@ async function loadExternalScript(src) {
         return true;
     }
     if (src.includes('analytics') && window.initAnalyticsPage) {
+        console.log(`Скрипт ${src} уже инициализирован через window`);
+        return true;
+    }
+    if (src.includes('help.js') && window.initHelpPage) {
         console.log(`Скрипт ${src} уже инициализирован через window`);
         return true;
     }
@@ -531,7 +625,8 @@ async function loadPage(url) {
                         src.includes('index') ||
                         src.includes('projects') ||
                         src.includes('team') ||
-                        src.includes('analytics');
+                        src.includes('analytics') ||
+                        src.includes('help.js');
 
                     const alreadyInited =
                         (src.includes('board_list') && window.initBoardListPage) ||
@@ -540,7 +635,8 @@ async function loadPage(url) {
                         (src.includes('index') && window.initIndexPage) ||
                         (src.includes('projects') && window.initProjectsPage) ||
                         (src.includes('team') && window.initTeamPage) ||
-                        (src.includes('analytics') && window.initAnalyticsPage);
+                        (src.includes('analytics') && window.initAnalyticsPage) ||
+                        (src.includes('help.js') && window.initHelpPage);
                     const forceLoad =
                         (src.includes('task_detail_modal') && typeof window.tpOpenTaskDetailModal !== 'function')
                         || (src.includes('chart.js') && typeof window.Chart !== 'function');
@@ -602,6 +698,10 @@ async function loadPage(url) {
                             .then(() => window.initAnalyticsPage())
                             .catch((err) => console.error('Chart.js не загружен для аналитики', err));
                     }
+                    if (isHelpPage(currentContent) && typeof window.initHelpPage === 'function') {
+                        console.log('Вызов initHelpPage');
+                        window.initHelpPage();
+                    }
 
                     const isBoardList = currentContent.classList.contains('board-list') && !currentContent.classList.contains('board-kanban');
                     const isBoardKanban = currentContent.classList.contains('board-kanban');
@@ -622,6 +722,7 @@ async function loadPage(url) {
                         initNavigation();
                         updateActiveMenuItem();
                     });
+                    ensureGlobalSearchScript().then(initGlobalSearchUi);
                     
                     console.log('Загрузка страницы завершена');
                 }, 200);
@@ -640,10 +741,12 @@ window.addEventListener('popstate', () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+    ensureGlobalToast();
     initSubmenus();
     initAsideCollapseToggle();
     hydrateTeamProjectsMenu().then(() => {
         initNavigation();
         updateActiveMenuItem();
     });
+    ensureGlobalSearchScript().then(initGlobalSearchUi);
 });

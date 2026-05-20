@@ -69,7 +69,7 @@ insert into help_faq (position_no, question, answer) values
     (1, 'Как создать проект?', 'Откройте раздел «Проекты» → «Создать проект», укажите название, тип (Kanban, Scrum или List) и команду.'),
     (2, 'Почему задача в «Готово» пропала с доски?', 'Завершённые задачи автоматически архивируются. Их можно найти в архиве задач доски или в отчётах.'),
     (3, 'Как пригласить участника в команду?', 'Раздел «Команда» → приглашение по email. После принятия приглашения пользователь появится в списке.'),
-    (4, 'Чем отличаются Kanban и Scrum?', 'Kanban — непрерывный поток без спринтов. Scrum — планирование спринта, бэклог и отдельные колонки спринта.'),
+    (4, 'Чем отличаются Kanban и Scrum?', 'Kanban - непрерывный поток без спринтов. Scrum - планирование спринта, бэклог и отдельные колонки спринта.'),
     (5, 'Где смотреть аналитику?', 'Раздел «Аналитика»: KPI, velocity, CFD и сравнение проектов за выбранный период.');
 
 insert into help_doc_section (position_no, slug, title, summary) values
@@ -85,7 +85,7 @@ from help_doc_section s where s.slug = 'start';
 
 insert into help_doc_article (section_id, position_no, slug, title, body_md)
 select s.id, 1, 'project-types', 'Типы проектов',
-       '- **List** — табличный список досок.\n- **Kanban** — колонки по статусам.\n- **Scrum** — спринты и бэклог.'
+       '- **List** - табличный список досок.\n- **Kanban** - колонки по статусам.\n- **Scrum** - спринты и бэклог.'
 from help_doc_section s where s.slug = 'projects';
 
 insert into help_doc_article (section_id, position_no, slug, title, body_md)
@@ -95,5 +95,5 @@ from help_doc_section s where s.slug = 'tasks';
 
 insert into help_doc_article (section_id, position_no, slug, title, body_md)
 select s.id, 1, 'dashboard-overview', 'Обзор аналитики',
-       'На вкладке «Обзор» — KPI, velocity и CFD. Период (7–180 дней) влияет на все графики верхнего блока.'
+       'На вкладке «Обзор» - KPI, velocity и CFD. Период (7–180 дней) влияет на все графики верхнего блока.'
 from help_doc_section s where s.slug = 'analytics';

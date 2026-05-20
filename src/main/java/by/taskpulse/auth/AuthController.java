@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
@@ -73,6 +74,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
+    @Transactional
     public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody RegisterRequest req) {
         String email = req.email().trim().toLowerCase(Locale.ROOT);
         if (exists("select count(*) from app_user where email = ?", email)) {
@@ -104,13 +106,7 @@ public class AuthController {
                 email, lastName, firstName, fullName, passwordEncoder.encode(req.password()), orgId, username
         );
         Long userId = jdbcTemplate.queryForObject("select id from app_user where email = ?", Long.class, email);
-        try {
-            jdbcTemplate.update(
-                    "update app_user set team_joined_at = coalesce(team_joined_at, now()) where id = ?",
-                    userId
-            );
-        } catch (DataAccessException ignored) {
-        }
+        touchTeamJoinedAt(userId);
 
         jdbcTemplate.update(
                 """
@@ -157,38 +153,16 @@ public class AuthController {
 
         createDefaultBoardsAndStages(projectId, projectCode, projectType);
 
-        List<Map<String, Object>> inviteResult = new ArrayList<>();
-        for (InviteRequest invite : req.invites()) {
-            String inviteRole = normalizeInviteRole(invite.role());
-            String invitedEmail = invite.email().trim().toLowerCase(Locale.ROOT);
-            jdbcTemplate.update(
-                    """
-                    insert into team_invitation(organization_id, team_id, invited_email, invited_role, status, invited_by)
-                    values (?, ?, ?, ?, 'sent', ?)
-                    """,
-                    orgId, teamId, invitedEmail, inviteRole, userId
-            );
-            inviteResult.add(Map.of("email", invitedEmail, "role", inviteRole, "status", "sent"));
-        }
-
-        Map<String, Object> context = contextByUserId(userId);
-        String token = jwtService.generateToken(username, userId, List.of("organization_registrar", "team_admin", "project_admin"));
-
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("token", token);
-        body.put("userId", userId);
-        body.put("username", username);
-        body.put("email", email);
-        body.put("context", context);
-        body.put("invites", inviteResult);
-        return withAuthCookie(token, body);
+        List<Map<String, Object>> inviteResult = saveInvites(orgId, teamId, userId, req.invites());
+        return finishOnboardingResponse(username, userId, email, inviteResult);
     }
 
     @PostMapping("/complete-onboarding")
+    @Transactional
     public ResponseEntity<Map<String, Object>> completeOnboarding(@Valid @RequestBody CompleteOnboardingRequest req) {
         String username = currentUserProvider.getUsername();
         if (username == null || username.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Требуется авторизация");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Требуется авторизация. Войдите снова или пройдите регистрацию заново.");
         }
         Map<String, Object> userRow = jdbcTemplate.queryForMap(
                 "select id, email from app_user where username = ? and is_active = true",
@@ -196,6 +170,10 @@ public class AuthController {
         );
         Long userId = ((Number) userRow.get("id")).longValue();
         String email = String.valueOf(userRow.get("email"));
+
+        if (userHasTeamMembership(userId)) {
+            return finishOnboardingResponse(username, userId, email, saveInvitesForExistingTeam(userId, req.invites()));
+        }
 
         String orgId = nextOrganizationCode(req.organizationName());
         String teamCode = nextTeamCode(orgId);
@@ -211,9 +189,7 @@ public class AuthController {
 
         jdbcTemplate.update("insert into organization(id, name) values (?, ?)", orgId, req.organizationName().trim());
         jdbcTemplate.update("update app_user set organization_id = ? where id = ?", orgId, userId);
-        try {
-            jdbcTemplate.update("update app_user set team_joined_at = coalesce(team_joined_at, now()) where id = ?", userId);
-        } catch (DataAccessException ignored) {}
+        touchTeamJoinedAt(userId);
 
         jdbcTemplate.update(
                 "insert into app_team(organization_id, code, name, lead_user_id) values (?, ?, ?, ?)",
@@ -239,27 +215,8 @@ public class AuthController {
         jdbcTemplate.update("insert into app_user_role(user_id, role_code, organization_id, team_id, project_id) values (?, 'project_admin', ?, ?, ?)", userId, orgId, teamId, projectId);
         createDefaultBoardsAndStages(projectId, projectCode, projectType);
 
-        List<Map<String, Object>> inviteResult = new ArrayList<>();
-        for (InviteRequest invite : req.invites()) {
-            String inviteRole = normalizeInviteRole(invite.role());
-            String invitedEmail = invite.email().trim().toLowerCase(Locale.ROOT);
-            jdbcTemplate.update(
-                    "insert into team_invitation(organization_id, team_id, invited_email, invited_role, status, invited_by) values (?, ?, ?, ?, 'sent', ?)",
-                    orgId, teamId, invitedEmail, inviteRole, userId
-            );
-            inviteResult.add(Map.of("email", invitedEmail, "role", inviteRole, "status", "sent"));
-        }
-
-        Map<String, Object> context = contextByUserId(userId);
-        String token = jwtService.generateToken(username, userId, List.of("organization_registrar", "team_admin", "project_admin"));
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("token", token);
-        body.put("userId", userId);
-        body.put("username", username);
-        body.put("email", email);
-        body.put("context", context);
-        body.put("invites", inviteResult);
-        return withAuthCookie(token, body);
+        List<Map<String, Object>> inviteResult = saveInvites(orgId, teamId, userId, req.invites());
+        return finishOnboardingResponse(username, userId, email, inviteResult);
     }
 
     @PostMapping("/login")
@@ -384,7 +341,7 @@ public class AuthController {
         String boardName = "Название доски";
         String boardCode = boardCodePrefix + "_1";
         jdbcTemplate.update(
-                "insert into board(name, project_id, code) values (?, ?, ?)",
+                "insert into board(name, project_id, code, position_no) values (?, ?, ?, 1)",
                 boardName, projectId, boardCode
         );
 
@@ -467,21 +424,109 @@ public class AuthController {
         return sb.toString();
     }
 
+    private boolean userHasTeamMembership(Long userId) {
+        Boolean exists = jdbcTemplate.queryForObject(
+                "select exists(select 1 from team_membership where user_id = ?)",
+                Boolean.class,
+                userId
+        );
+        return Boolean.TRUE.equals(exists);
+    }
+
+    private void touchTeamJoinedAt(Long userId) {
+        try {
+            jdbcTemplate.update(
+                    "update app_user set team_joined_at = coalesce(team_joined_at, current_date) where id = ?",
+                    userId
+            );
+        } catch (DataAccessException ignored) {
+        }
+    }
+
+    private List<Map<String, Object>> saveInvites(String orgId, Long teamId, Long userId, List<InviteRequest> invites) {
+        List<Map<String, Object>> inviteResult = new ArrayList<>();
+        for (InviteRequest invite : sanitizeInvites(invites)) {
+            String inviteRole = normalizeInviteRole(invite.role());
+            String invitedEmail = invite.email().trim().toLowerCase(Locale.ROOT);
+            jdbcTemplate.update(
+                    """
+                    insert into team_invitation(organization_id, team_id, invited_email, invited_role, status, invited_by)
+                    values (?, ?, ?, ?, 'sent', ?)
+                    """,
+                    orgId, teamId, invitedEmail, inviteRole, userId
+            );
+            inviteResult.add(Map.of("email", invitedEmail, "role", inviteRole, "status", "sent"));
+        }
+        return inviteResult;
+    }
+
+    private List<Map<String, Object>> saveInvitesForExistingTeam(Long userId, List<InviteRequest> invites) {
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(
+                """
+                select t.organization_id as org_id, t.id as team_id
+                from team_membership tm
+                join app_team t on t.id = tm.team_id
+                where tm.user_id = ?
+                order by t.id desc
+                limit 1
+                """,
+                userId
+        );
+        if (rows.isEmpty()) {
+            return List.of();
+        }
+        String orgId = String.valueOf(rows.get(0).get("org_id"));
+        Long teamId = ((Number) rows.get(0).get("team_id")).longValue();
+        return saveInvites(orgId, teamId, userId, invites);
+    }
+
+    private List<InviteRequest> sanitizeInvites(List<InviteRequest> invites) {
+        if (invites == null || invites.isEmpty()) {
+            return List.of();
+        }
+        return invites.stream()
+                .filter(i -> i != null && i.email() != null && !i.email().isBlank())
+                .toList();
+    }
+
+    private ResponseEntity<Map<String, Object>> finishOnboardingResponse(
+            String username, Long userId, String email, List<Map<String, Object>> inviteResult) {
+        Map<String, Object> context = contextByUserId(userId);
+        String token = jwtService.generateToken(username, userId, List.of("organization_registrar", "team_admin", "project_admin"));
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("token", token);
+        body.put("userId", userId);
+        body.put("username", username);
+        body.put("email", email);
+        body.put("context", context);
+        body.put("invites", inviteResult);
+        return withAuthCookie(token, body);
+    }
+
     private Map<String, Object> contextByUserId(Long userId) {
-        Map<String, Object> row = jdbcTemplate.queryForMap(
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(
                 """
                 select org.public_id as org_public_id, t.public_id as team_public_id
                 from team_membership tm
                 join app_team t on t.id = tm.team_id
                 join organization org on org.id = t.organization_id
                 where tm.user_id = ?
-                order by t.id
+                order by t.id desc
                 limit 1
                 """,
                 userId
         );
+        if (rows.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Рабочее пространство создано не полностью. Повторите шаг или обратитесь в поддержку.");
+        }
+        Map<String, Object> row = rows.get(0);
         String orgPublic = String.valueOf(row.get("org_public_id"));
         String teamPublic = String.valueOf(row.get("team_public_id"));
+        if (orgPublic.isBlank() || teamPublic.isBlank() || "null".equalsIgnoreCase(orgPublic) || "null".equalsIgnoreCase(teamPublic)) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Не удалось получить адрес рабочего пространства. Перезапустите приложение и повторите регистрацию.");
+        }
         return Map.of(
                 "organizationPublicId", orgPublic,
                 "teamPublicId", teamPublic,
@@ -499,7 +544,7 @@ public class AuthController {
             @NotBlank @Size(max = 150) String projectName,
                    @Size(max = 12) String projectKey,
             @NotBlank String projectType,
-            List<InviteRequest> invites
+            @jakarta.validation.Valid List<InviteRequest> invites
     ) {
         public List<InviteRequest> invites() {
             return invites == null ? List.of() : invites;
@@ -538,7 +583,7 @@ public class AuthController {
             @NotBlank @Size(max = 150) String projectName,
             @Size(max = 12) String projectKey,
             @NotBlank String projectType,
-            List<InviteRequest> invites
+            @jakarta.validation.Valid List<InviteRequest> invites
     ) {
         public List<InviteRequest> invites() {
             return invites == null ? List.of() : invites;

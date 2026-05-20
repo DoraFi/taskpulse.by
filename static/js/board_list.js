@@ -2023,7 +2023,7 @@ function createCardHeader(board, boardIndex) {
 
 function createDropdownMenu(board, boardIndex) {
     const dropdown = document.createElement('div');
-    dropdown.className = 'dropdown-menu border-dark-1 br-5';
+    dropdown.className = 'dropdown-menu br-5';
     dropdown.id = `actionsMenu-${boardIndex}`;
     dropdown.innerHTML = `
         <div class="dropdown-header">

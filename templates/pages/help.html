@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>TaskPulse - Помощь</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/static/source/logo_rect.svg}" href="/static/source/logo_rect.svg">
+    <link rel="stylesheet" th:href="@{/static/scss/style.css}" href="/static/scss/style.css">
+</head>
+
+<body>
+    <div class="header">
+        <div class="gap-24 flex-row" style="align-items: center;">
+            <a class="logo-link" data-context-link="home" href="/"><img class="logo" th:src="@{/static/source/logo_rect.svg}" src="/static/source/logo_rect.svg" alt="TaskPulse"></a>
+            <div class="search-panel br-5">
+                <img class="h-16" th:src="@{/static/source/icons/search.svg}" src="/static/source/icons/search.svg" alt="Поиск">
+                <input class="text-basic" type="search" placeholder="Поиск: задачи, проекты, команда, справка…" autocomplete="off">
+            </div>
+        </div>
+        <ul class="gap-24 flex-row header-toolbar">
+            <li><button type="button" class="header-toolbar__action" id="headerCreateTaskBtn" aria-label="Создать"><img class="h-32" th:src="@{/static/source/icons/plus.svg}" src="/static/source/icons/plus.svg" alt=""></button></li>
+            <li><button type="button" class="header-toolbar__action" id="headerSettingsBtn" aria-label="Настройки"><img class="h-32" th:src="@{/static/source/icons/settings.svg}" src="/static/source/icons/settings.svg" alt=""></button></li>
+            <li><button type="button" class="header-toolbar__action" id="headerProfileBtn" aria-label="Профиль"><img class="h-32" th:src="@{/static/source/icons/profile.svg}" src="/static/source/icons/profile.svg" alt=""></button></li>
+            <li><a th:href="@{/auth/welcome}" href="/auth/welcome" class="header-toolbar__action" aria-label="Выйти"><img class="h-32" th:src="@{/static/source/icons/logout.svg}" src="/static/source/icons/logout.svg" alt=""></a></li>
+            <li><button type="button" class="theme-toggle header-toolbar__action" id="themeToggle" aria-label="Переключить тему"><img class="h-32 theme-toggle__icon" th:src="@{/static/source/icons/lighttheme.svg}" src="/static/source/icons/lighttheme.svg" alt="" aria-hidden="true"></button></li>
+        </ul>
+    </div>
+
+    <div class="main-layout">
+        <aside id="aside-container"></aside>
+
+        <div class="app-container flex-col help-page" id="helpPage">
+            <nav class="tabs help-page__tabs" role="tablist" aria-label="Разделы справки">
+                <div class="tabs-buttons">
+                    <button type="button" class="button-basic help-tabs__btn active" data-tab="faq" role="tab" aria-selected="true">Частые вопросы</button>
+                    <button type="button" class="button-basic help-tabs__btn" data-tab="support" role="tab">Поддержка</button>
+                    <button type="button" class="button-basic help-tabs__btn" data-tab="docs" role="tab">Документация</button>
+                </div>
+            </nav>
+
+            <section class="help-panel is-active" data-panel="faq" id="helpPanelFaq">
+                <div class="help-toolbar">
+                    <div class="team-search projects-search help-toolbar__search">
+                        <img class="h-16" th:src="@{/static/source/icons/search.svg}" src="/static/source/icons/search.svg" alt="">
+                        <input class="text-basic" type="search" id="helpFaqSearchInput" placeholder="Поиск по вопросам…" autocomplete="off">
+                    </div>
+                </div>
+                <p class="text-signature help-toolbar__hint" id="helpFaqSearchHint"></p>
+                <div id="helpFaqSearchResults" class="help-faq-search-results" hidden></div>
+                <div class="help-faq-blocks" id="helpFaqBlocks">
+                    <p class="text-basic">Загрузка…</p>
+                </div>
+            </section>
+
+            <section class="help-panel" data-panel="support" id="helpPanelSupport" hidden>
+                <div class="help-support-sheet">
+                    <form class="help-ticket-form profile-modal__section profile-modal__section--card br-5" id="helpTicketForm">
+                        <p class="filter-label" id="helpSupportTitle">Заявка в поддержку</p>
+                        <p class="text-signature profile-modal__section-lead" id="helpSupportLead"></p>
+                        <div class="profile-modal__grid">
+                            <div class="auth-field profile-modal__field profile-modal__field--full">
+                                <label for="helpTicketSubject">Тема</label>
+                                <input id="helpTicketSubject" type="text" class="tp-field-plain" maxlength="200" required placeholder="Кратко опишите суть">
+                            </div>
+                            <div class="auth-field profile-modal__field profile-modal__field--full">
+                                <label for="helpTicketMessage">Описание</label>
+                                <textarea id="helpTicketMessage" class="profile-modal__bio tp-field-plain" rows="6" required placeholder="Шаги, ожидаемый и фактический результат"></textarea>
+                            </div>
+                            <div class="auth-field profile-modal__field profile-modal__field--full">
+                                <span class="text-signature create-task-label-plain">Вложения</span>
+                                <div class="create-task-attachments br-5 " id="helpTicketAttachmentsZone">
+                                    <p class="text-basic create-task-attachments__hint" id="helpTicketAttachmentsHint">Перетащите сюда файлы или</p>
+                                    <button type="button" class="button-basic create-task-attachments__btn" id="helpTicketAttachmentsBtn">Выберите в проводнике</button>
+                                </div>
+                                <ul class="create-task-selected-files text-basic mt-8" id="helpTicketFileList" aria-label="Выбранные файлы"></ul>
+                                <p class="text-signature help-ticket-form__files-hint" id="helpTicketFilesHint">До 5 файлов, каждый до 10 МБ</p>
+                            </div>
+                        </div>
+                        <div class="profile-modal__footer-actions help-ticket-form__footer">
+                            <button type="submit" class="button-basic" id="helpTicketSubmitBtn">Отправить заявку</button>
+                        </div>
+                        <p class="text-signature help-ticket-form__meta" id="helpSupportMeta"></p>
+                    </form>
+                </div>
+            </section>
+
+            <section class="help-panel" data-panel="docs" id="helpPanelDocs" hidden>
+                <div class="help-docs-panel">
+                    <div class="help-toolbar">
+                        <div class="team-search projects-search help-toolbar__search">
+                            <img class="h-16" th:src="@{/static/source/icons/search.svg}" src="/static/source/icons/search.svg" alt="">
+                            <input class="text-basic" type="search" id="helpDocsSearchInput" placeholder="Поиск в документации…" autocomplete="off">
+                        </div>
+                    </div>
+                    <div id="helpDocsSearchResults" class="help-docs-search-results" hidden></div>
+                    <div class="help-docs-layout">
+                        <aside class="help-docs-nav" id="helpDocsNav" aria-label="Документация">
+                            <p class="text-basic">Загрузка…</p>
+                        </aside>
+                        <div class="help-docs-article-wrap">
+                            <article class="help-docs-article card br-10" id="helpDocsArticle">
+                                <p class="text-basic">Загрузка…</p>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="/static/js/loadComponents.js"></script>
+    <script src="/static/js/global_search.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/theme.js"></script>
+    <script src="/static/js/create_task_modal.js"></script>
+    <script src="/static/js/tp_select.js"></script>
+    <script src="/static/js/tp_date_picker.js"></script>
+    <script src="/static/js/tp_combobox.js"></script>
+    <script src="/static/js/profile_modal.js"></script>
+    <script src="/static/js/settings_modal.js"></script>
+    <script src="/static/js/help.js"></script>
+</body>
+
+</html>

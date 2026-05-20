@@ -80,7 +80,8 @@
             try {
                 var res = await fetch('/api/auth/register-account', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                    credentials: 'same-origin',
                     body: JSON.stringify({ lastName: lastName, firstName: firstName, email: email, password: password })
                 });
                 var data = await res.json().catch(function () { return {}; });
@@ -248,12 +249,22 @@
             try {
                 var res = await fetch(accountReady ? '/api/auth/complete-onboarding' : '/api/auth/register', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                    credentials: 'same-origin',
                     body: JSON.stringify(payload)
                 });
                 var data = await res.json().catch(function () { return {}; });
                 if (!res.ok) {
-                    showToast(data.error || ('Не удалось завершить регистрацию. Код: ' + res.status));
+                    var errMsg = data.error || data.message
+                        || ('Не удалось завершить регистрацию. Код: ' + res.status);
+                    if (data.detail && String(data.detail).trim()) {
+                        errMsg += ' (' + String(data.detail).trim() + ')';
+                    }
+                    if (res.status === 401) {
+                        errMsg = 'Сессия истекла. Вернитесь на шаг регистрации и войдите снова.';
+                        sessionStorage.removeItem(ACCOUNT_REGISTERED_KEY);
+                    }
+                    showToast(errMsg);
                     return;
                 }
                 if (data && data.context && data.context.basePath) {

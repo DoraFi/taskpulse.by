@@ -1,0 +1,456 @@
+.help-page {
+    display: flex;
+    flex-direction: column;
+    gap: $space-24;
+    padding-bottom: $space-24;
+}
+
+.app-container.help-page {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.app-container.help-page.help-page--docs,
+.app-container.help-page:has(#helpPanelDocs:not([hidden])) {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.help-page.help-page--docs,
+.help-page:has(#helpPanelDocs:not([hidden])) {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+    padding-bottom: 0;
+    gap: $space-32;
+}
+
+.help-page__tabs {
+    margin-top: 0;
+    flex-shrink: 0;
+}
+
+.help-panel.is-active {
+    display: flex;
+    flex-direction: column;
+    gap: $space-16;
+}
+
+.help-panel {
+    display: none;
+}
+
+.help-panel[data-panel='docs'].is-active {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.help-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: $space-16;
+    margin-bottom: 0;
+    flex-shrink: 0;
+
+    &__search {
+        margin-bottom: 0;
+    }
+
+    &__hint {
+        margin: (-$space-8) 0 0;
+    }
+}
+
+.help-faq-blocks {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: $space-16;
+    width: 100%;
+    align-items: start;
+
+    @media (max-width: 1100px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.help-faq-block {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: $space-16 $space-20;
+    background: $light-green;
+    border-radius: $radius-md;
+}
+
+body[data-theme='dark'] .help-faq-block {
+    background: $dark-gray;
+    border: none;
+    box-shadow: none;
+}
+
+.help-faq-block__title {
+    margin-bottom: $space-12;
+    font-size: 1.05rem;
+}
+
+.help-faq-block__items {
+    display: flex;
+    flex-direction: column;
+    gap: $space-8;
+    width: 100%;
+}
+
+.help-faq-search-results {
+    display: flex;
+    flex-direction: column;
+    gap: $space-8;
+}
+
+.help-faq__item {
+    width: 100%;
+    box-sizing: border-box;
+    padding: $space-12 $space-16;
+    border-radius: $radius-sm;
+    background: rgba(255, 255, 255, 0.55);
+
+    summary {
+        cursor: pointer;
+        list-style: none;
+        font-weight: 600;
+
+        &::-webkit-details-marker {
+            display: none;
+        }
+    }
+}
+
+body[data-theme='dark'] .help-faq__item {
+    background: #353b30;
+    border: none;
+    color: $light-light-green;
+}
+
+.help-faq__answer {
+    margin-top: $space-8;
+    padding-top: $space-8;
+    border-top: 1px solid rgba($green, 0.15);
+    line-height: 1.45;
+}
+
+body[data-theme='dark'] .help-faq__answer {
+    border-top-color: rgba($green, 0.25);
+}
+
+.help-support-sheet {
+    width: 100%;
+    max-width: 44rem;
+    display: flex;
+    flex-direction: column;
+    gap: $space-24;
+}
+
+.help-ticket-form {
+    display: flex;
+    flex-direction: column;
+    gap: $space-16;
+    margin: 0;
+    padding: $space-16;
+    background: $light-green;
+    border: none;
+    box-shadow: none;
+
+    .filter-label {
+        margin: 0;
+    }
+
+    .profile-modal__section-lead {
+        margin: 0;
+        line-height: 1.45;
+    }
+
+    .profile-modal__grid {
+        display: flex;
+        flex-direction: column;
+        gap: $space-16;
+        width: 100%;
+    }
+
+    .profile-modal__field {
+        margin: 0;
+        width: 100%;
+    }
+
+    textarea.profile-modal__bio {
+        min-height: 7rem;
+        max-height: min(32vh, 16rem);
+        resize: vertical;
+        width: 100%;
+    }
+
+    &__files-hint {
+        margin: $space-8 0 0;
+    }
+
+    &__meta {
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    .create-task-label-plain {
+        display: block;
+        margin-bottom: $space-8;
+    }
+
+    &__footer.profile-modal__footer-actions {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: $space-16;
+        width: 100%;
+        margin-top: $space-8;
+    }
+}
+
+body[data-theme='dark'] .help-ticket-form {
+    background: $black;
+    color: inherit;
+}
+
+body[data-theme='dark'] .help-ticket-form .tp-field-plain {
+    @include tp-field-skin-dark();
+}
+
+.help-docs-panel {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    gap: $space-32;
+    overflow: hidden;
+}
+
+.help-docs-layout {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    grid-template-rows: minmax(0, 70vh);
+    gap: $space-16;
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+
+    @media (max-width: 900px) {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(0, auto) minmax(0, 1fr);
+    }
+}
+
+@mixin help-docs-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba($green, 0.35) rgba($green, 0.08);
+
+    &::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: rgba($green, 0.08);
+        border-radius: $radius-sm;
+        box-shadow: none;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: rgba($green, 0.35);
+        border-radius: $radius-sm;
+
+        &:hover {
+            background: rgba($green, 0.5);
+        }
+    }
+}
+
+.help-docs-nav {
+    padding: $space-12;
+    background: $light-green;
+    border-radius: $radius-md;
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-height: 0;
+    height: 100%;
+    @include help-docs-scrollbar;
+
+    &__group-title {
+        margin: $space-8 0 $space-4;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        opacity: 0.75;
+    }
+
+    &__group:first-child .help-docs-nav__group-title {
+        margin-top: 0;
+    }
+
+    &__item {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: $space-8 $space-12;
+        margin: 0 0 2px;
+        border: none;
+        border-radius: $radius-sm;
+        background: transparent;
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.9rem;
+        line-height: 1.3;
+        color: inherit;
+
+        &:hover {
+            background: rgba($green, 0.1);
+        }
+
+        &.is-active {
+            background: rgba($green, 0.2);
+            font-weight: 600;
+        }
+    }
+}
+
+body[data-theme='dark'] .help-docs-nav {
+    background: $dark-gray;
+}
+
+.help-docs-article-wrap {
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.help-docs-article.card {
+    flex: 1 1 0;
+    min-height: 0;
+    margin: 0;
+    padding: $space-20 $space-24;
+    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.help-docs-article__title {
+    flex-shrink: 0;
+}
+
+.help-docs-article__scroll {
+    flex: 1 1 0;
+    height: 0;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding-right: $space-8;
+    @include help-docs-scrollbar;
+}
+
+body[data-theme='dark'] .help-docs-article__scroll,
+body[data-theme='dark'] .help-docs-nav {
+    scrollbar-color: rgba($light-light-green, 0.35) rgba($light-light-green, 0.1);
+
+    &::-webkit-scrollbar-track {
+        background: rgba($light-light-green, 0.1);
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: rgba($light-light-green, 0.35);
+
+        &:hover {
+            background: rgba($light-light-green, 0.5);
+        }
+    }
+}
+
+.help-docs-article__body {
+    max-width: 52rem;
+
+    p + p {
+        margin-top: $space-12;
+    }
+}
+
+.help-md-list {
+    margin: $space-8 0 $space-12 $space-20;
+}
+
+.help-search-meta {
+    margin: 0 0 $space-8;
+}
+
+.help-search-list {
+    display: flex;
+    flex-direction: column;
+    gap: $space-8;
+}
+
+.help-search-hit {
+    width: 100%;
+    text-align: left;
+    padding: $space-12 $space-16;
+    border: none;
+    cursor: pointer;
+    font: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+    background: $light-green;
+
+    &:hover {
+        box-shadow: 0 2px 8px rgba($green, 0.15);
+    }
+
+    &__title {
+        font-weight: 600;
+        line-height: 1.35;
+    }
+
+    &__preview {
+        line-height: 1.45;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+}
+
+body[data-theme='dark'] .help-search-hit {
+    background: $dark-gray;
+}
+
+.help-docs-search-results,
+.help-faq-search-results {
+    padding: 0;
+    background: transparent;
+    border: none;
+    flex-shrink: 0;
+}
+
+.help-md-h3 {
+    margin: $space-20 0 $space-8;
+    font-size: 1.05rem;
+}
+
+.help-md-step {
+    margin: $space-4 0 $space-4 $space-4;
+    padding-left: $space-8;
+    border-left: 3px solid rgba($green, 0.35);
+}

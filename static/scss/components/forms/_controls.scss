@@ -1,7 +1,7 @@
 @mixin tp-field-skin-plain() {
     box-sizing: border-box;
     border: none;
-    background-color: $light-green;
+    background-color: $light-light-green;
     border-radius: $radius-sm;
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
     color: $dark-gray;
@@ -9,7 +9,7 @@
     padding: $space-4 $space-16;
 
     &:hover {
-        background-color: rgba($green, 0.12);
+        background-color: rgba($green, 0.08);
     }
 
     &:focus {

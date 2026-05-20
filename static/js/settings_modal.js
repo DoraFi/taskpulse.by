@@ -27,13 +27,22 @@
         if (['light', 'dark', 'system'].includes(mode)) sel.value = mode;
     }
 
-    function openModal(overlay) {
+    function openModal(overlay, panelId) {
         if (overlay.parentElement !== document.body) document.body.appendChild(overlay);
         overlay.classList.add('show');
         overlay.setAttribute('aria-hidden', 'false');
-        switchPanel(overlay, 'general');
+        switchPanel(overlay, panelId || 'general');
         syncThemeSelect(overlay);
     }
+
+    window.tpOpenSettingsModal = async function tpOpenSettingsModal(panelId) {
+        try {
+            const overlay = await ensureModal();
+            if (overlay) openModal(overlay, panelId);
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     function closeModal(overlay) {
         overlay.classList.remove('show');

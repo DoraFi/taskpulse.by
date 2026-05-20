@@ -170,7 +170,7 @@ function initIndexPage(options) {
                             const memberId = m.publicId || '';
                             return `
                         <button type="button" class="user-img-text index-team-member" data-member-id="${escapeIndexHtml(memberId)}" ${memberId ? '' : 'disabled'} aria-label="Открыть карточку ${escapeIndexHtml(shortName)}">
-                            ${m.online ? `<div class="status-online"><img src="/static/source/user_img/${m.avatar || 'basic_avatar.png'}" alt=""></div>` : `<img src="/static/source/user_img/${m.avatar || 'basic_avatar.png'}" alt="">`}
+                            <img src="/static/source/user_img/${m.avatar || 'basic_avatar.png'}" alt="">
                             <div class="basic-and-signature">
                                 <p class="text-basic">${escapeIndexHtml(shortName)}</p>
                                 <p class="text-signature">${escapeIndexHtml(m.role || '')}</p>

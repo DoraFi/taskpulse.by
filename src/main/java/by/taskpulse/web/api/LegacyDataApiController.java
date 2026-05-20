@@ -3534,7 +3534,7 @@ public class LegacyDataApiController {
                 return null;
             String teamPublicId = m.group(1);
             List<Long> ids = jdbcTemplate.query(
-                    "select id from app_team where public_id = ? order by id limit 1",
+                    "select id from app_team where lower(trim(public_id)) = lower(trim(?)) order by id desc limit 1",
                     (rs, rowNum) -> rs.getLong("id"),
                     teamPublicId);
             return ids.isEmpty() ? null : ids.get(0);
