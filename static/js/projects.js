@@ -48,7 +48,6 @@ const CREATE_PROJECT_TYPE_LABELS = {
     list: 'Список',
     kanban: 'Kanban',
     scrum: 'Scrum',
-    scrumban: 'Scrumban',
 };
 
 function bindCreateProjectTypePicker(displayEl, hiddenEl, picker, closeBtn) {

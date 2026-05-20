@@ -426,7 +426,7 @@
         if (desc && draft.description) desc.value = draft.description;
         var typeDisplay = document.getElementById('proj-template-display');
         if (typeDisplay && type) {
-            var labels = { list: 'Список', kanban: 'Kanban', scrum: 'Scrum', scrumban: 'Scrumban' };
+            var labels = { list: 'Список', kanban: 'Kanban', scrum: 'Scrum' };
             typeDisplay.value = labels[type.value] || type.value;
         }
     }

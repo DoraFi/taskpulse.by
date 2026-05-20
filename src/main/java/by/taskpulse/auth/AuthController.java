@@ -292,7 +292,8 @@ public class AuthController {
         if (raw == null) return "kanban";
         String value = raw.trim().toLowerCase(Locale.ROOT);
         return switch (value) {
-            case "list", "kanban", "scrum", "scrumban" -> value;
+            case "list", "kanban", "scrum" -> value;
+            case "scrumban" -> "scrum";
             default -> "kanban";
         };
     }

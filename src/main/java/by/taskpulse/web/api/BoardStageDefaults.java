@@ -12,8 +12,7 @@ public final class BoardStageDefaults {
     private static final Map<String, List<String>> BY_PROJECT_TYPE = Map.of(
             "list", List.of("Новая", "Очередь", "В работе", "Готово"),
             "kanban", List.of("Очередь", "В работе", "Тестирование", "Готово"),
-            "scrum", List.of("Очередь", "В работе", "Тестирование", "Готово", "Отложено"),
-            "scrumban", List.of("Очередь", "В работе", "Тестирование", "Готово"));
+            "scrum", List.of("Очередь", "В работе", "Тестирование", "Готово", "Отложено"));
 
     private static final Map<String, List<String>> KANBAN_BY_BOARD;
 

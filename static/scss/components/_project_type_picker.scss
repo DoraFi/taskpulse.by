@@ -75,6 +75,20 @@
     }
 }
 
+.project-type-card[data-template-value='scrum'] {
+    grid-column: 1 / -1;
+}
+
+.project-type-card[data-template-value='scrum'] .project-type-card__image {
+    height: 200px;
+}
+
+.project-type-card[data-template-value='scrum'] .project-type-mini--scrum {
+    grid-template-columns: 1fr 1.35fr;
+    gap: $space-12;
+    padding: $space-12;
+}
+
 .project-type-card {
     width: 100%;
     background: var(--tp-surface, #fff);
@@ -271,62 +285,6 @@
     border: $space-1 solid rgba($green, 0.2);
 }
 
-.project-type-mini--scrumban {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: $space-8;
-    padding: $space-8;
-}
-
-.mini-scrumban-col {
-    background: rgba($light-light-green, 0.95);
-    border: $space-1 solid rgba($green, 0.18);
-    border-radius: $space-8;
-    padding: $space-4;
-    display: grid;
-    grid-template-rows: 10px 1fr auto;
-    gap: $space-4;
-}
-
-.mini-scrumban-col > span {
-    display: block;
-    height: $space-4;
-    border-radius: 3px;
-    background: rgba($green, 0.55);
-}
-
-.mini-scrumban-stack {
-    display: grid;
-    gap: $space-4;
-    align-content: start;
-}
-
-.mini-scrumban-card {
-    height: $space-16;
-    border-radius: $space-4;
-    background: var(--tp-surface, #fff);
-    border: $space-1 solid rgba($green, 0.2);
-    position: relative;
-}
-
-.mini-scrumban-card--urgent::after {
-    content: '';
-    position: absolute;
-    right: 3px;
-    top: 3px;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: $pink;
-}
-
-.mini-scrumban-wip {
-    height: $space-8;
-    border-radius: $space-4;
-    background: rgba($pink, 0.2);
-    border: $space-1 solid rgba($pink, 0.35);
-}
-
 .project-type-card__image[data-type='list']::after {
     content: 'Мини-реестр задач';
     position: absolute;
@@ -347,15 +305,6 @@
 
 .project-type-card__image[data-type='scrum']::after {
     content: 'Мини-scrum цикл';
-    position: absolute;
-    left: $space-20;
-    bottom: $space-16;
-    color: darken($green, 18%);
-    font-size: 0.78rem;
-}
-
-.project-type-card__image[data-type='scrumban']::after {
-    content: 'Мини-scrumban гибрид';
     position: absolute;
     left: $space-20;
     bottom: $space-16;

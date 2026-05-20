@@ -238,54 +238,16 @@
             background: #ffffff;
             border: 1px solid #d4e5c3;
         }
-        .project-type-mini--scrumban {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-            padding: 6px;
+        .project-type-card[data-template-value="scrum"] {
+            grid-column: 1 / -1;
         }
-        .mini-scrumban-col {
-            background: #edf5e4;
-            border: 1px solid #d8e8c8;
-            border-radius: 6px;
-            padding: 4px;
-            display: grid;
-            grid-template-rows: 10px 1fr auto;
-            gap: 4px;
+        .project-type-card[data-template-value="scrum"] .project-type-card__image {
+            height: 200px;
         }
-        .mini-scrumban-col > span {
-            display: block;
-            height: 4px;
-            border-radius: 3px;
-            background: #7fb363;
-        }
-        .mini-scrumban-stack {
-            display: grid;
-            gap: 4px;
-            align-content: start;
-        }
-        .mini-scrumban-card {
-            height: 16px;
-            border-radius: 4px;
-            background: #ffffff;
-            border: 1px solid #d4e5c3;
-            position: relative;
-        }
-        .mini-scrumban-card--urgent::after {
-            content: "";
-            position: absolute;
-            right: 3px;
-            top: 3px;
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            background: #d95050;
-        }
-        .mini-scrumban-wip {
-            height: 8px;
-            border-radius: 4px;
-            background: rgba(217, 80, 80, 0.2);
-            border: 1px solid rgba(217, 80, 80, 0.35);
+        .project-type-card[data-template-value="scrum"] .project-type-mini--scrum {
+            grid-template-columns: 1fr 1.35fr;
+            gap: 10px;
+            padding: 10px;
         }
         .project-type-card__image[data-type="list"]::after {
             content: "Мини-реестр задач";
@@ -305,14 +267,6 @@
         }
         .project-type-card__image[data-type="scrum"]::after {
             content: "Мини-scrum цикл";
-            position: absolute;
-            left: 20px;
-            bottom: 16px;
-            color: #4c6e35;
-            font-size: 0.78rem;
-        }
-        .project-type-card__image[data-type="scrumban"]::after {
-            content: "Мини-scrumban гибрид";
             position: absolute;
             left: 20px;
             bottom: 16px;
@@ -525,40 +479,6 @@
                             <p class="text-basic">Итерационный режим: бэклог, планирование спринта, цель, демо и ретро. Удобно для предсказуемых релизов.</p>
                         </div>
                     </button>
-                    <button type="button" class="project-type-card" data-template-value="scrumban">
-                        <div class="project-type-card__image" data-type="scrumban">
-                            <div class="project-type-mini project-type-mini--scrumban">
-                                <div class="mini-scrumban-col">
-                                    <span></span>
-                                    <div class="mini-scrumban-stack">
-                                        <div class="mini-scrumban-card"></div>
-                                        <div class="mini-scrumban-card mini-scrumban-card--urgent"></div>
-                                    </div>
-                                    <div class="mini-scrumban-wip"></div>
-                                </div>
-                                <div class="mini-scrumban-col">
-                                    <span></span>
-                                    <div class="mini-scrumban-stack">
-                                        <div class="mini-scrumban-card"></div>
-                                        <div class="mini-scrumban-card"></div>
-                                        <div class="mini-scrumban-card mini-scrumban-card--urgent"></div>
-                                    </div>
-                                    <div class="mini-scrumban-wip"></div>
-                                </div>
-                                <div class="mini-scrumban-col">
-                                    <span></span>
-                                    <div class="mini-scrumban-stack">
-                                        <div class="mini-scrumban-card"></div>
-                                    </div>
-                                    <div class="mini-scrumban-wip"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="project-type-card__text">
-                            <p class="project-type-card__title">Scrumban</p>
-                            <p class="text-basic">Гибрид Scrum и Kanban: планирование блоками плюс обработка срочных инцидентов без срыва всего цикла.</p>
-                        </div>
-                    </button>
                 </div>
             </div>
         </section>
@@ -576,7 +496,6 @@
                 list: 'Список',
                 kanban: 'Kanban',
                 scrum: 'Scrum',
-                scrumban: 'Scrumban'
             };
 
             function openPicker() {

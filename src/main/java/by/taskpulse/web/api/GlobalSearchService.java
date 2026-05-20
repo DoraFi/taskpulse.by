@@ -450,7 +450,7 @@ public class GlobalSearchService {
         if ("kanban".equals(type)) {
             return basePath + "/p/" + enc + "/kanban?project=" + enc;
         }
-        if ("scrum".equals(type) || "scrumban".equals(type)) {
+        if ("scrum".equals(type)) {
             return basePath + "/p/" + enc + "/scrum?project=" + enc;
         }
         return basePath + "/p/" + enc + "/boards?project=" + enc;

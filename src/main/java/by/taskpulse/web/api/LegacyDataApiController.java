@@ -995,7 +995,7 @@ public class LegacyDataApiController {
         boolean hasProjectPublicId = hasColumn("project", "public_id");
         String archiveFilter = boardProjectArchiveFilter(withProjectFilter);
         String boardKindFilter = withProjectFilter ? "" : " and (b.code like 'KANBAN%' or b.code like 'SCRUM%') ";
-        String projectTypeFilter = withProjectFilter ? "" : " and p.project_type in ('kanban', 'scrum', 'scrumban') ";
+        String projectTypeFilter = withProjectFilter ? "" : " and p.project_type in ('kanban', 'scrum') ";
         String projectFilter = withProjectFilter
                 ? (hasProjectPublicId
                         ? " and (lower(cast(p.code as text)) = lower(?) or lower(cast(p.public_id as text)) = lower(?) or lower(cast(p.name as text)) = lower(?) or cast(p.id as text) = ?) "
@@ -2068,7 +2068,8 @@ public class LegacyDataApiController {
         }
         String t = String.valueOf(raw).trim().toLowerCase(Locale.ROOT);
         return switch (t) {
-            case "kanban", "scrum", "list", "scrumban" -> t;
+            case "kanban", "scrum", "list" -> t;
+            case "scrumban" -> "scrum";
             default -> "list";
         };
     }
@@ -2239,8 +2240,7 @@ public class LegacyDataApiController {
                 teamId, projectCode);
         Long projectId = ((Number) prj.get("id")).longValue();
         String projectType = String.valueOf(prj.get("project_type"));
-        boolean isKanban = "kanban".equals(view) || "kanban".equals(projectType) || "scrum".equals(projectType)
-                || "scrumban".equals(projectType);
+        boolean isKanban = "kanban".equals(view) || "kanban".equals(projectType) || "scrum".equals(projectType);
         String prefix;
         if ("scrum".equals(view) || "scrum".equals(projectType))
             prefix = "SCRUM";
@@ -2301,7 +2301,7 @@ public class LegacyDataApiController {
     private static final Pattern SPRINT_TITLE_NUM_RU = Pattern.compile("(?iU)спринт\\s*№?\\s*(\\d+)");
     private static final Pattern SPRINT_TITLE_NUM_EN = Pattern.compile("(?iU)sprint\\s*#?\\s*(\\d+)");
 
-    private static final String SCRUM_LIKE_PROJECT = " p.project_type in ('scrum', 'scrumban')";
+    private static final String SCRUM_LIKE_PROJECT = " p.project_type = 'scrum'";
 
     private long requireScrumProjectIdForBoard(long boardId, long teamId) {
         try {
@@ -2392,7 +2392,7 @@ public class LegacyDataApiController {
                         join project p on p.id = b.project_id
                         where b.project_id = ?
                           and b.project_id in (select pt.project_id from project_team pt where pt.team_id = ?)
-                          and p.project_type in ('scrum', 'scrumban')
+                          and p.project_type = 'scrum'
                         """,
                 projectId,
                 teamId);
@@ -2409,7 +2409,7 @@ public class LegacyDataApiController {
                         where p.id = b.project_id
                           and b.project_id = ?
                           and b.project_id in (select pt.project_id from project_team pt where pt.team_id = ?)
-                          and p.project_type in ('scrum', 'scrumban')
+                          and p.project_type = 'scrum'
                         """,
                 "Спринт " + newNum,
                 projectId,
@@ -2459,7 +2459,7 @@ public class LegacyDataApiController {
                             where b.project_id = ?
                               and b.sprint_finished_at is not null
                               and b.project_id in (select pt.project_id from project_team pt where pt.team_id = ?)
-                              and p.project_type in ('scrum', 'scrumban')
+                              and p.project_type = 'scrum'
                             """,
                     Long.class,
                     projectId,
