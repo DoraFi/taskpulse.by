@@ -81,6 +81,11 @@ aside {
                     border-radius: 1px;
                 }       
             }
+
+            &.nav-link--in-section:not(.active) {
+                color: $green;
+                font-weight: 500;
+            }
         }   
     }
 

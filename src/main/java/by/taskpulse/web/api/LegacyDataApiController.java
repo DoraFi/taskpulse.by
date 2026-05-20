@@ -56,15 +56,18 @@ public class LegacyDataApiController {
     private final CurrentUserProvider currentUserProvider;
     private final HttpServletRequest request;
     private final PasswordEncoder passwordEncoder;
+    private final AnalyticsDashboardService analyticsDashboardService;
 
     public LegacyDataApiController(JdbcTemplate jdbcTemplate,
             CurrentUserProvider currentUserProvider,
             HttpServletRequest request,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            AnalyticsDashboardService analyticsDashboardService) {
         this.jdbcTemplate = jdbcTemplate;
         this.currentUserProvider = currentUserProvider;
         this.request = request;
         this.passwordEncoder = passwordEncoder;
+        this.analyticsDashboardService = analyticsDashboardService;
     }
 
     @GetMapping("/api/team")
@@ -863,10 +866,9 @@ public class LegacyDataApiController {
 
     @GetMapping("/api/boards")
     public Map<String, Object> boards(@RequestParam(required = false) String project) {
+        boolean withProjectFilter = project != null && !project.isBlank();
         String visibleProjectsSql = inClauseSql(visibleProjectIds());
-        String archiveFilter = hasColumn("board", "archived_at") && hasColumn("project", "archived_at")
-                ? " and b.archived_at is null and p.archived_at is null "
-                : "";
+        String archiveFilter = boardProjectArchiveFilter(withProjectFilter);
         String sql = """
                 select
                     b.id as board_id,
@@ -991,9 +993,7 @@ public class LegacyDataApiController {
         boolean withProjectFilter = project != null && !project.isBlank();
         String visibleProjectsSql = withProjectFilter ? null : inClauseSql(visibleProjectIdsSafe());
         boolean hasProjectPublicId = hasColumn("project", "public_id");
-        String archiveFilter = hasColumn("board", "archived_at") && hasColumn("project", "archived_at")
-                ? " and b.archived_at is null and p.archived_at is null "
-                : "";
+        String archiveFilter = boardProjectArchiveFilter(withProjectFilter);
         String boardKindFilter = withProjectFilter ? "" : " and (b.code like 'KANBAN%' or b.code like 'SCRUM%') ";
         String projectTypeFilter = withProjectFilter ? "" : " and p.project_type in ('kanban', 'scrum', 'scrumban') ";
         String projectFilter = withProjectFilter
@@ -1059,9 +1059,7 @@ public class LegacyDataApiController {
             boolean withProjectFilter = project != null && !project.isBlank();
             String visibleProjectsSql = withProjectFilter ? null : inClauseSql(visibleProjectIdsSafe());
             boolean hasProjectPublicId = hasColumn("project", "public_id");
-            String archiveFilter = hasColumn("board", "archived_at") && hasColumn("project", "archived_at")
-                    ? " and b.archived_at is null and p.archived_at is null "
-                    : "";
+            String archiveFilter = boardProjectArchiveFilter(withProjectFilter);
             String boardKindFilter = withProjectFilter ? "" : " and (b.code like 'KANBAN%' or b.code like 'SCRUM%') ";
             String projectFilter = withProjectFilter
                     ? (hasProjectPublicId
@@ -3440,6 +3438,17 @@ public class LegacyDataApiController {
         return out;
     }
 
+    public Map<String, Object> analyticsDashboard(@RequestParam(defaultValue = "30") int period) {
+        try {
+            return analyticsDashboardService.build(currentTeamId(), visibleProjectIds(), period);
+        } catch (DataAccessException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Ошибка построения аналитики: " + (ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName()));
+        }
+    }
+
     private Map<Long, List<Map<String, Object>>> loadSubtasksByTaskId() {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(
                 "select id, task_id, name, completed from subtask order by id");
@@ -3536,12 +3545,16 @@ public class LegacyDataApiController {
 
     private List<Long> visibleProjectIds() {
         Long teamId = currentTeamId();
+        String activeOnly = hasColumn("project", "archived_at") ? " and p.archived_at is null " : "";
         List<Long> ids = jdbcTemplate.query(
                 """
                         select p.id
                         from project_team pt
                         join project p on p.id = pt.project_id
                         where pt.team_id = ?
+                        """
+                        + activeOnly
+                        + """
                         order by p.id
                         """,
                 (rs, rowNum) -> rs.getLong("id"),
@@ -3549,7 +3562,28 @@ public class LegacyDataApiController {
         if (!ids.isEmpty()) {
             return ids;
         }
-        return jdbcTemplate.query("select id from project order by id", (rs, rowNum) -> rs.getLong("id"));
+        return jdbcTemplate.query(
+                "select id from project where 1=1 " + activeOnly + " order by id",
+                (rs, rowNum) -> rs.getLong("id"));
+    }
+
+    /** Доски/задачи: при явном project= разрешаем архивный проект, иначе только активные. */
+    private String boardProjectArchiveFilter(boolean explicitProjectRequest) {
+        boolean hasBoardArchived = hasColumn("board", "archived_at");
+        boolean hasProjectArchived = hasColumn("project", "archived_at");
+        if (!hasBoardArchived && !hasProjectArchived) {
+            return "";
+        }
+        if (explicitProjectRequest) {
+            return hasBoardArchived ? " and b.archived_at is null " : "";
+        }
+        if (hasBoardArchived && hasProjectArchived) {
+            return " and b.archived_at is null and p.archived_at is null ";
+        }
+        if (hasBoardArchived) {
+            return " and b.archived_at is null ";
+        }
+        return " and p.archived_at is null ";
     }
 
     private List<Long> visibleProjectIdsSafe() {
@@ -4091,45 +4125,7 @@ public class LegacyDataApiController {
     }
 
     private List<String> loadDefaultBoardStages(String projectType, String boardName) {
-        String pt = projectType == null || projectType.isBlank() ? "kanban" : projectType;
-        String bn = boardName == null ? "" : boardName;
-        if (hasTable("seed_board_stage_template")) {
-            try {
-                List<String> fromBoard = jdbcTemplate.query(
-                        """
-                                select stage_name
-                                from seed_board_stage_template
-                                where project_type = ?
-                                  and board_name = ?
-                                order by position_no
-                                """,
-                        (rs, rowNum) -> rs.getString("stage_name"),
-                        pt,
-                        bn);
-                if (!fromBoard.isEmpty()) {
-                    return new ArrayList<>(fromBoard);
-                }
-            } catch (Exception ignored) {
-            }
-        }
-        if (hasTable("seed_stage_template")) {
-            try {
-                List<String> fromType = jdbcTemplate.query(
-                        """
-                                select stage_name
-                                from seed_stage_template
-                                where project_type = ?
-                                order by position_no
-                                """,
-                        (rs, rowNum) -> rs.getString("stage_name"),
-                        pt);
-                if (!fromType.isEmpty()) {
-                    return new ArrayList<>(fromType);
-                }
-            } catch (Exception ignored) {
-            }
-        }
-        return new ArrayList<>(List.of("Очередь", "В работе", "Тестирование", "Готово"));
+        return BoardStageDefaults.forBoard(projectType, boardName);
     }
 
     private Map<String, Object> activityRow(String key, String value) {

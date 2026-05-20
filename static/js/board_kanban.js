@@ -114,7 +114,21 @@
 
     function currentProjectCodeFromUrl() {
         const params = new URLSearchParams(window.location.search);
-        return params.get('project') || null;
+        const fromQuery = params.get('project');
+        if (fromQuery) {
+            try {
+                return decodeURIComponent(fromQuery);
+            } catch {
+                return fromQuery;
+            }
+        }
+        const match = window.location.pathname.match(/\/p\/([^/]+)\//);
+        if (!match) return null;
+        try {
+            return decodeURIComponent(match[1]);
+        } catch {
+            return match[1];
+        }
     }
 
     function isScrumView() {
@@ -726,7 +740,7 @@
 
     async function loadKanbanData() {
         const params = new URLSearchParams(window.location.search);
-        const project = params.get('project');
+        const project = currentProjectCodeFromUrl();
         const boardsUrl = project ? apiUrl(`/kanban/boards?project=${encodeURIComponent(project)}`) : apiUrl('/kanban/boards');
         const fetchBoards = async () => {
             const r = await fetch(boardsUrl, { cache: 'no-store' });
@@ -758,15 +772,7 @@
             }
         }
         if (project && !kanbanBoards.length) {
-            try {
-                const fallback = await fetch(apiUrl('/kanban/boards'), { cache: 'no-store' });
-                if (fallback.ok) {
-                    const fallbackData = await fallback.json();
-                    const allBoards = Array.isArray(fallbackData?.boards) ? fallbackData.boards : [];
-                    kanbanBoards = allBoards;
-                }
-            } catch {
-            }
+            kanbanLoadError = 'Для этого проекта нет доступных досок';
         }
         kanbanTasks = [];
         kanbanBoards.forEach(b => {

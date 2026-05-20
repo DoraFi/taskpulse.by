@@ -23,6 +23,7 @@
 @import 'components/modals/settings';
 @import 'pages/projects';
 @import 'pages/team';
+@import 'pages/analytics';
 @import 'pages/auth';
 @import 'components/modal_forms';
 @import 'util/motion_guards';
@@ -185,7 +186,7 @@ body[data-theme="dark"] {
 }
 
 .app-container {
-    padding: $space-48 $space-64;
+    padding: $space-48 $space-64 $space-96;
     flex: 1;
     display: flex;
     min-width: 0;

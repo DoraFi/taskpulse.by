@@ -8,6 +8,30 @@ function apiUrl(path) {
     return `${getApiBasePath()}${path}`;
 }
 
+function escapeHtml(s) {
+    return String(s ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function projectOpenHref(orgId, teamId, code, view) {
+    const projectCode = encodeURIComponent(code);
+    if (orgId && teamId && code) {
+        if (view === 'kanban') {
+            return `/o/${encodeURIComponent(orgId)}/t/${encodeURIComponent(teamId)}/p/${projectCode}/kanban?project=${projectCode}`;
+        }
+        if (view === 'scrum') {
+            return `/o/${encodeURIComponent(orgId)}/t/${encodeURIComponent(teamId)}/p/${projectCode}/scrum?project=${projectCode}`;
+        }
+        return `/o/${encodeURIComponent(orgId)}/t/${encodeURIComponent(teamId)}/p/${projectCode}/boards?project=${projectCode}`;
+    }
+    if (view === 'kanban') return `/kanban?project=${projectCode}`;
+    if (view === 'scrum') return `/scrum?project=${projectCode}`;
+    return `/boards?project=${projectCode}`;
+}
+
 function openCreateProjectModal(overlay) {
     overlay.classList.add('show');
     overlay.setAttribute('aria-hidden', 'false');
@@ -229,9 +253,11 @@ function initProjectsPage() {
                     return;
                 }
                 grid.innerHTML = filtered.map((p) => {
-                    const isKanban = p.view === 'kanban';
-                    const isScrum = p.view === 'scrum';
-                    const projectCode = encodeURIComponent(p.code || '');
+                    const view = p.view || p.type || 'list';
+                    const isKanban = view === 'kanban';
+                    const isScrum = view === 'scrum';
+                    const code = String(p.code || '').trim();
+                    const projectCode = encodeURIComponent(code);
                     const totalTasks = Number(p.taskCount ?? 0);
                     const doneTasks = Number(p.doneCount ?? 0);
                     const inProcessTasks = Number(p.inProgressCount ?? 0);
@@ -240,20 +266,18 @@ function initProjectsPage() {
                     const donePct = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
                     const inProcessPct = totalTasks > 0 ? Math.round((inProcessTasks / totalTasks) * 100) : 0;
                     const todoPct = Math.max(0, 100 - donePct - inProcessPct);
-                    const href = (orgId && teamId && projectCode)
-                        ? (isKanban
-                            ? `/o/${encodeURIComponent(orgId)}/t/${encodeURIComponent(teamId)}/p/${projectCode}/kanban?project=${projectCode}`
-                            : isScrum
-                                ? `/o/${encodeURIComponent(orgId)}/t/${encodeURIComponent(teamId)}/p/${projectCode}/scrum?project=${projectCode}`
-                                : `/o/${encodeURIComponent(orgId)}/t/${encodeURIComponent(teamId)}/p/${projectCode}/boards?project=${projectCode}`)
-                        : (isKanban ? `/kanban?project=${projectCode}` : isScrum ? `/scrum?project=${projectCode}` : `/boards?project=${projectCode}`);
+                    const href = projectOpenHref(orgId, teamId, code, view);
                     const mode = isKanban ? 'Kanban' : isScrum ? 'Scrum' : 'List';
                     const chip = doneTasks > 0 ? 'Активен' : 'Новый';
                     const projectAction = isArchiveView
-                        ? `<button class="button-basic project-action" data-project-code="${p.code}" data-action="restore-project">Восстановить</button>`
-                        : `<button class="button-secondary project-action" data-project-code="${p.code}" data-action="archive-project">В архив</button>`;
+                        ? `<button type="button" class="button-basic project-action" data-project-code="${escapeHtml(code)}" data-action="restore-project">Восстановить</button>`
+                        : `<button type="button" class="button-secondary project-action" data-project-code="${escapeHtml(code)}" data-action="archive-project">В архив</button>`;
+                    const cardTag = isArchiveView ? 'div' : 'a';
+                    const cardHref = isArchiveView ? '' : ` href="${href}"`;
+                    const openBtn = isArchiveView ? '' : '<span class="button-basic">Открыть проект</span>';
+                    const cardLabel = isArchiveView ? `Архивный проект ${p.name || code}` : 'Открыть проект';
                     return `
-                        <a class="project-card ${(isKanban || isScrum) ? 'project-card--kanban' : 'project-card--list'}" href="${href}" aria-label="Открыть проект">
+                        <${cardTag} class="project-card ${(isKanban || isScrum) ? 'project-card--kanban' : 'project-card--list'}"${cardHref} aria-label="${escapeHtml(cardLabel)}">
                             <div class="project-card__body">
                                 <div class="project-card__head">
                                     <div class="project-card__icon" aria-hidden="true">${(p.code || 'PRJ').slice(0,1)}</div>
@@ -282,9 +306,9 @@ function initProjectsPage() {
                                         <div class="legend"><div class="circle bg-light-gray"></div><p>Не начато</p></div>
                                     </div>
                                 </div>
-                                <div class="project-card__footer">${projectAction}<button class="button-basic">Открыть проект</button></div>
+                                <div class="project-card__footer">${projectAction}${openBtn}</div>
                             </div>
-                        </a>
+                        </${cardTag}>
                     `;
                 }).join('');
                 grid.querySelectorAll('.project-action').forEach(b => {

@@ -44,6 +44,11 @@ function applyContextNavLinks(base) {
     document.querySelectorAll('[data-context-link="projects-org"]').forEach(el => el.dataset.href = `${base}/projects/org`);
     document.querySelectorAll('[data-context-link="projects-archive"]').forEach(el => el.dataset.href = `${base}/projects/archive`);
     document.querySelectorAll('[data-context-link="team"]').forEach(el => el.dataset.href = `${base}/team`);
+    document.querySelectorAll('[data-context-link="analytics-section"]').forEach(el => el.dataset.href = `${base}/analytics`);
+    document.querySelectorAll('[data-context-link="analytics"]').forEach(el => el.dataset.href = `${base}/analytics`);
+    document.querySelectorAll('[data-context-link="analytics-reports"]').forEach(el => el.dataset.href = `${base}/analytics#reports`);
+    document.querySelectorAll('[data-context-link="analytics-charts"]').forEach(el => el.dataset.href = `${base}/analytics#charts`);
+    document.querySelectorAll('[data-context-link="analytics-compare"]').forEach(el => el.dataset.href = `${base}/analytics#compare`);
     document.querySelectorAll('a.logo-link, .header .logo[href="/"], .header a[href="/"]').forEach(a => a.setAttribute('href', base));
 }
 
@@ -52,8 +57,8 @@ function isErrorPage() {
 }
 
 function clearActiveMenuState() {
-    document.querySelectorAll('.nav-link.active').forEach(link => {
-        link.classList.remove('active');
+    document.querySelectorAll('.nav-link.active, .nav-link.nav-link--in-section').forEach(link => {
+        link.classList.remove('active', 'nav-link--in-section');
     });
 }
 
@@ -193,12 +198,55 @@ function initSubmenus() {
     loadSubmenusState();
 }
 
-function isCurrentPage(url) {
+function pageRoot(container, selector) {
+    if (!container) return null;
+    if (container.matches && container.matches(selector)) return container;
+    return container.querySelector(selector);
+}
+
+function isAnalyticsPage(container) {
+    if (!container) return false;
+    if (container.classList && container.classList.contains('analytics-page')) return true;
+    return Boolean(pageRoot(container, '#analyticsPage'));
+}
+
+function applyAppContainerPageShell(target, source) {
+    if (!target || !source) return;
+    target.className = source.className;
+    if (source.id) {
+        target.id = source.id;
+    } else {
+        target.removeAttribute('id');
+    }
+    delete target.dataset.controlsBound;
+    delete target.dataset.tabsBound;
+}
+
+function isAnalyticsPath(pathname) {
+    return pathname.endsWith('/analytics');
+}
+
+function analyticsTabFromUrl(url) {
+    const hash = (url.hash || '').replace('#', '').trim();
+    return hash || 'overview';
+}
+
+function navLinkMatches(currentUrl, linkUrl, contextLink) {
+    if (currentUrl.pathname !== linkUrl.pathname) return false;
+    if (linkUrl.search && currentUrl.search !== linkUrl.search) return false;
+    if (contextLink === 'analytics-section') {
+        return false;
+    }
+    if (isAnalyticsPath(currentUrl.pathname)) {
+        return analyticsTabFromUrl(currentUrl) === analyticsTabFromUrl(linkUrl);
+    }
+    return true;
+}
+
+function isCurrentPage(url, contextLink) {
     const currentUrl = new URL(window.location.href);
     const targetUrl = new URL(url, window.location.origin);
-    if (currentUrl.pathname !== targetUrl.pathname) return false;
-    if (!targetUrl.search) return true;
-    return currentUrl.search === targetUrl.search;
+    return navLinkMatches(currentUrl, targetUrl, contextLink);
 }
 
 function updateActiveMenuItem() {
@@ -210,12 +258,18 @@ function updateActiveMenuItem() {
 
     const currentUrl = new URL(window.location.href);
     
+    const onAnalytics = isAnalyticsPath(currentUrl.pathname);
+
     document.querySelectorAll('.nav-link[data-href]').forEach(link => {
         const linkUrl = new URL(link.dataset.href, window.location.origin);
-        
-        const samePath = currentUrl.pathname === linkUrl.pathname;
-        const sameSearch = !linkUrl.search || currentUrl.search === linkUrl.search;
-        if (samePath && sameSearch) {
+        const contextLink = link.dataset.contextLink || '';
+        if (contextLink === 'analytics-section') {
+            if (onAnalytics) {
+                link.classList.add('nav-link--in-section');
+            }
+            return;
+        }
+        if (navLinkMatches(currentUrl, linkUrl, contextLink)) {
             link.classList.add('active');
         }
     });
@@ -301,9 +355,16 @@ function handleNavigationClick(e) {
     if (!url || url === '#') return;
 
     e.preventDefault();
-    if (isCurrentPage(url)) {
+    if (isCurrentPage(url, this.dataset.contextLink)) {
         if (typeof window.initIndexPage === 'function' && document.getElementById('indexTodoTasks')) {
             window.initIndexPage({ forceFetch: true });
+        } else if (typeof window.initAnalyticsPage === 'function' && document.getElementById('analyticsPage')) {
+            const targetUrl = new URL(url, window.location.origin);
+            history.replaceState(null, '', `${targetUrl.pathname}${targetUrl.search}${targetUrl.hash || ''}`);
+            ensureChartJs()
+                .then(() => window.initAnalyticsPage())
+                .catch((err) => console.error('Chart.js не загружен для аналитики', err));
+            updateActiveMenuItem();
         } else {
             console.log('Уже на этой странице, переход не требуется');
         }
@@ -311,6 +372,25 @@ function handleNavigationClick(e) {
     }
 
     loadPage(url);
+}
+
+const SPA_BODY_FRAGMENT_IDS = ['taskDetailModal'];
+
+function mountSpaBodyFragments(doc) {
+    SPA_BODY_FRAGMENT_IDS.forEach((id) => {
+        const fresh = doc.getElementById(id);
+        if (!fresh) return;
+        document.getElementById(id)?.remove();
+        document.body.appendChild(document.importNode(fresh, true));
+    });
+}
+
+const CHART_JS_CDN = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js';
+
+async function ensureChartJs() {
+    if (typeof window.Chart === 'function') return true;
+    await loadExternalScript(CHART_JS_CDN);
+    return typeof window.Chart === 'function';
 }
 
 async function loadExternalScript(src) {
@@ -339,6 +419,14 @@ async function loadExternalScript(src) {
         return true;
     }
     if (src.includes('projects') && window.initProjectsPage) {
+        console.log(`Скрипт ${src} уже инициализирован через window`);
+        return true;
+    }
+    if (src.includes('team') && window.initTeamPage) {
+        console.log(`Скрипт ${src} уже инициализирован через window`);
+        return true;
+    }
+    if (src.includes('analytics') && window.initAnalyticsPage) {
         console.log(`Скрипт ${src} уже инициализирован через window`);
         return true;
     }
@@ -423,7 +511,8 @@ async function loadPage(url) {
                         src.includes('tasks') ||
                         src.includes('index') ||
                         src.includes('projects') ||
-                        src.includes('team');
+                        src.includes('team') ||
+                        src.includes('analytics');
 
                     const alreadyInited =
                         (src.includes('board_list') && window.initBoardListPage) ||
@@ -431,9 +520,13 @@ async function loadPage(url) {
                         (src.includes('tasks') && window.initTasksPage) ||
                         (src.includes('index') && window.initIndexPage) ||
                         (src.includes('projects') && window.initProjectsPage) ||
-                        (src.includes('team') && window.initTeamPage);
+                        (src.includes('team') && window.initTeamPage) ||
+                        (src.includes('analytics') && window.initAnalyticsPage);
+                    const forceLoad =
+                        (src.includes('task_detail_modal') && typeof window.tpOpenTaskDetailModal !== 'function')
+                        || (src.includes('chart.js') && typeof window.Chart !== 'function');
 
-                    if (!isPageScript || !alreadyInited) {
+                    if (!isPageScript || !alreadyInited || forceLoad) {
                         await loadExternalScript(src);
                     } else {
                         console.log(`Скрипт ${src} уже инициализирован, пропускаем`);
@@ -443,9 +536,16 @@ async function loadPage(url) {
                 currentContent.style.opacity = '0';
                 currentContent.style.transition = 'opacity 0.2s ease';
                 
+                const targetUrl = new URL(url, window.location.origin);
+                const goingToAnalytics = isAnalyticsPath(targetUrl.pathname)
+                    || Boolean(newContent.classList.contains('analytics-page') || newContent.id === 'analyticsPage');
+                if (goingToAnalytics) {
+                    await ensureChartJs();
+                }
+
                 setTimeout(() => {
                     console.log('Замена контента...');
-                    currentContent.className = newContent.className;
+                    applyAppContainerPageShell(currentContent, newContent);
                     currentContent.innerHTML = newContent.innerHTML;
                     currentContent.style.opacity = '1';
                     history.pushState({}, '', url);
@@ -455,7 +555,11 @@ async function loadPage(url) {
                     }
                     
                     executeInlineScripts(currentContent);
-                    
+                    mountSpaBodyFragments(doc);
+                    if (typeof window.tpInitTaskDetailModal === 'function') {
+                        window.tpInitTaskDetailModal();
+                    }
+
                     if (currentContent.querySelector('#tasks-grid') && typeof window.initTasksPage === 'function') {
                         console.log('Вызов initTasksPage');
                         window.initTasksPage();
@@ -472,6 +576,12 @@ async function loadPage(url) {
                     if (currentContent.querySelector('#teamMembersGrid') && typeof window.initTeamPage === 'function') {
                         console.log('Вызов initTeamPage');
                         window.initTeamPage();
+                    }
+                    if (isAnalyticsPage(currentContent) && typeof window.initAnalyticsPage === 'function') {
+                        console.log('Вызов initAnalyticsPage');
+                        ensureChartJs()
+                            .then(() => window.initAnalyticsPage())
+                            .catch((err) => console.error('Chart.js не загружен для аналитики', err));
                     }
 
                     const isBoardList = currentContent.classList.contains('board-list') && !currentContent.classList.contains('board-kanban');
@@ -507,7 +617,7 @@ async function loadPage(url) {
 }
 
 window.addEventListener('popstate', () => {
-    loadPage(window.location.pathname);
+    loadPage(`${window.location.pathname}${window.location.search}${window.location.hash || ''}`);
 });
 
 document.addEventListener('DOMContentLoaded', () => {

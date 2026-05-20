@@ -525,7 +525,8 @@
 
     function init() {
         const overlay = document.getElementById('taskDetailModal');
-        if (!overlay) return;
+        if (!overlay || overlay.dataset.modalBound === '1') return;
+        overlay.dataset.modalBound = '1';
 
         bindDeadlineInputs(overlay);
         loadOptions().catch(() => {});
@@ -716,13 +717,19 @@
             });
         }
 
-        document.addEventListener('keydown', e => {
-            if (e.key !== 'Escape') return;
-            if (!overlay.classList.contains('show')) return;
-            if (document.querySelector('.modal-overlay.custom-calendar-modal.show')) return;
-            doClose();
-        });
+        if (!window._tpTaskDetailEscapeBound) {
+            window._tpTaskDetailEscapeBound = true;
+            document.addEventListener('keydown', e => {
+                if (e.key !== 'Escape') return;
+                const modal = document.getElementById('taskDetailModal');
+                if (!modal || !modal.classList.contains('show')) return;
+                if (document.querySelector('.modal-overlay.custom-calendar-modal.show')) return;
+                closeModal(modal);
+            });
+        }
     }
+
+    window.tpInitTaskDetailModal = init;
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);

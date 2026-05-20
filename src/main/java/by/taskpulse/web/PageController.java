@@ -210,6 +210,13 @@ public class PageController {
         return "pages/team";
     }
 
+    @GetMapping("/o/{orgId}/t/{teamId}/analytics")
+    public String analyticsContext(@PathVariable String orgId, @PathVariable String teamId, HttpServletRequest request, Model model) {
+        String contextError = validateContextAccess(orgId, teamId);
+        if (contextError != null) return contextErrorView(model, request, 404, contextError);
+        return "pages/analytics";
+    }
+
     @GetMapping("/o/{orgId}/t/{teamId}/{*rest}")
     public String invalidContextSubpath(@PathVariable String orgId,
                                         @PathVariable String teamId,

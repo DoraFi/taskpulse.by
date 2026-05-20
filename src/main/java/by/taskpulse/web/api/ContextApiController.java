@@ -279,6 +279,11 @@ public class ContextApiController {
         return legacy.projectReports(mode);
     }
 
+    @GetMapping("/api/analytics/dashboard")
+    public Map<String, Object> analyticsDashboardAuto(@RequestParam(defaultValue = "30") int period) {
+        return legacy.analyticsDashboard(period);
+    }
+
     @GetMapping("/api/bootstrap/context")
     public Map<String, Object> bootstrapContext() {
         Map<String, Object> row = currentContextRow();
@@ -669,6 +674,14 @@ public class ContextApiController {
                                        @RequestParam(defaultValue = "all") String mode) {
         ensureContextAccess(orgId, teamId);
         return legacy.projectReports(mode);
+    }
+
+    @GetMapping("/o/{orgId}/t/{teamId}/api/analytics/dashboard")
+    public Map<String, Object> analyticsDashboard(@PathVariable String orgId,
+                                                @PathVariable String teamId,
+                                                @RequestParam(defaultValue = "30") int period) {
+        ensureContextAccess(orgId, teamId);
+        return legacy.analyticsDashboard(period);
     }
 
     private void ensureContextAccess(String orgId, String teamId) {

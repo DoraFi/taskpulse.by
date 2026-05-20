@@ -27,12 +27,13 @@
                 <span class="arrow-wrapper">
                     <img src="/static/source/icons/arrow_dark_cropped.svg" th:src="@{/static/source/icons/arrow_dark_cropped.svg}" alt="" class="arrow-img">
                 </span>
-                <button class="nav-link text-basic">Аналитика</button>
+                <button class="nav-link text-basic nav-link--section" data-context-link="analytics-section">Аналитика</button>
             </div>
             <ul class="submenu">
-                <li><button class="nav-link">Отчеты</button></li>
-                <li><button class="nav-link">Диаграммы прогресса</button></li>
-                <li><button class="nav-link">Сравнительный анализ</button></li>
+                <li><button class="nav-link" data-context-link="analytics">Обзор</button></li>
+                <li><button class="nav-link" data-context-link="analytics-reports">Отчёты</button></li>
+                <li><button class="nav-link" data-context-link="analytics-charts">Диаграммы</button></li>
+                <li><button class="nav-link" data-context-link="analytics-compare">Сравнение</button></li>
             </ul>
         </li>
         <li class="item">

@@ -66,7 +66,7 @@
 .text-signature, .tasks-grid .grid-header, .legends .legend, .scrum-backlog-panel .kanban-task-item .subtasks .checkbox-text, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .timeline-due, .board-list .tasks-grid-wrapper > .empty-state, .board-reports-card .reports-stat-label, .kanban-board-card .kanban-stage-col .subtasks .checkbox-text,
 .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text, .kanban-board-card .kanban-count-chip,
 .kanban-archive-board .kanban-count-chip, .board-list .card .list .subtasks .checkbox-text, .auth-hint, .auth-field label, .auth-step-pill, .auth-mini-card__text, .form-auth .checkbox-item .checkbox-text,
-.form-auth .checkbox-item a, .auth-motif-board__head, .auth-hero__eyebrow, .modal-content.settings-modal .settings-modal__links, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-label, .button-small {
+.form-auth .checkbox-item a, .auth-motif-board__head, .auth-hero__eyebrow, .analytics-table th, .modal-content.settings-modal .settings-modal__links, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-label, .button-small {
   font-size: 0.75rem;
   font-weight: 400;
 }
@@ -192,6 +192,10 @@ aside .item .nav-link.active::after {
   background-color: #61A039;
   border-radius: 1px;
 }
+aside .item .nav-link.nav-link--in-section:not(.active) {
+  color: #61A039;
+  font-weight: 500;
+}
 aside .submenu {
   padding-left: 2.25rem;
   margin-top: 0.75rem;
@@ -211,7 +215,7 @@ aside .submenu .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text,
 aside .submenu .kanban-archive-board .kanban-count-chip,
 .kanban-archive-board aside .submenu .kanban-count-chip, aside .submenu .board-list .card .list .subtasks .checkbox-text, .board-list .card .list .subtasks aside .submenu .checkbox-text, aside .submenu .auth-hint, aside .submenu .auth-field label, .auth-field aside .submenu label, aside .submenu .auth-step-pill, aside .submenu .auth-mini-card__text, aside .submenu .form-auth .checkbox-item .checkbox-text, .form-auth .checkbox-item aside .submenu .checkbox-text,
 aside .submenu .form-auth .checkbox-item a,
-.form-auth .checkbox-item aside .submenu a, aside .submenu .auth-motif-board__head, aside .submenu .auth-hero__eyebrow, aside .submenu .modal-content.settings-modal .settings-modal__links, .modal-content.settings-modal aside .submenu .settings-modal__links, aside .submenu .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month aside .submenu .weekdays, aside .submenu .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-range aside .submenu .range-values, aside .submenu .modal-content .modal-body .filter-section .filter-label, .modal-content .modal-body .filter-section aside .submenu .filter-label, aside .submenu .button-small {
+.form-auth .checkbox-item aside .submenu a, aside .submenu .auth-motif-board__head, aside .submenu .auth-hero__eyebrow, aside .submenu .analytics-table th, .analytics-table aside .submenu th, aside .submenu .modal-content.settings-modal .settings-modal__links, .modal-content.settings-modal aside .submenu .settings-modal__links, aside .submenu .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month aside .submenu .weekdays, aside .submenu .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-range aside .submenu .range-values, aside .submenu .modal-content .modal-body .filter-section .filter-label, .modal-content .modal-body .filter-section aside .submenu .filter-label, aside .submenu .button-small {
   display: block;
   max-width: 13.25vw;
   white-space: nowrap;
@@ -593,7 +597,7 @@ body[data-theme=dark] .header .search-panel input::placeholder {
 .text-signature, .tasks-grid .grid-header, .legends .legend, .scrum-backlog-panel .kanban-task-item .subtasks .checkbox-text, .board-table-card .subtasks .checkbox-text, .board-list .tasks-grid .subtasks-list span, .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .timeline-due, .board-list .tasks-grid-wrapper > .empty-state, .board-reports-card .reports-stat-label, .kanban-board-card .kanban-stage-col .subtasks .checkbox-text,
 .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text, .kanban-board-card .kanban-count-chip,
 .kanban-archive-board .kanban-count-chip, .board-list .card .list .subtasks .checkbox-text, .auth-hint, .auth-field label, .auth-step-pill, .auth-mini-card__text, .form-auth .checkbox-item .checkbox-text,
-.form-auth .checkbox-item a, .auth-motif-board__head, .auth-hero__eyebrow, .modal-content.settings-modal .settings-modal__links, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-label, .button-small {
+.form-auth .checkbox-item a, .auth-motif-board__head, .auth-hero__eyebrow, .analytics-table th, .modal-content.settings-modal .settings-modal__links, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-label, .button-small {
   font-size: 0.75rem;
   font-weight: 400;
 }
@@ -3328,6 +3332,590 @@ body[data-theme=dark] .team-mail-route {
   background: rgba(97, 160, 57, 0.1);
 }
 
+.analytics-page {
+  gap: 1.5rem;
+  padding-bottom: 2.25rem;
+}
+
+.analytics-page__hero {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 1.125rem;
+  flex-wrap: wrap;
+  padding: 1.5rem 2.25rem;
+  margin-bottom: 1.5rem;
+  background: #EEF7E9;
+  border-radius: 0.6rem;
+}
+
+body[data-theme=dark] .analytics-page__hero {
+  background: #2D3229;
+}
+
+.analytics-page__hero-main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.375rem;
+  min-width: 0;
+  flex: 1 1 16rem;
+}
+
+.analytics-page__eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.75;
+}
+
+.analytics-page__title {
+  margin: 0;
+  line-height: 1.15;
+}
+
+.analytics-page__subtitle {
+  margin: 0;
+  color: #7F8C73;
+}
+
+body[data-theme=dark] .analytics-page__subtitle {
+  color: rgba(249.6297, 252.603, 247.197, 0.72);
+}
+
+.analytics-page__hero-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5625rem;
+  justify-content: flex-end;
+}
+
+.analytics-page__period-label {
+  margin: 0;
+}
+
+.analytics-page__period-select {
+  min-width: 9rem;
+}
+
+.analytics-page__tabs {
+  margin-bottom: 1.5rem;
+  width: 100%;
+  max-width: 100%;
+}
+.analytics-page__tabs .tabs-buttons {
+  width: 100%;
+  flex-wrap: wrap;
+}
+.analytics-page__tabs .button-basic[data-tab] {
+  box-shadow: none;
+}
+
+.analytics-loading,
+.analytics-error {
+  padding: 1.125rem;
+  text-align: center;
+}
+
+.analytics-error {
+  color: #F8085C;
+  margin-bottom: 0.75rem;
+}
+
+.analytics-chart-warn {
+  margin: 0 0 0.75rem;
+  padding: 0.5625rem 0.75rem;
+  border-radius: 0.3rem;
+  background: rgba(97, 160, 57, 0.08);
+  border: 0.0625rem solid rgba(97, 160, 57, 0.22);
+  color: #2D3229;
+}
+
+body[data-theme=dark] .analytics-chart-warn {
+  color: hsl(93, 53%, 98%);
+  background: rgba(97, 160, 57, 0.12);
+}
+
+.analytics-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5625rem;
+  margin-bottom: 1.5rem;
+}
+@media (max-width: 1100px) {
+  .analytics-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 560px) {
+  .analytics-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.analytics-kpi {
+  padding: 0.5625rem 0.75rem;
+  border-radius: 0.3rem;
+  background: hsl(93, 53%, 98%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.analytics-kpi .text-header, .analytics-kpi .board-reports-card .reports-stat-value, .board-reports-card .analytics-kpi .reports-stat-value, .analytics-kpi .auth-mini-card__n, .analytics-kpi .custom-calendar-modal .custom-calendar .custom-calendar-header button:not(.tp-select__trigger), .custom-calendar-modal .custom-calendar .custom-calendar-header .analytics-kpi button:not(.tp-select__trigger), .analytics-kpi .custom-calendar-modal .custom-calendar .custom-calendar-header .custom-calendar-title, .custom-calendar-modal .custom-calendar .custom-calendar-header .analytics-kpi .custom-calendar-title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+body[data-theme=dark] .analytics-kpi {
+  background: rgba(249.6297, 252.603, 247.197, 0.06);
+}
+
+.analytics-kpi__hint {
+  opacity: 0.75;
+  line-height: 1.35;
+}
+
+.analytics-health {
+  margin-bottom: 1.5rem;
+  border-left: 0.25rem solid #61A039;
+}
+.analytics-health.is-warn {
+  border-left-color: #7F8C73;
+}
+.analytics-health.is-danger {
+  border-left-color: #F8085C;
+}
+
+.analytics-health__main {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5625rem;
+  margin-bottom: 0.5625rem;
+}
+
+.analytics-health__badge {
+  padding: 0.25rem 0.5625rem;
+  border-radius: 0.3rem;
+  background: rgba(97, 160, 57, 0.14);
+}
+
+.analytics-health.is-warn .analytics-health__badge {
+  background: rgba(127, 140, 115, 0.2);
+}
+
+.analytics-health.is-danger .analytics-health__badge {
+  background: rgba(248, 8, 92, 0.12);
+  color: #F8085C;
+}
+
+.analytics-health__text {
+  margin: 0;
+  line-height: 1.65;
+  max-width: 52rem;
+}
+
+.analytics-grid {
+  display: grid;
+  gap: 2.25rem;
+  margin-bottom: 2.25rem;
+}
+.analytics-grid--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (max-width: 900px) {
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.analytics-card {
+  gap: 1.125rem;
+}
+.analytics-card.card {
+  padding: 1.5rem;
+}
+
+.analytics-card__head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+.analytics-card__head h2 {
+  margin: 0;
+}
+
+.analytics-card__desc {
+  margin: 0;
+  line-height: 1.65;
+  max-width: 48rem;
+  color: #7F8C73;
+}
+
+body[data-theme=dark] .analytics-card__desc {
+  color: rgba(249.6297, 252.603, 247.197, 0.72);
+}
+
+.analytics-chart-wrap {
+  position: relative;
+  flex: 1 1 auto;
+  width: 100%;
+  height: 15rem;
+  min-height: 12rem;
+}
+.analytics-chart-wrap--donut {
+  height: 11rem;
+  min-height: 10rem;
+  min-width: 0;
+}
+.analytics-chart-wrap--tall {
+  height: 18rem;
+}
+.analytics-chart-wrap--cfd {
+  height: 22rem;
+  min-height: 18rem;
+}
+
+.analytics-donut {
+  display: grid;
+  grid-template-columns: minmax(8rem, 1fr) minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+  width: 100%;
+}
+@media (max-width: 640px) {
+  .analytics-donut {
+    grid-template-columns: 1fr;
+  }
+}
+
+.analytics-chart-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  min-width: 0;
+}
+.analytics-chart-legend--inline {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.375rem 1.125rem;
+  margin-bottom: 0.75rem;
+}
+.analytics-chart-legend--inline.analytics-chart-legend--below {
+  align-self: stretch;
+  width: 100%;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.375rem 1.5rem;
+  margin-top: 0.5625rem;
+  margin-bottom: 0;
+  padding: 0.25rem 0 0.375rem;
+}
+@media (max-width: 560px) {
+  .analytics-chart-legend--inline.analytics-chart-legend--below {
+    flex-wrap: wrap;
+    gap: 0.375rem 0.75rem;
+  }
+}
+.analytics-chart-legend--inline.analytics-chart-legend--below .analytics-chart-legend__item--inline {
+  align-items: center;
+  white-space: nowrap;
+}
+
+.analytics-chart-legend__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.375rem;
+  min-width: 0;
+}
+.analytics-chart-legend__item--inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.analytics-chart-legend__text {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.375rem;
+  min-width: 0;
+}
+
+.analytics-chart-legend__dot {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.analytics-chart-legend__label {
+  min-width: 0;
+  flex: 0 1 auto;
+}
+
+.analytics-chart-legend__value {
+  flex: 0 0 auto;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #7F8C73;
+  font-variant-numeric: tabular-nums;
+}
+.analytics-chart-legend__value::before {
+  content: "·";
+  margin-right: 0.25rem;
+  color: rgba(127, 140, 115, 0.65);
+  font-weight: 400;
+}
+.analytics-chart-legend--inline .analytics-chart-legend__value::before {
+  content: none;
+  margin: 0;
+}
+
+body[data-theme=dark] .analytics-chart-legend__value {
+  color: rgba(249.6297, 252.603, 247.197, 0.72);
+}
+
+.analytics-reports-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.125rem;
+}
+
+.analytics-reports-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  padding: 0.5625rem 0.75rem;
+  min-width: 7.5rem;
+  border-radius: 0.3rem;
+  background: hsl(93, 53%, 98%);
+}
+.analytics-reports-chip .text-header, .analytics-reports-chip .board-reports-card .reports-stat-value, .board-reports-card .analytics-reports-chip .reports-stat-value, .analytics-reports-chip .auth-mini-card__n, .analytics-reports-chip .custom-calendar-modal .custom-calendar .custom-calendar-header button:not(.tp-select__trigger), .custom-calendar-modal .custom-calendar .custom-calendar-header .analytics-reports-chip button:not(.tp-select__trigger), .analytics-reports-chip .custom-calendar-modal .custom-calendar .custom-calendar-header .custom-calendar-title, .custom-calendar-modal .custom-calendar .custom-calendar-header .analytics-reports-chip .custom-calendar-title {
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+body[data-theme=dark] .analytics-reports-chip {
+  background: rgba(249.6297, 252.603, 247.197, 0.06);
+}
+
+.analytics-table-wrap {
+  overflow-x: auto;
+  width: 100%;
+  margin-bottom: 0.375rem;
+}
+
+.analytics-table {
+  width: 100%;
+  min-width: 44rem;
+  border-collapse: collapse;
+}
+.analytics-table th,
+.analytics-table td {
+  padding: 0.375rem 0.5625rem;
+  text-align: left;
+  border-bottom: 0.0625rem solid rgba(97, 160, 57, 0.18);
+}
+.analytics-table th {
+  font-weight: 500;
+  white-space: nowrap;
+  color: #7F8C73;
+}
+.analytics-table tbody tr:hover td {
+  background: rgba(97, 160, 57, 0.04);
+}
+
+body[data-theme=dark] .analytics-table th {
+  color: rgba(249.6297, 252.603, 247.197, 0.65);
+}
+body[data-theme=dark] .analytics-table th,
+body[data-theme=dark] .analytics-table td {
+  border-bottom-color: rgba(249.6297, 252.603, 247.197, 0.12);
+}
+
+.analytics-lead-time {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5625rem;
+}
+@media (max-width: 700px) {
+  .analytics-lead-time {
+    grid-template-columns: 1fr;
+  }
+}
+
+.analytics-lead-time__item {
+  padding: 0.5625rem 0.75rem;
+  border-radius: 0.3rem;
+  background: hsl(93, 53%, 98%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.analytics-lead-time__item .text-header, .analytics-lead-time__item .board-reports-card .reports-stat-value, .board-reports-card .analytics-lead-time__item .reports-stat-value, .analytics-lead-time__item .auth-mini-card__n, .analytics-lead-time__item .custom-calendar-modal .custom-calendar .custom-calendar-header button:not(.tp-select__trigger), .custom-calendar-modal .custom-calendar .custom-calendar-header .analytics-lead-time__item button:not(.tp-select__trigger), .analytics-lead-time__item .custom-calendar-modal .custom-calendar .custom-calendar-header .custom-calendar-title, .custom-calendar-modal .custom-calendar .custom-calendar-header .analytics-lead-time__item .custom-calendar-title {
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+body[data-theme=dark] .analytics-lead-time__item {
+  background: rgba(249.6297, 252.603, 247.197, 0.06);
+}
+
+.analytics-risks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5625rem;
+}
+
+.analytics-risk {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.3rem;
+  background: hsl(93, 53%, 98%);
+  border-left: 0.25rem solid rgba(97, 160, 57, 0.35);
+}
+.analytics-risk.is-medium {
+  border-left-color: #7F8C73;
+}
+.analytics-risk.is-high {
+  border-left-color: #F8085C;
+  background: rgba(248, 8, 92, 0.04);
+}
+
+body[data-theme=dark] .analytics-risk {
+  background: rgba(249.6297, 252.603, 247.197, 0.06);
+}
+body[data-theme=dark] .analytics-risk.is-high {
+  background: rgba(248, 8, 92, 0.08);
+}
+
+.analytics-workload {
+  padding: 0.5625rem 0.75rem;
+  border-radius: 0.3rem;
+  line-height: 1.55;
+}
+.analytics-workload.is-ok {
+  background: rgba(97, 160, 57, 0.1);
+  border: 0.0625rem solid rgba(97, 160, 57, 0.2);
+}
+.analytics-workload.is-warn {
+  background: rgba(248, 8, 92, 0.06);
+  border: 0.0625rem solid rgba(248, 8, 92, 0.25);
+  color: #F8085C;
+}
+
+.analytics-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+}
+.analytics-panel .analytics-kpi-grid,
+.analytics-panel .analytics-health,
+.analytics-panel .analytics-grid {
+  margin-bottom: 0;
+}
+
+.analytics-panel[hidden] {
+  display: none !important;
+}
+
+#chartjs-tooltip,
+.chartjs-tooltip {
+  background: #EEF7E9 !important;
+  border: 0.0625rem solid rgba(97, 160, 57, 0.35) !important;
+  border-radius: 0.3rem !important;
+  box-shadow: 0 4px 14px rgba(45, 50, 41, 0.08) !important;
+  color: #2D3229 !important;
+  font-family: "SN Pro", sans-serif !important;
+  font-size: 0.75rem !important;
+  font-weight: 400 !important;
+  opacity: 1 !important;
+  pointer-events: none;
+}
+#chartjs-tooltip .chartjs-tooltip-title,
+.chartjs-tooltip .chartjs-tooltip-title {
+  font-family: "SN Pro", sans-serif !important;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  color: #2D3229 !important;
+  margin-bottom: 0.25rem !important;
+}
+#chartjs-tooltip .chartjs-tooltip-body,
+#chartjs-tooltip .chartjs-tooltip-body-item,
+#chartjs-tooltip .chartjs-tooltip-body-item-text,
+.chartjs-tooltip .chartjs-tooltip-body,
+.chartjs-tooltip .chartjs-tooltip-body-item,
+.chartjs-tooltip .chartjs-tooltip-body-item-text {
+  font-family: "SN Pro", sans-serif !important;
+  font-size: 0.75rem !important;
+  font-weight: 400 !important;
+  color: #2D3229 !important;
+}
+#chartjs-tooltip .chartjs-tooltip-footer,
+.chartjs-tooltip .chartjs-tooltip-footer {
+  font-family: "SN Pro", sans-serif !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  color: #2D3229 !important;
+  margin-top: 0.375rem !important;
+  padding-top: 0.375rem !important;
+  border-top: 0.0625rem solid rgba(97, 160, 57, 0.25) !important;
+}
+
+body[data-theme=dark] #chartjs-tooltip,
+body[data-theme=dark] .chartjs-tooltip {
+  background: #2D3229 !important;
+  border-color: rgba(97, 160, 57, 0.4) !important;
+  color: hsl(93, 53%, 98%) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+}
+body[data-theme=dark] #chartjs-tooltip .chartjs-tooltip-title,
+body[data-theme=dark] #chartjs-tooltip .chartjs-tooltip-body,
+body[data-theme=dark] #chartjs-tooltip .chartjs-tooltip-body-item,
+body[data-theme=dark] #chartjs-tooltip .chartjs-tooltip-body-item-text,
+body[data-theme=dark] .chartjs-tooltip .chartjs-tooltip-title,
+body[data-theme=dark] .chartjs-tooltip .chartjs-tooltip-body,
+body[data-theme=dark] .chartjs-tooltip .chartjs-tooltip-body-item,
+body[data-theme=dark] .chartjs-tooltip .chartjs-tooltip-body-item-text {
+  color: hsl(93, 53%, 98%) !important;
+}
+body[data-theme=dark] #chartjs-tooltip .chartjs-tooltip-footer,
+body[data-theme=dark] .chartjs-tooltip .chartjs-tooltip-footer {
+  color: hsl(93, 53%, 98%) !important;
+  border-top-color: rgba(97, 160, 57, 0.35) !important;
+}
+
+@media print {
+  .header,
+  #aside-container,
+  .analytics-page__tabs,
+  .analytics-page__hero-actions {
+    display: none !important;
+  }
+  .analytics-page__hero {
+    background: transparent;
+    padding: 0;
+  }
+  .analytics-card,
+  .analytics-kpi {
+    break-inside: avoid;
+  }
+  .analytics-chart-wrap {
+    height: 11rem;
+  }
+  .analytics-chart-wrap--cfd {
+    height: 16rem;
+  }
+}
 @keyframes auth-gradient-flow {
   0% {
     background-position: 0% 50%;
@@ -7081,7 +7669,7 @@ body[data-theme=dark] {
 }
 
 .app-container {
-  padding: 2.25rem 3rem;
+  padding: 2.25rem 3rem 4.5rem;
   flex: 1;
   display: flex;
   min-width: 0;
@@ -7253,6 +7841,8 @@ body[data-theme=dark] #indexTeamMembers {
 .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .due-attention .weekdays,
 .due-attention .modal-content.settings-modal .settings-modal__links,
 .modal-content.settings-modal .due-attention .settings-modal__links,
+.due-attention .analytics-table th,
+.analytics-table .due-attention th,
 .due-attention .auth-hero__eyebrow,
 .due-attention .auth-motif-board__head,
 .due-attention .form-auth .checkbox-item .checkbox-text,
@@ -7436,6 +8026,8 @@ body[data-theme=dark] #indexTeamMembers {
 .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .tasks-to-do-grid .col-task .weekdays,
 .tasks-to-do-grid .col-task .modal-content.settings-modal .settings-modal__links,
 .modal-content.settings-modal .tasks-to-do-grid .col-task .settings-modal__links,
+.tasks-to-do-grid .col-task .analytics-table th,
+.analytics-table .tasks-to-do-grid .col-task th,
 .tasks-to-do-grid .col-task .auth-hero__eyebrow,
 .tasks-to-do-grid .col-task .auth-motif-board__head,
 .tasks-to-do-grid .col-task .form-auth .checkbox-item .checkbox-text,
@@ -7569,6 +8161,8 @@ aside .submenu .tasks-to-do-grid .col-event .nav-link,
 .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .tasks-to-do-grid .col-event .weekdays,
 .tasks-to-do-grid .col-event .modal-content.settings-modal .settings-modal__links,
 .modal-content.settings-modal .tasks-to-do-grid .col-event .settings-modal__links,
+.tasks-to-do-grid .col-event .analytics-table th,
+.analytics-table .tasks-to-do-grid .col-event th,
 .tasks-to-do-grid .col-event .auth-hero__eyebrow,
 .tasks-to-do-grid .col-event .auth-motif-board__head,
 .tasks-to-do-grid .col-event .form-auth .checkbox-item .checkbox-text,
@@ -7702,6 +8296,8 @@ aside .submenu .events-grid .col-task .nav-link,
 .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .events-grid .col-task .weekdays,
 .events-grid .col-task .modal-content.settings-modal .settings-modal__links,
 .modal-content.settings-modal .events-grid .col-task .settings-modal__links,
+.events-grid .col-task .analytics-table th,
+.analytics-table .events-grid .col-task th,
 .events-grid .col-task .auth-hero__eyebrow,
 .events-grid .col-task .auth-motif-board__head,
 .events-grid .col-task .form-auth .checkbox-item .checkbox-text,
@@ -7835,6 +8431,8 @@ aside .submenu .events-grid .col-event .nav-link,
 .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .events-grid .col-event .weekdays,
 .events-grid .col-event .modal-content.settings-modal .settings-modal__links,
 .modal-content.settings-modal .events-grid .col-event .settings-modal__links,
+.events-grid .col-event .analytics-table th,
+.analytics-table .events-grid .col-event th,
 .events-grid .col-event .auth-hero__eyebrow,
 .events-grid .col-event .auth-motif-board__head,
 .events-grid .col-event .form-auth .checkbox-item .checkbox-text,
@@ -8380,3 +8978,5 @@ body[data-theme=dark] .toast-notification {
     transform: translateY(0);
   }
 }
+
+/*# sourceMappingURL=style.css.map */

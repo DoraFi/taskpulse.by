@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>TaskPulse - Аналитика</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/static/source/logo_rect.svg}" href="/static/source/logo_rect.svg">
+    <link rel="stylesheet" th:href="@{/static/scss/style.css}" href="/static/scss/style.css">
+</head>
+
+<body>
+    <div class="header">
+        <div class="gap-24 flex-row" style="align-items: center;">
+            <a class="logo-link" data-context-link="home" href="/"><img class="logo" th:src="@{/static/source/logo_rect.svg}" src="/static/source/logo_rect.svg" alt="TaskPulse"></a>
+            <div class="search-panel br-5">
+                <img class="h-16" th:src="@{/static/source/icons/search.svg}" src="/static/source/icons/search.svg" alt="Поиск">
+                <input class="text-basic" type="text" placeholder="Поиск">
+            </div>
+        </div>
+        <ul class="gap-24 flex-row header-toolbar">
+            <li><button type="button" class="header-toolbar__action" id="headerCreateTaskBtn" aria-label="Создать"><img class="h-32" th:src="@{/static/source/icons/plus.svg}" src="/static/source/icons/plus.svg" alt=""></button></li>
+            <li><button type="button" class="header-toolbar__action" id="headerSettingsBtn" aria-label="Настройки"><img class="h-32" th:src="@{/static/source/icons/settings.svg}" src="/static/source/icons/settings.svg" alt=""></button></li>
+            <li><button type="button" class="header-toolbar__action" id="headerProfileBtn" aria-label="Профиль"><img class="h-32" th:src="@{/static/source/icons/profile.svg}" src="/static/source/icons/profile.svg" alt=""></button></li>
+            <li><a th:href="@{/auth/welcome}" href="/auth/welcome" class="header-toolbar__action" aria-label="Выйти"><img class="h-32" th:src="@{/static/source/icons/logout.svg}" src="/static/source/icons/logout.svg" alt=""></a></li>
+            <li><button type="button" class="theme-toggle header-toolbar__action" id="themeToggle" aria-label="Переключить тему"><img class="h-32 theme-toggle__icon" th:src="@{/static/source/icons/lighttheme.svg}" src="/static/source/icons/lighttheme.svg" alt=""></button></li>
+        </ul>
+    </div>
+
+    <div class="main-layout">
+        <aside id="aside-container"></aside>
+
+        <div class="app-container flex-col analytics-page" id="analyticsPage">
+            <header class="analytics-page__hero">
+                <div class="analytics-page__hero-main">
+                    <p class="text-signature analytics-page__eyebrow">Панель показателей команды</p>
+                    <h1 class="text-header analytics-page__title" id="analyticsTeamTitle">Аналитика</h1>
+                    <p class="text-basic analytics-page__subtitle" id="analyticsSubtitle">Загрузка данных…</p>
+                </div>
+                <div class="analytics-page__hero-actions">
+                    <label class="text-signature analytics-page__period-label" for="analyticsPeriod">Период</label>
+                    <select id="analyticsPeriod" class="filter-input create-task-select analytics-page__period-select" aria-label="Период анализа">
+                        <option value="7">7 дней</option>
+                        <option value="30" selected>30 дней</option>
+                        <option value="90">90 дней</option>
+                        <option value="180">180 дней</option>
+                    </select>
+                    <button type="button" class="button-secondary" id="analyticsRefreshBtn">Обновить</button>
+                    <button type="button" class="button-basic" id="analyticsPrintBtn">Печать отчёта</button>
+                </div>
+            </header>
+
+            <nav class="tabs analytics-page__tabs" role="tablist" aria-label="Разделы аналитики">
+                <div class="tabs-buttons">
+                    <button type="button" class="button-basic analytics-tabs__btn is-active" data-tab="overview" role="tab" aria-selected="true">Обзор</button>
+                    <button type="button" class="button-basic analytics-tabs__btn" data-tab="reports" role="tab">Отчёты</button>
+                    <button type="button" class="button-basic analytics-tabs__btn" data-tab="charts" role="tab">Диаграммы</button>
+                    <button type="button" class="button-basic analytics-tabs__btn" data-tab="compare" role="tab">Сравнение</button>
+                </div>
+            </nav>
+
+            <div id="analyticsLoading" class="analytics-loading text-basic">Загрузка аналитики…</div>
+            <div id="analyticsError" class="analytics-error text-basic" hidden role="alert"></div>
+            <p id="analyticsChartWarn" class="analytics-chart-warn text-signature" hidden>Графики недоступны (Chart.js не загрузился). KPI и таблицы отображаются.</p>
+
+            <div id="analyticsContent" hidden>
+                <!-- Обзор -->
+                <section class="analytics-panel" data-panel="overview">
+                    <div class="analytics-kpi-grid" id="analyticsKpiGrid"></div>
+                    <div class="analytics-health card br-10" id="analyticsHealthCard"></div>
+                    <div class="analytics-grid analytics-grid--2">
+                        <article class="analytics-card card br-10">
+                            <header class="analytics-card__head">
+                                <h2 class="text-header">Скорость команды</h2>
+                                <p class="text-signature analytics-card__desc" id="analyticsVelocityDesc">Созданные и завершённые задачи по неделям - аналог velocity в Agile.</p>
+                            </header>
+                            <div class="analytics-chart-wrap"><canvas id="chartVelocity" aria-label="Скорость команды"></canvas></div>
+                        </article>
+                        <article class="analytics-card card br-10">
+                            <header class="analytics-card__head">
+                                <h2 class="text-header">Распределение по статусам</h2>
+                                <p class="text-signature analytics-card__desc" id="analyticsStagesDesc">Текущий срез задач по колонкам рабочего процесса.</p>
+                            </header>
+                            <div class="analytics-donut">
+                                <div class="analytics-chart-wrap analytics-chart-wrap--donut">
+                                    <canvas id="chartStages" aria-label="Статусы"></canvas>
+                                </div>
+                                <div class="analytics-chart-legend" id="chartStagesLegend"></div>
+                            </div>
+                        </article>
+                    </div>
+                    <div class="analytics-grid analytics-grid--2">
+                        <article class="analytics-card card br-10">
+                            <header class="analytics-card__head">
+                                <h2 class="text-header">Активность изменений</h2>
+                                <p class="text-signature analytics-card__desc" id="analyticsActivityDesc">Переходы статусов за выбранный период - индикатор вовлечённости команды.</p>
+                            </header>
+                            <div class="analytics-chart-wrap"><canvas id="chartActivity" aria-label="Активность"></canvas></div>
+                        </article>
+                        <article class="analytics-card card br-10">
+                            <header class="analytics-card__head">
+                                <h2 class="text-header">Приоритеты</h2>
+                                <p class="text-signature analytics-card__desc" id="analyticsPriorityDesc">Доля срочных и обычных задач в активном бэклоге.</p>
+                            </header>
+                            <div class="analytics-donut">
+                                <div class="analytics-chart-wrap analytics-chart-wrap--donut">
+                                    <canvas id="chartPriority" aria-label="Приоритеты"></canvas>
+                                </div>
+                                <div class="analytics-chart-legend" id="chartPriorityLegend"></div>
+                            </div>
+                        </article>
+                    </div>
+                    <article class="analytics-card card br-10">
+                        <header class="analytics-card__head">
+                            <h2 class="text-header">Накопительная диаграмма потока</h2>
+                            <p class="text-signature analytics-card__desc" id="analyticsCfdDesc">Динамика объёма работ по стадиям - помогает увидеть заторы и рост WIP</p>
+                        </header>
+                        <div class="analytics-chart-wrap analytics-chart-wrap--cfd"><canvas id="chartCfd" aria-label="CFD"></canvas></div>
+                        <div class="analytics-chart-legend analytics-chart-legend--inline analytics-chart-legend--below" id="chartCfdLegend" aria-hidden="true"></div>
+                    </article>
+                </section>
+
+                <!-- Отчёты -->
+                <section class="analytics-panel" data-panel="reports" hidden>
+                    <article class="analytics-card card br-10">
+                        <header class="analytics-card__head">
+                            <h2 class="text-header">Сводный отчёт по проектам</h2>
+                            <p class="text-signature analytics-card__desc">Табличный обзор для руководителя: объёмы, просрочки, срочные задачи.</p>
+                        </header>
+                        <div class="analytics-reports-summary" id="analyticsReportsSummary"></div>
+                        <div class="analytics-table-wrap">
+                            <table class="analytics-table text-basic" id="analyticsProjectsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Проект</th>
+                                        <th>Всего</th>
+                                        <th>Очередь</th>
+                                        <th>В работе</th>
+                                        <th>Готово</th>
+                                        <th>Срочные</th>
+                                        <th>Просрочено</th>
+                                        <th>% готовности</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </article>
+                    <div class="analytics-grid analytics-grid--2">
+                        <article class="analytics-card card br-10">
+                            <header class="analytics-card__head">
+                                <h2 class="text-header">Показатели качества процесса</h2>
+                                <p class="text-signature analytics-card__desc">Lead time - время от создания до завершения задачи.</p>
+                            </header>
+                            <div class="analytics-lead-time" id="analyticsLeadTime"></div>
+                        </article>
+                        <article class="analytics-card card br-10">
+                            <header class="analytics-card__head">
+                                <h2 class="text-header">Баланс нагрузки</h2>
+                                <p class="text-signature analytics-card__desc">Равномерность распределения задач между участниками.</p>
+                            </header>
+                            <div id="analyticsWorkloadMsg" class="text-basic"></div>
+                        </article>
+                    </div>
+                    <article class="analytics-card card br-10">
+                        <header class="analytics-card__head">
+                            <h2 class="text-header">Топ рисков по проектам</h2>
+                            <p class="text-signature analytics-card__desc">Проекты с наибольшим числом просроченных и срочных задач.</p>
+                        </header>
+                        <div id="analyticsRisksList" class="analytics-risks-list"></div>
+                    </article>
+                </section>
+
+                <!-- Диаграммы -->
+                <section class="analytics-panel" data-panel="charts" hidden>
+                    <div class="analytics-grid analytics-grid--2">
+                        <article class="analytics-card card br-10">
+                            <header class="analytics-card__head">
+                                <h2 class="text-header">Нагрузка по исполнителям</h2>
+                                <p class="text-signature analytics-card__desc">Назначенные, в работе и завершённые задачи на человека.</p>
+                            </header>
+                            <div class="analytics-chart-wrap analytics-chart-wrap--tall"><canvas id="chartAssignee" aria-label="Исполнители"></canvas></div>
+                        </article>
+                        <article class="analytics-card card br-10">
+                            <header class="analytics-card__head">
+                                <h2 class="text-header">Популярные переходы статусов</h2>
+                                <p class="text-signature analytics-card__desc">Какие движения по workflow встречаются чаще всего.</p>
+                            </header>
+                            <div class="analytics-chart-wrap analytics-chart-wrap--tall"><canvas id="chartTransitions" aria-label="Переходы"></canvas></div>
+                        </article>
+                    </div>
+                    <article class="analytics-card card br-10">
+                        <header class="analytics-card__head">
+                            <h2 class="text-header">Просрочки и срочность по проектам</h2>
+                            <p class="text-signature analytics-card__desc">Сравнение «горящих» задач между проектами команды.</p>
+                        </header>
+                        <div class="analytics-chart-wrap analytics-chart-wrap--tall"><canvas id="chartRiskBar" aria-label="Риски"></canvas></div>
+                    </article>
+                </section>
+
+                <!-- Сравнение -->
+                <section class="analytics-panel" data-panel="compare" hidden>
+                    <article class="analytics-card card br-10">
+                        <header class="analytics-card__head">
+                            <h2 class="text-header">Сравнение проектов</h2>
+                            <p class="text-signature analytics-card__desc">Доля завершённых задач и объём бэклога - для приоритизации внимания менеджера.</p>
+                        </header>
+                        <div class="analytics-chart-wrap analytics-chart-wrap--tall"><canvas id="chartCompareDone" aria-label="Сравнение готовности"></canvas></div>
+                    </article>
+                    <article class="analytics-card card br-10">
+                        <header class="analytics-card__head">
+                            <h2 class="text-header">Объём задач по проектам</h2>
+                            <p class="text-signature analytics-card__desc">Абсолютные значения очереди, работы и готовности.</p>
+                        </header>
+                        <div class="analytics-chart-wrap analytics-chart-wrap--tall"><canvas id="chartCompareStack" aria-label="Стек проектов"></canvas></div>
+                    </article>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" crossorigin="anonymous"></script>
+    <script src="/static/js/loadComponents.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/theme.js"></script>
+    <script src="/static/js/create_task_modal.js"></script>
+    <script src="/static/js/tp_select.js"></script>
+    <script src="/static/js/profile_modal.js"></script>
+    <script src="/static/js/settings_modal.js"></script>
+    <script src="/static/js/analytics.js"></script>
+</body>
+
+</html>

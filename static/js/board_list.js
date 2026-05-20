@@ -26,7 +26,21 @@ function prefetchIndexSummaryAfterTaskMutation() {
 
 function currentProjectCodeFromUrl() {
     const params = new URLSearchParams(window.location.search);
-    return params.get('project') || null;
+    const fromQuery = params.get('project');
+    if (fromQuery) {
+        try {
+            return decodeURIComponent(fromQuery);
+        } catch {
+            return fromQuery;
+        }
+    }
+    const match = window.location.pathname.match(/\/p\/([^/]+)\//);
+    if (!match) return null;
+    try {
+        return decodeURIComponent(match[1]);
+    } catch {
+        return match[1];
+    }
 }
 
 async function createBoardServer(name, view = 'list') {
@@ -120,7 +134,7 @@ async function loadBoardsData() {
             }
         }
         const params = new URLSearchParams(window.location.search);
-        const project = params.get('project');
+        const project = currentProjectCodeFromUrl();
         const url = project ? apiUrl(`/boards?project=${encodeURIComponent(project)}`) : apiUrl('/boards');
         const response = await fetch(url);
         if (!response.ok) {

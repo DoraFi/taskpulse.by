@@ -495,7 +495,7 @@ function renderModalStats(stats) {
 
 function personalDisplayValue(value) {
     const text = String(value ?? '').trim();
-    if (!text || text === '-' || text === '—') return '';
+    if (!text || text === '-' || text === '-') return '';
     if (/^не\s+указан/i.test(text)) return '';
     return text;
 }
