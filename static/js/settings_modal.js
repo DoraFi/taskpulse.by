@@ -27,12 +27,71 @@
         if (['light', 'dark', 'system'].includes(mode)) sel.value = mode;
     }
 
+    function escapeHtml(s) {
+        return String(s ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    async function loadSessions(overlay) {
+        const list = overlay.querySelector('#settingsSessionList');
+        if (!list) return;
+        try {
+            const res = await fetch('/api/me', { credentials: 'same-origin' });
+            if (!res.ok) throw new Error('me api failed');
+            const data = await res.json();
+            const sessions = Array.isArray(data.sessions) ? data.sessions : [];
+            if (!sessions.length) {
+                list.innerHTML = `
+                    <li class="settings-modal__session-row br-5">
+                        <div>
+                            <p class="text-basic settings-modal__session-device">Нет данных о входах</p>
+                            <p class="text-signature">Войдите снова, чтобы обновить информацию</p>
+                        </div>
+                    </li>`;
+                return;
+            }
+            list.innerHTML = sessions.map(s => {
+                const device = escapeHtml(s.device || 'Устройство');
+                const subtitle = escapeHtml(s.subtitle || s.when || '');
+                if (s.current) {
+                    return `
+                        <li class="settings-modal__session-row br-5">
+                            <div>
+                                <p class="text-basic settings-modal__session-device">${device}</p>
+                                <p class="text-signature">${subtitle}</p>
+                            </div>
+                            <span class="text-signature settings-modal__session-badge">Текущая</span>
+                        </li>`;
+                }
+                return `
+                    <li class="settings-modal__session-row br-5">
+                        <div>
+                            <p class="text-basic settings-modal__session-device">${device}</p>
+                            <p class="text-signature">${subtitle}</p>
+                        </div>
+                        <button type="button" class="button-secondary settings-modal__session-revoke" disabled title="Скоро">Завершить</button>
+                    </li>`;
+            }).join('');
+        } catch (err) {
+            console.error(err);
+            list.innerHTML = `
+                <li class="settings-modal__session-row br-5">
+                    <p class="text-signature">Не удалось загрузить сессии</p>
+                </li>`;
+        }
+    }
+
     function openModal(overlay, panelId) {
         if (overlay.parentElement !== document.body) document.body.appendChild(overlay);
         overlay.classList.add('show');
         overlay.setAttribute('aria-hidden', 'false');
-        switchPanel(overlay, panelId || 'general');
+        const panel = panelId || 'general';
+        switchPanel(overlay, panel);
         syncThemeSelect(overlay);
+        if (panel === 'security') loadSessions(overlay);
     }
 
     window.tpOpenSettingsModal = async function tpOpenSettingsModal(panelId) {
@@ -90,17 +149,13 @@
             e.preventDefault();
             showSettingsToast('Настройки сохранены');
         });
-        overlay.querySelector('#settingsExportBtn')?.addEventListener('click', e => {
-            e.preventDefault();
-            showSettingsToast('Запрос на экспорт принят (демо)');
-        });
-
         overlay.querySelectorAll('.settings-modal__nav-item').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.dataset.settingsPanel;
                 if (id) {
                     switchPanel(overlay, id);
                     if (id === 'appearance') syncThemeSelect(overlay);
+                    if (id === 'security') loadSessions(overlay);
                 }
             });
         });

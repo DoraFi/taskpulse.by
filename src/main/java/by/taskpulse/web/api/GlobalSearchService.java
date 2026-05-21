@@ -43,12 +43,10 @@ public class GlobalSearchService {
             new StaticEntry(new String[]{"выйти", "logout", "выход"}, "command", "Выйти из аккаунта", "Команда", "/auth/welcome", null, "navigate"),
 
             new StaticEntry(new String[]{"язык", "locale", "формат даты", "общие"}, "settings", "Общие настройки", "Настройки", null, "general", "openSettingsPanel"),
-            new StaticEntry(new String[]{"уведомления", "notifications", "email"}, "settings", "Уведомления", "Настройки", null, "notifications", "openSettingsPanel"),
             new StaticEntry(new String[]{"внешний вид", "тема", "theme", "тёмная", "светлая"}, "settings", "Внешний вид", "Настройки", null, "appearance", "openSettingsPanel"),
             new StaticEntry(new String[]{"безопасность", "пароль", "2fa", "security"}, "settings", "Безопасность", "Настройки", null, "security", "openSettingsPanel"),
-            new StaticEntry(new String[]{"интеграции", "webhook", "api ключ"}, "settings", "Интеграции", "Настройки", null, "integrations", "openSettingsPanel"),
             new StaticEntry(new String[]{"доступ", "роли", "приглашения", "команда и доступ"}, "settings", "Команда и доступ", "Настройки", null, "team", "openSettingsPanel"),
-            new StaticEntry(new String[]{"экспорт", "данные", "backup", "csv"}, "settings", "Данные и экспорт", "Настройки", null, "data", "openSettingsPanel")
+            new StaticEntry(new String[]{"данные", "удаление аккаунта", "аккаунт"}, "settings", "Данные", "Настройки", null, "data", "openSettingsPanel")
     );
 
     private final JdbcTemplate jdbcTemplate;

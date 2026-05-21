@@ -1,6 +1,7 @@
 package by.taskpulse.web.api;
 
 import by.taskpulse.auth.CurrentUserProvider;
+import by.taskpulse.auth.LoginAudit;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -665,6 +666,10 @@ public class LegacyDataApiController {
                             coalesce(u.timezone, 'Europe/Minsk') as timezone,
                             coalesce(u.office, '') as office,
                             coalesce(u.bio, '') as bio,
+                            u.last_login_at,
+                            coalesce(u.last_login_client, '') as last_login_client,
+                            u.previous_login_at,
+                            coalesce(u.previous_login_client, '') as previous_login_client,
                             coalesce(to_char(u.team_joined_at, 'TMMonth YYYY'), '') as team_since,
                             coalesce(tm.name, 'Без команды') as team_name,
                             coalesce(tm.public_id, '') as team_public_id,
@@ -710,10 +715,35 @@ public class LegacyDataApiController {
                 },
                 uid);
 
+        String timezone = String.valueOf(base.get("timezone"));
+        String lastLoginClient = String.valueOf(base.get("last_login_client"));
+        if ("null".equalsIgnoreCase(lastLoginClient)) {
+            lastLoginClient = "";
+        }
+        String previousLoginClient = String.valueOf(base.get("previous_login_client"));
+        if ("null".equalsIgnoreCase(previousLoginClient)) {
+            previousLoginClient = "";
+        }
+
         List<Map<String, Object>> activity = new ArrayList<>();
-        activity.add(activityRow("Последний вход", "Сегодня, 09:14 · Chrome · Windows"));
+        activity.add(activityRow(
+                "Последний вход",
+                LoginAudit.formatLoginActivityValue(base.get("last_login_at"), lastLoginClient, timezone)));
         activity.add(activityRow("Двухфакторная защита", "Выключена"));
-        activity.add(activityRow("Календари", "Google Calendar"));
+
+        List<Map<String, Object>> sessions = new ArrayList<>();
+        Object lastLoginAt = base.get("last_login_at");
+        if (lastLoginAt != null) {
+            String currentDevice = lastLoginClient.isBlank()
+                    ? "Это устройство"
+                    : "Это устройство · " + lastLoginClient;
+            sessions.add(LoginAudit.sessionRow(true, currentDevice, lastLoginAt, timezone));
+            Object previousLoginAt = base.get("previous_login_at");
+            if (previousLoginAt != null) {
+                String prevDevice = previousLoginClient.isBlank() ? "Другое устройство" : previousLoginClient;
+                sessions.add(LoginAudit.sessionRow(false, prevDevice, previousLoginAt, timezone));
+            }
+        }
 
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("id", base.get("id"));
@@ -745,6 +775,7 @@ public class LegacyDataApiController {
         out.put("organizationPublicId", base.get("organization_public_id"));
         out.put("projects", projects);
         out.put("activity", activity);
+        out.put("sessions", sessions);
 
         Map<String, Object> stats = new LinkedHashMap<>();
         stats.put("assigned", assigned == null ? 0 : assigned);

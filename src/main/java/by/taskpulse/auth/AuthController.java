@@ -1,5 +1,6 @@
 package by.taskpulse.auth;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -47,7 +48,9 @@ public class AuthController {
     }
 
     @PostMapping("/register-account")
-    public ResponseEntity<Map<String, Object>> registerAccount(@Valid @RequestBody RegisterAccountRequest req) {
+    public ResponseEntity<Map<String, Object>> registerAccount(
+            @Valid @RequestBody RegisterAccountRequest req,
+            HttpServletRequest request) {
         String email = req.email().trim().toLowerCase(Locale.ROOT);
         if (exists("select count(*) from app_user where email = ?", email)) {
             return ResponseEntity.badRequest().body(Map.of("error", "Пользователь с таким email уже существует"));
@@ -64,6 +67,7 @@ public class AuthController {
                 email, lastName, firstName, fullName, passwordEncoder.encode(req.password()), username
         );
         Long userId = jdbcTemplate.queryForObject("select id from app_user where email = ?", Long.class, email);
+        LoginAudit.recordLogin(jdbcTemplate, userId, request != null ? request.getHeader("User-Agent") : null);
         String token = jwtService.generateToken(username, userId, List.of("member"));
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("token", token);
@@ -75,7 +79,9 @@ public class AuthController {
 
     @PostMapping("/register")
     @Transactional
-    public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody RegisterRequest req) {
+    public ResponseEntity<Map<String, Object>> register(
+            @Valid @RequestBody RegisterRequest req,
+            HttpServletRequest request) {
         String email = req.email().trim().toLowerCase(Locale.ROOT);
         if (exists("select count(*) from app_user where email = ?", email)) {
             return ResponseEntity.badRequest().body(Map.of("error", "Пользователь с таким email уже существует"));
@@ -154,12 +160,14 @@ public class AuthController {
         createDefaultBoardsAndStages(projectId, projectCode, projectType);
 
         List<Map<String, Object>> inviteResult = saveInvites(orgId, teamId, userId, req.invites());
-        return finishOnboardingResponse(username, userId, email, inviteResult);
+        return finishOnboardingResponse(username, userId, email, inviteResult, request);
     }
 
     @PostMapping("/complete-onboarding")
     @Transactional
-    public ResponseEntity<Map<String, Object>> completeOnboarding(@Valid @RequestBody CompleteOnboardingRequest req) {
+    public ResponseEntity<Map<String, Object>> completeOnboarding(
+            @Valid @RequestBody CompleteOnboardingRequest req,
+            HttpServletRequest request) {
         String username = currentUserProvider.getUsername();
         if (username == null || username.isBlank()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Требуется авторизация. Войдите снова или пройдите регистрацию заново.");
@@ -172,7 +180,7 @@ public class AuthController {
         String email = String.valueOf(userRow.get("email"));
 
         if (userHasTeamMembership(userId)) {
-            return finishOnboardingResponse(username, userId, email, saveInvitesForExistingTeam(userId, req.invites()));
+            return finishOnboardingResponse(username, userId, email, saveInvitesForExistingTeam(userId, req.invites()), request);
         }
 
         String orgId = nextOrganizationCode(req.organizationName());
@@ -216,11 +224,13 @@ public class AuthController {
         createDefaultBoardsAndStages(projectId, projectCode, projectType);
 
         List<Map<String, Object>> inviteResult = saveInvites(orgId, teamId, userId, req.invites());
-        return finishOnboardingResponse(username, userId, email, inviteResult);
+        return finishOnboardingResponse(username, userId, email, inviteResult, request);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest req) {
+    public ResponseEntity<Map<String, Object>> login(
+            @Valid @RequestBody LoginRequest req,
+            HttpServletRequest request) {
         String email = req.email().trim().toLowerCase(Locale.ROOT);
         List<Map<String, Object>> users = jdbcTemplate.queryForList(
                 "select id, username, password_hash from app_user where email = ? and is_active = true",
@@ -242,6 +252,8 @@ public class AuthController {
                 userId
         );
         if (roles.isEmpty()) roles = List.of("member");
+
+        LoginAudit.recordLogin(jdbcTemplate, userId, request != null ? request.getHeader("User-Agent") : null);
 
         long sessionMinutes = req.rememberMe()
                 ? jwtProperties.getRememberExpirationMinutes()
@@ -491,7 +503,12 @@ public class AuthController {
     }
 
     private ResponseEntity<Map<String, Object>> finishOnboardingResponse(
-            String username, Long userId, String email, List<Map<String, Object>> inviteResult) {
+            String username,
+            Long userId,
+            String email,
+            List<Map<String, Object>> inviteResult,
+            HttpServletRequest request) {
+        LoginAudit.recordLogin(jdbcTemplate, userId, request != null ? request.getHeader("User-Agent") : null);
         Map<String, Object> context = contextByUserId(userId);
         String token = jwtService.generateToken(username, userId, List.of("organization_registrar", "team_admin", "project_admin"));
         Map<String, Object> body = new LinkedHashMap<>();
