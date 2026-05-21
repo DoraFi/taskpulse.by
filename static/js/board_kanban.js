@@ -226,6 +226,35 @@
         return task?.displayId || task?.id || '';
     }
 
+    function parseDependencyLabelId(label) {
+        const raw = String(label || '').trim();
+        if (!raw) return '';
+        const sep = raw.indexOf(' - ');
+        return (sep >= 0 ? raw.slice(0, sep) : raw).trim();
+    }
+
+    function findKanbanTaskByDependency(sourceTask) {
+        if (!sourceTask) return null;
+        const depDbId = sourceTask.dependencyTaskId;
+        if (depDbId != null && depDbId !== '') {
+            const byId = kanbanTasks.find(t => Number(t.id) === Number(depDbId));
+            if (byId) return byId;
+            for (const b of kanbanBoards) {
+                const archived = (b.archivedTasks || []).find(t => Number(t.id) === Number(depDbId));
+                if (archived) return archived;
+            }
+        }
+        const displayId = parseDependencyLabelId(sourceTask.dependencyLabel);
+        if (!displayId) return null;
+        const byDisplay = kanbanTasks.find(t => String(getTaskDisplayId(t)).trim() === displayId);
+        if (byDisplay) return byDisplay;
+        for (const b of kanbanBoards) {
+            const archived = (b.archivedTasks || []).find(t => String(getTaskDisplayId(t)).trim() === displayId);
+            if (archived) return archived;
+        }
+        return null;
+    }
+
     function getScopedStorageKey(baseKey) {
         const p = currentProjectCodeFromUrl() || 'all';
         return `${baseKey}:${p}`;
@@ -1713,17 +1742,10 @@
         const hasDueDate = task.dueDate && String(task.dueDate).trim();
         const hasDependency = task.dependencyLabel && String(task.dependencyLabel).trim();
         if (!hasAssignee && !hasDueDate && !hasDependency) return null;
-        const extractDependencyDisplayId = (label) => {
-            const raw = String(label || '').trim();
-            if (!raw) return '';
-            return raw.split('-')[0].trim();
-        };
         const tagBlock = document.createElement('div');
         tagBlock.className = 'tag';
-        const openDependencyTaskById = (displayId) => {
-            const depId = String(displayId || '').trim();
-            if (!depId) return;
-            const linked = kanbanTasks.find(t => String(getTaskDisplayId(t)).trim() === depId);
+        const openLinkedDependencyTask = () => {
+            const linked = findKanbanTaskByDependency(task);
             if (!linked) {
                 showToast('Связанная задача не найдена');
                 return;
@@ -1756,18 +1778,18 @@
             const depPrefix = task.dependencyType === 'blocks'
                 ? 'Блокирует'
                 : (task.dependencyType === 'blocked_by' ? 'Блокируется' : 'Связана');
-            const depId = extractDependencyDisplayId(task.dependencyLabel);
+            const depId = parseDependencyLabelId(task.dependencyLabel);
             depDiv.innerHTML = `
                 <span class="text-signature">${escapeHtml(depPrefix)}</span>
                 <span class="text-basic dependency-chip-id">${escapeHtml(depId || '-')}</span>
             `;
             if (depPrefix === 'Блокируется' && isTaskBlocked(task)) depDiv.classList.add('dependency-chip--blocked');
-            if (depId) {
+            if (depId || task.dependencyTaskId != null) {
                 depDiv.classList.add('dependency-chip--clickable');
                 depDiv.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    openDependencyTaskById(depId);
+                    openLinkedDependencyTask();
                 });
             }
             tagBlock.appendChild(depDiv);
@@ -3024,27 +3046,15 @@
         return wrap;
     }
 
-    function getDependencyDisplayId(label) {
-        const raw = String(label || '').trim();
-        if (!raw) return '';
-        return raw.split('-')[0].trim();
-    }
-
     function isTaskBlocked(task) {
         if (!task) return false;
         const label = String(task.dependencyLabel || '');
         const depTypeBlocked = task.dependencyType === 'blocked_by'
             || label.toLowerCase().includes('блокируется');
         if (!depTypeBlocked) return false;
-        const blockerDisplayId = getDependencyDisplayId(label);
-        if (!blockerDisplayId) return true;
-        const blocker = kanbanTasks.find(t => String(getTaskDisplayId(t)).trim() === blockerDisplayId);
-        if (blocker) return blocker.stage !== 'Готово';
-        const archivedBlocker = kanbanBoards
-            .flatMap(b => Array.isArray(b.archivedTasks) ? b.archivedTasks : [])
-            .find(t => String(getTaskDisplayId(t)).trim() === blockerDisplayId);
-        if (archivedBlocker) return false;
-        return true;
+        const blocker = findKanbanTaskByDependency(task);
+        if (!blocker) return true;
+        return blocker.stage !== 'Готово';
     }
 
     function createScrumQueueBoardHead(board, boardIndex, backlogTasks, backlogPanelRoot) {

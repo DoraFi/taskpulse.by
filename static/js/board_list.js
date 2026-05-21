@@ -2696,6 +2696,34 @@ function updateSubtasksProgress(task) {
     }
 }
 
+function parseDependencyLabelId(label) {
+    const raw = String(label || '').trim();
+    if (!raw) return '';
+    const sep = raw.indexOf(' - ');
+    return (sep >= 0 ? raw.slice(0, sep) : raw).trim();
+}
+
+function findBoardTaskByDependency(sourceTask) {
+    if (!sourceTask) return null;
+    const depDbId = sourceTask.dependencyTaskId;
+    const getTaskDisplayIdSafe = (t) => String(t?.displayId || t?.id || '').trim();
+    if (depDbId != null && depDbId !== '') {
+        for (const b of boardsData || []) {
+            const byId = (b.tasks || []).find(t => Number(t.id) === Number(depDbId))
+                || (b.archivedTasks || []).find(t => Number(t.id) === Number(depDbId));
+            if (byId) return byId;
+        }
+    }
+    const displayId = parseDependencyLabelId(sourceTask.dependencyLabel);
+    if (!displayId) return null;
+    for (const b of boardsData || []) {
+        const linked = (b.tasks || []).find(t => getTaskDisplayIdSafe(t) === displayId)
+            || (b.archivedTasks || []).find(t => getTaskDisplayIdSafe(t) === displayId);
+        if (linked) return linked;
+    }
+    return null;
+}
+
 function createTagBlock(task) {
     const hasAssignee = task.assignee && task.assignee.trim();
     const hasPriority = task.priority && (task.priority === 'срочно' || task.priority === 'обычный');
@@ -2704,17 +2732,8 @@ function createTagBlock(task) {
     if (!hasAssignee && !hasPriority && !hasDueDate && !hasDependency) return null;
     const tagBlock = document.createElement('div');
     tagBlock.className = 'tag';
-    const getTaskDisplayIdSafe = (t) => String(t?.displayId || t?.id || '').trim();
-    const openDependencyTaskById = (displayId) => {
-        const depId = String(displayId || '').trim();
-        if (!depId) return;
-        let linkedTask = null;
-        for (const b of boardsData || []) {
-            linkedTask = (b.tasks || []).find(t => getTaskDisplayIdSafe(t) === depId) || null;
-            if (linkedTask) break;
-            linkedTask = (b.archivedTasks || []).find(t => getTaskDisplayIdSafe(t) === depId) || null;
-            if (linkedTask) break;
-        }
+    const openLinkedDependencyTask = () => {
+        const linkedTask = findBoardTaskByDependency(task);
         if (!linkedTask) {
             showToast('Связанная задача не найдена');
             return;
@@ -2749,7 +2768,7 @@ function createTagBlock(task) {
     if (hasDependency) {
         const depDiv = document.createElement('div');
         depDiv.className = 'deadline dependency-chip';
-        const depId = String(task.dependencyLabel || '').split('-')[0].trim();
+        const depId = parseDependencyLabelId(task.dependencyLabel);
         const depPrefix = task.dependencyType === 'blocks'
             ? 'Блокирует'
             : (task.dependencyType === 'blocked_by' ? 'Блокируется' : 'Связана');
@@ -2758,12 +2777,12 @@ function createTagBlock(task) {
             <span class="text-basic dependency-chip-id">${escapeHtml(depId || '-')}</span>
         `;
         if (depPrefix === 'Блокируется' && isTaskBlocked(task)) depDiv.classList.add('dependency-chip--blocked');
-        if (depId) {
+        if (depId || task.dependencyTaskId != null) {
             depDiv.classList.add('dependency-chip--clickable');
             depDiv.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                openDependencyTaskById(depId);
+                openLinkedDependencyTask();
             });
         }
         tagBlock.appendChild(depDiv);
@@ -2777,15 +2796,7 @@ function isTaskBlocked(task) {
     const depTypeBlocked = task.dependencyType === 'blocked_by'
         || rawLabel.toLowerCase().includes('блокируется');
     if (!depTypeBlocked) return false;
-    const blockerDisplayId = rawLabel.split('-')[0].trim();
-    if (!blockerDisplayId) return true;
-    let blocker = null;
-    for (const b of boardsData || []) {
-        blocker = (b.tasks || []).find(t => String(t?.displayId || t?.id || '').trim() === blockerDisplayId) || null;
-        if (blocker) break;
-        blocker = (b.archivedTasks || []).find(t => String(t?.displayId || t?.id || '').trim() === blockerDisplayId) || null;
-        if (blocker) break;
-    }
+    const blocker = findBoardTaskByDependency(task);
     if (!blocker) return true;
     return blocker.stage !== 'Готово';
 }
