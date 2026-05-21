@@ -18,6 +18,10 @@
         display: flex;
         align-items: center;
         gap: $space-24;
+
+        &[hidden] {
+            display: none !important;
+        }
     }
 
     .profile-modal__avatar {

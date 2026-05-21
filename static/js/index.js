@@ -86,7 +86,7 @@ function bindIndexDashboardNav() {
             const hrefByNav = {
                 'tasks-all': `${base}/tasks`,
                 'tasks-history': `${base}/tasks`,
-                'tasks-calendar': `${base}/tasks`,
+                'events': `${base}/events`,
                 'projects-team': `${base}/team`
             };
             const key = el.getAttribute('data-index-nav');
@@ -222,27 +222,49 @@ function initIndexPage(options) {
 
             const eventsGrid = document.querySelector('.events-grid');
             if (eventsGrid) {
-                const todoList = Array.isArray(data.todo) ? data.todo : [];
-                const upcoming = todoList
-                    .filter(t => t && t.dueDate)
-                    .slice(0, 6);
+                const upcoming = Array.isArray(data.upcomingEvents) ? data.upcomingEvents : [];
 
                 if (upcoming.length === 0) {
                     eventsGrid.innerHTML = '<div class="empty-message">Пока нет ближайших событий</div>';
                 } else {
-                    eventsGrid.innerHTML = upcoming.map(e => {
-                        const dueClass = isAttentionDate(e.dueDate) ? 'pink' : 'light-gray';
+                    eventsGrid.innerHTML = upcoming.map((e, idx) => {
+                        const dueClass = isAttentionDate(e.dateIso || e.date) ? 'pink' : 'light-gray';
+                        const dateText = typeof window.tpFormatEventDate === 'function'
+                            ? window.tpFormatEventDate(e.dateIso || e.date, e.date)
+                            : formatRelativeDate(e.dateIso || e.date);
+                        const title = e.kind === 'birthday'
+                            ? (typeof window.tpBirthdayListTitle === 'function'
+                                ? window.tpBirthdayListTitle(e.personName)
+                                : `День рождения у ${e.personName || ''}`.trim())
+                            : (e.title || '');
+                        const sub = e.kind === 'birthday'
+                            ? (typeof window.tpBirthdayAgePhrase === 'function'
+                                ? window.tpBirthdayAgePhrase(e)
+                                : (e.ageLabel ? `исполнится ${e.ageLabel}` : ''))
+                            : (e.kindLabel || '');
                         return `
-                                <div class="grid-row">
+                                <button type="button" class="index-event-row" data-event-idx="${idx}">
                                     <div class="col-event">
-                                        <p class="text-basic">${e.name || ''}</p>
+                                        <div class="basic-and-signature">
+                                            <p class="text-basic">${escapeIndexHtml(title)}</p>
+                                            <p class="index-event-row__kind text-signature">${escapeIndexHtml(sub)}</p>
+                                        </div>
                                     </div>
                                     <div class="col-date">
-                                        <p class="text-basic ${dueClass}">${formatRelativeDate(e.dueDate) || ''}</p>
+                                        <p class="text-basic ${dueClass}">${escapeIndexHtml(dateText || '-')}</p>
                                     </div>
-                                </div>
+                                </button>
                             `;
                     }).join('');
+                    eventsGrid.querySelectorAll('.index-event-row').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const idx = Number(btn.getAttribute('data-event-idx'));
+                            const ev = upcoming[idx];
+                            if (ev && typeof window.tpOpenEventDetail === 'function') {
+                                window.tpOpenEventDetail(ev.id);
+                            }
+                        });
+                    });
                 }
             }
         })
@@ -297,12 +319,22 @@ function daysDiffFromToday(dateStr) {
     return Math.round((date - today) / 86400000);
 }
 
+function isoToUiDate(iso) {
+    if (!iso || !String(iso).includes('-')) return iso || '';
+    const [y, m, d] = String(iso).split('-');
+    return `${d}.${m}.${y}`;
+}
+
 function formatRelativeDate(dateStr) {
     const diff = daysDiffFromToday(dateStr);
-    if (diff == null) return dateStr || '';
+    if (diff == null) {
+        if (dateStr && String(dateStr).includes('-')) return isoToUiDate(dateStr);
+        return dateStr || '';
+    }
     if (diff === -1) return 'Вчера';
     if (diff === 0) return 'Сегодня';
     if (diff === 1) return 'Завтра';
+    if (dateStr && String(dateStr).includes('-')) return isoToUiDate(dateStr);
     return dateStr;
 }
 

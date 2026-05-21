@@ -506,7 +506,9 @@ function createAddTaskForm(boardId, boardIndex) {
             const prevYear = month === 0 ? year - 1 : year;
             const prevMonth = month === 0 ? 11 : month - 1;
             const dateStr = `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-${String(prevDate).padStart(2, '0')}`;
-            html += `<div class="other-month" data-date="${dateStr}">${prevDate}</div>`;
+            html += typeof window.tpCalendarOtherMonthCell === 'function'
+                ? window.tpCalendarOtherMonthCell(prevDate, dateStr)
+                : `<div class="other-month">${prevDate}</div>`;
         }
 
         const dayCtx = { selectionStart, selectionEnd };
@@ -533,7 +535,9 @@ function createAddTaskForm(boardId, boardIndex) {
             const nextYear = month === 11 ? year + 1 : year;
             const nextMonth = month === 11 ? 0 : month + 1;
             const dateStr = `${nextYear}-${String(nextMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-            html += `<div class="other-month" data-date="${dateStr}">${i}</div>`;
+            html += typeof window.tpCalendarOtherMonthCell === 'function'
+                ? window.tpCalendarOtherMonthCell(i, dateStr)
+                : `<div class="other-month">${i}</div>`;
         }
 
         html += `</div></div>`;

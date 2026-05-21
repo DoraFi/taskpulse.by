@@ -83,9 +83,77 @@
             margin: 0 auto;
         }
     }
+
+    .tp-date-picker__time {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: $space-8;
+        margin: $space-16 0 $space-8;
+
+        &[hidden] {
+            display: none !important;
+        }
+    }
+
+    &.tp-date-picker--no-time .tp-date-picker__time {
+        display: none !important;
+    }
+
+    .tp-date-picker__time-fields {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: $space-8;
+    }
+
+    .tp-date-picker__time-sep {
+        @extend .text-header;
+        color: $dark-gray;
+    }
+
+    .tp-date-picker-hour,
+    .tp-date-picker-minute {
+        width: 4.5rem;
+    }
 }
 
 .custom-calendar-modal {
+    .custom-calendar-range__time {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: $space-12;
+        margin: $space-16 0 $space-8;
+        width: 100%;
+
+        .tp-date-picker__time-label {
+            margin: 0;
+        }
+
+        .tp-date-picker__time-fields {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: $space-8;
+        }
+
+        .tp-date-picker-hour,
+        .tp-date-picker-minute {
+            width: 4.5rem;
+            min-width: 4.5rem;
+            max-width: 4.5rem;
+        }
+
+        .tp-select {
+            width: 4.5rem;
+            min-width: 4.5rem;
+            max-width: 4.5rem;
+        }
+    }
+
     .custom-calendar {
         background: $light-light-green;
         padding: $space-48;
@@ -160,6 +228,12 @@
                     color: $light-gray;
                     margin-bottom: $space-12;
                     @extend .text-signature;
+
+                    div:nth-child(6),
+                    div:nth-child(7) {
+                        color: $pink;
+                        font-weight: 600;
+                    }
                 }
 
                 .days {
@@ -172,9 +246,12 @@
                         text-align: center;
                         padding: $space-12;
                         aspect-ratio: 1/1;
-                        cursor: pointer;
                         @extend .br-5;
                         transition: all 0.2s;
+                    }
+
+                    .day {
+                        cursor: pointer;
                     }
 
                     .day {
@@ -207,6 +284,11 @@
                     .other-month {
                         color: lighten($light-gray, 20%);
                         cursor: default;
+                        pointer-events: none;
+
+                        &.weekend {
+                            background: rgba(255, 105, 180, 0.06);
+                        }
 
                         &:hover {
                             background: none;

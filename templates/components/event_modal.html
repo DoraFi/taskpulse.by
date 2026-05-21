@@ -1,0 +1,125 @@
+<div th:fragment="eventModal" xmlns:th="http://www.thymeleaf.org">
+    <div class="modal-overlay" id="eventDetailModal" aria-hidden="true">
+        <div class="modal-content profile-modal event-detail-modal" role="dialog" aria-labelledby="eventDetailModalTitle" aria-modal="true">
+            <div class="modal-header">
+                <p class="text-header" id="eventDetailModalTitle">Событие</p>
+                <button type="button" class="modal-close" id="eventDetailModalClose" aria-label="Закрыть">
+                    <img src="/static/source/icons/cross.svg" alt="" width="24" height="24">
+                </button>
+            </div>
+            <div class="modal-body profile-modal__body">
+                <div class="profile-modal__hero" id="eventDetailHero" hidden>
+                    <img class="profile-modal__avatar" id="eventDetailAvatar" src="/static/source/user_img/basic_avatar.png" alt="">
+                    <div class="profile-modal__titles">
+                        <p class="text-header" id="eventDetailPerson"></p>
+                        <p class="text-signature" id="eventDetailPersonMeta"></p>
+                    </div>
+                </div>
+                <p class="text-signature events-detail-modal__lead" id="eventDetailSubtitle" hidden></p>
+                <div class="profile-modal__section profile-modal__section--card br-5">
+                    <p class="filter-label" id="eventDetailSectionLabel">Данные события</p>
+                    <div class="profile-modal__grid">
+                        <div class="auth-field profile-modal__field profile-modal__field--full" id="eventDetailTitleRow" hidden>
+                            <label for="eventDetailTitle">Название</label>
+                            <input type="text" class="tp-field-plain" id="eventDetailTitle" readonly tabindex="-1">
+                        </div>
+                        <div class="auth-field profile-modal__field" id="eventDetailDateSingleRow" hidden>
+                            <label for="eventDetailDateSingle">Дата события</label>
+                            <input type="text" class="tp-field-plain" id="eventDetailDateSingle" readonly tabindex="-1">
+                        </div>
+                        <div class="auth-field profile-modal__field" id="eventDetailDateStartRow" hidden>
+                            <label for="eventDetailDateStart">Дата начала</label>
+                            <input type="text" class="tp-field-plain" id="eventDetailDateStart" readonly tabindex="-1">
+                        </div>
+                        <div class="auth-field profile-modal__field" id="eventDetailDateEndRow" hidden>
+                            <label for="eventDetailDateEnd">Дата окончания</label>
+                            <input type="text" class="tp-field-plain" id="eventDetailDateEnd" readonly tabindex="-1">
+                        </div>
+                        <div class="auth-field profile-modal__field" id="eventDetailTimeRow" hidden>
+                            <label for="eventDetailTime">Время</label>
+                            <input type="text" class="tp-field-plain" id="eventDetailTime" readonly tabindex="-1">
+                        </div>
+                        <div class="auth-field profile-modal__field" id="eventDetailScopeRow" hidden>
+                            <label for="eventDetailScope">Охват</label>
+                            <input type="text" class="tp-field-plain" id="eventDetailScope" readonly tabindex="-1">
+                        </div>
+                        <div class="auth-field profile-modal__field profile-modal__field--full" id="eventDetailLocationRow" hidden>
+                            <label for="eventDetailLocation">Место</label>
+                            <input type="text" class="tp-field-plain" id="eventDetailLocation" readonly tabindex="-1">
+                        </div>
+                        <div class="auth-field profile-modal__field profile-modal__field--full" id="eventDetailDescRow" hidden>
+                            <label for="eventDetailDescription">Описание</label>
+                            <textarea class="tp-field-plain profile-modal__bio" id="eventDetailDescription" rows="4" readonly tabindex="-1"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" id="eventDetailFooter" hidden>
+                <button type="button" class="button-secondary" id="eventDetailEditBtn">Изменить</button>
+                <button type="button" class="button-secondary events-detail-modal__danger" id="eventDetailDeleteBtn">Удалить</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="eventFormModal" aria-hidden="true">
+        <div class="modal-content create-task-modal events-modal events-modal--form" role="dialog" aria-labelledby="eventFormModalTitle" aria-modal="true">
+            <div class="modal-header">
+                <p class="text-header" id="eventFormModalTitle">Новое событие</p>
+                <button type="button" class="modal-close" id="eventFormModalClose" aria-label="Закрыть">
+                    <img src="/static/source/icons/cross.svg" alt="" width="24" height="24">
+                </button>
+            </div>
+            <div class="modal-body create-task-modal__body events-modal__body">
+                <div class="auth-field create-task-field">
+                    <label class="filter-label" for="eventFormTitle">Название</label>
+                    <input id="eventFormTitle" type="text" class="filter-input" maxlength="200" required autocomplete="off" placeholder="Например, Планёрка команды">
+                </div>
+                <div class="auth-field create-task-field">
+                    <label class="filter-label" for="eventFormDescription">Описание</label>
+                    <textarea id="eventFormDescription" class="filter-input" rows="4" placeholder="Необязательно"></textarea>
+                </div>
+                <div class="filter-section create-task-field events-form-schedule">
+                    <input type="hidden" id="eventFormDate" autocomplete="off">
+                    <input type="hidden" id="eventFormEndDate" autocomplete="off">
+                    <input type="hidden" id="eventFormTime" autocomplete="off">
+                    <div class="auth-field create-task-field">
+                        <label class="filter-label" for="eventFormDateStartDisplay">Дата начала</label>
+                        <div class="search-panel br-5 tp-date-field events-form-schedule__trigger" id="eventFormStartTrigger" role="button" tabindex="0" aria-haspopup="dialog">
+                            <img class="h-16" src="/static/source/icons/calendar.svg" alt="">
+                            <span id="eventFormDateStartDisplay" class="tp-date-field__value text-basic">Не выбрана</span>
+                        </div>
+                    </div>
+                    <div class="auth-field create-task-field">
+                        <label class="filter-label" for="eventFormDateEndDisplay">Дата окончания</label>
+                        <div class="search-panel br-5 tp-date-field events-form-schedule__trigger" id="eventFormEndTrigger" role="button" tabindex="0" aria-haspopup="dialog">
+                            <img class="h-16" src="/static/source/icons/calendar.svg" alt="">
+                            <span id="eventFormDateEndDisplay" class="tp-date-field__value text-basic">Не выбрана</span>
+                        </div>
+                    </div>
+                    <div class="auth-field create-task-field">
+                        <label class="filter-label" for="eventFormTimeDisplay">Время</label>
+                        <div class="search-panel br-5 tp-date-field events-form-schedule__trigger" id="eventFormTimeTrigger" role="button" tabindex="0" aria-haspopup="dialog">
+                            <img class="h-16" src="/static/source/icons/calendar.svg" alt="">
+                            <span id="eventFormTimeDisplay" class="tp-date-field__value text-basic">Не выбрано</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="auth-field create-task-field">
+                    <label class="filter-label" for="eventFormLocation">Место (необязательно)</label>
+                    <input id="eventFormLocation" type="text" class="filter-input" maxlength="300" placeholder="Офис, переговорная, ссылка…" autocomplete="off">
+                </div>
+                <div class="auth-field create-task-field">
+                    <label class="filter-label" for="eventFormScope">Охват</label>
+                    <select id="eventFormScope" class="filter-input create-task-select">
+                        <option value="team">Только эта команда</option>
+                        <option value="organization">Вся организация</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="button-secondary" id="eventFormCancelBtn">Отмена</button>
+                <button type="button" class="button-basic" id="eventFormSaveBtn">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -210,6 +210,13 @@ public class PageController {
         return "pages/team";
     }
 
+    @GetMapping("/o/{orgId}/t/{teamId}/events")
+    public String eventsContext(@PathVariable String orgId, @PathVariable String teamId, HttpServletRequest request, Model model) {
+        String blocked = openContextPage(orgId, teamId, request, model);
+        if (blocked != null) return blocked;
+        return "pages/events";
+    }
+
     @GetMapping("/o/{orgId}/t/{teamId}/analytics")
     public String analyticsContext(@PathVariable String orgId, @PathVariable String teamId, HttpServletRequest request, Model model) {
         String blocked = openContextPage(orgId, teamId, request, model);

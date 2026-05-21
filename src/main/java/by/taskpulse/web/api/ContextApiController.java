@@ -10,9 +10,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,17 +29,20 @@ public class ContextApiController {
     private final CurrentUserProvider currentUserProvider;
     private final HelpCenterService helpCenter;
     private final GlobalSearchService globalSearch;
+    private final CalendarEventService calendarEvents;
 
     public ContextApiController(JdbcTemplate jdbcTemplate,
                                 LegacyDataApiController legacy,
                                 CurrentUserProvider currentUserProvider,
                                 HelpCenterService helpCenter,
-                                GlobalSearchService globalSearch) {
+                                GlobalSearchService globalSearch,
+                                CalendarEventService calendarEvents) {
         this.jdbcTemplate = jdbcTemplate;
         this.legacy = legacy;
         this.currentUserProvider = currentUserProvider;
         this.helpCenter = helpCenter;
         this.globalSearch = globalSearch;
+        this.calendarEvents = calendarEvents;
     }
 
     @GetMapping("/api/me")
@@ -282,6 +287,43 @@ public class ContextApiController {
     @GetMapping("/api/index/summary")
     public Map<String, Object> indexSummaryAuto(HttpServletResponse response) {
         return legacy.indexSummary(response);
+    }
+
+    @GetMapping("/api/events/meta")
+    public Map<String, Object> eventsMetaAuto() {
+        return calendarEvents.meta();
+    }
+
+    @GetMapping("/api/events")
+    public List<Map<String, Object>> eventsListAuto(@RequestParam(required = false) String from,
+                                                    @RequestParam(required = false) String to) {
+        return calendarEvents.list(from, to);
+    }
+
+    @GetMapping("/api/events/upcoming")
+    public List<Map<String, Object>> eventsUpcomingAuto(@RequestParam(defaultValue = "8") int limit) {
+        return calendarEvents.upcoming(limit);
+    }
+
+    @GetMapping("/api/events/{eventId}")
+    public Map<String, Object> eventByIdAuto(@PathVariable String eventId) {
+        return calendarEvents.getByPublicId(eventId);
+    }
+
+    @PostMapping("/api/events")
+    public Map<String, Object> createEventAuto(@RequestBody Map<String, Object> payload) {
+        return calendarEvents.create(payload);
+    }
+
+    @PutMapping("/api/events/{eventId}")
+    public Map<String, Object> updateEventAuto(@PathVariable String eventId,
+                                             @RequestBody Map<String, Object> payload) {
+        return calendarEvents.update(eventId, payload);
+    }
+
+    @DeleteMapping("/api/events/{eventId}")
+    public Map<String, Object> deleteEventAuto(@PathVariable String eventId) {
+        return calendarEvents.delete(eventId);
     }
 
     @GetMapping("/api/index/mini-chart")
@@ -811,6 +853,62 @@ public class ContextApiController {
                                               @RequestParam(defaultValue = "guide") String article) {
         ensureContextAccess(orgId, teamId);
         return helpCenter.getDocArticle(kind, sectionSlug, article);
+    }
+
+    @GetMapping("/o/{orgId}/t/{teamId}/api/events/meta")
+    public Map<String, Object> eventsMeta(@PathVariable String orgId, @PathVariable String teamId) {
+        ensureContextAccess(orgId, teamId);
+        return calendarEvents.meta();
+    }
+
+    @GetMapping("/o/{orgId}/t/{teamId}/api/events")
+    public List<Map<String, Object>> eventsList(@PathVariable String orgId,
+                                                @PathVariable String teamId,
+                                                @RequestParam(required = false) String from,
+                                                @RequestParam(required = false) String to) {
+        ensureContextAccess(orgId, teamId);
+        return calendarEvents.list(from, to);
+    }
+
+    @GetMapping("/o/{orgId}/t/{teamId}/api/events/upcoming")
+    public List<Map<String, Object>> eventsUpcoming(@PathVariable String orgId,
+                                                   @PathVariable String teamId,
+                                                   @RequestParam(defaultValue = "8") int limit) {
+        ensureContextAccess(orgId, teamId);
+        return calendarEvents.upcoming(limit);
+    }
+
+    @GetMapping("/o/{orgId}/t/{teamId}/api/events/{eventId}")
+    public Map<String, Object> eventById(@PathVariable String orgId,
+                                         @PathVariable String teamId,
+                                         @PathVariable String eventId) {
+        ensureContextAccess(orgId, teamId);
+        return calendarEvents.getByPublicId(eventId);
+    }
+
+    @PostMapping("/o/{orgId}/t/{teamId}/api/events")
+    public Map<String, Object> createEvent(@PathVariable String orgId,
+                                           @PathVariable String teamId,
+                                           @RequestBody Map<String, Object> payload) {
+        ensureContextAccess(orgId, teamId);
+        return calendarEvents.create(payload);
+    }
+
+    @PutMapping("/o/{orgId}/t/{teamId}/api/events/{eventId}")
+    public Map<String, Object> updateEvent(@PathVariable String orgId,
+                                           @PathVariable String teamId,
+                                           @PathVariable String eventId,
+                                           @RequestBody Map<String, Object> payload) {
+        ensureContextAccess(orgId, teamId);
+        return calendarEvents.update(eventId, payload);
+    }
+
+    @DeleteMapping("/o/{orgId}/t/{teamId}/api/events/{eventId}")
+    public Map<String, Object> deleteEvent(@PathVariable String orgId,
+                                           @PathVariable String teamId,
+                                           @PathVariable String eventId) {
+        ensureContextAccess(orgId, teamId);
+        return calendarEvents.delete(eventId);
     }
 
     private void ensureContextAccess(String orgId, String teamId) {

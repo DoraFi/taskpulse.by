@@ -75,6 +75,7 @@
             window.openTpDatePicker({
                 title: 'Дата рождения',
                 value: current,
+                withTime: false,
                 minYear: 1920,
                 maxYear: new Date().getFullYear(),
                 allowClear: true,

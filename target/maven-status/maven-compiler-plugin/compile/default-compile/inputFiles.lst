@@ -24,8 +24,10 @@ D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\TaskpulseAppl
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\web\api\AnalyticsDashboardService.java
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\web\api\ApiExceptionControllerAdvice.java
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\web\api\BoardStageDefaults.java
+D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\web\api\CalendarEventService.java
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\web\api\ContextApiController.java
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\web\api\GlobalSearchService.java
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\web\api\HelpCenterService.java
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\web\api\LegacyDataApiController.java
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\web\PageController.java
+D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\web\TeamContextSupport.java

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>TaskPulse - События</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/static/source/logo_rect.svg}" href="/static/source/logo_rect.svg">
+    <link rel="stylesheet" th:href="@{/static/scss/style.css}" href="/static/scss/style.css">
+</head>
+
+<body>
+    <div class="header">
+        <div class="gap-24 flex-row" style="align-items: center;">
+            <a class="logo-link" data-context-link="home" href="/"><img class="logo" th:src="@{/static/source/logo_rect.svg}" src="/static/source/logo_rect.svg" alt="TaskPulse"></a>
+            <div class="search-panel br-5">
+                <img class="h-16" th:src="@{/static/source/icons/search.svg}" src="/static/source/icons/search.svg" alt="Поиск">
+                <input class="text-basic" type="search" placeholder="Поиск: задачи, проекты, команда, справка…" autocomplete="off">
+            </div>
+        </div>
+        <ul class="gap-24 flex-row header-toolbar">
+            <li><button type="button" class="header-toolbar__action" id="headerCreateTaskBtn" aria-label="Создать"><img class="h-32" th:src="@{/static/source/icons/plus.svg}" src="/static/source/icons/plus.svg" alt=""></button></li>
+            <li><button type="button" class="header-toolbar__action" id="headerSettingsBtn" aria-label="Настройки"><img class="h-32" th:src="@{/static/source/icons/settings.svg}" src="/static/source/icons/settings.svg" alt=""></button></li>
+            <li><button type="button" class="header-toolbar__action" id="headerProfileBtn" aria-label="Профиль"><img class="h-32" th:src="@{/static/source/icons/profile.svg}" src="/static/source/icons/profile.svg" alt=""></button></li>
+            <li><a th:href="@{/auth/welcome}" href="/auth/welcome" class="header-toolbar__action" aria-label="Выйти"><img class="h-32" th:src="@{/static/source/icons/logout.svg}" src="/static/source/icons/logout.svg" alt=""></a></li>
+            <li><button type="button" class="theme-toggle header-toolbar__action" id="themeToggle" aria-label="Переключить тему"><img class="h-32 theme-toggle__icon" th:src="@{/static/source/icons/lighttheme.svg}" src="/static/source/icons/lighttheme.svg" alt="" aria-hidden="true"></button></li>
+        </ul>
+    </div>
+
+    <div class="main-layout">
+        <aside id="aside-container"></aside>
+
+        <div class="app-container flex-col events-page" id="eventsPage">
+            <header class="events-page__hero br-5">
+                <div>
+                    <h1 class="text-header" id="eventsPageTitle">События</h1>
+                    <p class="text-signature" id="eventsPageSubtitle">Календарь команды и организации</p>
+                </div>
+                <button type="button" class="button-basic" id="eventsCreateBtn" hidden>Создать событие</button>
+            </header>
+
+            <div class="events-page__layout">
+                <section class="card events-page__calendar-card">
+                    <div class="custom-calendar events-calendar--embedded">
+                        <div class="custom-calendar-header events-calendar__nav">
+                            <button type="button" class="prev-both" id="eventsPrevMonth" aria-label="Предыдущий месяц">←</button>
+                            <p class="custom-calendar-title" id="eventsCalendarTitle"></p>
+                            <button type="button" class="next-both" id="eventsNextMonth" aria-label="Следующий месяц">→</button>
+                        </div>
+                        <div class="custom-calendar-months" id="eventsCalendarMonths"></div>
+                    </div>
+                    <div class="events-calendar__legend-wrap">
+                        <div class="events-calendar__legend text-signature">
+                            <span><span class="events-calendar__dot events-calendar__dot--custom"></span> Событие</span>
+                            <span><span class="events-calendar__dot events-calendar__dot--birthday"></span> День рождения</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card events-page__list-card">
+                    <div class="events-day-panel" id="eventsDayPanel">
+                        <p class="text-header" id="eventsDayListTitle">События дня</p>
+                        <div class="events-day-list" id="eventsDayList">
+                            <p class="text-signature">Загрузка…</p>
+                        </div>
+                    </div>
+                    <div class="events-day-panel" id="eventsNearestPanel" hidden>
+                        <p class="text-header">Ближайшее событие</p>
+                        <div class="events-day-list events-day-list--nearest" id="eventsNearestList"></div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <th:block th:replace="~{components/event_modal :: eventModal}"></th:block>
+    <script src="/static/js/loadComponents.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/theme.js"></script>
+    <script src="/static/js/tp_calendar_days.js"></script>
+    <script src="/static/js/custom_calendar_range.js"></script>
+    <script src="/static/js/tp_date_picker.js"></script>
+    <script src="/static/js/tp_select.js"></script>
+    <script src="/static/js/event_modal.js"></script>
+    <script src="/static/js/events.js"></script>
+    <script src="/static/js/create_task_modal.js"></script>
+    <script src="/static/js/profile_modal.js"></script>
+    <script src="/static/js/settings_modal.js"></script>
+</body>
+
+</html>

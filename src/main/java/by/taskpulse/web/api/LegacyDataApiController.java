@@ -58,17 +58,20 @@ public class LegacyDataApiController {
     private final HttpServletRequest request;
     private final PasswordEncoder passwordEncoder;
     private final AnalyticsDashboardService analyticsDashboardService;
+    private final CalendarEventService calendarEventService;
 
     public LegacyDataApiController(JdbcTemplate jdbcTemplate,
             CurrentUserProvider currentUserProvider,
             HttpServletRequest request,
             PasswordEncoder passwordEncoder,
-            AnalyticsDashboardService analyticsDashboardService) {
+            AnalyticsDashboardService analyticsDashboardService,
+            CalendarEventService calendarEventService) {
         this.jdbcTemplate = jdbcTemplate;
         this.currentUserProvider = currentUserProvider;
         this.request = request;
         this.passwordEncoder = passwordEncoder;
         this.analyticsDashboardService = analyticsDashboardService;
+        this.calendarEventService = calendarEventService;
     }
 
     @GetMapping("/api/team")
@@ -3486,6 +3489,11 @@ public class LegacyDataApiController {
         out.put("activeProjects", activeProjects);
         out.put("team", team);
         out.put("recentActions", recentActions);
+        try {
+            out.put("upcomingEvents", calendarEventService.upcoming(5));
+        } catch (Exception ex) {
+            out.put("upcomingEvents", List.of());
+        }
         return out;
     }
 

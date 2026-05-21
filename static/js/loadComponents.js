@@ -101,6 +101,7 @@ function applyContextNavLinks(base) {
     document.querySelectorAll('[data-context-link="projects-org"]').forEach(el => el.dataset.href = `${base}/projects/org`);
     document.querySelectorAll('[data-context-link="projects-archive"]').forEach(el => el.dataset.href = `${base}/projects/archive`);
     document.querySelectorAll('[data-context-link="team"]').forEach(el => el.dataset.href = `${base}/team`);
+    document.querySelectorAll('[data-context-link="events"]').forEach(el => el.dataset.href = `${base}/events`);
     document.querySelectorAll('[data-context-link="analytics-section"]').forEach(el => el.dataset.href = `${base}/analytics`);
     document.querySelectorAll('[data-context-link="analytics"]').forEach(el => el.dataset.href = `${base}/analytics`);
     document.querySelectorAll('[data-context-link="analytics-reports"]').forEach(el => el.dataset.href = `${base}/analytics#reports`);
@@ -299,8 +300,18 @@ function isHelpPage(container) {
     return Boolean(pageRoot(container, '#helpPage'));
 }
 
+function isEventsPage(container) {
+    if (!container) return false;
+    if (container.classList && container.classList.contains('events-page')) return true;
+    return Boolean(pageRoot(container, '#eventsPage'));
+}
+
 function isHelpPath(pathname) {
     return pathname.endsWith('/help');
+}
+
+function isEventsPath(pathname) {
+    return pathname.endsWith('/events');
 }
 
 function helpNavHash(url) {
@@ -474,6 +485,11 @@ function handleNavigationClick(e) {
             history.replaceState(null, '', `${targetUrl.pathname}${targetUrl.search}${targetUrl.hash || ''}`);
             window.initHelpPage().catch((err) => console.error('help init', err));
             updateActiveMenuItem();
+        } else if (typeof window.initEventsPage === 'function' && document.getElementById('eventsPage')) {
+            const targetUrl = new URL(url, window.location.origin);
+            history.replaceState(null, '', `${targetUrl.pathname}${targetUrl.search}${targetUrl.hash || ''}`);
+            window.initEventsPage().catch((err) => console.error('events init', err));
+            updateActiveMenuItem();
         } else {
             console.log('Уже на этой странице, переход не требуется');
         }
@@ -483,7 +499,7 @@ function handleNavigationClick(e) {
     loadPage(url);
 }
 
-const SPA_BODY_FRAGMENT_IDS = ['taskDetailModal'];
+const SPA_BODY_FRAGMENT_IDS = ['taskDetailModal', 'eventDetailModal', 'eventFormModal'];
 
 function mountSpaBodyFragments(doc) {
     SPA_BODY_FRAGMENT_IDS.forEach((id) => {
@@ -541,6 +557,13 @@ async function loadExternalScript(src) {
     }
     if (src.includes('help.js') && window.initHelpPage) {
         console.log(`Скрипт ${src} уже инициализирован через window`);
+        return true;
+    }
+    if (src.includes('events.js') && window.initEventsPage) {
+        console.log(`Скрипт ${src} уже инициализирован через window`);
+        return true;
+    }
+    if (src.includes('event_modal.js') && typeof window.tpOpenEventDetail === 'function') {
         return true;
     }
     
@@ -626,7 +649,9 @@ async function loadPage(url) {
                         src.includes('projects') ||
                         src.includes('team') ||
                         src.includes('analytics') ||
-                        src.includes('help.js');
+                        src.includes('help.js') ||
+                        src.includes('events.js') ||
+                        src.includes('event_modal.js');
 
                     const alreadyInited =
                         (src.includes('board_list') && window.initBoardListPage) ||
@@ -636,9 +661,11 @@ async function loadPage(url) {
                         (src.includes('projects') && window.initProjectsPage) ||
                         (src.includes('team') && window.initTeamPage) ||
                         (src.includes('analytics') && window.initAnalyticsPage) ||
-                        (src.includes('help.js') && window.initHelpPage);
+                        (src.includes('help.js') && window.initHelpPage) ||
+                        (src.includes('events.js') && window.initEventsPage);
                     const forceLoad =
                         (src.includes('task_detail_modal') && typeof window.tpOpenTaskDetailModal !== 'function')
+                        || (src.includes('event_modal.js') && typeof window.tpOpenEventDetail !== 'function')
                         || (src.includes('chart.js') && typeof window.Chart !== 'function');
 
                     if (!isPageScript || !alreadyInited || forceLoad) {
@@ -674,6 +701,9 @@ async function loadPage(url) {
                     if (typeof window.tpInitTaskDetailModal === 'function') {
                         window.tpInitTaskDetailModal();
                     }
+                    if (typeof window.tpInitEventModals === 'function') {
+                        window.tpInitEventModals();
+                    }
 
                     if (currentContent.querySelector('#tasks-grid') && typeof window.initTasksPage === 'function') {
                         console.log('Вызов initTasksPage');
@@ -701,6 +731,10 @@ async function loadPage(url) {
                     if (isHelpPage(currentContent) && typeof window.initHelpPage === 'function') {
                         console.log('Вызов initHelpPage');
                         window.initHelpPage();
+                    }
+                    if (isEventsPage(currentContent) && typeof window.initEventsPage === 'function') {
+                        console.log('Вызов initEventsPage');
+                        window.initEventsPage();
                     }
 
                     const isBoardList = currentContent.classList.contains('board-list') && !currentContent.classList.contains('board-kanban');

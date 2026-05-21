@@ -75,7 +75,7 @@
             </div>
             <div class="column">
                 <div class="card">
-                    <button type="button" class="index-card-heading-link" data-index-nav="tasks-calendar" aria-label="Перейти к календарю и срокам">
+                    <button type="button" class="index-card-heading-link" data-index-nav="events" aria-label="Перейти к событиям">
                         <span class="text-header">Ближайшие события</span>
                         <span class="index-card-heading-arrow" aria-hidden="true">
                             <img th:src="@{/static/source/icons/arrow_dark_move.svg}" src="/static/source/icons/arrow_dark_move.svg" alt="">
@@ -100,6 +100,7 @@
         </div>
     </div>
     <th:block th:replace="~{components/task_detail_modal_fragment :: taskDetailModal}"></th:block>
+    <th:block th:replace="~{components/event_modal :: eventModal}"></th:block>
     <script src="/static/js/loadComponents.js"></script>
     <script src="/static/js/app.js"></script>
     <script src="/static/js/theme.js"></script>
@@ -112,6 +113,7 @@
     <script src="/static/js/profile_modal.js"></script>
     <script src="/static/js/team.js"></script>
     <script src="/static/js/settings_modal.js"></script>
+    <script src="/static/js/event_modal.js"></script>
     <script src="/static/js/index.js"></script> 
 </body>
 
