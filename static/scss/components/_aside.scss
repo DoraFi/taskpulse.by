@@ -151,21 +151,33 @@ aside {
     }
 }
 
+body[data-theme="dark"] aside#aside-container,
 body[data-theme="dark"] aside {
     background-color: $dark-gray;
     box-shadow: inset -1px 0 0 rgba($light-gray, 0.18);
+    color: $light-light-green;
 }
 
-body[data-theme="dark"] aside .item .nav-link:hover {
+body[data-theme="dark"] aside .item .nav-link {
+    color: $light-light-green;
+}
+
+body[data-theme="dark"] aside .item .nav-link:hover,
+body[data-theme="dark"] aside .item .nav-link.active,
+body[data-theme="dark"] aside .item .nav-link.nav-link--in-section:not(.active) {
     color: $green;
 }
 
 body[data-theme="dark"] aside .submenu .nav-link {
-    color: $light-light-green;
+    color: rgba($light-light-green, 0.88);
 }
 
 body[data-theme="dark"] aside .submenu .nav-link.active {
     color: $green;
+}
+
+body[data-theme="dark"] aside .submenu .text-signature {
+    color: rgba($light-light-green, 0.55);
 }
 
 .aside-collapse-toggle-btn {

@@ -52,10 +52,14 @@
             html += `<div class="other-month" data-date="${dateStr}">${prevDate}</div>`;
         }
 
+        const dayCtx = { selectedIso };
+        const dayClassFn = typeof global.tpCalendarDayClasses === 'function'
+            ? global.tpCalendarDayClasses
+            : (iso) => (iso === selectedIso ? 'day selected-start' : 'day');
+
         for (let d = 1; d <= daysInMonth; d++) {
             const dateStr = toIsoDate(year, month, d);
-            let classes = 'day';
-            if (selectedIso === dateStr) classes += ' selected-start';
+            const classes = dayClassFn(dateStr, dayCtx);
             html += `<div class="${classes}" data-date="${dateStr}">${d}</div>`;
         }
 

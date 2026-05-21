@@ -91,7 +91,7 @@
 .modal-content .form-auth .filter-input,
 .modal-content .form-auth input.tp-field-plain,
 .modal-content .form-auth textarea.tp-field-plain,
-.modal-content .form-auth input.team-add-member-modal__email, .auth-link-row a, .modal-content.settings-modal .settings-modal__nav-item, .tp-select__trigger, .tp-dropdown-option, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar, .tp-date-picker .tp-date-picker__selects .tp-select__trigger, select.create-task-select, .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body input, .tab-btn, .button-basic,
+.modal-content .form-auth input.team-add-member-modal__email, .auth-link-row a, .modal-content.settings-modal .settings-modal__section-card input.tp-field-plain, .modal-content.settings-modal .settings-modal__nav-item, .tp-select__trigger, .tp-dropdown-option, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar, .tp-date-picker .tp-date-picker__selects .tp-select__trigger, select.create-task-select, .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body input, .tab-btn, .button-basic,
 .button-secondary,
 .reset-filters-btn, aside .submenu .nav-link {
   font-size: 1rem;
@@ -257,21 +257,39 @@ aside:not(:empty) {
   transition: opacity 0.2s ease;
 }
 
+body[data-theme=dark] aside#aside-container,
 body[data-theme=dark] aside {
   background-color: #2D3229;
   box-shadow: inset -1px 0 0 rgba(127, 140, 115, 0.18);
+  color: #fafdf7;
 }
 
-body[data-theme=dark] aside .item .nav-link:hover {
+body[data-theme=dark] aside .item .nav-link {
+  color: #fafdf7;
+}
+
+body[data-theme=dark] aside .item .nav-link:hover,
+body[data-theme=dark] aside .item .nav-link.active,
+body[data-theme=dark] aside .item .nav-link.nav-link--in-section:not(.active) {
   color: #61A039;
 }
 
 body[data-theme=dark] aside .submenu .nav-link {
-  color: #fafdf7;
+  color: rgba(250, 253, 247, 0.88);
 }
 
 body[data-theme=dark] aside .submenu .nav-link.active {
   color: #61A039;
+}
+
+body[data-theme=dark] aside .submenu .text-signature, body[data-theme=dark] aside .submenu .tasks-grid .grid-header, .tasks-grid body[data-theme=dark] aside .submenu .grid-header, body[data-theme=dark] aside .submenu .legends .legend, .legends body[data-theme=dark] aside .submenu .legend, body[data-theme=dark] aside .submenu .scrum-backlog-panel .kanban-task-item .subtasks .checkbox-text, .scrum-backlog-panel .kanban-task-item .subtasks body[data-theme=dark] aside .submenu .checkbox-text, body[data-theme=dark] aside .submenu .board-table-card .subtasks .checkbox-text, .board-table-card .subtasks body[data-theme=dark] aside .submenu .checkbox-text, body[data-theme=dark] aside .submenu .board-list .tasks-grid .subtasks-list span, .board-list .tasks-grid .subtasks-list body[data-theme=dark] aside .submenu span, body[data-theme=dark] aside .submenu .board-timeline-card .subtasks .subtasks-list .checkbox-text, .board-timeline-card .subtasks .subtasks-list body[data-theme=dark] aside .submenu .checkbox-text, body[data-theme=dark] aside .submenu .board-timeline-card .timeline-due, .board-timeline-card body[data-theme=dark] aside .submenu .timeline-due, body[data-theme=dark] aside .submenu .board-list .tasks-grid-wrapper > .empty-state, .board-list body[data-theme=dark] aside .submenu .tasks-grid-wrapper > .empty-state, body[data-theme=dark] aside .submenu .board-reports-card .reports-stat-label, .board-reports-card body[data-theme=dark] aside .submenu .reports-stat-label, body[data-theme=dark] aside .submenu .kanban-board-card .kanban-stage-col .subtasks .checkbox-text, .kanban-board-card .kanban-stage-col .subtasks body[data-theme=dark] aside .submenu .checkbox-text,
+body[data-theme=dark] aside .submenu .kanban-archive-board .kanban-stage-col .subtasks .checkbox-text,
+.kanban-archive-board .kanban-stage-col .subtasks body[data-theme=dark] aside .submenu .checkbox-text, body[data-theme=dark] aside .submenu .kanban-board-card .kanban-count-chip, .kanban-board-card body[data-theme=dark] aside .submenu .kanban-count-chip,
+body[data-theme=dark] aside .submenu .kanban-archive-board .kanban-count-chip,
+.kanban-archive-board body[data-theme=dark] aside .submenu .kanban-count-chip, body[data-theme=dark] aside .submenu .board-list .card .list .subtasks .checkbox-text, .board-list .card .list .subtasks body[data-theme=dark] aside .submenu .checkbox-text, body[data-theme=dark] aside .submenu .auth-hint, body[data-theme=dark] aside .submenu .auth-field label, .auth-field body[data-theme=dark] aside .submenu label, body[data-theme=dark] aside .submenu .auth-step-pill, body[data-theme=dark] aside .submenu .auth-mini-card__text, body[data-theme=dark] aside .submenu .form-auth .checkbox-item .checkbox-text, .form-auth .checkbox-item body[data-theme=dark] aside .submenu .checkbox-text,
+body[data-theme=dark] aside .submenu .form-auth .checkbox-item a,
+.form-auth .checkbox-item body[data-theme=dark] aside .submenu a, body[data-theme=dark] aside .submenu .auth-motif-board__head, body[data-theme=dark] aside .submenu .auth-hero__eyebrow, body[data-theme=dark] aside .submenu .analytics-table th, .analytics-table body[data-theme=dark] aside .submenu th, body[data-theme=dark] aside .submenu .modal-content.settings-modal .settings-modal__links, .modal-content.settings-modal body[data-theme=dark] aside .submenu .settings-modal__links, body[data-theme=dark] aside .submenu .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .weekdays, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month body[data-theme=dark] aside .submenu .weekdays, body[data-theme=dark] aside .submenu .modal-content .modal-body .filter-section .filter-range .range-values, .modal-content .modal-body .filter-section .filter-range body[data-theme=dark] aside .submenu .range-values, body[data-theme=dark] aside .submenu .modal-content .modal-body .filter-section .filter-label, .modal-content .modal-body .filter-section body[data-theme=dark] aside .submenu .filter-label, body[data-theme=dark] aside .submenu .button-small {
+  color: rgba(250, 253, 247, 0.55);
 }
 
 .aside-collapse-toggle-btn {
@@ -753,7 +771,7 @@ body[data-theme=dark] .header-global-search__hit.is-active {
 .modal-content .form-auth .filter-input,
 .modal-content .form-auth input.tp-field-plain,
 .modal-content .form-auth textarea.tp-field-plain,
-.modal-content .form-auth input.team-add-member-modal__email, .auth-link-row a, .modal-content.settings-modal .settings-modal__nav-item, .tp-select__trigger, .tp-dropdown-option, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar, .tp-date-picker .tp-date-picker__selects .tp-select__trigger, select.create-task-select, .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body input, aside .submenu .nav-link, .button-basic,
+.modal-content .form-auth input.team-add-member-modal__email, .auth-link-row a, .modal-content.settings-modal .settings-modal__section-card input.tp-field-plain, .modal-content.settings-modal .settings-modal__nav-item, .tp-select__trigger, .tp-dropdown-option, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar, .tp-date-picker .tp-date-picker__selects .tp-select__trigger, select.create-task-select, .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body input, aside .submenu .nav-link, .button-basic,
 .button-secondary,
 .reset-filters-btn, .tab-btn {
   font-size: 1rem;
@@ -2757,9 +2775,38 @@ body[data-theme=dark] .modal-content.profile-modal .profile-modal__settings-hint
 }
 .modal-content.settings-modal .settings-modal__section-card .filter-label {
   font-weight: 500;
+  margin: 0 0 0.375rem;
 }
 .modal-content.settings-modal .settings-modal__section-card span.checkbox-text {
   font-weight: 400;
+}
+.modal-content.settings-modal .settings-modal__section-card input.tp-field-plain {
+  all: unset;
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  padding: 0.25rem 0.75rem;
+  box-sizing: border-box;
+  border: 0.0625rem solid rgba(97, 160, 57, 0.05);
+  background-color: rgba(97, 160, 57, 0.07);
+  border-radius: 0.3rem;
+  transition: all 0.2s ease;
+  color: #2D3229;
+}
+.modal-content.settings-modal .settings-modal__section-card input.tp-field-plain:hover {
+  border-color: #61A039;
+  box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.2);
+}
+.modal-content.settings-modal .settings-modal__section-card input.tp-field-plain:focus {
+  outline: none;
+  border-color: #61A039;
+  box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.4);
+}
+.modal-content.settings-modal .settings-modal__section-card input.tp-field-plain::-moz-placeholder {
+  color: rgba(45, 50, 41, 0.5);
+}
+.modal-content.settings-modal .settings-modal__section-card input.tp-field-plain::placeholder {
+  color: rgba(45, 50, 41, 0.5);
 }
 .modal-content.settings-modal .settings-modal__p {
   margin: 0 0 0.5625rem;
@@ -2919,6 +2966,33 @@ body[data-theme=dark] .modal-content.settings-modal .settings-modal__session-row
 body[data-theme=dark] .modal-content.settings-modal .settings-modal__integration-card {
   background: #282D25;
   border-color: #fafdf7;
+}
+body[data-theme=dark] .modal-content.settings-modal .settings-modal__section-card input.tp-field-plain,
+body[data-theme=dark] .modal-content.settings-modal .settings-modal__session-row input.tp-field-plain,
+body[data-theme=dark] .modal-content.settings-modal .settings-modal__integration-card input.tp-field-plain {
+  color: #fafdf7;
+  background-color: rgba(97, 160, 57, 0.08);
+  border-color: rgba(97, 160, 57, 0.28);
+}
+body[data-theme=dark] .modal-content.settings-modal .settings-modal__section-card input.tp-field-plain:hover,
+body[data-theme=dark] .modal-content.settings-modal .settings-modal__session-row input.tp-field-plain:hover,
+body[data-theme=dark] .modal-content.settings-modal .settings-modal__integration-card input.tp-field-plain:hover {
+  border-color: #61A039;
+  box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.22);
+}
+body[data-theme=dark] .modal-content.settings-modal .settings-modal__section-card input.tp-field-plain:focus,
+body[data-theme=dark] .modal-content.settings-modal .settings-modal__session-row input.tp-field-plain:focus,
+body[data-theme=dark] .modal-content.settings-modal .settings-modal__integration-card input.tp-field-plain:focus {
+  border-color: #61A039;
+  box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.35);
+}
+body[data-theme=dark] .modal-content.settings-modal .settings-modal__section-card input.tp-field-plain::-moz-placeholder, body[data-theme=dark] .modal-content.settings-modal .settings-modal__session-row input.tp-field-plain::-moz-placeholder, body[data-theme=dark] .modal-content.settings-modal .settings-modal__integration-card input.tp-field-plain::-moz-placeholder {
+  color: rgba(250, 253, 247, 0.45);
+}
+body[data-theme=dark] .modal-content.settings-modal .settings-modal__section-card input.tp-field-plain::placeholder,
+body[data-theme=dark] .modal-content.settings-modal .settings-modal__session-row input.tp-field-plain::placeholder,
+body[data-theme=dark] .modal-content.settings-modal .settings-modal__integration-card input.tp-field-plain::placeholder {
+  color: rgba(250, 253, 247, 0.45);
 }
 
 body[data-theme=dark] .modal-content.settings-modal .settings-modal__inline-link {
@@ -6668,7 +6742,7 @@ body[data-theme=dark] .kanban-archive-board .kanban-stage-sep-line {
 }
 .kanban-board-card .kanban-priority-section.urgent button .text-basic, .kanban-board-card .kanban-priority-section.urgent button .tp-table-row-fallback .tasks-grid .grid-row, .tp-table-row-fallback .tasks-grid .kanban-board-card .kanban-priority-section.urgent button .grid-row, .kanban-board-card .kanban-priority-section.urgent button .tasks-grid .grid-row, .tasks-grid .kanban-board-card .kanban-priority-section.urgent button .grid-row, .kanban-board-card .kanban-priority-section.urgent button .task-detail-sheet.modal-content.create-task-modal textarea.create-task-desc, .task-detail-sheet.modal-content.create-task-modal .kanban-board-card .kanban-priority-section.urgent button textarea.create-task-desc, .kanban-board-card .kanban-priority-section.urgent button .board-timeline-card .timeline-assignee span, .board-timeline-card .timeline-assignee .kanban-board-card .kanban-priority-section.urgent button span, .kanban-board-card .kanban-priority-section.urgent button .board-timeline-card .timeline-task-card__name, .board-timeline-card .kanban-board-card .kanban-priority-section.urgent button .timeline-task-card__name, .kanban-board-card .kanban-priority-section.urgent button .board-timeline-card .timeline-date-chip, .board-timeline-card .kanban-board-card .kanban-priority-section.urgent button .timeline-date-chip, .kanban-board-card .kanban-priority-section.urgent button aside .submenu .nav-link, aside .submenu .kanban-board-card .kanban-priority-section.urgent button .nav-link, .kanban-board-card .kanban-priority-section.urgent button .button-basic,
 .kanban-board-card .kanban-priority-section.urgent button .button-secondary,
-.kanban-board-card .kanban-priority-section.urgent button .reset-filters-btn, .kanban-board-card .kanban-priority-section.urgent button .tab-btn, .kanban-board-card .kanban-priority-section.urgent button .modal-content .modal-body input, .modal-content .modal-body .kanban-board-card .kanban-priority-section.urgent button input, .kanban-board-card .kanban-priority-section.urgent button .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .kanban-board-card .kanban-priority-section.urgent button .filter-input, .kanban-board-card .kanban-priority-section.urgent button select.create-task-select, .kanban-board-card .kanban-priority-section.urgent button .tp-date-picker .tp-date-picker__selects .tp-select__trigger, .tp-date-picker .tp-date-picker__selects .kanban-board-card .kanban-priority-section.urgent button .tp-select__trigger, .kanban-board-card .kanban-priority-section.urgent button .custom-calendar-modal .custom-calendar, .custom-calendar-modal .kanban-board-card .kanban-priority-section.urgent button .custom-calendar, .kanban-board-card .kanban-priority-section.urgent button .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .kanban-board-card .kanban-priority-section.urgent button button, .kanban-board-card .kanban-priority-section.urgent button .tp-dropdown-option, .kanban-board-card .kanban-priority-section.urgent button .tp-select__trigger, .kanban-board-card .kanban-priority-section.urgent button .modal-content.settings-modal .settings-modal__nav-item, .modal-content.settings-modal .kanban-board-card .kanban-priority-section.urgent button .settings-modal__nav-item, .kanban-board-card .kanban-priority-section.urgent button .auth-link-row a, .auth-link-row .kanban-board-card .kanban-priority-section.urgent button a, .kanban-board-card .kanban-priority-section.urgent button .modal-content .modal-body input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger), .modal-content .modal-body .kanban-board-card .kanban-priority-section.urgent button input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger),
+.kanban-board-card .kanban-priority-section.urgent button .reset-filters-btn, .kanban-board-card .kanban-priority-section.urgent button .tab-btn, .kanban-board-card .kanban-priority-section.urgent button .modal-content .modal-body input, .modal-content .modal-body .kanban-board-card .kanban-priority-section.urgent button input, .kanban-board-card .kanban-priority-section.urgent button .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .kanban-board-card .kanban-priority-section.urgent button .filter-input, .kanban-board-card .kanban-priority-section.urgent button select.create-task-select, .kanban-board-card .kanban-priority-section.urgent button .tp-date-picker .tp-date-picker__selects .tp-select__trigger, .tp-date-picker .tp-date-picker__selects .kanban-board-card .kanban-priority-section.urgent button .tp-select__trigger, .kanban-board-card .kanban-priority-section.urgent button .custom-calendar-modal .custom-calendar, .custom-calendar-modal .kanban-board-card .kanban-priority-section.urgent button .custom-calendar, .kanban-board-card .kanban-priority-section.urgent button .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .kanban-board-card .kanban-priority-section.urgent button button, .kanban-board-card .kanban-priority-section.urgent button .tp-dropdown-option, .kanban-board-card .kanban-priority-section.urgent button .tp-select__trigger, .kanban-board-card .kanban-priority-section.urgent button .modal-content.settings-modal .settings-modal__nav-item, .modal-content.settings-modal .kanban-board-card .kanban-priority-section.urgent button .settings-modal__nav-item, .kanban-board-card .kanban-priority-section.urgent button .modal-content.settings-modal .settings-modal__section-card input.tp-field-plain, .modal-content.settings-modal .settings-modal__section-card .kanban-board-card .kanban-priority-section.urgent button input.tp-field-plain, .kanban-board-card .kanban-priority-section.urgent button .auth-link-row a, .auth-link-row .kanban-board-card .kanban-priority-section.urgent button a, .kanban-board-card .kanban-priority-section.urgent button .modal-content .modal-body input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger), .modal-content .modal-body .kanban-board-card .kanban-priority-section.urgent button input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger),
 .kanban-board-card .kanban-priority-section.urgent button .modal-content .modal-body textarea:not(.create-task-desc),
 .modal-content .modal-body .kanban-board-card .kanban-priority-section.urgent button textarea:not(.create-task-desc),
 .kanban-board-card .kanban-priority-section.urgent button .modal-content .modal-body .filter-input,
@@ -6743,6 +6817,8 @@ aside .submenu .kanban-archive-board .kanban-priority-section.urgent button .nav
 .kanban-archive-board .kanban-priority-section.urgent button .tp-select__trigger,
 .kanban-archive-board .kanban-priority-section.urgent button .modal-content.settings-modal .settings-modal__nav-item,
 .modal-content.settings-modal .kanban-archive-board .kanban-priority-section.urgent button .settings-modal__nav-item,
+.kanban-archive-board .kanban-priority-section.urgent button .modal-content.settings-modal .settings-modal__section-card input.tp-field-plain,
+.modal-content.settings-modal .settings-modal__section-card .kanban-archive-board .kanban-priority-section.urgent button input.tp-field-plain,
 .kanban-archive-board .kanban-priority-section.urgent button .auth-link-row a,
 .auth-link-row .kanban-archive-board .kanban-priority-section.urgent button a,
 .kanban-archive-board .kanban-priority-section.urgent button .modal-content .modal-body input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger),
@@ -6806,7 +6882,7 @@ aside .submenu .kanban-archive-board .kanban-priority-section.urgent button .nav
 }
 .kanban-board-card .kanban-priority-section.normal button .text-basic, .kanban-board-card .kanban-priority-section.normal button .tp-table-row-fallback .tasks-grid .grid-row, .tp-table-row-fallback .tasks-grid .kanban-board-card .kanban-priority-section.normal button .grid-row, .kanban-board-card .kanban-priority-section.normal button .tasks-grid .grid-row, .tasks-grid .kanban-board-card .kanban-priority-section.normal button .grid-row, .kanban-board-card .kanban-priority-section.normal button .task-detail-sheet.modal-content.create-task-modal textarea.create-task-desc, .task-detail-sheet.modal-content.create-task-modal .kanban-board-card .kanban-priority-section.normal button textarea.create-task-desc, .kanban-board-card .kanban-priority-section.normal button .board-timeline-card .timeline-assignee span, .board-timeline-card .timeline-assignee .kanban-board-card .kanban-priority-section.normal button span, .kanban-board-card .kanban-priority-section.normal button .board-timeline-card .timeline-task-card__name, .board-timeline-card .kanban-board-card .kanban-priority-section.normal button .timeline-task-card__name, .kanban-board-card .kanban-priority-section.normal button .board-timeline-card .timeline-date-chip, .board-timeline-card .kanban-board-card .kanban-priority-section.normal button .timeline-date-chip, .kanban-board-card .kanban-priority-section.normal button aside .submenu .nav-link, aside .submenu .kanban-board-card .kanban-priority-section.normal button .nav-link, .kanban-board-card .kanban-priority-section.normal button .button-basic,
 .kanban-board-card .kanban-priority-section.normal button .button-secondary,
-.kanban-board-card .kanban-priority-section.normal button .reset-filters-btn, .kanban-board-card .kanban-priority-section.normal button .tab-btn, .kanban-board-card .kanban-priority-section.normal button .modal-content .modal-body input, .modal-content .modal-body .kanban-board-card .kanban-priority-section.normal button input, .kanban-board-card .kanban-priority-section.normal button .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .kanban-board-card .kanban-priority-section.normal button .filter-input, .kanban-board-card .kanban-priority-section.normal button select.create-task-select, .kanban-board-card .kanban-priority-section.normal button .tp-date-picker .tp-date-picker__selects .tp-select__trigger, .tp-date-picker .tp-date-picker__selects .kanban-board-card .kanban-priority-section.normal button .tp-select__trigger, .kanban-board-card .kanban-priority-section.normal button .custom-calendar-modal .custom-calendar, .custom-calendar-modal .kanban-board-card .kanban-priority-section.normal button .custom-calendar, .kanban-board-card .kanban-priority-section.normal button .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .kanban-board-card .kanban-priority-section.normal button button, .kanban-board-card .kanban-priority-section.normal button .tp-dropdown-option, .kanban-board-card .kanban-priority-section.normal button .tp-select__trigger, .kanban-board-card .kanban-priority-section.normal button .modal-content.settings-modal .settings-modal__nav-item, .modal-content.settings-modal .kanban-board-card .kanban-priority-section.normal button .settings-modal__nav-item, .kanban-board-card .kanban-priority-section.normal button .auth-link-row a, .auth-link-row .kanban-board-card .kanban-priority-section.normal button a, .kanban-board-card .kanban-priority-section.normal button .modal-content .modal-body input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger), .modal-content .modal-body .kanban-board-card .kanban-priority-section.normal button input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger),
+.kanban-board-card .kanban-priority-section.normal button .reset-filters-btn, .kanban-board-card .kanban-priority-section.normal button .tab-btn, .kanban-board-card .kanban-priority-section.normal button .modal-content .modal-body input, .modal-content .modal-body .kanban-board-card .kanban-priority-section.normal button input, .kanban-board-card .kanban-priority-section.normal button .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .kanban-board-card .kanban-priority-section.normal button .filter-input, .kanban-board-card .kanban-priority-section.normal button select.create-task-select, .kanban-board-card .kanban-priority-section.normal button .tp-date-picker .tp-date-picker__selects .tp-select__trigger, .tp-date-picker .tp-date-picker__selects .kanban-board-card .kanban-priority-section.normal button .tp-select__trigger, .kanban-board-card .kanban-priority-section.normal button .custom-calendar-modal .custom-calendar, .custom-calendar-modal .kanban-board-card .kanban-priority-section.normal button .custom-calendar, .kanban-board-card .kanban-priority-section.normal button .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .kanban-board-card .kanban-priority-section.normal button button, .kanban-board-card .kanban-priority-section.normal button .tp-dropdown-option, .kanban-board-card .kanban-priority-section.normal button .tp-select__trigger, .kanban-board-card .kanban-priority-section.normal button .modal-content.settings-modal .settings-modal__nav-item, .modal-content.settings-modal .kanban-board-card .kanban-priority-section.normal button .settings-modal__nav-item, .kanban-board-card .kanban-priority-section.normal button .modal-content.settings-modal .settings-modal__section-card input.tp-field-plain, .modal-content.settings-modal .settings-modal__section-card .kanban-board-card .kanban-priority-section.normal button input.tp-field-plain, .kanban-board-card .kanban-priority-section.normal button .auth-link-row a, .auth-link-row .kanban-board-card .kanban-priority-section.normal button a, .kanban-board-card .kanban-priority-section.normal button .modal-content .modal-body input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger), .modal-content .modal-body .kanban-board-card .kanban-priority-section.normal button input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger),
 .kanban-board-card .kanban-priority-section.normal button .modal-content .modal-body textarea:not(.create-task-desc),
 .modal-content .modal-body .kanban-board-card .kanban-priority-section.normal button textarea:not(.create-task-desc),
 .kanban-board-card .kanban-priority-section.normal button .modal-content .modal-body .filter-input,
@@ -6881,6 +6957,8 @@ aside .submenu .kanban-archive-board .kanban-priority-section.normal button .nav
 .kanban-archive-board .kanban-priority-section.normal button .tp-select__trigger,
 .kanban-archive-board .kanban-priority-section.normal button .modal-content.settings-modal .settings-modal__nav-item,
 .modal-content.settings-modal .kanban-archive-board .kanban-priority-section.normal button .settings-modal__nav-item,
+.kanban-archive-board .kanban-priority-section.normal button .modal-content.settings-modal .settings-modal__section-card input.tp-field-plain,
+.modal-content.settings-modal .settings-modal__section-card .kanban-archive-board .kanban-priority-section.normal button input.tp-field-plain,
 .kanban-archive-board .kanban-priority-section.normal button .auth-link-row a,
 .auth-link-row .kanban-archive-board .kanban-priority-section.normal button a,
 .kanban-archive-board .kanban-priority-section.normal button .modal-content .modal-body input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger),
@@ -7756,7 +7834,7 @@ body[data-theme=dark] .kanban-archive-board .kanban-stage-table {
 }
 .kanban-board-card .kanban-stage-table-head-main .text-basic, .kanban-board-card .kanban-stage-table-head-main .tasks-grid .grid-row, .tasks-grid .kanban-board-card .kanban-stage-table-head-main .grid-row, .kanban-board-card .kanban-stage-table-head-main .task-detail-sheet.modal-content.create-task-modal textarea.create-task-desc, .task-detail-sheet.modal-content.create-task-modal .kanban-board-card .kanban-stage-table-head-main textarea.create-task-desc, .kanban-board-card .kanban-stage-table-head-main aside .submenu .nav-link, aside .submenu .kanban-board-card .kanban-stage-table-head-main .nav-link, .kanban-board-card .kanban-stage-table-head-main .button-basic,
 .kanban-board-card .kanban-stage-table-head-main .button-secondary,
-.kanban-board-card .kanban-stage-table-head-main .reset-filters-btn, .kanban-board-card .kanban-stage-table-head-main .tab-btn, .kanban-board-card .kanban-stage-table-head-main .modal-content .modal-body input, .modal-content .modal-body .kanban-board-card .kanban-stage-table-head-main input, .kanban-board-card .kanban-stage-table-head-main select.create-task-select, .kanban-board-card .kanban-stage-table-head-main .custom-calendar-modal .custom-calendar, .custom-calendar-modal .kanban-board-card .kanban-stage-table-head-main .custom-calendar, .kanban-board-card .kanban-stage-table-head-main .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .kanban-board-card .kanban-stage-table-head-main button, .kanban-board-card .kanban-stage-table-head-main .tp-dropdown-option, .kanban-board-card .kanban-stage-table-head-main .tp-select__trigger, .kanban-board-card .kanban-stage-table-head-main .modal-content.settings-modal .settings-modal__nav-item, .modal-content.settings-modal .kanban-board-card .kanban-stage-table-head-main .settings-modal__nav-item, .kanban-board-card .kanban-stage-table-head-main .auth-link-row a, .auth-link-row .kanban-board-card .kanban-stage-table-head-main a, .kanban-board-card .kanban-stage-table-head-main .modal-content .modal-body input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger), .modal-content .modal-body .kanban-board-card .kanban-stage-table-head-main input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger),
+.kanban-board-card .kanban-stage-table-head-main .reset-filters-btn, .kanban-board-card .kanban-stage-table-head-main .tab-btn, .kanban-board-card .kanban-stage-table-head-main .modal-content .modal-body input, .modal-content .modal-body .kanban-board-card .kanban-stage-table-head-main input, .kanban-board-card .kanban-stage-table-head-main select.create-task-select, .kanban-board-card .kanban-stage-table-head-main .custom-calendar-modal .custom-calendar, .custom-calendar-modal .kanban-board-card .kanban-stage-table-head-main .custom-calendar, .kanban-board-card .kanban-stage-table-head-main .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .kanban-board-card .kanban-stage-table-head-main button, .kanban-board-card .kanban-stage-table-head-main .tp-dropdown-option, .kanban-board-card .kanban-stage-table-head-main .tp-select__trigger, .kanban-board-card .kanban-stage-table-head-main .modal-content.settings-modal .settings-modal__nav-item, .modal-content.settings-modal .kanban-board-card .kanban-stage-table-head-main .settings-modal__nav-item, .kanban-board-card .kanban-stage-table-head-main .modal-content.settings-modal .settings-modal__section-card input.tp-field-plain, .modal-content.settings-modal .settings-modal__section-card .kanban-board-card .kanban-stage-table-head-main input.tp-field-plain, .kanban-board-card .kanban-stage-table-head-main .auth-link-row a, .auth-link-row .kanban-board-card .kanban-stage-table-head-main a, .kanban-board-card .kanban-stage-table-head-main .modal-content .modal-body input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger), .modal-content .modal-body .kanban-board-card .kanban-stage-table-head-main input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger),
 .kanban-board-card .kanban-stage-table-head-main .modal-content .modal-body textarea:not(.create-task-desc),
 .modal-content .modal-body .kanban-board-card .kanban-stage-table-head-main textarea:not(.create-task-desc),
 .kanban-board-card .kanban-stage-table-head-main .modal-content .modal-body .filter-input,
@@ -8563,7 +8641,7 @@ body[data-theme=dark] #indexTeamMembers {
 }
 .due-attention .text-basic, .due-attention .tp-table-row-fallback .tasks-grid .grid-row, .tp-table-row-fallback .tasks-grid .due-attention .grid-row, .due-attention .tasks-grid .grid-row, .tasks-grid .due-attention .grid-row, .due-attention aside .submenu .nav-link, aside .submenu .due-attention .nav-link, .due-attention .button-basic,
 .due-attention .button-secondary,
-.due-attention .reset-filters-btn, .due-attention .tab-btn, .due-attention .modal-content .modal-body input, .modal-content .modal-body .due-attention input, .due-attention .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .due-attention .filter-input, .due-attention select.create-task-select, .due-attention .tp-date-picker .tp-date-picker__selects .tp-select__trigger, .tp-date-picker .tp-date-picker__selects .due-attention .tp-select__trigger, .due-attention .custom-calendar-modal .custom-calendar, .custom-calendar-modal .due-attention .custom-calendar, .due-attention .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .due-attention button, .due-attention .tp-dropdown-option, .due-attention .tp-select__trigger, .due-attention .modal-content.settings-modal .settings-modal__nav-item, .modal-content.settings-modal .due-attention .settings-modal__nav-item, .due-attention .auth-link-row a, .auth-link-row .due-attention a, .due-attention .modal-content .modal-body input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger), .modal-content .modal-body .due-attention input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger),
+.due-attention .reset-filters-btn, .due-attention .tab-btn, .due-attention .modal-content .modal-body input, .modal-content .modal-body .due-attention input, .due-attention .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .due-attention .filter-input, .due-attention select.create-task-select, .due-attention .tp-date-picker .tp-date-picker__selects .tp-select__trigger, .tp-date-picker .tp-date-picker__selects .due-attention .tp-select__trigger, .due-attention .custom-calendar-modal .custom-calendar, .custom-calendar-modal .due-attention .custom-calendar, .due-attention .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .due-attention button, .due-attention .tp-dropdown-option, .due-attention .tp-select__trigger, .due-attention .modal-content.settings-modal .settings-modal__nav-item, .modal-content.settings-modal .due-attention .settings-modal__nav-item, .due-attention .modal-content.settings-modal .settings-modal__section-card input.tp-field-plain, .modal-content.settings-modal .settings-modal__section-card .due-attention input.tp-field-plain, .due-attention .auth-link-row a, .auth-link-row .due-attention a, .due-attention .modal-content .modal-body input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger), .modal-content .modal-body .due-attention input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger),
 .due-attention .modal-content .modal-body textarea:not(.create-task-desc),
 .modal-content .modal-body .due-attention textarea:not(.create-task-desc),
 .due-attention .modal-content .modal-body .filter-input,
@@ -8749,7 +8827,7 @@ body[data-theme=dark] #indexTeamMembers {
 }
 .tasks-to-do-grid .col-task .text-basic, .tasks-to-do-grid .col-task .tp-table-row-fallback .tasks-grid .grid-row, .tp-table-row-fallback .tasks-grid .tasks-to-do-grid .col-task .grid-row, .tasks-to-do-grid .col-task .tasks-grid .grid-row, .tasks-grid .tasks-to-do-grid .col-task .grid-row, .tasks-to-do-grid .col-task aside .submenu .nav-link, aside .submenu .tasks-to-do-grid .col-task .nav-link, .tasks-to-do-grid .col-task .button-basic,
 .tasks-to-do-grid .col-task .button-secondary,
-.tasks-to-do-grid .col-task .reset-filters-btn, .tasks-to-do-grid .col-task .tab-btn, .tasks-to-do-grid .col-task .modal-content .modal-body input, .modal-content .modal-body .tasks-to-do-grid .col-task input, .tasks-to-do-grid .col-task .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .tasks-to-do-grid .col-task .filter-input, .tasks-to-do-grid .col-task select.create-task-select, .tasks-to-do-grid .col-task .tp-date-picker .tp-date-picker__selects .tp-select__trigger, .tp-date-picker .tp-date-picker__selects .tasks-to-do-grid .col-task .tp-select__trigger, .tasks-to-do-grid .col-task .custom-calendar-modal .custom-calendar, .custom-calendar-modal .tasks-to-do-grid .col-task .custom-calendar, .tasks-to-do-grid .col-task .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .tasks-to-do-grid .col-task button, .tasks-to-do-grid .col-task .tp-dropdown-option, .tasks-to-do-grid .col-task .tp-select__trigger, .tasks-to-do-grid .col-task .modal-content.settings-modal .settings-modal__nav-item, .modal-content.settings-modal .tasks-to-do-grid .col-task .settings-modal__nav-item, .tasks-to-do-grid .col-task .auth-link-row a, .auth-link-row .tasks-to-do-grid .col-task a, .tasks-to-do-grid .col-task .modal-content .modal-body input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger), .modal-content .modal-body .tasks-to-do-grid .col-task input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger),
+.tasks-to-do-grid .col-task .reset-filters-btn, .tasks-to-do-grid .col-task .tab-btn, .tasks-to-do-grid .col-task .modal-content .modal-body input, .modal-content .modal-body .tasks-to-do-grid .col-task input, .tasks-to-do-grid .col-task .modal-content .modal-body .filter-section .filter-input, .modal-content .modal-body .filter-section .tasks-to-do-grid .col-task .filter-input, .tasks-to-do-grid .col-task select.create-task-select, .tasks-to-do-grid .col-task .tp-date-picker .tp-date-picker__selects .tp-select__trigger, .tp-date-picker .tp-date-picker__selects .tasks-to-do-grid .col-task .tp-select__trigger, .tasks-to-do-grid .col-task .custom-calendar-modal .custom-calendar, .custom-calendar-modal .tasks-to-do-grid .col-task .custom-calendar, .tasks-to-do-grid .col-task .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header button, .custom-calendar-modal .custom-calendar .custom-calendar-months .custom-calendar-month .month-header .tasks-to-do-grid .col-task button, .tasks-to-do-grid .col-task .tp-dropdown-option, .tasks-to-do-grid .col-task .tp-select__trigger, .tasks-to-do-grid .col-task .modal-content.settings-modal .settings-modal__nav-item, .modal-content.settings-modal .tasks-to-do-grid .col-task .settings-modal__nav-item, .tasks-to-do-grid .col-task .modal-content.settings-modal .settings-modal__section-card input.tp-field-plain, .modal-content.settings-modal .settings-modal__section-card .tasks-to-do-grid .col-task input.tp-field-plain, .tasks-to-do-grid .col-task .auth-link-row a, .auth-link-row .tasks-to-do-grid .col-task a, .tasks-to-do-grid .col-task .modal-content .modal-body input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger), .modal-content .modal-body .tasks-to-do-grid .col-task input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger),
 .tasks-to-do-grid .col-task .modal-content .modal-body textarea:not(.create-task-desc),
 .modal-content .modal-body .tasks-to-do-grid .col-task textarea:not(.create-task-desc),
 .tasks-to-do-grid .col-task .modal-content .modal-body .filter-input,
@@ -8867,6 +8945,8 @@ aside .submenu .tasks-to-do-grid .col-event .nav-link,
 .tasks-to-do-grid .col-event .tp-select__trigger,
 .tasks-to-do-grid .col-event .modal-content.settings-modal .settings-modal__nav-item,
 .modal-content.settings-modal .tasks-to-do-grid .col-event .settings-modal__nav-item,
+.tasks-to-do-grid .col-event .modal-content.settings-modal .settings-modal__section-card input.tp-field-plain,
+.modal-content.settings-modal .settings-modal__section-card .tasks-to-do-grid .col-event input.tp-field-plain,
 .tasks-to-do-grid .col-event .auth-link-row a,
 .auth-link-row .tasks-to-do-grid .col-event a,
 .tasks-to-do-grid .col-event .modal-content .modal-body input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger),
@@ -9002,6 +9082,8 @@ aside .submenu .events-grid .col-task .nav-link,
 .events-grid .col-task .tp-select__trigger,
 .events-grid .col-task .modal-content.settings-modal .settings-modal__nav-item,
 .modal-content.settings-modal .events-grid .col-task .settings-modal__nav-item,
+.events-grid .col-task .modal-content.settings-modal .settings-modal__section-card input.tp-field-plain,
+.modal-content.settings-modal .settings-modal__section-card .events-grid .col-task input.tp-field-plain,
 .events-grid .col-task .auth-link-row a,
 .auth-link-row .events-grid .col-task a,
 .events-grid .col-task .modal-content .modal-body input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger),
@@ -9137,6 +9219,8 @@ aside .submenu .events-grid .col-event .nav-link,
 .events-grid .col-event .tp-select__trigger,
 .events-grid .col-event .modal-content.settings-modal .settings-modal__nav-item,
 .modal-content.settings-modal .events-grid .col-event .settings-modal__nav-item,
+.events-grid .col-event .modal-content.settings-modal .settings-modal__section-card input.tp-field-plain,
+.modal-content.settings-modal .settings-modal__section-card .events-grid .col-event input.tp-field-plain,
 .events-grid .col-event .auth-link-row a,
 .auth-link-row .events-grid .col-event a,
 .events-grid .col-event .modal-content .modal-body input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger),

@@ -375,7 +375,7 @@
                         </div>
                         <div class="auth-field">
                             <label for="proj-visibility">Видимость</label>
-                            <select id="proj-visibility" name="visibility">
+                            <select id="proj-visibility" name="visibility" class="tp-field-plain create-task-select">
                                 <option value="private">Только приглашённые</option>
                                 <option value="org">Вся организация</option>
                             </select>
@@ -484,6 +484,7 @@
         </section>
     </div>
 
+    <script src="/static/js/tp_select.js"></script>
     <script th:src="@{/static/js/auth_static.js}" src="/static/js/auth_static.js"></script>
     <script>
         (function() {

@@ -121,10 +121,21 @@
 
         .filter-label {
             font-weight: 500;
+            margin: 0 0 $space-8;
         }
 
         span.checkbox-text {
             font-weight: 400;
+        }
+
+        input.tp-field-plain {
+            all: unset;
+            box-sizing: border-box;
+            display: block;
+            width: 100%;
+            padding: $space-4 $space-16;
+            @include tp-field-skin-base();
+            @extend .text-basic;
         }
     }
 
@@ -316,6 +327,10 @@ body[data-theme="dark"] .modal-content.settings-modal .settings-modal__session-r
 body[data-theme="dark"] .modal-content.settings-modal .settings-modal__integration-card {
     background: $black;
     border-color: $light-light-green;
+
+    input.tp-field-plain {
+        @include tp-field-skin-dark();
+    }
 }
 
 body[data-theme="dark"] .modal-content.settings-modal .settings-modal__inline-link {

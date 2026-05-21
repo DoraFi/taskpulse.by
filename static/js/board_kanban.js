@@ -1331,12 +1331,21 @@
                 const dateStr = `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-${String(prevDate).padStart(2, '0')}`;
                 html += `<div class="other-month" data-date="${dateStr}">${prevDate}</div>`;
             }
+            const dayCtx = { selectionStart, selectionEnd };
+            const dayClassFn = typeof window.tpCalendarDayClasses === 'function'
+                ? window.tpCalendarDayClasses
+                : (dateStr, ctx) => {
+                    let classes = 'day';
+                    if (ctx.selectionStart === dateStr) classes += ' selected-start';
+                    if (ctx.selectionEnd === dateStr) classes += ' selected-end';
+                    if (ctx.selectionStart && ctx.selectionEnd && dateStr > ctx.selectionStart && dateStr < ctx.selectionEnd) {
+                        classes += ' in-range';
+                    }
+                    return classes;
+                };
             for (let d = 1; d <= daysInMonth; d++) {
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                let classes = 'day';
-                if (selectionStart === dateStr) classes += ' selected-start';
-                if (selectionEnd === dateStr) classes += ' selected-end';
-                if (selectionStart && selectionEnd && dateStr > selectionStart && dateStr < selectionEnd) classes += ' in-range';
+                const classes = dayClassFn(dateStr, dayCtx);
                 html += `<div class="${classes}" data-date="${dateStr}">${d}</div>`;
             }
             const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;

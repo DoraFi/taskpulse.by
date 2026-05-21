@@ -55,6 +55,7 @@
                 <button class="tab-btn" data-tab="deadline">Срок истекает</button>
                 <button class="tab-btn" data-tab="todo">К выполнению</button>
                 <button class="tab-btn" data-tab="created">Созданные мной</button>
+                <button class="tab-btn" data-tab="all">Все задачи</button>
             </div>
         
             <div class="card">
@@ -102,128 +103,29 @@
                         </div>
                         <div class="modal-body">
                             <!-- Статус -->
-                            <div class="filter-section">
+                            <div class="filter-section" data-filter-section="status">
                                 <label class="filter-label">Статус</label>
-                                <div class="filter-checkbox-group" id="filterStatusGroup">
-                                    <label class="checkbox-item">
-                                        <input type="checkbox" value="neutral">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="checkbox-text">Назначена</span>
-                                    </label>
-                                    <label class="checkbox-item">
-                                        <input type="checkbox" value="inprocess">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="checkbox-text">В работе</span>
-                                    </label>
-                                    <label class="checkbox-item">
-                                        <input type="checkbox" value="done">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="checkbox-text">Завершено</span>
-                                    </label>
-                                    <label class="checkbox-item">
-                                        <input type="checkbox" value="exit">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="checkbox-text">Отложено</span>
-                                    </label>
-                                </div>                      
+                                <div class="filter-checkbox-group" id="filterStatusGroup"></div>
                             </div>
                         
-                            <!-- Приоритет -->
-                            <div class="filter-section">
+                            <div class="filter-section" data-filter-section="priority">
                                 <label class="filter-label">Приоритет</label>
-                                <div class="filter-checkbox-group" id="filterPriorityGroup">
-                                    <label class="checkbox-item">
-                                        <input type="checkbox" value="срочно">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="checkbox-text">Срочно</span>
-                                    </label>
-                                    <label class="checkbox-item">
-                                        <input type="checkbox" value="обычный">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="checkbox-text">Обычный</span>
-                                    </label>
-                                </div>
+                                <div class="filter-checkbox-group" id="filterPriorityGroup"></div>
                             </div>
                         
-                            <!-- Проект -->
-                            <div class="filter-section">
+                            <div class="filter-section" data-filter-section="project">
                                 <label class="filter-label">Проект</label>
-                                <div class="filter-checkbox-group" id="filterProjectGroup">
-                                    <label class="checkbox-item">
-                                        <input type="checkbox" value="Корпоративный портал">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="checkbox-text">Корпоративный портал</span>
-                                    </label>
-                                    <label class="checkbox-item">
-                                        <input type="checkbox" value="Микросервисная платформа">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="checkbox-text">Микросервисная платформа</span>
-                                    </label>
-                                    <label class="checkbox-item">
-                                        <input type="checkbox" value="CRM-система">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="checkbox-text">CRM-система</span>
-                                    </label>
-                                </div>
+                                <div class="filter-checkbox-group" id="filterProjectGroup"></div>
                             </div>
                         
-                            <!-- Исполнитель -->
-                            <div class="filter-section">
+                            <div class="filter-section" data-filter-section="assignee">
                                 <label class="filter-label">Исполнитель</label>
-                                <div class="filter-checkbox-group" id="filterAssigneeGroup">
-                                    <label class="checkbox-item">
-                                        <input type="checkbox" value="Лев Аксенов">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="checkbox-text">Лев Аксенов</span>
-                                    </label>
-                                    <label class="checkbox-item">
-                                        <input type="checkbox" value="Дарья Швед">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="checkbox-text">Дарья Швед</span>
-                                    </label>
-                                    <label class="checkbox-item">
-                                        <input type="checkbox" value="Ксения Глебко">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="checkbox-text">Ксения Глебко</span>
-                                    </label>
-                                    <label class="checkbox-item">
-                                        <input type="checkbox" value="Полина Ильючик">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="checkbox-text">Полина Ильючик</span>
-                                    </label>
-                                </div>
+                                <div class="filter-checkbox-group" id="filterAssigneeGroup"></div>
                             </div>
                         
-                            <!-- Создатель -->
-                            <div class="filter-section">
+                            <div class="filter-section" data-filter-section="creator">
                                 <label class="filter-label">Создатель</label>
-                                <div class="filter-checkbox-group" id="filterCreatorGroup">
-                                    <label class="checkbox-item">
-                                        <input type="checkbox" value="Лев Аксенов">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="checkbox-text">Лев Аксенов</span>
-                                    </label>
-                                    <label class="checkbox-item">
-                                        <input type="checkbox" value="Дарья Швед">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="checkbox-text">Дарья Швед</span>
-                                    </label>
-                                    <label class="checkbox-item">
-                                        <input type="checkbox" value="Оксана Кветко">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="checkbox-text">Оксана Кветко</span>
-                                    </label>
-                                    <label class="checkbox-item">
-                                        <input type="checkbox" value="Ксения Глебко">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="checkbox-text">Ксения Глебко</span>
-                                    </label>
-                                    <label class="checkbox-item">
-                                        <input type="checkbox" value="Полина Ильючик">
-                                        <span class="custom-checkbox"></span>
-                                        <span class="checkbox-text">Полина Ильючик</span>
-                                    </label>
-                                </div>
+                                <div class="filter-checkbox-group" id="filterCreatorGroup"></div>
                             </div>
                         
                             <!-- Сложность (SP) -->
@@ -268,6 +170,7 @@
     <script src="/static/js/loadComponents.js"></script>
     <script src="/static/js/app.js"></script>
     <script src="/static/js/theme.js"></script>
+    <script src="/static/js/tp_calendar_days.js"></script>
     <script src="/static/js/custom_calendar_range.js"></script>
     <script src="/static/js/task_detail_modal.js"></script>
     <script src="/static/js/tp_select.js"></script>

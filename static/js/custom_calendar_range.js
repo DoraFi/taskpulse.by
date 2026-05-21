@@ -3,8 +3,29 @@ function openCustomCalendarRange({ start, end, onApply }) {
     let selectionEnd = end || null;
     let currentYear;
     let currentMonth;
-    const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const dayClassFn = typeof window.tpCalendarDayClasses === 'function'
+        ? window.tpCalendarDayClasses
+        : (dateStr, ctx) => {
+            let classes = 'day';
+            const p = String(dateStr).split('-').map(Number);
+            if (p.length === 3) {
+                const dow = new Date(p[0], p[1] - 1, p[2]).getDay();
+                if (dow === 0 || dow === 6) classes += ' weekend';
+            }
+            if (dateStr === (ctx?.today || '')) classes += ' today';
+            if (ctx?.selectionStart === dateStr) classes += ' selected-start';
+            if (ctx?.selectionEnd === dateStr) classes += ' selected-end';
+            if (ctx?.selectionStart && ctx?.selectionEnd && dateStr > ctx.selectionStart && dateStr < ctx.selectionEnd) {
+                classes += ' in-range';
+            }
+            return classes;
+        };
+    const todayStr = typeof window.tpCalendarTodayIso === 'function'
+        ? window.tpCalendarTodayIso()
+        : (() => {
+            const today = new Date();
+            return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        })();
 
     const modal = document.createElement('div');
     modal.className = 'modal-overlay custom-calendar-modal';
@@ -74,15 +95,10 @@ function openCustomCalendarRange({ start, end, onApply }) {
             html += `<div class="other-month" data-date="${dateStr}">${prevDate}</div>`;
         }
 
+        const dayCtx = { today: todayStr, selectionStart, selectionEnd };
         for (let d = 1; d <= daysInMonth; d++) {
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-            let classes = 'day';
-            const dayOfWeek = new Date(year, month, d).getDay();
-            if (dayOfWeek === 0 || dayOfWeek === 6) classes += ' weekend';
-            if (dateStr === todayStr) classes += ' today';
-            if (selectionStart === dateStr) classes += ' selected-start';
-            if (selectionEnd === dateStr) classes += ' selected-end';
-            if (selectionStart && selectionEnd && dateStr > selectionStart && dateStr < selectionEnd) classes += ' in-range';
+            const classes = dayClassFn(dateStr, dayCtx);
             html += `<div class="${classes}" data-date="${dateStr}">${d}</div>`;
         }
 

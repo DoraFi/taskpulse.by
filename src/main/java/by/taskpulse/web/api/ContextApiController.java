@@ -274,6 +274,11 @@ public class ContextApiController {
         return legacy.assignedTasks();
     }
 
+    @GetMapping("/api/tasks/filter-options")
+    public Map<String, Object> tasksFilterOptionsAuto(@RequestParam(defaultValue = "all") String tab) {
+        return legacy.tasksFilterOptions(tab);
+    }
+
     @GetMapping("/api/index/summary")
     public Map<String, Object> indexSummaryAuto(HttpServletResponse response) {
         return legacy.indexSummary(response);
@@ -664,6 +669,14 @@ public class ContextApiController {
     public List<Map<String, Object>> assigned(@PathVariable String orgId, @PathVariable String teamId) {
         ensureContextAccess(orgId, teamId);
         return legacy.assignedTasks();
+    }
+
+    @GetMapping("/o/{orgId}/t/{teamId}/api/tasks/filter-options")
+    public Map<String, Object> tasksFilterOptions(@PathVariable String orgId,
+                                                  @PathVariable String teamId,
+                                                  @RequestParam(defaultValue = "all") String tab) {
+        ensureContextAccess(orgId, teamId);
+        return legacy.tasksFilterOptions(tab);
     }
 
     @GetMapping("/o/{orgId}/t/{teamId}/api/index/summary")

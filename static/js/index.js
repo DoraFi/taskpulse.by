@@ -74,16 +74,13 @@ function wireIndexTodoClicks(grid, todo) {
     });
 }
 
-function initIndexPage(options) {
-    const forceFetch = options && options.forceFetch === true;
-    if (forceFetch) {
-        window._tpIndexSummaryLast = null;
-        window._tpIndexSummaryLastAt = null;
-    }
-    if (!document.getElementById('indexTodoTasks')) return Promise.resolve();
-
-    if (!window._tpIndexNavBound) {
-        window._tpIndexNavBound = true;
+function bindIndexDashboardNav() {
+    if (window._tpIndexNavDelegation) return;
+    window._tpIndexNavDelegation = true;
+    document.addEventListener('click', (e) => {
+        const el = e.target.closest('[data-index-nav]');
+        if (!el) return;
+        e.preventDefault();
         resolveContextBasePath().then((base) => {
             if (!base) return;
             const hrefByNav = {
@@ -92,17 +89,24 @@ function initIndexPage(options) {
                 'tasks-calendar': `${base}/tasks`,
                 'projects-team': `${base}/team`
             };
-            document.querySelectorAll('[data-index-nav]').forEach((el) => {
-                const key = el.getAttribute('data-index-nav');
-                const href = hrefByNav[key];
-                if (!href) return;
-                el.onclick = (e) => {
-                    e.preventDefault();
-                    navigateTo(href);
-                };
-            });
+            const key = el.getAttribute('data-index-nav');
+            const href = hrefByNav[key];
+            if (href) navigateTo(href);
         });
+    });
+}
+
+bindIndexDashboardNav();
+
+function initIndexPage(options) {
+    const forceFetch = options && options.forceFetch === true;
+    if (forceFetch) {
+        window._tpIndexSummaryLast = null;
+        window._tpIndexSummaryLastAt = null;
     }
+    if (!document.getElementById('indexTodoTasks')) return Promise.resolve();
+
+    bindIndexDashboardNav();
 
     const usePrefetch = !forceFetch && window._tpIndexSummaryLast != null;
     if (!usePrefetch) {

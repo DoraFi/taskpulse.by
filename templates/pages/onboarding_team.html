@@ -75,7 +75,7 @@
                             </div>
                             <div class="auth-field" style="margin: 0;">
                                 <label for="role-1">Роль</label>
-                                <select id="role-1" name="roles[]">
+                                <select id="role-1" name="roles[]" class="tp-field-plain create-task-select">
                                     <option value="member">Участник</option>
                                     <option value="admin">Администратор</option>
                                     <option value="viewer">Наблюдатель</option>
@@ -89,7 +89,7 @@
                             </div>
                             <div class="auth-field" style="margin: 0;">
                                 <label for="role-2">Роль</label>
-                                <select id="role-2" name="roles[]">
+                                <select id="role-2" name="roles[]" class="tp-field-plain create-task-select">
                                     <option value="member">Участник</option>
                                     <option value="admin">Администратор</option>
                                     <option value="viewer">Наблюдатель</option>
@@ -115,6 +115,7 @@
         </div>
     </main>
 
+    <script src="/static/js/tp_select.js"></script>
     <script th:src="@{/static/js/auth_static.js}" src="/static/js/auth_static.js"></script>
 </body>
 

@@ -60,42 +60,79 @@ async function loadCurrentUser() {
     }
 }
 
-function filterTasks(tab) {
-    const sortByPriorityAndDate = (arr, doneLast = false) => {
-        const priorityWeight = (p) => p === 'срочно' ? 0 : 1;
-        return [...arr].sort((a, b) => {
-            if (doneLast) {
-                const aDone = a.status === 'done' ? 1 : 0;
-                const bDone = b.status === 'done' ? 1 : 0;
-                if (aDone !== bDone) return aDone - bDone;
-            }
-            const pa = priorityWeight(a.priority);
-            const pb = priorityWeight(b.priority);
-            if (pa !== pb) return pa - pb;
-            const da = parseDate(a.dueDate || '31.12.2099');
-            const db = parseDate(b.dueDate || '31.12.2099');
-            return da - db;
-        });
-    };
-    const today = new Date();
-    switch(tab) {
-        case 'assigned':
-            return sortByPriorityAndDate(
-                (Array.isArray(assignedTasksData) ? assignedTasksData : []).filter(task => task.status !== 'done')
-            );
-        case 'deadline':
-            return sortByPriorityAndDate(tasksData.filter(task => {
-                const dueDate = parseDate(task.dueDate);
-                const diffDays = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
-                return diffDays <= 3 && diffDays >= 0 && task.status !== 'done';
-            }));
-        case 'todo':
-            return sortByPriorityAndDate(tasksData.filter(task => task.assignee === '-'));
-        case 'created':
-            return sortByPriorityAndDate(tasksData.filter(task => task.creator === currentUser.name), true);
-        default:
-            return sortByPriorityAndDate(tasksData);
+function priorityWeight(priority) {
+    return priority === 'срочно' ? 0 : 1;
+}
+
+function sortByPriorityAndDate(arr, doneLast = false) {
+    return [...arr].sort((a, b) => {
+        if (doneLast) {
+            const aDone = a.status === 'done' ? 1 : 0;
+            const bDone = b.status === 'done' ? 1 : 0;
+            if (aDone !== bDone) return aDone - bDone;
+        }
+        const pa = priorityWeight(a.priority);
+        const pb = priorityWeight(b.priority);
+        if (pa !== pb) return pa - pb;
+        const da = parseDate(a.dueDate || '31.12.2099');
+        const db = parseDate(b.dueDate || '31.12.2099');
+        return da - db;
+    });
+}
+
+function sortByDateThenPriority(arr) {
+    return [...arr].sort((a, b) => {
+        const da = parseDate(a.dueDate || '31.12.2099');
+        const db = parseDate(b.dueDate || '31.12.2099');
+        if (da - db !== 0) return da - db;
+        return priorityWeight(a.priority) - priorityWeight(b.priority);
+    });
+}
+
+function isUnassignedTask(task) {
+    if (task.assigneeId == null || task.assigneeId === '') return true;
+    const assignee = String(task.assignee || '').trim();
+    return !assignee || assignee === '-' || assignee === '-';
+}
+
+function isCreatedByCurrentUser(task) {
+    if (currentUser.id != null && task.creatorId != null) {
+        return Number(task.creatorId) === Number(currentUser.id);
     }
+    const me = (currentUser.name || '').trim();
+    const creator = (task.creator || '').trim();
+    return Boolean(me && creator && me === creator);
+}
+
+function isExpiringTask(task) {
+    if (task.status === 'done') return false;
+    const diff = daysDiffFromToday(task.dueDate);
+    return diff != null && diff <= 3 && diff >= 0;
+}
+
+function getTasksForTab(tab) {
+    switch (tab) {
+        case 'assigned':
+            return Array.isArray(assignedTasksData) ? [...assignedTasksData] : [];
+        case 'deadline':
+            return tasksData.filter(isExpiringTask);
+        case 'todo':
+            return tasksData.filter(isUnassignedTask);
+        case 'created':
+            return tasksData.filter(isCreatedByCurrentUser);
+        case 'all':
+            return [...tasksData];
+        default:
+            return [...tasksData];
+    }
+}
+
+function sortTasksForTab(tab, arr) {
+    return sortByDateThenPriority(arr);
+}
+
+function filterTasks(tab) {
+    return sortTasksForTab(tab, getTasksForTab(tab));
 }
 
 function parseDate(dateStr) {
@@ -311,11 +348,13 @@ function getColumnsForTab(tab) {
         case 'deadline':
             return ['id', 'name', 'status', 'dueDate', 'priority', 'complexity', 'time', 'assignee', 'project'];
         case 'todo':
-            return ['id', 'name', 'status', 'dueDate', 'priority', 'complexity', 'time', 'assignee', 'creator', 'project'];
+            return ['id', 'name', 'status', 'dueDate', 'priority', 'complexity', 'time', 'creator', 'project'];
         case 'created':
             return ['id', 'name', 'status', 'dueDate', 'priority', 'complexity', 'time', 'assignee', 'project'];
+        case 'all':
+            return ['id', 'name', 'status', 'dueDate', 'priority', 'complexity', 'time', 'assignee', 'creator', 'project'];
         default:
-            return ['id', 'name', 'status', 'dueDate', 'priority', 'complexity', 'time', 'project'];
+            return ['id', 'name', 'status', 'dueDate', 'priority', 'complexity', 'time', 'assignee', 'creator', 'project'];
     }
 }
 
@@ -380,6 +419,7 @@ function initFilters() {
         if (filterIcon) {
             filterIcon.addEventListener('click', () => {
                 updateFilterSectionsVisibility();
+                hydrateFilterCheckboxesFromDb();
                 filterModal.classList.add('show');
             });
         }
@@ -530,67 +570,63 @@ function uniqueSortedStrings(values) {
         .sort((a, b) => a.localeCompare(b, 'ru'));
 }
 
-function hydrateFilterCheckboxesFromDb() {
-    const tasks = Array.isArray(tasksData) ? tasksData : [];
+async function loadFilterOptions(tab) {
+    try {
+        const response = await fetch(apiUrl(`/tasks/filter-options?tab=${encodeURIComponent(tab || 'all')}`));
+        if (!response.ok) throw new Error('filter-options failed');
+        return await response.json();
+    } catch (error) {
+        console.error('Ошибка загрузки фильтров:', error);
+        return null;
+    }
+}
 
-    const current = collectFilters();
-    renderCheckboxGroup(
-        'filterStatusGroup',
-        uniqueSortedStrings(tasks.map(t => t.status)).map(status => ({
+function buildFilterOptionsFallback(tab) {
+    const tasks = getTasksForTab(tab);
+    return {
+        statuses: uniqueSortedStrings(tasks.map(t => t.status)).map(status => ({
             value: status,
             label: STATUS_LABELS[status] || status
         })),
-        current.statuses
-    );
-    renderCheckboxGroup(
-        'filterPriorityGroup',
-        uniqueSortedStrings(tasks.map(t => t.priority)).map(priority => ({
+        priorities: uniqueSortedStrings(tasks.map(t => t.priority)).map(priority => ({
             value: priority,
             label: priority === 'срочно' ? 'Срочно' : priority === 'обычный' ? 'Обычный' : priority
         })),
-        current.priorities
-    );
-    renderCheckboxGroup(
-        'filterProjectGroup',
-        uniqueSortedStrings(tasks.map(t => t.project)).map(project => ({ value: project, label: project })),
-        current.projects
-    );
-    renderCheckboxGroup(
-        'filterAssigneeGroup',
-        uniqueSortedStrings(tasks.map(t => t.assignee).filter(a => a && a !== '-')).map(name => ({ value: name, label: name })),
-        current.assignees
-    );
-    renderCheckboxGroup(
-        'filterCreatorGroup',
-        uniqueSortedStrings(tasks.map(t => t.creator)).map(name => ({ value: name, label: name })),
-        current.creators
-    );
+        projects: uniqueSortedStrings(tasks.map(t => t.project)).map(project => ({ value: project, label: project })),
+        assignees: uniqueSortedStrings(tasks.map(t => t.assignee).filter(a => a && a !== '-')).map(name => ({ value: name, label: name })),
+        creators: uniqueSortedStrings(tasks.map(t => t.creator)).map(name => ({ value: name, label: name })),
+        maxComplexity: 13
+    };
+}
+
+async function hydrateFilterCheckboxesFromDb() {
+    const tab = document.querySelector('.tab-btn.active')?.dataset.tab || 'all';
+    const current = collectFilters();
+    const opts = (await loadFilterOptions(tab)) || buildFilterOptionsFallback(tab);
+
+    renderCheckboxGroup('filterStatusGroup', opts.statuses || [], current.statuses);
+    renderCheckboxGroup('filterPriorityGroup', opts.priorities || [], current.priorities);
+    renderCheckboxGroup('filterProjectGroup', opts.projects || [], current.projects);
+    renderCheckboxGroup('filterAssigneeGroup', opts.assignees || [], current.assignees);
+    renderCheckboxGroup('filterCreatorGroup', opts.creators || [], current.creators);
+
+    if (complexityRange && opts.maxComplexity) {
+        const maxVal = Math.max(1, Number(opts.maxComplexity) || 13);
+        complexityRange.max = String(maxVal);
+        if (Number(complexityRange.value) > maxVal) {
+            complexityRange.value = String(maxVal);
+            if (complexityValue) complexityValue.textContent = `До ${maxVal} SP`;
+        }
+        const rangeLabels = complexityRange.closest('.filter-range')?.querySelectorAll('.range-values span');
+        if (rangeLabels && rangeLabels.length >= 2) {
+            rangeLabels[1].textContent = String(maxVal);
+        }
+    }
 }
 
 function applyFiltersToTasks(criteria) {
     const currentTab = document.querySelector('.tab-btn.active').dataset.tab;
-    const today = new Date();
-    let filteredTasks = [];
-    switch(currentTab) {
-        case 'assigned':
-            filteredTasks = tasksData.filter(task => task.assignee === currentUser.name && task.status !== 'done');
-            break;
-        case 'deadline':
-            filteredTasks = tasksData.filter(task => {
-                const dueDate = parseDate(task.dueDate);
-                const diffDays = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
-                return diffDays <= 3 && diffDays >= 0 && task.status !== 'done';
-            });
-            break;
-        case 'todo':
-            filteredTasks = tasksData.filter(task => task.status === 'neutral');
-            break;
-        case 'created':
-            filteredTasks = tasksData.filter(task => task.creator === currentUser.name);
-            break;
-        default:
-            filteredTasks = [...tasksData];
-    }
+    let filteredTasks = getTasksForTab(currentTab);
     if (criteria.statuses && criteria.statuses.length > 0) {
         filteredTasks = filteredTasks.filter(task => criteria.statuses.includes(task.status));
     }
@@ -615,24 +651,19 @@ function applyFiltersToTasks(criteria) {
     if (criteria.dateTo) {
         filteredTasks = filteredTasks.filter(task => convertToISODate(task.dueDate) <= criteria.dateTo);
     }
-    updateTasksWithSort(filteredTasks);
+    updateTasksWithSort(sortTasksForTab(currentTab, filteredTasks));
 }
 
 function updateFilterSectionsVisibility() {
-    const currentTab = document.querySelector('.tab-btn.active')?.dataset.tab;
-    const filterSections = document.querySelectorAll('.modal-body .filter-section');
-    const alwaysVisible = [0, 1, 2, 5, 6];
-    const assigneeVisible = ['deadline', 'todo', 'created'];
-    const creatorVisible = ['assigned', 'deadline', 'todo'];
-    filterSections.forEach((section, idx) => {
-        if (alwaysVisible.includes(idx)) {
-            section.style.display = '';
-            return;
-        }
-        if (idx === 3) {
-            section.style.display = assigneeVisible.includes(currentTab) ? '' : 'none';
-        } else if (idx === 4) {
-            section.style.display = creatorVisible.includes(currentTab) ? '' : 'none';
+    const currentTab = document.querySelector('.tab-btn.active')?.dataset.tab || 'all';
+    const hideAssignee = currentTab === 'assigned' || currentTab === 'created';
+    const hideCreator = currentTab === 'created';
+    document.querySelectorAll('#filterModal [data-filter-section]').forEach(section => {
+        const key = section.dataset.filterSection;
+        if (key === 'assignee') {
+            section.style.display = hideAssignee ? 'none' : '';
+        } else if (key === 'creator') {
+            section.style.display = hideCreator ? 'none' : '';
         } else {
             section.style.display = '';
         }
@@ -678,18 +709,20 @@ function handleTabClick(e) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     e.currentTarget.classList.add('active');
     const tab = e.currentTarget.dataset.tab;
-    if (tab === 'assigned') {
-        loadAssignedTasks().then(() => renderTasks(tab));
-    } else {
-        if (!tasksData || tasksData.length === 0) {
-            loadTasks().then(() => renderTasks(tab));
-        } else {
-            renderTasks(tab);
+    const render = () => {
+        hydrateFilterCheckboxesFromDb();
+        renderTasks(tab);
+        updateNameColumnMaxWidth();
+        if (filterModal && filterModal.classList.contains('show')) {
+            updateFilterSectionsVisibility();
         }
-    }
-    updateNameColumnMaxWidth();
-    if (filterModal && filterModal.classList.contains('show')) {
-        updateFilterSectionsVisibility();
+    };
+    if (tab === 'assigned') {
+        loadAssignedTasks().then(render);
+    } else if (!tasksData || tasksData.length === 0) {
+        loadTasks().then(render);
+    } else {
+        render();
     }
 }
 
@@ -746,7 +779,8 @@ function renderTasksWithColumns(tab) {
         assigned: 'Назначенные мне задачи',
         deadline: 'Задачи с истекающим сроком',
         todo: 'Задачи к выполнению',
-        created: 'Созданные мной задачи'
+        created: 'Созданные мной задачи',
+        all: 'Все задачи'
     };
     headerTitle.textContent = titles[tab];
     const allColumns = getColumnsForTab(tab);

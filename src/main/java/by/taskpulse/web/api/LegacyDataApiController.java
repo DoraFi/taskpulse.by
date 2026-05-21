@@ -18,6 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1240,32 +1241,42 @@ public class LegacyDataApiController {
         long taskId = taskIdNum.longValue();
         long boardId = boardIdNum.longValue();
         Map<String, Object> oldRow = jdbcTemplate.queryForMap(
-                "select stage as old_stage, archived_at as old_archived_at from task_item where id = ?",
+                "select stage as old_stage, archived_at as old_archived_at, assignee_id as old_assignee_id from task_item where id = ?",
                 taskId);
         String oldStage = oldRow.get("old_stage") == null ? null : String.valueOf(oldRow.get("old_stage")).trim();
         Object oldArchivedAt = oldRow.get("old_archived_at");
+        Object oldAssigneeId = oldRow.get("old_assignee_id");
         Object nextArchivedAt = "Готово".equals(stage)
                 ? ("Готово".equals(oldStage) ? oldArchivedAt : Timestamp.from(Instant.now()))
                 : null;
         Long uid = currentUserId();
+        Long nextAssigneeId = oldAssigneeId == null ? null : ((Number) oldAssigneeId).longValue();
+        boolean stageChanged = !Objects.equals(oldStage, stage);
+        if (nextAssigneeId == null && stageChanged) {
+            nextAssigneeId = uid;
+        }
         int updated = jdbcTemplate.update(
                 """
                         update task_item
-                        set board_id = ?, stage = ?, priority = ?, archived_at = ?, updated_at = now()
+                        set board_id = ?, stage = ?, priority = ?, assignee_id = ?, archived_at = ?, updated_at = now()
                         where id = ?
                         """,
                 boardId,
                 stage,
                 (priority == null || priority.isBlank()) ? "обычный" : priority,
+                nextAssigneeId,
                 nextArchivedAt,
                 taskId);
         if (updated == 0) {
             throw new IllegalArgumentException("Задача не найдена");
         }
-        if (!Objects.equals(oldStage, stage)) {
+        if (stageChanged) {
             insertTaskStatusHistory(taskId, uid, oldStage, stage, "user");
         }
-        return Map.of("ok", true);
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("ok", true);
+        out.put("assigneeAssigned", nextAssigneeId != null && oldAssigneeId == null && stageChanged);
+        return out;
     }
 
     private void insertTaskStatusHistory(long taskId, long changedBy, String oldStage, String newStage,
@@ -1526,6 +1537,7 @@ public class LegacyDataApiController {
                 """
                         select t.stage as old_stage
                              , t.archived_at as old_archived_at
+                             , t.assignee_id as old_assignee_id
                         from task_item t
                         join board b on b.id = t.board_id
                         join project p on p.id = b.project_id
@@ -1537,9 +1549,14 @@ public class LegacyDataApiController {
                 taskId, teamId);
         String oldStage = oldRow.get("old_stage") == null ? null : String.valueOf(oldRow.get("old_stage")).trim();
         Object oldArchivedAt = oldRow.get("old_archived_at");
+        Object oldAssigneeId = oldRow.get("old_assignee_id");
+        boolean stageChanged = !Objects.equals(oldStage, stage);
         Object nextArchivedAt = "Готово".equals(stage)
                 ? ("Готово".equals(oldStage) ? oldArchivedAt : Timestamp.from(Instant.now()))
                 : null;
+        if (assigneeId == null && oldAssigneeId == null && stageChanged) {
+            assigneeId = uid;
+        }
 
         jdbcTemplate.update(
                 """
@@ -1706,7 +1723,7 @@ public class LegacyDataApiController {
                 """
                         select
                             t.id, t.task_code, t.name, t.stage, t.priority, t.due_date, t.created_at, t.updated_at,
-                            t.story_points, t.estimate_hours,
+                            t.story_points, t.estimate_hours, t.assignee_id, t.creator_id,
                             coalesce(t.description, '') as description,
                             coalesce(p.project_type, 'list') as project_type,
                             """ + sqlPersonDisplayName("a") + """
@@ -1747,10 +1764,12 @@ public class LegacyDataApiController {
                             ? formatEstimateHours(rs.getBigDecimal("estimate_hours"))
                             : "8";
                     m.put("timeEstimate", estimate + "ч");
+                    m.put("creatorId", rs.getObject("creator_id"));
                     m.put("creator", rs.getString("creator_name"));
                     m.put("creatorRole", "manager");
                     m.put("creatorAvatar", rs.getString("creator_avatar") != null ? rs.getString("creator_avatar")
                             : "basic_avatar.png");
+                    m.put("assigneeId", rs.getObject("assignee_id"));
                     m.put("assignee", rs.getString("assignee_name") != null ? rs.getString("assignee_name") : "-");
                     m.put("assigneeRole", "member");
                     m.put("assigneeAvatar", rs.getString("assignee_avatar"));
@@ -1767,7 +1786,7 @@ public class LegacyDataApiController {
                 """
                         select
                             t.id, t.task_code, t.name, t.stage, t.priority, t.due_date, t.created_at, t.updated_at,
-                            t.story_points, t.estimate_hours,
+                            t.story_points, t.estimate_hours, t.assignee_id, t.creator_id,
                             coalesce(t.description, '') as description,
                             coalesce(p.project_type, 'list') as project_type,
                             """ + sqlPersonDisplayName("a") + """
@@ -1813,10 +1832,12 @@ public class LegacyDataApiController {
                             ? formatEstimateHours(rs.getBigDecimal("estimate_hours"))
                             : "8";
                     m.put("timeEstimate", estimate + "ч");
+                    m.put("creatorId", rs.getObject("creator_id"));
                     m.put("creator", rs.getString("creator_name"));
                     m.put("creatorRole", "manager");
                     m.put("creatorAvatar", rs.getString("creator_avatar") != null ? rs.getString("creator_avatar")
                             : "basic_avatar.png");
+                    m.put("assigneeId", rs.getObject("assignee_id"));
                     m.put("assignee", rs.getString("assignee_name") != null ? rs.getString("assignee_name") : "-");
                     m.put("assigneeRole", "member");
                     m.put("assigneeAvatar", rs.getString("assignee_avatar"));
@@ -1824,6 +1845,151 @@ public class LegacyDataApiController {
                     return m;
                 },
                 uid);
+    }
+
+    @GetMapping("/api/tasks/filter-options")
+    public Map<String, Object> tasksFilterOptions(@RequestParam(defaultValue = "all") String tab) {
+        Long uid = currentUserId();
+        List<Long> visibleIds = visibleProjectIds();
+        if (visibleIds.isEmpty()) {
+            Map<String, Object> empty = new LinkedHashMap<>();
+            empty.put("statuses", List.of());
+            empty.put("priorities", List.of());
+            empty.put("projects", List.of());
+            empty.put("assignees", List.of());
+            empty.put("creators", List.of());
+            empty.put("maxComplexity", 13);
+            return empty;
+        }
+        String visibleProjectsSql = inClauseSql(visibleIds);
+        String tabFilter = tasksTabSqlFilter(tab, uid);
+        String baseFrom = """
+                from task_item t
+                left join app_user a on a.id = t.assignee_id
+                left join app_user c on c.id = t.creator_id
+                left join board b on b.id = t.board_id
+                left join project p on p.id = b.project_id
+                where p.id in (""" + visibleProjectsSql + ") " + tabFilter;
+
+        List<String> stages = jdbcTemplate.queryForList(
+                "select distinct coalesce(t.stage, 'Новая') " + baseFrom + " order by 1",
+                String.class);
+        LinkedHashSet<String> statusCodes = new LinkedHashSet<>();
+        for (String stage : stages) {
+            statusCodes.add(toLegacyStatus(stage));
+        }
+        List<Map<String, String>> statuses = new ArrayList<>();
+        for (String code : statusCodes) {
+            Map<String, String> row = new LinkedHashMap<>();
+            row.put("value", code);
+            row.put("label", legacyStatusLabel(code));
+            statuses.add(row);
+        }
+
+        List<Map<String, String>> priorities = jdbcTemplate.query(
+                "select distinct t.priority " + baseFrom + " and t.priority is not null order by t.priority",
+                (rs, rowNum) -> {
+                    String p = rs.getString(1);
+                    Map<String, String> row = new LinkedHashMap<>();
+                    row.put("value", p);
+                    row.put("label", priorityLabel(p));
+                    return row;
+                });
+
+        List<Map<String, String>> projects = jdbcTemplate.query(
+                "select distinct p.name " + baseFrom + " and p.name is not null order by p.name",
+                (rs, rowNum) -> {
+                    String name = rs.getString(1);
+                    Map<String, String> row = new LinkedHashMap<>();
+                    row.put("value", name);
+                    row.put("label", name);
+                    return row;
+                });
+
+        List<Map<String, String>> assignees = List.of();
+        if (showAssigneeFilterForTab(tab)) {
+            assignees = jdbcTemplate.query(
+                    "select distinct " + sqlPersonDisplayName("a") + " as name " + baseFrom
+                            + " and t.assignee_id is not null order by name",
+                    (rs, rowNum) -> {
+                        String name = rs.getString(1);
+                        Map<String, String> row = new LinkedHashMap<>();
+                        row.put("value", name);
+                        row.put("label", name);
+                        return row;
+                    });
+        }
+
+        List<Map<String, String>> creators = List.of();
+        if (showCreatorFilterForTab(tab)) {
+            creators = jdbcTemplate.query(
+                    "select distinct " + sqlPersonDisplayName("c") + " as name " + baseFrom
+                            + " and t.creator_id is not null order by name",
+                    (rs, rowNum) -> {
+                        String name = rs.getString(1);
+                        Map<String, String> row = new LinkedHashMap<>();
+                        row.put("value", name);
+                        row.put("label", name);
+                        return row;
+                    });
+        }
+
+        Integer maxSp = jdbcTemplate.queryForObject(
+                "select coalesce(max(t.story_points), 13) " + baseFrom,
+                Integer.class);
+
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("statuses", statuses);
+        out.put("priorities", priorities);
+        out.put("projects", projects);
+        out.put("assignees", assignees);
+        out.put("creators", creators);
+        out.put("maxComplexity", maxSp == null ? 13 : Math.max(1, maxSp));
+        return out;
+    }
+
+    private String tasksTabSqlFilter(String tab, Long uid) {
+        if (tab == null || tab.isBlank())
+            tab = "all";
+        return switch (tab) {
+            case "assigned" -> " and t.assignee_id = " + uid + " and coalesce(t.stage, 'Очередь') <> 'Готово' ";
+            case "deadline" -> """
+                     and coalesce(t.stage, '') <> 'Готово'
+                     and t.due_date is not null
+                     and t.due_date >= current_date
+                     and t.due_date <= current_date + interval '3 days'
+                    """;
+            case "todo" -> " and t.assignee_id is null ";
+            case "created" -> " and t.creator_id = " + uid + " ";
+            default -> "";
+        };
+    }
+
+    private boolean showAssigneeFilterForTab(String tab) {
+        return tab != null && !tab.equals("assigned") && !tab.equals("created");
+    }
+
+    private boolean showCreatorFilterForTab(String tab) {
+        return tab != null && !tab.equals("created");
+    }
+
+    private String legacyStatusLabel(String code) {
+        return switch (code) {
+            case "inprocess" -> "В работе";
+            case "done" -> "Завершено";
+            case "exit" -> "Отложено";
+            default -> "Назначена";
+        };
+    }
+
+    private String priorityLabel(String priority) {
+        if (priority == null)
+            return "";
+        return switch (priority) {
+            case "срочно" -> "Срочно";
+            case "обычный" -> "Обычный";
+            default -> priority;
+        };
     }
 
     @GetMapping("/api/projects")

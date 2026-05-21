@@ -23,6 +23,17 @@
         });
     }
 
+    function initAuthTpSelects(root) {
+        var scope = root || document;
+        if (typeof window.initTpSelect !== 'function') return;
+        scope.querySelectorAll('select.create-task-select').forEach(function (sel) {
+            if (sel.dataset.tpSelect === '1') return;
+            window.initTpSelect(sel);
+        });
+    }
+
+    initAuthTpSelects(document);
+
     var addRow = document.getElementById('add-invite-row');
     if (addRow) {
         addRow.addEventListener('click', function () {
@@ -33,8 +44,18 @@
             var clone = first.cloneNode(true);
             clone.querySelectorAll('input, select').forEach(function (el) {
                 el.value = '';
+                if (el.tagName === 'SELECT') {
+                    el.classList.add('tp-field-plain', 'create-task-select');
+                    delete el.dataset.tpSelect;
+                    var wrap = el.closest('.tp-select');
+                    if (wrap && wrap.parentNode) {
+                        wrap.parentNode.insertBefore(el, wrap);
+                        wrap.remove();
+                    }
+                }
             });
             list.appendChild(clone);
+            initAuthTpSelects(clone);
         });
     }
 

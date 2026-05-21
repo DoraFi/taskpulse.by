@@ -187,14 +187,17 @@
                         <h2 class="settings-modal__panel-title text-header">Команда и доступ</h2>
                         <p class="text-signature settings-modal__lead">Организация и ваши права в пространстве TaskPulse</p>
                     </div>
-                    <div class="settings-modal__grid">
-                        <div class="auth-field settings-modal__field">
-                            <label for="settingsOrg">Организация</label>
-                            <input id="settingsOrg" type="text" class="filter-input" value="ООО «Пульс Задач»" readonly>
-                        </div>
-                        <div class="auth-field settings-modal__field">
-                            <label for="settingsRole">Ваша роль</label>
-                            <input id="settingsRole" type="text" class="filter-input" value="Участник команды" readonly>
+                    <div class="settings-modal__section-card br-5">
+                        <p class="filter-label">Организация и роль</p>
+                        <div class="settings-modal__grid">
+                            <div class="auth-field settings-modal__field">
+                                <label for="settingsOrg">Организация</label>
+                                <input id="settingsOrg" type="text" class="tp-field-plain" value="ООО «Пульс Задач»" readonly>
+                            </div>
+                            <div class="auth-field settings-modal__field">
+                                <label for="settingsRole">Ваша роль</label>
+                                <input id="settingsRole" type="text" class="tp-field-plain" value="Участник команды" readonly>
+                            </div>
                         </div>
                     </div>
                     <div class="header-signature">
