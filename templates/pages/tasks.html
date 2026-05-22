@@ -25,6 +25,16 @@
                     <img class="h-32" th:src="@{/static/source/icons/plus.svg}" src="/static/source/icons/plus.svg" alt="">
                 </button>
             </li>
+            <li class="header-team-switch" id="headerTeamSwitchWrap" hidden>
+                <div class="header-team-switch__host">
+                    <button type="button" class="header-toolbar__action" id="headerTeamSwitchBtn" aria-label="Сменить команду" aria-haspopup="menu" aria-expanded="false" aria-controls="headerTeamSwitchMenu">
+                        <img class="h-32" th:src="@{/static/source/icons/swap_team.svg}" src="/static/source/icons/swap_team.svg" alt="">
+                    </button>
+                    <div class="header-team-switch__menu" id="headerTeamSwitchMenu" role="menu" hidden>
+                        <ul class="header-team-switch__list" id="headerTeamSwitchList"></ul>
+                    </div>
+                </div>
+            </li>
             <li>
                 <button type="button" class="header-toolbar__action" id="headerSettingsBtn" aria-label="Настройки">
                     <img class="h-32" th:src="@{/static/source/icons/settings.svg}" src="/static/source/icons/settings.svg" alt="">
@@ -51,11 +61,11 @@
         <aside id="aside-container"></aside>
         <div class="app-container flex-col">
             <div class="tabs">
-                <button class="tab-btn active" data-tab="assigned">Назначенные мне</button>
+                <button class="tab-btn" data-tab="assigned">Назначенные мне</button>
                 <button class="tab-btn" data-tab="deadline">Срок истекает</button>
                 <button class="tab-btn" data-tab="todo">К выполнению</button>
                 <button class="tab-btn" data-tab="created">Созданные мной</button>
-                <button class="tab-btn" data-tab="all">Все задачи</button>
+                <button class="tab-btn active" data-tab="all">Все задачи</button>
             </div>
         
             <div class="card">

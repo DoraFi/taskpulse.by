@@ -19,7 +19,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public class GlobalSearchService {
 
     private static final int MIN_QUERY_LEN = 2;
-    private static final Pattern CONTEXT_TEAM_URI = Pattern.compile("^/o/[^/]+/t/([^/]+)/api(?:/.*)?$");
+    private static final Pattern CONTEXT_TEAM_URI = Pattern.compile("^/o/[^/]+/t/([^/]+)(?:/.*)?$");
 
     private record StaticEntry(String[] keywords, String kind, String title, String subtitle,
                                String pathSuffix, String settingsPanel, String action) {}
@@ -52,13 +52,16 @@ public class GlobalSearchService {
     private final JdbcTemplate jdbcTemplate;
     private final CurrentUserProvider currentUserProvider;
     private final HelpCenterService helpCenter;
+    private final LegacyDataApiController legacy;
 
     public GlobalSearchService(JdbcTemplate jdbcTemplate,
                                CurrentUserProvider currentUserProvider,
-                               HelpCenterService helpCenter) {
+                               HelpCenterService helpCenter,
+                               LegacyDataApiController legacy) {
         this.jdbcTemplate = jdbcTemplate;
         this.currentUserProvider = currentUserProvider;
         this.helpCenter = helpCenter;
+        this.legacy = legacy;
     }
 
     public Map<String, Object> search(String query) {
@@ -140,6 +143,10 @@ public class GlobalSearchService {
     }
 
     private List<Map<String, Object>> searchTasks(Long teamId, String pattern, String basePath) {
+        String visibleProjectsSql = visibleProjectsInClause();
+        if ("null".equals(visibleProjectsSql)) {
+            return List.of();
+        }
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(
                 """
                 select
@@ -150,14 +157,14 @@ public class GlobalSearchService {
                     t.stage,
                     t.priority,
                     left(coalesce(t.description, ''), 220) as snippet,
-                    p.code as project_code,
+                    trim(cast(p.code as text)) as project_code,
                     p.name as project_name,
                     coalesce(p.project_type, 'kanban') as project_type
                 from task_item t
                 join board b on b.id = t.board_id
                 join project p on p.id = b.project_id
-                join project_team pt on pt.project_id = p.id
-                where pt.team_id = ?
+                where b.project_id in (""" + visibleProjectsSql + """
+                )
                   and (
                     lower(t.name) like ?
                     or lower(coalesce(t.task_code, '')) like ?
@@ -167,7 +174,7 @@ public class GlobalSearchService {
                 order by t.id desc
                 limit 20
                 """,
-                teamId, pattern, pattern, pattern, pattern
+                pattern, pattern, pattern, pattern
         );
         List<Map<String, Object>> items = new ArrayList<>();
         for (Map<String, Object> row : rows) {
@@ -195,24 +202,28 @@ public class GlobalSearchService {
     }
 
     private List<Map<String, Object>> searchProjects(Long teamId, String pattern, String basePath, boolean archivedOnly) {
+        String visibleProjectsSql = visibleProjectsInClause();
+        if ("null".equals(visibleProjectsSql)) {
+            return List.of();
+        }
         String archivedClause = hasColumn("project", "archived_at")
                 ? (archivedOnly ? " and p.archived_at is not null " : " and p.archived_at is null ")
                 : "";
         boolean hasProjectPublicId = hasColumn("project", "public_id");
         String publicIdClause = hasProjectPublicId ? " or lower(coalesce(p.public_id, '')) like ?" : "";
         Object[] args = hasProjectPublicId
-                ? new Object[] { teamId, pattern, pattern, pattern }
-                : new Object[] { teamId, pattern, pattern };
+                ? new Object[] { pattern, pattern, pattern }
+                : new Object[] { pattern, pattern };
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(
                 """
-                select p.code, p.name, coalesce(p.project_type, 'kanban') as project_type
+                select trim(cast(p.code as text)) as code, p.name, coalesce(p.project_type, 'kanban') as project_type
                 from project p
-                join project_team pt on pt.project_id = p.id
-                where pt.team_id = ?
+                where p.id in (""" + visibleProjectsSql + """
+                )
                 """
                         + archivedClause
                         + """
-                  and (lower(p.name) like ? or lower(coalesce(p.code, '')) like ?
+                  and (lower(p.name) like ? or lower(trim(cast(p.code as text))) like ?
                 """
                         + publicIdClause
                         + """
@@ -235,20 +246,24 @@ public class GlobalSearchService {
     }
 
     private List<Map<String, Object>> searchBoards(Long teamId, String pattern, String basePath) {
+        String visibleProjectsSql = visibleProjectsInClause();
+        if ("null".equals(visibleProjectsSql)) {
+            return List.of();
+        }
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(
                 """
-                select b.name as board_name, b.code as board_code, p.code as project_code, p.name as project_name,
+                select b.name as board_name, b.code as board_code, trim(cast(p.code as text)) as project_code, p.name as project_name,
                        coalesce(p.project_type, 'kanban') as project_type
                 from board b
                 join project p on p.id = b.project_id
-                join project_team pt on pt.project_id = p.id
-                where pt.team_id = ?
+                where b.project_id in (""" + visibleProjectsSql + """
+                )
                   and (lower(b.name) like ? or lower(coalesce(b.code, '')) like ?
                        or lower(coalesce(p.name, '')) like ?)
                 order by p.name, b.name
                 limit 12
                 """,
-                teamId, pattern, pattern, pattern
+                pattern, pattern, pattern
         );
         List<Map<String, Object>> items = new ArrayList<>();
         for (Map<String, Object> row : rows) {
@@ -509,6 +524,21 @@ public class GlobalSearchService {
         return "";
     }
 
+    private String visibleProjectsInClause() {
+        List<Long> ids = legacy.visibleProjectIdsForContext();
+        if (ids == null || ids.isEmpty()) {
+            return "null";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < ids.size(); i++) {
+            if (i > 0) {
+                sb.append(',');
+            }
+            sb.append(ids.get(i));
+        }
+        return sb.toString();
+    }
+
     private Long resolveTeamId() {
         Long fromUri = contextTeamIdFromRequest();
         if (fromUri != null) return fromUri;
@@ -533,18 +563,53 @@ public class GlobalSearchService {
     private Long contextTeamIdFromRequest() {
         try {
             HttpServletRequest request = currentRequest();
-            if (request == null) return null;
+            if (request == null) {
+                return null;
+            }
+            @SuppressWarnings("unchecked")
+            Map<String, String> pathVars = (Map<String, String>) request.getAttribute(
+                    org.springframework.web.servlet.HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+            if (pathVars != null) {
+                String teamPublicId = pathVars.get("teamId");
+                if (teamPublicId != null && !teamPublicId.isBlank()) {
+                    List<Long> ids = jdbcTemplate.query(
+                            "select id from app_team where lower(trim(public_id)) = lower(trim(?)) order by id desc limit 1",
+                            (rs, rowNum) -> rs.getLong("id"),
+                            teamPublicId
+                    );
+                    if (!ids.isEmpty()) {
+                        return ids.get(0);
+                    }
+                }
+            }
+            List<String> sources = new ArrayList<>();
             String uri = request.getRequestURI();
-            if (uri == null || uri.isBlank()) return null;
-            Matcher m = CONTEXT_TEAM_URI.matcher(uri);
-            if (!m.matches()) return null;
-            String teamPublicId = m.group(1);
-            List<Long> ids = jdbcTemplate.query(
-                    "select id from app_team where public_id = ? limit 1",
-                    (rs, rowNum) -> rs.getLong("id"),
-                    teamPublicId
-            );
-            return ids.isEmpty() ? null : ids.get(0);
+            if (uri != null && !uri.isBlank()) {
+                sources.add(uri);
+            }
+            String referer = request.getHeader("Referer");
+            if (referer != null && !referer.isBlank()) {
+                sources.add(referer);
+            }
+            for (String src : sources) {
+                Matcher m = CONTEXT_TEAM_URI.matcher(src);
+                if (!m.find()) {
+                    continue;
+                }
+                String teamPublicId = m.group(1);
+                if ("api".equalsIgnoreCase(teamPublicId)) {
+                    continue;
+                }
+                List<Long> ids = jdbcTemplate.query(
+                        "select id from app_team where lower(trim(public_id)) = lower(trim(?)) order by id desc limit 1",
+                        (rs, rowNum) -> rs.getLong("id"),
+                        teamPublicId
+                );
+                if (!ids.isEmpty()) {
+                    return ids.get(0);
+                }
+            }
+            return null;
         } catch (Exception e) {
             return null;
         }

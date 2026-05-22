@@ -19,20 +19,45 @@ function apiUrl(path) {
 }
 
 async function loadTasks() {
+    const url = apiUrl('/tasks');
     try {
-        const response = await fetch(apiUrl('/tasks'));
-        tasksData = await response.json();
+        const response = window.tpDebug
+            ? await window.tpDebug.traceFetch(url, { cache: 'no-store', credentials: 'same-origin' }, 'GET /tasks')
+            : await fetch(url, { cache: 'no-store', credentials: 'same-origin' });
+        if (!response.ok) {
+            console.error('[TaskPulse] /tasks', response.status, await response.text().catch(() => ''));
+            tasksData = [];
+            return;
+        }
+        const data = await response.json();
+        tasksData = Array.isArray(data) ? data : [];
+        if (window.tpDebug) {
+            window.tpDebug.log('/tasks загружено', { count: tasksData.length, sample: tasksData.slice(0, 3) });
+        }
     } catch (error) {
-        console.error('Ошибка загрузки задач:', error);
+        console.error('[TaskPulse] Ошибка загрузки задач:', error);
+        tasksData = [];
     }
 }
 
 async function loadAssignedTasks() {
+    const url = apiUrl('/tasks/assigned');
     try {
-        const response = await fetch(apiUrl('/tasks/assigned'));
-        assignedTasksData = await response.json();
+        const response = window.tpDebug
+            ? await window.tpDebug.traceFetch(url, { cache: 'no-store', credentials: 'same-origin' }, 'GET /tasks/assigned')
+            : await fetch(url, { cache: 'no-store', credentials: 'same-origin' });
+        if (!response.ok) {
+            console.error('[TaskPulse] /tasks/assigned', response.status);
+            assignedTasksData = [];
+            return;
+        }
+        const data = await response.json();
+        assignedTasksData = Array.isArray(data) ? data : [];
+        if (window.tpDebug) {
+            window.tpDebug.log('/tasks/assigned загружено', { count: assignedTasksData.length });
+        }
     } catch (error) {
-        console.error('Ошибка загрузки назначенных задач:', error);
+        console.error('[TaskPulse] Ошибка загрузки назначенных задач:', error);
         assignedTasksData = [];
     }
 }
@@ -1078,7 +1103,10 @@ function initMoreActions() {
 }
 
 function initTasksPage() {
-    console.log('initTasksPage вызван');
+    console.log('[TaskPulse] initTasksPage');
+    if (window.tpDebug) {
+        window.tpDebug.dumpContext('страница задач');
+    }
     loadColumnsState();
     initFilters();
     initTabs();
@@ -1094,9 +1122,17 @@ function initTasksPage() {
         hydrateFilterCheckboxesFromDb();
         renderTasks(tab);
     };
+    const initialTab = document.querySelector('.tab-btn.active')?.dataset.tab || 'all';
     loadCurrentUser().then(() => Promise.all([loadTasks(), loadAssignedTasks()]).then(() => {
         hydrateFilterCheckboxesFromDb();
-        renderTasks('assigned');
+        renderTasks(initialTab);
+        if (window.tpDebug) {
+            window.tpDebug.log('renderTasks', {
+                tab: initialTab,
+                all: tasksData.length,
+                assigned: assignedTasksData.length
+            });
+        }
     }));
     window.addEventListener('resize', () => updateNameColumnMaxWidth());
 }

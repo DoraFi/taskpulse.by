@@ -18,10 +18,14 @@ import org.springframework.web.server.ResponseStatusException;
 public class PageController {
     private final JdbcTemplate jdbcTemplate;
     private final CurrentUserProvider currentUserProvider;
+    private final ContextPageGate contextPageGate;
 
-    public PageController(JdbcTemplate jdbcTemplate, CurrentUserProvider currentUserProvider) {
+    public PageController(JdbcTemplate jdbcTemplate,
+                          CurrentUserProvider currentUserProvider,
+                          ContextPageGate contextPageGate) {
         this.jdbcTemplate = jdbcTemplate;
         this.currentUserProvider = currentUserProvider;
+        this.contextPageGate = contextPageGate;
     }
 
     @GetMapping("/")
@@ -129,6 +133,11 @@ public class PageController {
         return "pages/index";
     }
 
+    @GetMapping("/o/{orgId}/t/{teamId}/")
+    public String homeContextTrailingSlash(@PathVariable String orgId, @PathVariable String teamId) {
+        return "redirect:/o/" + orgId + "/t/" + teamId;
+    }
+
     @GetMapping("/o/{orgId}")
     public String incompleteOrgContext(@PathVariable String orgId, HttpServletRequest request, Model model) {
         if (!isValidUuid(orgId)) {
@@ -203,13 +212,6 @@ public class PageController {
         return "pages/projects";
     }
 
-    @GetMapping("/o/{orgId}/t/{teamId}/team")
-    public String teamContext(@PathVariable String orgId, @PathVariable String teamId, HttpServletRequest request, Model model) {
-        String blocked = openContextPage(orgId, teamId, request, model);
-        if (blocked != null) return blocked;
-        return "pages/team";
-    }
-
     @GetMapping("/o/{orgId}/t/{teamId}/events")
     public String eventsContext(@PathVariable String orgId, @PathVariable String teamId, HttpServletRequest request, Model model) {
         String blocked = openContextPage(orgId, teamId, request, model);
@@ -240,9 +242,41 @@ public class PageController {
         if (rest != null && (rest.equals("api") || rest.startsWith("api/"))) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
+        if (rest == null || rest.isBlank()) {
+            return "redirect:/o/" + orgId + "/t/" + teamId;
+        }
+        String segment = rest.startsWith("/") ? rest.substring(1) : rest;
+        int slash = segment.indexOf('/');
+        if (slash >= 0) {
+            segment = segment.substring(0, slash);
+        }
+        String delegated = delegateKnownContextPage(orgId, teamId, segment, request, model);
+        if (delegated != null) {
+            return delegated;
+        }
         String blocked = openContextPage(orgId, teamId, request, model);
         if (blocked != null) return blocked;
         return contextErrorView(model, request, 404, "Страница в этом контексте не найдена");
+    }
+
+    private String delegateKnownContextPage(String orgId,
+                                            String teamId,
+                                            String segment,
+                                            HttpServletRequest request,
+                                            Model model) {
+        return switch (segment) {
+            case "team" -> {
+                String blocked = openContextPage(orgId, teamId, request, model);
+                yield blocked != null ? blocked : "pages/team";
+            }
+            case "events" -> eventsContext(orgId, teamId, request, model);
+            case "analytics" -> analyticsContext(orgId, teamId, request, model);
+            case "help" -> helpContext(orgId, teamId, request, model);
+            case "tasks" -> tasksTeamContext(orgId, teamId, request, model);
+            case "projects" -> projectsContext(orgId, teamId, request, model);
+            case "index" -> homeContextIndex(orgId, teamId, request, model);
+            default -> null;
+        };
     }
 
     @GetMapping({"/onboarding/project", "/templates/pages/onboarding_project.html"})
@@ -291,50 +325,7 @@ public class PageController {
     }
 
     private String openContextPage(String orgId, String teamId, HttpServletRequest request, Model model) {
-        String redirect = buildCanonicalContextRedirect(orgId, teamId, request);
-        if (redirect != null) {
-            return redirect;
-        }
-        String contextError = validateContextAccess(orgId, teamId);
-        if (contextError != null) {
-            return contextErrorView(model, request, 404, contextError);
-        }
-        return null;
-    }
-
-    private String buildCanonicalContextRedirect(String orgId, String teamId, HttpServletRequest request) {
-        if (!isValidUuid(teamId)) {
-            return null;
-        }
-        var resolved = TeamContextSupport.resolveByTeamPublicId(jdbcTemplate, teamId);
-        if (resolved.isEmpty()) {
-            return null;
-        }
-        String canonicalOrg = resolved.get().get("org_public_id");
-        if (canonicalOrg.equalsIgnoreCase(orgId.trim())) {
-            return null;
-        }
-        String uri = request.getRequestURI();
-        String fixed = uri.replaceFirst("/o/[^/]+/t/", "/o/" + canonicalOrg + "/t/");
-        if (fixed.equals(uri)) {
-            return null;
-        }
-        String qs = request.getQueryString();
-        return "redirect:" + fixed + (qs != null && !qs.isBlank() ? "?" + qs : "");
-    }
-
-    private String validateContextAccess(String orgId, String teamId) {
-        if (!isValidUuid(teamId)) {
-            return "Ссылка выглядит поврежденной. Проверьте, что вы открыли её полностью.";
-        }
-        var resolved = TeamContextSupport.resolveByTeamPublicId(jdbcTemplate, teamId);
-        if (resolved.isEmpty()) {
-            return "Мы не нашли эту команду. Возможно, ссылка устарела или содержит опечатку.";
-        }
-        if (!TeamContextSupport.userCanAccessTeam(jdbcTemplate, currentUsername(), teamId)) {
-            return "У вас пока нет доступа к этой команде.";
-        }
-        return null;
+        return contextPageGate.openContextPage(orgId, teamId, request, model);
     }
 
     private String validateProjectAccess(String orgId, String teamId, String projectCode, String expectedType) {
@@ -370,12 +361,7 @@ public class PageController {
     }
 
     private String contextErrorView(Model model, HttpServletRequest request, int status, String message) {
-        model.addAttribute("status", status);
-        model.addAttribute("path", request.getRequestURI() + (request.getQueryString() == null ? "" : "?" + request.getQueryString()));
-        model.addAttribute("message", message);
-        model.addAttribute("title", status == 400 ? "Не удалось открыть страницу" : "Страница недоступна");
-        model.addAttribute("hint", "Проверьте ссылку или перейдите на рабочую страницу через меню.");
-        return "error";
+        return contextPageGate.contextErrorView(model, request, status, message);
     }
 
     private String currentUsername() {

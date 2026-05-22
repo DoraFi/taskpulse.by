@@ -1,10 +1,14 @@
 package by.taskpulse.web.api;
 
 import by.taskpulse.auth.CurrentUserProvider;
+import by.taskpulse.web.TeamContextHolder;
 import by.taskpulse.web.TeamContextSupport;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpStatus;
@@ -30,19 +34,22 @@ public class ContextApiController {
     private final HelpCenterService helpCenter;
     private final GlobalSearchService globalSearch;
     private final CalendarEventService calendarEvents;
+    private final HttpServletRequest httpRequest;
 
     public ContextApiController(JdbcTemplate jdbcTemplate,
                                 LegacyDataApiController legacy,
                                 CurrentUserProvider currentUserProvider,
                                 HelpCenterService helpCenter,
                                 GlobalSearchService globalSearch,
-                                CalendarEventService calendarEvents) {
+                                CalendarEventService calendarEvents,
+                                HttpServletRequest httpRequest) {
         this.jdbcTemplate = jdbcTemplate;
         this.legacy = legacy;
         this.currentUserProvider = currentUserProvider;
         this.helpCenter = helpCenter;
         this.globalSearch = globalSearch;
         this.calendarEvents = calendarEvents;
+        this.httpRequest = httpRequest;
     }
 
     @GetMapping("/api/me")
@@ -341,16 +348,27 @@ public class ContextApiController {
         return legacy.analyticsDashboard(period);
     }
 
+    @GetMapping("/api/my-teams")
+    public Map<String, Object> myTeams() {
+        return legacy.listMyTeams();
+    }
+
+    @GetMapping("/o/{orgId}/t/{teamId}/api/my-teams")
+    public Map<String, Object> myTeamsInContext(@PathVariable String orgId, @PathVariable String teamId) {
+        ensureContextAccess(orgId, teamId);
+        return legacy.listMyTeams();
+    }
+
     @GetMapping("/api/bootstrap/context")
     public Map<String, Object> bootstrapContext() {
-        Map<String, Object> row = currentContextRow();
+        Map<String, Object> row = resolveBootstrapContextRow();
         String orgId = String.valueOf(row.get("org_public_id"));
         String teamId = String.valueOf(row.get("team_public_id"));
-        return Map.of(
-                "organizationPublicId", orgId,
-                "teamPublicId", teamId,
-                "basePath", "/o/" + orgId + "/t/" + teamId
-        );
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("organizationPublicId", orgId);
+        out.put("teamPublicId", teamId);
+        out.put("basePath", "/o/" + orgId + "/t/" + teamId);
+        return out;
     }
 
     @GetMapping("/o/{orgId}/t/{teamId}/api/me")
@@ -721,6 +739,31 @@ public class ContextApiController {
         return legacy.tasksFilterOptions(tab);
     }
 
+    @GetMapping("/api/debug/context")
+    public Map<String, Object> debugContextAuto() {
+        return legacy.debugContext();
+    }
+
+    @GetMapping("/o/{orgId}/t/{teamId}/api/debug/context")
+    public Map<String, Object> debugContext(@PathVariable String orgId, @PathVariable String teamId) {
+        Map<String, Object> access = ensureContextAccessOrExplain(orgId, teamId);
+        if (Boolean.FALSE.equals(access.get("ok"))) {
+            return access;
+        }
+        try {
+            Map<String, Object> payload = new LinkedHashMap<>(legacy.debugContext());
+            payload.put("ok", true);
+            return payload;
+        } catch (Exception ex) {
+            Map<String, Object> err = new LinkedHashMap<>();
+            err.put("ok", false);
+            err.put("message", ex.getMessage() != null ? ex.getMessage() : "Ошибка отладки контекста");
+            err.put("requestedOrgId", orgId);
+            err.put("requestedTeamId", teamId);
+            return err;
+        }
+    }
+
     @GetMapping("/o/{orgId}/t/{teamId}/api/index/summary")
     public Map<String, Object> indexSummary(@PathVariable String orgId, @PathVariable String teamId, HttpServletResponse response) {
         ensureContextAccess(orgId, teamId);
@@ -912,15 +955,96 @@ public class ContextApiController {
     }
 
     private void ensureContextAccess(String orgId, String teamId) {
-        if (!TeamContextSupport.resolveByTeamPublicId(jdbcTemplate, teamId).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Команда не найдена");
-        }
-        if (!TeamContextSupport.userCanAccessTeam(jdbcTemplate, currentUsername(), teamId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нет доступа к указанной команде");
+        Map<String, Object> check = ensureContextAccessOrExplain(orgId, teamId);
+        if (Boolean.FALSE.equals(check.get("ok"))) {
+            String message = String.valueOf(check.getOrDefault("message", "Команда не найдена"));
+            HttpStatus status = "Нет доступа к указанной команде".equals(message)
+                    ? HttpStatus.FORBIDDEN
+                    : HttpStatus.NOT_FOUND;
+            throw new ResponseStatusException(status, message);
         }
     }
 
-    private Map<String, Object> currentContextRow() {
+    private Map<String, Object> ensureContextAccessOrExplain(String orgId, String teamId) {
+        String teamKey = TeamContextSupport.normalizePublicId(teamId);
+        if (teamKey.isEmpty()) {
+            return Map.of(
+                    "ok", false,
+                    "message", "Команда не найдена",
+                    "hint", "В адресе не указан идентификатор команды"
+            );
+        }
+        Optional<Map<String, String>> resolved = TeamContextSupport.resolveByTeamPublicId(jdbcTemplate, teamKey);
+        if (resolved.isEmpty()) {
+            Map<String, Object> out = new LinkedHashMap<>();
+            out.put("ok", false);
+            out.put("message", "Команда не найдена");
+            out.put("requestedTeamId", teamKey);
+            out.put("requestedOrgId", TeamContextSupport.normalizePublicId(orgId));
+            out.put("hint", "Проверьте ссылку или выберите команду в переключателе в шапке");
+            return out;
+        }
+        String canonicalTeam = resolved.get().get("team_public_id");
+        String canonicalOrg = resolved.get().get("org_public_id");
+        if (!TeamContextSupport.userCanAccessTeam(jdbcTemplate, currentUsername(), canonicalTeam)) {
+            return Map.of(
+                    "ok", false,
+                    "message", "Нет доступа к указанной команде",
+                    "teamPublicId", canonicalTeam
+            );
+        }
+        TeamContextHolder.setTeamPublicId(canonicalTeam);
+        return Map.of(
+                "ok", true,
+                "teamPublicId", canonicalTeam,
+                "orgPublicId", canonicalOrg
+        );
+    }
+
+    private Map<String, Object> resolveBootstrapContextRow() {
+        if (httpRequest != null) {
+            String referer = httpRequest.getHeader("Referer");
+            Optional<Map<String, String>> fromReferer = TeamContextSupport.parseContextFromUrl(referer);
+            if (fromReferer.isPresent()) {
+                Map<String, Object> row = contextRowForPublicIds(
+                        fromReferer.get().get("org_public_id"),
+                        fromReferer.get().get("team_public_id"));
+                if (row != null) {
+                    return row;
+                }
+            }
+            Optional<Map<String, String>> fromUri = TeamContextSupport.parseContextFromUrl(httpRequest.getRequestURI());
+            if (fromUri.isPresent()) {
+                Map<String, Object> row = contextRowForPublicIds(
+                        fromUri.get().get("org_public_id"),
+                        fromUri.get().get("team_public_id"));
+                if (row != null) {
+                    return row;
+                }
+            }
+        }
+        return defaultContextRow();
+    }
+
+    private Map<String, Object> contextRowForPublicIds(String orgPublicId, String teamPublicId) {
+        if (teamPublicId == null || teamPublicId.isBlank()) {
+            return null;
+        }
+        if (!TeamContextSupport.userCanAccessTeam(jdbcTemplate, currentUsername(), teamPublicId)) {
+            return null;
+        }
+        Optional<Map<String, String>> resolved = TeamContextSupport.resolveByTeamPublicId(jdbcTemplate, teamPublicId);
+        if (resolved.isEmpty()) {
+            return null;
+        }
+        Map<String, String> row = resolved.get();
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("org_public_id", row.get("org_public_id"));
+        out.put("team_public_id", row.get("team_public_id"));
+        return out;
+    }
+
+    private Map<String, Object> defaultContextRow() {
         return jdbcTemplate.queryForMap(
                 """
                 select

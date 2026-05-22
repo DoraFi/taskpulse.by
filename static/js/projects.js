@@ -231,13 +231,24 @@ function initProjectsPage() {
     const isOrgView = pathname.endsWith('/projects/org');
     const scope = isOrgView || isArchiveView ? 'organization' : 'team';
     const archived = isArchiveView ? 'true' : 'false';
-    Promise.all([fetch(apiUrl(`/projects?scope=${encodeURIComponent(scope)}&archived=${archived}`)), fetch(apiUrl('/me'))])
+    const projectsUrl = apiUrl(`/projects?scope=${encodeURIComponent(scope)}&archived=${archived}`);
+    const meUrl = apiUrl('/me');
+    if (window.tpDebug) {
+        window.tpDebug.dumpContext('страница проектов');
+    }
+    const fetchProjects = window.tpDebug
+        ? (url) => window.tpDebug.traceFetch(url, { credentials: 'same-origin' }, 'GET /projects')
+        : (url) => fetch(url, { credentials: 'same-origin' });
+    Promise.all([fetchProjects(projectsUrl), fetchProjects(meUrl)])
         .then(([projectsRes, meRes]) => {
-            if (!projectsRes.ok) throw new Error('projects api failed');
-            if (!meRes.ok) throw new Error('me api failed');
+            if (!projectsRes.ok) throw new Error(`projects api failed: ${projectsRes.status}`);
+            if (!meRes.ok) throw new Error(`me api failed: ${meRes.status}`);
             return Promise.all([projectsRes.json(), meRes.json()]);
         })
         .then(([projects, me]) => {
+            if (window.tpDebug) {
+                window.tpDebug.log('/projects', { count: Array.isArray(projects) ? projects.length : 0, projects });
+            }
             const orgId = me.organizationPublicId;
             const teamId = me.teamPublicId;
             const allProjects = Array.isArray(projects) ? projects : [];

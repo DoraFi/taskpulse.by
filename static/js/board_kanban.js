@@ -768,11 +768,18 @@
     }
 
     async function loadKanbanData() {
+        if (window.tpDebug) {
+            try {
+                await window.tpDebug.dumpContext('канбан');
+            } catch (_) { /* debug must not block board load */ }
+        }
         const params = new URLSearchParams(window.location.search);
         const project = currentProjectCodeFromUrl();
         const boardsUrl = project ? apiUrl(`/kanban/boards?project=${encodeURIComponent(project)}`) : apiUrl('/kanban/boards');
         const fetchBoards = async () => {
-            const r = await fetch(boardsUrl, { cache: 'no-store' });
+            const r = window.tpDebug
+                ? await window.tpDebug.traceFetch(boardsUrl, { cache: 'no-store' }, 'GET kanban/boards')
+                : await fetch(boardsUrl, { cache: 'no-store' });
             if (!r.ok) {
                 const txt = await r.text().catch(() => '');
                 throw new Error(`boards ${r.status}: ${txt || 'empty response'}`);
@@ -813,7 +820,9 @@
         const sources = new Set(boardSources.length ? boardSources : [defaultSource]);
         const seenTasks = new Set();
         for (const url of sources) {
-            const tRes = await fetch(url, { cache: 'no-store' });
+            const tRes = window.tpDebug
+                ? await window.tpDebug.traceFetch(url, { cache: 'no-store' }, 'GET kanban/tasks')
+                : await fetch(url, { cache: 'no-store' });
             if (!tRes.ok) {
                 const txt = await tRes.text().catch(() => '');
                 kanbanLoadError = `Ошибка загрузки задач (${tRes.status}) для ${url}: ${txt || 'empty response'}`;
@@ -830,6 +839,14 @@
             });
         }
         applyArchivedTasksMapToState();
+        if (window.tpDebug) {
+            window.tpDebug.log('канбан загружен', {
+                project,
+                boards: kanbanBoards.length,
+                tasks: kanbanTasks.length,
+                sources: [...sources]
+            });
+        }
         migrateKanbanData();
         kanbanBoards.forEach(b => {
             if (!Array.isArray(b.stages)) b.stages = [];

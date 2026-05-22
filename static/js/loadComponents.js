@@ -33,6 +33,15 @@ function getApiBasePath() {
 
 window.getApiBasePath = getApiBasePath;
 
+(function loadTpDebugScript() {
+    if (window.__tpDebugScriptLoaded) return;
+    window.__tpDebugScriptLoaded = true;
+    const s = document.createElement('script');
+    s.src = '/static/js/tp_debug.js';
+    s.async = false;
+    document.head.appendChild(s);
+})();
+
 function ensureGlobalToast() {
     if (typeof window.showToast === 'function') return;
     window.showToast = function showToast(message) {
@@ -48,6 +57,23 @@ function ensureGlobalToast() {
         clearTimeout(window.showToast._hideTimer);
         window.showToast._hideTimer = setTimeout(() => toast.classList.remove('show'), 2800);
     };
+}
+
+async function ensureTeamSwitchScript() {
+    if (window.__tpTeamSwitchBoot) {
+        if (typeof window.tpInitHeaderTeamSwitch === 'function') {
+            window.tpInitHeaderTeamSwitch();
+        }
+        return;
+    }
+    return new Promise((resolve) => {
+        const s = document.createElement('script');
+        s.src = '/static/js/team_switch.js';
+        s.async = true;
+        s.onload = () => resolve();
+        s.onerror = () => resolve();
+        document.head.appendChild(s);
+    });
 }
 
 function ensureGlobalSearchScript() {
@@ -78,7 +104,30 @@ function apiUrlForBase(basePath, path) {
     return `${basePath}/api${path}`;
 }
 
+function getContextBaseFromPathname() {
+    const m = window.location.pathname.match(/^\/o\/([^/]+)\/t\/([^/]+)/);
+    if (!m) return null;
+    return `/o/${m[1]}/t/${m[2]}`;
+}
+
 async function resolveContextBase() {
+    const fromPath = getContextBaseFromPathname();
+    if (fromPath) {
+        try {
+            sessionStorage.setItem('tpActiveTeamBase', fromPath);
+        } catch (_) { /* ignore */ }
+        return fromPath;
+    }
+    try {
+        const stored = sessionStorage.getItem('tpActiveTeamBase');
+        if (stored && /^\/o\/[^/]+\/t\/[^/]+$/.test(stored)) {
+            const probe = await fetch(`${stored}/api/my-teams`, { credentials: 'same-origin', cache: 'no-store' });
+            if (probe.ok) {
+                return stored;
+            }
+            sessionStorage.removeItem('tpActiveTeamBase');
+        }
+    } catch (_) { /* ignore */ }
     try {
         const res = await fetch('/api/bootstrap/context');
         if (isSessionExpiredResponse(res.status)) {
@@ -87,10 +136,25 @@ async function resolveContextBase() {
         }
         if (!res.ok) return null;
         const data = await res.json();
-        return data && data.basePath ? data.basePath : null;
+        const base = data && data.basePath ? data.basePath : null;
+        if (base) {
+            try {
+                sessionStorage.setItem('tpActiveTeamBase', base);
+            } catch (_) { /* ignore */ }
+        }
+        return base;
     } catch {
         return null;
     }
+}
+
+window.getContextBaseFromPathname = getContextBaseFromPathname;
+
+function contextIdsFromBase(base) {
+    if (!base) return { orgId: null, teamId: null };
+    const m = String(base).match(/^\/o\/([^/]+)\/t\/([^/]+)/);
+    if (!m) return { orgId: null, teamId: null };
+    return { orgId: decodeURIComponent(m[1]), teamId: decodeURIComponent(m[2]) };
 }
 
 function applyContextNavLinks(base) {
@@ -136,25 +200,30 @@ async function hydrateTeamProjectsMenu() {
     };
     try {
         const base = await resolveContextBase();
-        applyContextNavLinks(base);
+        const navBase = getContextBaseFromPathname() || base;
+        applyContextNavLinks(navBase);
+        const { orgId, teamId } = contextIdsFromBase(navBase);
         const [meRes, projectsRes] = await Promise.all([
-            fetch(apiUrlForBase(base, '/me')),
-            fetch(apiUrlForBase(base, '/projects'))
+            fetch(apiUrlForBase(navBase, '/me')),
+            fetch(apiUrlForBase(navBase, '/projects'))
         ]);
         if (!meRes.ok || !projectsRes.ok) {
-            renderFallbackMenu(null, null);
+            renderFallbackMenu(orgId, teamId);
             return;
         }
-        const me = await meRes.json();
         const projects = await projectsRes.json();
-        const orgId = me.organizationPublicId;
-        const teamId = me.teamPublicId;
-        if (orgId && teamId) applyContextNavLinks(`/o/${encodeURIComponent(orgId)}/t/${encodeURIComponent(teamId)}`);
         if (!Array.isArray(projects) || !projects.length) {
             renderFallbackMenu(orgId, teamId);
             return;
         }
-        const projectsLinks = projects.map((p) => {
+        const seenCodes = new Set();
+        const uniqueProjects = projects.filter((p) => {
+            const code = String(p.code || p.id || '').trim().toLowerCase();
+            if (!code || seenCodes.has(code)) return false;
+            seenCodes.add(code);
+            return true;
+        });
+        const projectsLinks = uniqueProjects.map((p) => {
             const projectCode = encodeURIComponent(p.code || '');
             const fallback = '#';
             const href = orgId && teamId && projectCode
@@ -496,6 +565,18 @@ function handleNavigationClick(e) {
         return;
     }
 
+    const navBase = getContextBaseFromPathname();
+    if (navBase && url && !String(url).startsWith(navBase)) {
+        const target = new URL(url, window.location.origin);
+        const linkMatch = target.pathname.match(/^\/o\/[^/]+\/t\/[^/]+(\/.*)?$/);
+        if (linkMatch) {
+            const suffix = linkMatch[1] || '';
+            const rebuilt = `${navBase}${suffix}${target.search}${target.hash || ''}`;
+            loadPage(rebuilt);
+            return;
+        }
+    }
+
     loadPage(url);
 }
 
@@ -752,11 +833,14 @@ async function loadPage(url) {
                     
                     initSubmenus();
                     initAsideCollapseToggle();
+                    const navBaseNow = getContextBaseFromPathname();
+                    if (navBaseNow) applyContextNavLinks(navBaseNow);
                     hydrateTeamProjectsMenu().then(() => {
                         initNavigation();
                         updateActiveMenuItem();
                     });
                     ensureGlobalSearchScript().then(initGlobalSearchUi);
+                    ensureTeamSwitchScript();
                     
                     console.log('Загрузка страницы завершена');
                 }, 200);
@@ -783,4 +867,5 @@ document.addEventListener('DOMContentLoaded', () => {
         updateActiveMenuItem();
     });
     ensureGlobalSearchScript().then(initGlobalSearchUi);
+    ensureTeamSwitchScript();
 });

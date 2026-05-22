@@ -466,7 +466,15 @@
 
         overlay.querySelector('#createTaskModalSubmit')?.addEventListener('click', async () => {
             try {
-                const rec = getProjectRecordByInput(projectInput?.value || '');
+                let rec = getProjectRecordByInput(projectInput?.value || '');
+                if (!rec && currentProjectCode) {
+                    await loadOptionsWithQuery(overlay, currentProjectCode, '');
+                    rec = getProjectRecordByInput(projectInput?.value || '')
+                        || (formOptions.projects || []).find(
+                            p => String(p.code || '').toLowerCase() === String(currentProjectCode).toLowerCase()
+                        )
+                        || null;
+                }
                 if (!rec) {
                     showToast('Выберите проект из списка.');
                     return;
@@ -580,7 +588,15 @@
                 const qsProject = new URLSearchParams(window.location.search).get('project');
                 const preferredProjectCode = qsProject || (pathProjectMatch ? decodeURIComponent(pathProjectMatch[1]) : null);
                 if (preferredProjectCode) {
-                    const rec = (formOptions.projects || []).find(p => p.code === preferredProjectCode);
+                    let rec = (formOptions.projects || []).find(
+                        p => String(p.code || '').toLowerCase() === String(preferredProjectCode).toLowerCase()
+                    );
+                    if (!rec) {
+                        await loadOptionsWithQuery(overlay, preferredProjectCode, '');
+                        rec = (formOptions.projects || []).find(
+                            p => String(p.code || '').toLowerCase() === String(preferredProjectCode).toLowerCase()
+                        );
+                    }
                     if (rec) {
                         projectInput.value = `${rec.name} [${rec.code}]`;
                         currentProjectCode = rec.code;
