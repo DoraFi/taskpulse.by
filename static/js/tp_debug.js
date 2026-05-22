@@ -1,7 +1,3 @@
-/**
- * TaskPulse client debug — всегда пишет в консоль (F12).
- * Сводка контекста: GET {contextBase}/api/debug/context
- */
 (function () {
     const PREFIX = '[TaskPulse]';
 
@@ -132,5 +128,5 @@
         apiBase
     };
 
-    log('отладка включена — tpDebug.dumpContext() в консоли');
+    log('отладка включена - tpDebug.dumpContext() в консоли');
 })();

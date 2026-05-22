@@ -161,11 +161,7 @@ public class LegacyDataApiController {
                                     where aur.user_id = u.id
                                       and aur.team_id = tm.team_id
                                       and aur.role_code in ('team_admin', 'member', 'observer')
-                                    order by case aur.role_code
-                                        when 'team_admin' then 1
-                                        when 'member' then 2
-                                        else 3
-                                    end
+                                    order by aur.id desc
                                     limit 1
                                 ),
                                 case tm.role
@@ -1893,8 +1889,8 @@ public class LegacyDataApiController {
                         + ")"
                         + projectArchive
                         + """
-                        order by t.id
-                        """,
+                                order by t.id
+                                """,
                 (rs, rowNum) -> {
                     Map<String, Object> m = new LinkedHashMap<>();
                     String dueDate = toUiDate(rs.getDate("due_date"));
@@ -1966,13 +1962,13 @@ public class LegacyDataApiController {
                         + ")"
                         + projectArchive
                         + """
-                          and t.assignee_id = ?
-                          and coalesce(t.stage, 'Очередь') <> 'Готово'
-                        order by
-                          case when t.priority = 'срочно' then 0 else 1 end,
-                          t.due_date nulls last,
-                          t.id
-                        """,
+                                  and t.assignee_id = ?
+                                  and coalesce(t.stage, 'Очередь') <> 'Готово'
+                                order by
+                                  case when t.priority = 'срочно' then 0 else 1 end,
+                                  t.due_date nulls last,
+                                  t.id
+                                """,
                 (rs, rowNum) -> {
                     Map<String, Object> m = new LinkedHashMap<>();
                     String dueDate = toUiDate(rs.getDate("due_date"));
@@ -3398,8 +3394,8 @@ public class LegacyDataApiController {
                 join project p on p.id = b.project_id
                 where p.id in (""" + visibleProjectsSql + """
                 ) """ + (project != null && !project.isBlank()
-                        ? " and lower(trim(cast(p.code as text))) = lower(trim(?)) "
-                        : "")
+                ? " and lower(trim(cast(p.code as text))) = lower(trim(?)) "
+                : "")
                 + (hasQ ? " and (lower(t.name) like ? or lower(coalesce(t.public_id, t.task_code, '')) like ?) " : "")
                 + """
                         order by t.id desc
@@ -3443,9 +3439,10 @@ public class LegacyDataApiController {
                 join project p on p.id = b.project_id
                 where p.id in (""" + visibleProjectsSql + """
                 ) """ + (project != null && !project.isBlank()
-                        ? " and lower(trim(cast(p.code as text))) = lower(trim(?)) "
+                ? " and lower(trim(cast(p.code as text))) = lower(trim(?)) "
+                : "")
+                + (hasQ ? " and (lower(b.name) like ? or lower(p.name) like ? or lower(trim(cast(p.code as text))) like ?) "
                         : "")
-                + (hasQ ? " and (lower(b.name) like ? or lower(p.name) like ? or lower(trim(cast(p.code as text))) like ?) " : "")
                 + """
                         order by p.name, b.name
                         limit 50
@@ -3525,9 +3522,9 @@ public class LegacyDataApiController {
                         + visibility
                         + projectArchive
                         + """
-                        order by t.due_date nulls last, t.id
-                        limit 10
-                        """,
+                                order by t.due_date nulls last, t.id
+                                limit 10
+                                """,
                 (rs, rowNum) -> {
                     Map<String, Object> row = new LinkedHashMap<>();
                     row.put("taskDbId", rs.getLong("task_db_id"));
@@ -3569,10 +3566,10 @@ public class LegacyDataApiController {
                         + visibility
                         + projectArchive
                         + """
-                        group by p.id, p.name, p.summary
-                        order by count(case when t.stage in ('В работе','Тестирование','Очередь') then 1 end) desc, p.id
-                        limit 2
-                        """,
+                                group by p.id, p.name, p.summary
+                                order by count(case when t.stage in ('В работе','Тестирование','Очередь') then 1 end) desc, p.id
+                                limit 2
+                                """,
                 (rs, rowNum) -> {
                     int total = rs.getInt("total_count");
                     int doneCount = rs.getInt("done_count");
@@ -3810,7 +3807,8 @@ public class LegacyDataApiController {
             throw ex;
         } catch (Exception ex) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Ошибка построения аналитики: " + (ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName()));
+                    "Ошибка построения аналитики: "
+                            + (ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName()));
         }
     }
 
@@ -3889,7 +3887,7 @@ public class LegacyDataApiController {
             warnings.add("currentTeamId()=" + teamId + " не совпадает с team из URL/holder=" + teamIdFromUrl);
         }
         if (teamId == null) {
-            warnings.add("currentTeamId() = null — контекст команды не определён");
+            warnings.add("currentTeamId() = null - контекст команды не определён");
         }
 
         String teamPublicId = null;
@@ -3950,26 +3948,27 @@ public class LegacyDataApiController {
                     });
         }
 
-        List<Map<String, Object>> projectTeamLinks = teamId == null ? List.of() : jdbcTemplate.query(
-                """
-                        select pt.project_id, pt.team_id, trim(cast(p.code as text)) as code, t.name as team_name
-                        from project_team pt
-                        join project p on p.id = pt.project_id
-                        join app_team t on t.id = pt.team_id
-                        where p.id in (select pm.project_id from project_member pm where pm.user_id = ?)
-                           or pt.team_id = ?
-                        order by p.code, pt.team_id
-                        """,
-                (rs, rowNum) -> {
-                    Map<String, Object> m = new LinkedHashMap<>();
-                    m.put("projectId", rs.getLong("project_id"));
-                    m.put("teamId", rs.getLong("team_id"));
-                    m.put("code", rs.getString("code"));
-                    m.put("teamName", rs.getString("team_name"));
-                    return m;
-                },
-                uid,
-                teamId);
+        List<Map<String, Object>> projectTeamLinks = teamId == null ? List.of()
+                : jdbcTemplate.query(
+                        """
+                                select pt.project_id, pt.team_id, trim(cast(p.code as text)) as code, t.name as team_name
+                                from project_team pt
+                                join project p on p.id = pt.project_id
+                                join app_team t on t.id = pt.team_id
+                                where p.id in (select pm.project_id from project_member pm where pm.user_id = ?)
+                                   or pt.team_id = ?
+                                order by p.code, pt.team_id
+                                """,
+                        (rs, rowNum) -> {
+                            Map<String, Object> m = new LinkedHashMap<>();
+                            m.put("projectId", rs.getLong("project_id"));
+                            m.put("teamId", rs.getLong("team_id"));
+                            m.put("code", rs.getString("code"));
+                            m.put("teamName", rs.getString("team_name"));
+                            return m;
+                        },
+                        uid,
+                        teamId);
 
         List<Map<String, Object>> tasksByProject = List.of();
         if (!visibleIds.isEmpty()) {
@@ -4101,9 +4100,6 @@ public class LegacyDataApiController {
         }
     }
 
-    /**
-     * Ensures project_team rows for the current team without re-linking the whole org (V40-style).
-     */
     private void ensureProjectTeamLinksForUserInTeam(Long userId, Long teamId) {
         if (userId == null || teamId == null) {
             return;
@@ -4237,8 +4233,8 @@ public class LegacyDataApiController {
                         + teamProjectVisibilitySql("p")
                         + activeOnly
                         + """
-                        order by p.id
-                        """,
+                                order by p.id
+                                """,
                 (rs, rowNum) -> idSet.add(rs.getLong("id")));
 
         if (addProjectFromUrl) {
@@ -4291,10 +4287,6 @@ public class LegacyDataApiController {
         return ids.isEmpty() ? Optional.empty() : Optional.of(ids.get(0));
     }
 
-    /**
-     * Resolves project ids for kanban/list filters within the current team context.
-     * Prevents matching duplicate codes (e.g. PRO) from other organizations.
-     */
     private List<Long> resolveProjectIdsForKanbanFilter(String projectParam) {
         if (projectParam == null || projectParam.isBlank()) {
             return visibleProjectIdsSafe();
@@ -4321,16 +4313,16 @@ public class LegacyDataApiController {
         boolean hasPublicId = hasColumn("project", "public_id");
         String matchSql = hasPublicId
                 ? """
-                (lower(trim(cast(p.code as text))) = lower(?)
-                 or lower(trim(cast(p.public_id as text))) = lower(?)
-                 or lower(trim(cast(p.name as text))) = lower(?)
-                 or cast(p.id as text) = ?)
-                """
+                        (lower(trim(cast(p.code as text))) = lower(?)
+                         or lower(trim(cast(p.public_id as text))) = lower(?)
+                         or lower(trim(cast(p.name as text))) = lower(?)
+                         or cast(p.id as text) = ?)
+                        """
                 : """
-                (lower(trim(cast(p.code as text))) = lower(?)
-                 or lower(trim(cast(p.name as text))) = lower(?)
-                 or cast(p.id as text) = ?)
-                """;
+                        (lower(trim(cast(p.code as text))) = lower(?)
+                         or lower(trim(cast(p.name as text))) = lower(?)
+                         or cast(p.id as text) = ?)
+                        """;
         return jdbcTemplate.query(
                 "select p.id from project p where " + teamProjectVisibilitySql("p") + activeOnly + " and " + matchSql
                         + " order by p.id desc",
@@ -4784,11 +4776,7 @@ public class LegacyDataApiController {
                                     where aur.user_id = ?
                                       and aur.team_id = ?
                                       and aur.role_code in ('team_admin', 'member', 'observer')
-                                    order by case aur.role_code
-                                        when 'team_admin' then 1
-                                        when 'member' then 2
-                                        else 3
-                                    end
+                                    order by aur.id desc
                                     limit 1
                                 ),
                                 (

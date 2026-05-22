@@ -79,7 +79,7 @@
         }
         try {
             sessionStorage.setItem('tpActiveTeamBase', target);
-        } catch (_) { /* ignore */ }
+        } catch (_) {  }
         window.location.href = target;
     }
 

@@ -199,7 +199,14 @@ function openAddMemberModal() {
     const email = document.getElementById('teamAddMemberEmail');
     const role = document.getElementById('teamAddMemberRole');
     if (email) email.value = '';
-    if (role) role.value = 'member';
+    if (role) {
+        role.value = 'member';
+        if (role._tpSelectApi?.setValue) {
+            role._tpSelectApi.setValue('member');
+        } else {
+            role._tpSelectApi?.refresh?.();
+        }
+    }
     overlay.classList.add('show');
     overlay.setAttribute('aria-hidden', 'false');
     if (typeof window.initAllTpSelects === 'function') {
@@ -615,6 +622,25 @@ function memberDepartmentValue(member) {
     return d && d !== 'Команда' ? d : '';
 }
 
+function normalizeMemberAccessRoleCode(code) {
+    const v = String(code || 'member').trim().toLowerCase();
+    if (v === 'team_admin' || v === 'admin' || v === 'lead') return 'team_admin';
+    if (v === 'observer' || v === 'viewer') return 'observer';
+    return 'member';
+}
+
+function syncMemberRoleSelect(roleCode) {
+    const roleSelect = document.getElementById('teamMemberRoleSelect');
+    if (!roleSelect) return;
+    const normalized = normalizeMemberAccessRoleCode(roleCode);
+    if (roleSelect._tpSelectApi?.setValue) {
+        roleSelect._tpSelectApi.setValue(normalized);
+        return;
+    }
+    roleSelect.value = normalized;
+    roleSelect._tpSelectApi?.refresh?.();
+}
+
 function fillMemberModal(member) {
     const canEdit = teamPageState.canManageRoles && !member.isSelf;
     const roleSection = document.getElementById('teamMemberRoleSection');
@@ -662,7 +688,7 @@ function fillMemberModal(member) {
         setMemberRoleMode(true);
         if (positionField) positionField.hidden = false;
         if (departmentField) departmentField.hidden = false;
-        if (roleSelect) roleSelect.value = member.accessRole || 'member';
+        syncMemberRoleSelect(member.accessRole);
         memberPositionCombobox?.setValue(memberPositionValue(member));
         memberDepartmentCombobox?.setValue(memberDepartmentValue(member));
         if (saveBtn) saveBtn.hidden = false;

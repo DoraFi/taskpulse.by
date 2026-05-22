@@ -258,6 +258,27 @@
             closeList();
         }
 
+        function setValue(value) {
+            const key = String(value ?? '');
+            let index = -1;
+            for (let i = 0; i < select.options.length; i++) {
+                if (String(select.options[i].value) === key) {
+                    index = i;
+                    break;
+                }
+            }
+            if (index >= 0) {
+                select.selectedIndex = index;
+            } else if (key) {
+                select.value = key;
+            }
+            syncTrigger();
+            if (!list.hidden) {
+                list.innerHTML = buildListHtml();
+                if (searchable) applySearchHighlight();
+            }
+        }
+
         function refresh() {
             syncTrigger();
             if (!list.hidden) {
@@ -396,7 +417,7 @@
 
         syncTrigger();
 
-        const api = { refresh, close: closeList, getSelect: () => select };
+        const api = { refresh, setValue, close: closeList, getSelect: () => select };
         select._tpSelectApi = api;
         return api;
     }

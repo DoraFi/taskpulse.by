@@ -115,7 +115,7 @@ async function resolveContextBase() {
     if (fromPath) {
         try {
             sessionStorage.setItem('tpActiveTeamBase', fromPath);
-        } catch (_) { /* ignore */ }
+        } catch (_) {  }
         return fromPath;
     }
     try {
@@ -127,7 +127,7 @@ async function resolveContextBase() {
             }
             sessionStorage.removeItem('tpActiveTeamBase');
         }
-    } catch (_) { /* ignore */ }
+    } catch (_) {  }
     try {
         const res = await fetch('/api/bootstrap/context');
         if (isSessionExpiredResponse(res.status)) {
@@ -140,7 +140,7 @@ async function resolveContextBase() {
         if (base) {
             try {
                 sessionStorage.setItem('tpActiveTeamBase', base);
-            } catch (_) { /* ignore */ }
+            } catch (_) {  }
         }
         return base;
     } catch {

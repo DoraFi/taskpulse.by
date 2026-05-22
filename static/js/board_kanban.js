@@ -771,7 +771,7 @@
         if (window.tpDebug) {
             try {
                 await window.tpDebug.dumpContext('канбан');
-            } catch (_) { /* debug must not block board load */ }
+            } catch (_) { }
         }
         const params = new URLSearchParams(window.location.search);
         const project = currentProjectCodeFromUrl();

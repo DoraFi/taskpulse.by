@@ -1,176 +1,359 @@
 <div class="modal-overlay" id="profileModal" aria-hidden="true">
-    <div class="modal-content profile-modal" role="dialog" aria-labelledby="profileModalTitle" aria-modal="true">
-        <div class="modal-header">
-            <p class="text-header" id="profileModalTitle">Профиль</p>
-            <button type="button" class="modal-close" id="profileModalClose" aria-label="Закрыть">
-                <img src="/static/source/icons/cross.svg" alt="" width="24" height="24">
-            </button>
-        </div>
-        <div class="modal-body profile-modal__body">
-            <div class="profile-modal__hero">
-                <img class="profile-modal__avatar" id="profileAvatar" src="/static/source/user_img/dar_shved.jpg" alt="">
-                <div class="profile-modal__titles">
-                    <p class="text-header" id="profileTitleName">Дарья Швед</p>
-                    <p class="text-signature" id="profileTitleRole">Разработчик · отдел разработки</p>
-                    <p class="text-basic profile-modal__id" id="profileTitleMeta">@d.shved · в команде с октября 2024</p>
-                    <p class="text-signature profile-modal__id" id="profilePublicIds">USR: - · TEAM: - · ORG: -</p>
-                </div>
-            </div>
-
-            <p class="text-signature profile-modal__settings-hint">Язык интерфейса, права и оформление — в разделе «Настройки» в шапке.</p>
-
-            <div class="profile-modal__section profile-modal__section--card br-5">
-                <p class="filter-label">Личные данные</p>
-                <div class="profile-modal__grid">
-                    <div class="auth-field profile-modal__field">
-                        <label for="profileLogin">Логин</label>
-                        <input id="profileLogin" type="text" class="tp-field-plain" value="d.shved" readonly autocomplete="username">
-                    </div>
-                    <div class="auth-field profile-modal__field">
-                        <label for="profileLastName">Фамилия</label>
-                        <input id="profileLastName" type="text" class="tp-field-plain" value="" autocomplete="family-name">
-                    </div>
-                    <div class="auth-field profile-modal__field">
-                        <label for="profileFirstName">Имя</label>
-                        <input id="profileFirstName" type="text" class="tp-field-plain" value="" autocomplete="given-name">
-                    </div>
-                    <div class="auth-field profile-modal__field">
-                        <label for="profilePatronymic">Отчество</label>
-                        <input id="profilePatronymic" type="text" class="tp-field-plain" value="" autocomplete="additional-name">
-                    </div>
-                    <div class="auth-field profile-modal__field">
-                        <label for="profileEmail">Рабочий e-mail</label>
-                        <input id="profileEmail" type="email" class="tp-field-plain" value="daria.shved@taskpulse.by" autocomplete="email">
-                    </div>
-                    <div class="auth-field profile-modal__field">
-                        <label for="profilePhone">Телефон</label>
-                        <input id="profilePhone" type="tel" class="tp-field-plain" value="+375 (29) 123-45-67" autocomplete="tel">
-                    </div>
-                    <div class="auth-field profile-modal__field">
-                        <label for="profileBirthDateTrigger">Дата рождения</label>
-                        <input id="profileBirthDate" type="hidden">
-                        <div class="search-panel br-5 tp-date-field" id="profileBirthDateTrigger" role="button" tabindex="0" aria-haspopup="dialog">
-                            <img class="h-16" src="/static/source/icons/calendar.svg" alt="">
-                            <span id="profileBirthDateDisplay" class="tp-date-field__value text-basic">Не указана</span>
-                        </div>
-                    </div>
-                    <div class="auth-field profile-modal__field">
-                        <label for="profileBirthVisibility">Кто видит дату рождения</label>
-                        <select id="profileBirthVisibility" class="tp-field-plain create-task-select profile-modal__select--full">
-                            <option value="hidden">Никто</option>
-                            <option value="month_day">Только день и месяц</option>
-                            <option value="full">Полная дата</option>
-                        </select>
-                    </div>
-                    <div class="auth-field profile-modal__field">
-                        <label for="profileTimezone">Часовой пояс</label>
-                        <select id="profileTimezone" class="tp-field-plain create-task-select profile-modal__select--full">
-                            <option value="Europe/Minsk" selected>Минск (UTC+3)</option>
-                            <option value="Europe/Moscow">Москва (UTC+3)</option>
-                            <option value="Europe/Warsaw">Варшава (UTC+1)</option>
-                        </select>
-                    </div>
-                    <div class="auth-field profile-modal__field">
-                        <label for="profileOffice">Офис / локация</label>
-                        <input id="profileOffice" type="text" class="tp-field-plain" value="Минск, ул. Немига, 12">
-                    </div>
-                </div>
-            </div>
-
-            <div class="auth-field profile-modal__field profile-modal__field--full">
-                <label for="profileBio">О себе</label>
-                <textarea id="profileBio" class="profile-modal__bio tp-field-plain" rows="4" placeholder="Например: направление работы, зона ответственности, чем можете помочь команде">Работаю над серверной частью и интеграциями между сервисами. В задачах опираюсь на согласованные требования, аккуратные код-ревью и предсказуемые релизы. Подключаюсь к обсуждению контрактов API и схем данных, когда это ускоряет поставку.</textarea>
-            </div>
-
-            <div class="profile-modal__section">
-                <p class="filter-label">Сводка по задачам</p>
-                <div class="profile-modal__stats">
-                    <div class="profile-modal__stat br-5">
-                        <span class="text-signature">Назначено</span>
-                        <span class="text-header" id="profileStatAssigned">6</span>
-                    </div>
-                    <div class="profile-modal__stat br-5">
-                        <span class="text-signature">В работе</span>
-                        <span class="text-header" id="profileStatInProgress">4</span>
-                    </div>
-                    <div class="profile-modal__stat br-5">
-                        <span class="text-signature">За неделю</span>
-                        <span class="text-header" id="profileStatWeek">7</span>
-                    </div>
-                    <div class="profile-modal__stat br-5">
-                        <span class="text-signature">Завершено (мес.)</span>
-                        <span class="text-header" id="profileStatMonthDone">11</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="profile-modal__section profile-modal__section--card profile-modal__section--activity br-5">
-                <p class="filter-label">Проекты и роли</p>
-                <ul class="profile-modal__activity-list" id="profileProjectsRolesList">
-                    <li class="profile-modal__activity-row">
-                        <span class="profile-modal__activity-key text-signature">Корпоративный портал</span>
-                        <span class="profile-modal__activity-value text-basic">Разработка</span>
-                    </li>
-                    <li class="profile-modal__activity-row">
-                        <span class="profile-modal__activity-key text-signature">Микросервисная платформа</span>
-                        <span class="profile-modal__activity-value text-basic">Код-ревью</span>
-                    </li>
-                    <li class="profile-modal__activity-row">
-                        <span class="profile-modal__activity-key text-signature">CRM</span>
-                        <span class="profile-modal__activity-value text-basic">Консультации по API</span>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="profile-modal__section profile-modal__section--card profile-modal__password-block br-5">
-                <p class="filter-label">Безопасность аккаунта</p>
-                <p class="text-signature profile-modal__section-lead">Смена пароля входа в TaskPulse</p>
-                <div class="auth-field profile-modal__field">
-                    <label for="profilePwdCurrent">Текущий пароль</label>
-                    <input id="profilePwdCurrent" type="password" class="filter-input" autocomplete="current-password" placeholder="••••••••">
-                </div>
-                <div class="profile-modal__grid profile-modal__grid--password">
-                    <div class="auth-field profile-modal__field">
-                        <label for="profilePwdNew">Новый пароль</label>
-                        <input id="profilePwdNew" type="password" class="filter-input" autocomplete="new-password" placeholder="Не менее 8 символов">
-                    </div>
-                    <div class="auth-field profile-modal__field">
-                        <label for="profilePwdRepeat">Повторите пароль</label>
-                        <input id="profilePwdRepeat" type="password" class="filter-input" autocomplete="new-password" placeholder="Ещё раз">
-                    </div>
-                </div>
-                <p class="text-signature profile-modal__password-hint">После смены пароля активные сессии на других устройствах можно завершить в «Настройках».</p>
-                <button type="button" class="button-secondary profile-modal__password-btn" id="profileModalChangePassword">Обновить пароль</button>
-            </div>
-
-            <div class="profile-modal__section profile-modal__section--card profile-modal__section--activity br-5">
-                <p class="filter-label">Активность</p>
-                <ul class="profile-modal__activity-list" id="profileActivityList">
-                    <li class="profile-modal__activity-row">
-                        <span class="profile-modal__activity-key text-signature">Последний вход</span>
-                        <span class="profile-modal__activity-value text-basic">Нет данных</span>
-                    </li>
-                    <li class="profile-modal__activity-row">
-                        <span class="profile-modal__activity-key text-signature">Двухфакторная защита</span>
-                        <span class="profile-modal__activity-value text-basic">Выключена</span>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <div class="modal-footer profile-modal__footer">
-            <div id="profileExitConfirmBar" class="profile-modal__exit-confirm" role="status" aria-live="polite" hidden>
-                <span class="profile-modal__exit-question text-basic">Выйти из профиля?</span>
-                <span class="profile-modal__exit-links">
-                    <a href="#" class="profile-modal__exit-answer" id="profileExitConfirmYes">Да</a>
-                    <span class="profile-modal__exit-dot" aria-hidden="true">·</span>
-                    <a href="#" class="profile-modal__exit-answer" id="profileExitConfirmNo">Отмена</a>
-                </span>
-            </div>
-            <div class="profile-modal__footer-actions" id="profileModalFooterActions">
-                <button type="button" class="button-secondary profile-modal__danger-btn" id="profileModalLeaveTeam" hidden>Покинуть команду</button>
-                <button type="button" class="button-secondary" id="profileModalExitProfile">Выйти из профиля</button>
-                <button type="button" class="button-basic" id="profileModalSave">Сохранить изменения</button>
-            </div>
-        </div>
+  <div
+    class="modal-content profile-modal"
+    role="dialog"
+    aria-labelledby="profileModalTitle"
+    aria-modal="true"
+  >
+    <div class="modal-header">
+      <p class="text-header" id="profileModalTitle">Профиль</p>
+      <button
+        type="button"
+        class="modal-close"
+        id="profileModalClose"
+        aria-label="Закрыть"
+      >
+        <img
+          src="/static/source/icons/cross.svg"
+          alt=""
+          width="24"
+          height="24"
+        />
+      </button>
     </div>
+    <div class="modal-body profile-modal__body">
+      <div class="profile-modal__hero">
+        <img
+          class="profile-modal__avatar"
+          id="profileAvatar"
+          src="/static/source/user_img/dar_shved.jpg"
+          alt=""
+        />
+        <div class="profile-modal__titles">
+          <p class="text-header" id="profileTitleName">Дарья Швед</p>
+          <p class="text-signature" id="profileTitleRole">
+            Разработчик · отдел разработки
+          </p>
+          <p class="text-basic profile-modal__id" id="profileTitleMeta">
+            @d.shved · в команде с октября 2024
+          </p>
+          <p class="text-signature profile-modal__id" id="profilePublicIds">
+            USR: - · TEAM: - · ORG: -
+          </p>
+        </div>
+      </div>
+
+      <p class="text-signature profile-modal__settings-hint">
+        Язык интерфейса, права и оформление - в разделе «Настройки» в шапке.
+      </p>
+
+      <div class="profile-modal__section profile-modal__section--card br-5">
+        <p class="filter-label">Личные данные</p>
+        <div class="profile-modal__grid">
+          <div class="auth-field profile-modal__field">
+            <label for="profileLogin">Логин</label>
+            <input
+              id="profileLogin"
+              type="text"
+              class="tp-field-plain"
+              value="d.shved"
+              readonly
+              autocomplete="username"
+            />
+          </div>
+          <div class="auth-field profile-modal__field">
+            <label for="profileLastName">Фамилия</label>
+            <input
+              id="profileLastName"
+              type="text"
+              class="tp-field-plain"
+              value=""
+              autocomplete="family-name"
+            />
+          </div>
+          <div class="auth-field profile-modal__field">
+            <label for="profileFirstName">Имя</label>
+            <input
+              id="profileFirstName"
+              type="text"
+              class="tp-field-plain"
+              value=""
+              autocomplete="given-name"
+            />
+          </div>
+          <div class="auth-field profile-modal__field">
+            <label for="profilePatronymic">Отчество</label>
+            <input
+              id="profilePatronymic"
+              type="text"
+              class="tp-field-plain"
+              value=""
+              autocomplete="additional-name"
+            />
+          </div>
+          <div class="auth-field profile-modal__field">
+            <label for="profileEmail">Рабочий e-mail</label>
+            <input
+              id="profileEmail"
+              type="email"
+              class="tp-field-plain"
+              value="daria.shved@taskpulse.by"
+              autocomplete="email"
+            />
+          </div>
+          <div class="auth-field profile-modal__field">
+            <label for="profilePhone">Телефон</label>
+            <input
+              id="profilePhone"
+              type="tel"
+              class="tp-field-plain"
+              value="+375 (29) 123-45-67"
+              autocomplete="tel"
+            />
+          </div>
+          <div class="auth-field profile-modal__field">
+            <label for="profileBirthDateTrigger">Дата рождения</label>
+            <input id="profileBirthDate" type="hidden" />
+            <div
+              class="search-panel br-5 tp-date-field"
+              id="profileBirthDateTrigger"
+              role="button"
+              tabindex="0"
+              aria-haspopup="dialog"
+            >
+              <img
+                class="h-16"
+                src="/static/source/icons/calendar.svg"
+                alt=""
+              />
+              <span
+                id="profileBirthDateDisplay"
+                class="tp-date-field__value text-basic"
+                >Не указана</span
+              >
+            </div>
+          </div>
+          <div class="auth-field profile-modal__field">
+            <label for="profileBirthVisibility">Кто видит дату рождения</label>
+            <select
+              id="profileBirthVisibility"
+              class="tp-field-plain create-task-select profile-modal__select--full"
+            >
+              <option value="hidden">Никто</option>
+              <option value="month_day">Только день и месяц</option>
+              <option value="full">Полная дата</option>
+            </select>
+          </div>
+          <div class="auth-field profile-modal__field">
+            <label for="profileTimezone">Часовой пояс</label>
+            <select
+              id="profileTimezone"
+              class="tp-field-plain create-task-select profile-modal__select--full"
+            >
+              <option value="Europe/Minsk" selected>Минск (UTC+3)</option>
+              <option value="Europe/Moscow">Москва (UTC+3)</option>
+              <option value="Europe/Warsaw">Варшава (UTC+1)</option>
+            </select>
+          </div>
+          <div class="auth-field profile-modal__field">
+            <label for="profileOffice">Офис / локация</label>
+            <input
+              id="profileOffice"
+              type="text"
+              class="tp-field-plain"
+              value="Минск, ул. Немига, 12"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-field profile-modal__field profile-modal__field--full">
+        <label for="profileBio">О себе</label>
+        <textarea
+          id="profileBio"
+          class="profile-modal__bio tp-field-plain"
+          rows="4"
+          placeholder="Например: направление работы, зона ответственности, чем можете помочь команде"
+        >
+Работаю над серверной частью и интеграциями между сервисами. В задачах опираюсь на согласованные требования, аккуратные код-ревью и предсказуемые релизы. Подключаюсь к обсуждению контрактов API и схем данных, когда это ускоряет поставку.</textarea
+        >
+      </div>
+
+      <div class="profile-modal__section">
+        <p class="filter-label">Сводка по задачам</p>
+        <div class="profile-modal__stats">
+          <div class="profile-modal__stat br-5">
+            <span class="text-signature">Назначено</span>
+            <span class="text-header" id="profileStatAssigned">6</span>
+          </div>
+          <div class="profile-modal__stat br-5">
+            <span class="text-signature">В работе</span>
+            <span class="text-header" id="profileStatInProgress">4</span>
+          </div>
+          <div class="profile-modal__stat br-5">
+            <span class="text-signature">За неделю</span>
+            <span class="text-header" id="profileStatWeek">7</span>
+          </div>
+          <div class="profile-modal__stat br-5">
+            <span class="text-signature">Завершено (мес.)</span>
+            <span class="text-header" id="profileStatMonthDone">11</span>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="profile-modal__section profile-modal__section--card profile-modal__section--activity br-5"
+      >
+        <p class="filter-label">Проекты и роли</p>
+        <ul class="profile-modal__activity-list" id="profileProjectsRolesList">
+          <li class="profile-modal__activity-row">
+            <span class="profile-modal__activity-key text-signature"
+              >Корпоративный портал</span
+            >
+            <span class="profile-modal__activity-value text-basic"
+              >Разработка</span
+            >
+          </li>
+          <li class="profile-modal__activity-row">
+            <span class="profile-modal__activity-key text-signature"
+              >Микросервисная платформа</span
+            >
+            <span class="profile-modal__activity-value text-basic"
+              >Код-ревью</span
+            >
+          </li>
+          <li class="profile-modal__activity-row">
+            <span class="profile-modal__activity-key text-signature">CRM</span>
+            <span class="profile-modal__activity-value text-basic"
+              >Консультации по API</span
+            >
+          </li>
+        </ul>
+      </div>
+
+      <div
+        class="profile-modal__section profile-modal__section--card profile-modal__password-block br-5"
+      >
+        <p class="filter-label">Безопасность аккаунта</p>
+        <p class="text-signature profile-modal__section-lead">
+          Смена пароля входа в TaskPulse
+        </p>
+        <div class="auth-field profile-modal__field">
+          <label for="profilePwdCurrent">Текущий пароль</label>
+          <input
+            id="profilePwdCurrent"
+            type="password"
+            class="filter-input"
+            autocomplete="current-password"
+            placeholder="••••••••"
+          />
+        </div>
+        <div class="profile-modal__grid profile-modal__grid--password">
+          <div class="auth-field profile-modal__field">
+            <label for="profilePwdNew">Новый пароль</label>
+            <input
+              id="profilePwdNew"
+              type="password"
+              class="filter-input"
+              autocomplete="new-password"
+              placeholder="Не менее 8 символов"
+            />
+          </div>
+          <div class="auth-field profile-modal__field">
+            <label for="profilePwdRepeat">Повторите пароль</label>
+            <input
+              id="profilePwdRepeat"
+              type="password"
+              class="filter-input"
+              autocomplete="new-password"
+              placeholder="Ещё раз"
+            />
+          </div>
+        </div>
+        <p class="text-signature profile-modal__password-hint">
+          После смены пароля активные сессии на других устройствах можно
+          завершить в «Настройках».
+        </p>
+        <button
+          type="button"
+          class="button-secondary profile-modal__password-btn"
+          id="profileModalChangePassword"
+        >
+          Обновить пароль
+        </button>
+      </div>
+
+      <div
+        class="profile-modal__section profile-modal__section--card profile-modal__section--activity br-5"
+      >
+        <p class="filter-label">Активность</p>
+        <ul class="profile-modal__activity-list" id="profileActivityList">
+          <li class="profile-modal__activity-row">
+            <span class="profile-modal__activity-key text-signature"
+              >Последний вход</span
+            >
+            <span class="profile-modal__activity-value text-basic"
+              >Нет данных</span
+            >
+          </li>
+          <li class="profile-modal__activity-row">
+            <span class="profile-modal__activity-key text-signature"
+              >Двухфакторная защита</span
+            >
+            <span class="profile-modal__activity-value text-basic"
+              >Выключена</span
+            >
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="modal-footer profile-modal__footer">
+      <div
+        id="profileExitConfirmBar"
+        class="profile-modal__exit-confirm"
+        role="status"
+        aria-live="polite"
+        hidden
+      >
+        <span class="profile-modal__exit-question text-basic"
+          >Выйти из профиля?</span
+        >
+        <span class="profile-modal__exit-links">
+          <a
+            href="#"
+            class="profile-modal__exit-answer"
+            id="profileExitConfirmYes"
+            >Да</a
+          >
+          <span class="profile-modal__exit-dot" aria-hidden="true">·</span>
+          <a
+            href="#"
+            class="profile-modal__exit-answer"
+            id="profileExitConfirmNo"
+            >Отмена</a
+          >
+        </span>
+      </div>
+      <div class="profile-modal__footer-actions" id="profileModalFooterActions">
+        <button
+          type="button"
+          class="button-secondary profile-modal__danger-btn"
+          id="profileModalLeaveTeam"
+          hidden
+        >
+          Покинуть команду
+        </button>
+        <button
+          type="button"
+          class="button-secondary"
+          id="profileModalExitProfile"
+        >
+          Выйти из профиля
+        </button>
+        <button type="button" class="button-basic" id="profileModalSave">
+          Сохранить изменения
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

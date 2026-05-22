@@ -1,8 +1,5 @@
 package by.taskpulse.web;
 
-/**
- * Request-scoped team public id from URL (/o/{org}/t/{team}/...).
- */
 public final class TeamContextHolder {
 
     private static final ThreadLocal<String> TEAM_PUBLIC_ID = new ThreadLocal<>();
