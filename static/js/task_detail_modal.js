@@ -154,14 +154,42 @@
         return ['Очередь', 'В работе', 'Тестирование', 'Готово', 'Отложено'];
     }
 
-    function apiBasePath() {
+    let modalApiBasePath = null;
+
+    function syncApiBaseFromPathOrStorage() {
+        if (typeof getContextBaseFromPathname === 'function') {
+            const fromPath = getContextBaseFromPathname();
+            if (fromPath) return `${fromPath}/api`;
+        }
         const m = window.location.pathname.match(/^\/o\/([^/]+)\/t\/([^/]+)/);
-        if (!m) return '/api';
-        return `/o/${m[1]}/t/${m[2]}/api`;
+        if (m) return `/o/${m[1]}/t/${m[2]}/api`;
+        try {
+            const stored = sessionStorage.getItem('tpActiveTeamBase');
+            if (stored && /^\/o\/[^/]+\/t\/[^/]+$/.test(stored)) return `${stored}/api`;
+        } catch (_) { /* ignore */ }
+        return null;
     }
 
-    function apiUrl(path) {
-        return `${apiBasePath()}${path}`;
+    async function getModalApiBasePath() {
+        const sync = syncApiBaseFromPathOrStorage();
+        if (sync) {
+            modalApiBasePath = sync;
+            return sync;
+        }
+        if (modalApiBasePath) return modalApiBasePath;
+        if (typeof resolveContextBase === 'function') {
+            const base = await resolveContextBase();
+            modalApiBasePath = base ? `${base}/api` : '/api';
+        } else {
+            modalApiBasePath = '/api';
+        }
+        return modalApiBasePath;
+    }
+
+    async function apiUrl(path) {
+        const base = await getModalApiBasePath();
+        const p = path.startsWith('/') ? path : `/${path}`;
+        return `${base}${p}`;
     }
 
     function safeShowToast(msg) {
@@ -200,6 +228,13 @@
     function bindSearchableMenu(input, menu, sourceItems, toLabel, onPick) {
         if (!input || !menu) return () => {};
         let items = sourceItems || [];
+        const parent = input.parentElement;
+        const setParentLayer = (enabled) => {
+            if (!parent) return;
+            parent.style.position = 'relative';
+            parent.style.overflow = 'visible';
+            parent.style.zIndex = enabled ? '9100' : '';
+        };
         const render = (query) => {
             const q = String(query || '').trim().toLowerCase();
             const filtered = q
@@ -213,25 +248,34 @@
                     const picked = filtered[idx];
                     input.value = toLabel(picked);
                     menu.style.display = 'none';
+                    setParentLayer(false);
                     if (onPick) onPick(picked);
                 });
             });
         };
         const onInput = () => render(input.value);
-        const onFocus = () => render(input.value);
-        const onBlur = () => setTimeout(() => { menu.style.display = 'none'; }, 120);
+        const onFocus = () => {
+            setParentLayer(true);
+            render(input.value);
+        };
+        const onBlur = () => setTimeout(() => {
+            menu.style.display = 'none';
+            setParentLayer(false);
+        }, 120);
         input.addEventListener('input', onInput);
         input.addEventListener('focus', onFocus);
         input.addEventListener('blur', onBlur);
-        const parent = input.parentElement;
-        if (parent) parent.style.position = 'relative';
+        if (parent) {
+            parent.style.position = 'relative';
+            parent.style.overflow = 'visible';
+        }
         menu.style.position = 'absolute';
         menu.style.left = '0';
         menu.style.right = '0';
         menu.style.top = 'calc(100% + 4px)';
         menu.style.maxHeight = '220px';
         menu.style.overflowY = 'auto';
-        menu.style.zIndex = '1205';
+        menu.style.zIndex = '9000';
         menu.style.background = '#fff';
         menu.style.border = '1px solid #dbe6d3';
         render('');
@@ -261,7 +305,7 @@
         if (projectCode) params.set('project', projectCode);
         if (searchQuery && searchQuery.trim()) params.set('q', searchQuery.trim());
         const q = params.toString() ? `?${params.toString()}` : '';
-        const res = await fetch(apiUrl(`/task-form/options${q}`));
+        const res = await fetch(await apiUrl(`/task-form/options${q}`));
         if (!res.ok) throw new Error('options failed');
         currentOptions = await res.json();
         if (window._tpTaskDetailUpdateProjects) window._tpTaskDetailUpdateProjects(currentOptions.projects || []);
@@ -329,7 +373,7 @@
 
     async function fetchTaskAttachments(taskId) {
         if (!taskId) return [];
-        const res = await fetch(apiUrl(`/kanban/tasks/attachments?taskId=${encodeURIComponent(String(taskId))}`));
+        const res = await fetch(await apiUrl(`/kanban/tasks/attachments?taskId=${encodeURIComponent(String(taskId))}`));
         if (!res.ok) return [];
         const data = await res.json().catch(() => []);
         return Array.isArray(data) ? data : [];
@@ -390,9 +434,9 @@
                 }
                 const ok = await styledConfirm('Удалить уже загруженное вложение?');
                 if (!ok) return;
-                let res = await fetch(apiUrl(`/kanban/tasks/attachments/delete?attachmentId=${attachmentId}`), { method: 'POST' });
+                let res = await fetch(await apiUrl(`/kanban/tasks/attachments/delete?attachmentId=${attachmentId}`), { method: 'POST' });
                 if (!res.ok) {
-                    res = await fetch(apiUrl(`/kanban/tasks/attachments/delete?attachmentId=${attachmentId}`), { method: 'GET' });
+                    res = await fetch(await apiUrl(`/kanban/tasks/attachments/delete?attachmentId=${attachmentId}`), { method: 'GET' });
                 }
                 if (!res.ok) {
                     safeShowToast('Не удалось удалить вложение');
@@ -414,7 +458,7 @@
             const fd = new FormData();
             fd.append('taskId', String(taskId));
             fd.append('file', file);
-            const res = await fetch(apiUrl('/kanban/tasks/attachments/upload'), { method: 'POST', body: fd });
+            const res = await fetch(await apiUrl('/kanban/tasks/attachments/upload'), { method: 'POST', body: fd });
             if (res.ok) ok += 1;
             else failed += 1;
         }
@@ -450,6 +494,10 @@
         const dbId = resolveTaskDbId(task);
         if (!task || dbId == null) return;
         currentTask = task;
+        modalApiBasePath = syncApiBaseFromPathOrStorage();
+        if (!modalApiBasePath) {
+            getModalApiBasePath().catch(() => {});
+        }
 
         const overlay = document.getElementById('taskDetailModal');
         if (!overlay) return;
@@ -529,7 +577,7 @@
         overlay.dataset.modalBound = '1';
 
         bindDeadlineInputs(overlay);
-        loadOptions().catch(() => {});
+        getModalApiBasePath().then(() => loadOptions()).catch(() => {});
 
         const projectInput = document.getElementById('taskDetailProject');
         const projectMenu = document.getElementById('taskDetailProjectMenu');
@@ -659,7 +707,8 @@
                 try {
                     const tid = resolveTaskDbId(currentTask);
                     if (tid == null) throw new Error('task id');
-                    const res = await fetch(apiUrl('/kanban/tasks/update'), {
+                    await getModalApiBasePath();
+                    const res = await fetch(await apiUrl('/kanban/tasks/update'), {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({

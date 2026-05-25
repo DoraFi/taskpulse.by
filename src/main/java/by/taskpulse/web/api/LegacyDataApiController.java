@@ -1599,8 +1599,11 @@ public class LegacyDataApiController {
             throw new IllegalArgumentException("taskId обязателен");
         Long taskId = taskIdNum.longValue();
 
-        Long teamId = currentTeamId();
         Long uid = currentUserId();
+        Long teamId = resolveTeamIdForAccessibleTask(taskId, uid);
+        if (teamId == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Задача не найдена или нет доступа");
+        }
 
         String name = payload.get("name") == null ? null : String.valueOf(payload.get("name")).trim();
         String description = payload.get("description") == null ? null
@@ -4044,6 +4047,36 @@ public class LegacyDataApiController {
                 "select id from app_team where lower(trim(cast(public_id as text))) = lower(trim(?)) order by id desc limit 1",
                 (rs, rowNum) -> rs.getLong("id"),
                 TeamContextSupport.normalizePublicId(teamPublicId));
+        return ids.isEmpty() ? null : ids.get(0);
+    }
+
+    /** Команда, в которой пользователь видит задачу (предпочтение — контекст URL/сессии). */
+    private Long resolveTeamIdForAccessibleTask(Long taskId, Long userId) {
+        if (taskId == null || taskId <= 0 || userId == null) {
+            return null;
+        }
+        Long preferred = contextTeamIdFromRequest();
+        if (preferred == null) {
+            Optional<String[]> ctx = resolveTeamContextFromRequest();
+            if (ctx.isPresent()) {
+                preferred = resolveTeamIdByPublicId(ctx.get()[1]);
+            }
+        }
+        final long preferredOrderKey = preferred != null ? preferred : -1L;
+        List<Long> ids = jdbcTemplate.query(
+                """
+                        select pt.team_id
+                        from task_item t
+                        join board b on b.id = t.board_id
+                        join project p on p.id = b.project_id
+                        join project_team pt on pt.project_id = p.id
+                        join team_membership tm on tm.team_id = pt.team_id and tm.user_id = ?
+                        where t.id = ?
+                        order by case when pt.team_id = ? then 0 else pt.team_id end
+                        limit 1
+                        """,
+                (rs, rowNum) -> rs.getLong("team_id"),
+                userId, taskId, preferredOrderKey);
         return ids.isEmpty() ? null : ids.get(0);
     }
 
