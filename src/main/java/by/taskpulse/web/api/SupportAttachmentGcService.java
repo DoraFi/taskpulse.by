@@ -1,7 +1,5 @@
 package by.taskpulse.web.api;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -15,17 +13,18 @@ import org.springframework.stereotype.Service;
 public class SupportAttachmentGcService {
 
     private static final Logger log = LoggerFactory.getLogger(SupportAttachmentGcService.class);
-    private static final Path STATIC_ROOT = Path.of("static");
 
     private final JdbcTemplate jdbcTemplate;
+    private final StoredFileGcSupport storedFileGc;
 
-    public SupportAttachmentGcService(JdbcTemplate jdbcTemplate) {
+    public SupportAttachmentGcService(JdbcTemplate jdbcTemplate, StoredFileGcSupport storedFileGc) {
         this.jdbcTemplate = jdbcTemplate;
+        this.storedFileGc = storedFileGc;
     }
 
-    @Scheduled(cron = "0 15 3 * * *") // daily 03:15
+    @Scheduled(cron = "0 0 0 * * *")
     public void cleanupExpiredSupportAttachments() {
-        if (!hasTable("help_support_attachment") || !hasTable("stored_file")) {
+        if (!storedFileGc.hasTable("help_support_attachment") || !storedFileGc.hasTable("stored_file")) {
             return;
         }
 
@@ -47,56 +46,12 @@ public class SupportAttachmentGcService {
             log.info("GC: deleted {} expired help attachments", deletedRows);
         }
 
-        // Remove stored_file rows that are no longer referenced by any attachment table.
         for (Map<String, Object> row : expired) {
             Long storedFileId = row.get("stored_file_id") instanceof Number n ? n.longValue() : null;
-            if (storedFileId == null || storedFileId <= 0) continue;
-
-            Integer refs = jdbcTemplate.queryForObject(
-                    """
-                    select
-                      (select count(*) from task_attachment where stored_file_id = ?)
-                      + (select count(*) from help_support_attachment where stored_file_id = ?)
-                    """,
-                    Integer.class,
-                    storedFileId, storedFileId
-            );
-            if (refs != null && refs > 0) continue;
-
-            String storagePath = null;
-            try {
-                Map<String, Object> f = jdbcTemplate.queryForMap(
-                        "select storage_path from stored_file where id = ?",
-                        storedFileId
-                );
-                storagePath = f.get("storage_path") == null ? null : String.valueOf(f.get("storage_path"));
-            } catch (Exception ignored) {
-                // file already removed
+            if (storedFileId == null || storedFileId <= 0) {
+                continue;
             }
-
-            int removed = jdbcTemplate.update("delete from stored_file where id = ?", storedFileId);
-            if (removed > 0 && storagePath != null && !storagePath.isBlank()) {
-                try {
-                    Files.deleteIfExists(STATIC_ROOT.resolve(storagePath));
-                } catch (Exception ex) {
-                    log.warn("GC: failed to delete stored file {}", storagePath, ex);
-                }
-            }
+            storedFileGc.deleteStoredFileIfUnreferenced(storedFileId);
         }
     }
-
-    private boolean hasTable(String tableName) {
-        Integer c = jdbcTemplate.queryForObject(
-                """
-                select count(*)
-                from information_schema.tables t
-                where t.table_name = ?
-                  and t.table_schema = any (current_schemas(true))
-                """,
-                Integer.class,
-                tableName
-        );
-        return c != null && c > 0;
-    }
 }
-
