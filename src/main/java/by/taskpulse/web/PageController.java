@@ -324,6 +324,11 @@ public class PageController {
         return "components/create_task_modal";
     }
 
+    @GetMapping("/templates/components/create_subtask_modal.html")
+    public String createSubtaskModalComponent() {
+        return "components/create_subtask_modal";
+    }
+
     private String openContextPage(String orgId, String teamId, HttpServletRequest request, Model model) {
         return contextPageGate.openContextPage(orgId, teamId, request, model);
     }

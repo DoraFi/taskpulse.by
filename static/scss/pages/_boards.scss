@@ -642,6 +642,59 @@ body[data-theme="dark"] .kanban-stage-group.sortable-fallback .kanban-stage-sep-
     }
 }
 
+.kanban-task-item.task-card--subtask-addable,
+.board-list .card .list .item.task-card--subtask-addable,
+.board-list .timeline-task-card.task-card--subtask-addable {
+    position: relative;
+}
+
+.task-subtask-add-btn {
+    position: absolute;
+    top: $space-16;
+    right: $space-24;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: none;
+    border-radius: $radius-sm;
+    background: rgba($green, 0.12);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+    z-index: 5;
+    line-height: 0;
+
+    img {
+        width: 10px;
+        height: 10px;
+        display: block;
+        pointer-events: none;
+    }
+}
+
+.kanban-task-item.task-card--subtask-addable:hover .task-subtask-add-btn,
+.kanban-task-item.task-card--subtask-addable:focus-within .task-subtask-add-btn,
+.board-list .card .list .item.task-card--subtask-addable:hover .task-subtask-add-btn,
+.board-list .card .list .item.task-card--subtask-addable:focus-within .task-subtask-add-btn,
+.board-list .timeline-task-card.task-card--subtask-addable:hover .task-subtask-add-btn,
+.board-list .timeline-task-card.task-card--subtask-addable:focus-within .task-subtask-add-btn,
+.task-subtask-add-btn:focus-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+body[data-theme="dark"] .task-subtask-add-btn {
+    background: rgba($green, 0.28);
+
+    img {
+        filter: brightness(0) invert(1);
+    }
+}
+
 .kanban-task-item.sortable-fallback .tag .deadline.dependency-chip::before,
 .kanban-board-card .kanban-stage-col .tag .deadline.dependency-chip::before,
 .kanban-archive-board .kanban-stage-col .tag .deadline.dependency-chip::before,

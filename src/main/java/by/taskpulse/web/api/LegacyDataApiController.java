@@ -1401,6 +1401,60 @@ public class LegacyDataApiController {
         }
     }
 
+    @PostMapping("/api/kanban/subtasks/create")
+    public Map<String, Object> createSubtask(@RequestBody Map<String, Object> payload) {
+        Number taskIdNum = (Number) payload.get("taskId");
+        String name = payload.get("name") == null ? null : String.valueOf(payload.get("name")).trim();
+        if (taskIdNum == null || taskIdNum.longValue() <= 0) {
+            throw new IllegalArgumentException("taskId обязателен");
+        }
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("name обязателен");
+        }
+        if (name.length() > 200) {
+            throw new IllegalArgumentException("Название подзадачи не длиннее 200 символов");
+        }
+        long taskId = taskIdNum.longValue();
+        Long teamId = currentTeamId();
+
+        Map<String, Object> taskRow;
+        try {
+            taskRow = jdbcTemplate.queryForMap(
+                    """
+                            select t.stage
+                            from task_item t
+                            join board b on b.id = t.board_id
+                            join project_team pt on pt.project_id = b.project_id
+                            where t.id = ?
+                              and pt.team_id = ?
+                            limit 1
+                            """,
+                    taskId, teamId);
+        } catch (org.springframework.dao.EmptyResultDataAccessException ex) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Нет доступа к задаче");
+        }
+
+        String stage = taskRow.get("stage") == null ? "" : String.valueOf(taskRow.get("stage")).trim();
+        if ("Готово".equals(stage)) {
+            throw new IllegalStateException("Нельзя добавлять подзадачи в статусе «Готово»");
+        }
+
+        Long subtaskId = jdbcTemplate.queryForObject(
+                """
+                        insert into subtask (name, completed, task_id)
+                        values (?, false, ?)
+                        returning id
+                        """,
+                Long.class,
+                name,
+                taskId);
+        return Map.of(
+                "ok", true,
+                "subtaskId", subtaskId,
+                "taskId", taskId,
+                "name", name);
+    }
+
     @PostMapping("/api/kanban/subtasks/toggle")
     public Map<String, Object> toggleSubtask(@RequestBody Map<String, Object> payload) {
         Number subtaskIdNum = (Number) payload.get("subtaskId");

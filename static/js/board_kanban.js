@@ -1853,6 +1853,10 @@
             item.appendChild(btn);
         }
 
+        if (typeof window.tpAttachSubtaskAddButton === 'function') {
+            window.tpAttachSubtaskAddButton(item, task);
+        }
+
         return item;
     }
 

@@ -1,0 +1,21 @@
+.modal-content.create-subtask-modal {
+    width: min(420px, 92vw);
+    height: auto;
+    max-height: none;
+    min-height: 0;
+
+    .create-subtask-modal__body {
+        display: flex;
+        flex-direction: column;
+        gap: $space-16;
+    }
+
+    .create-subtask-modal__parent {
+        margin: 0;
+        word-break: break-word;
+    }
+
+    .create-subtask-modal__field {
+        margin: 0;
+    }
+}

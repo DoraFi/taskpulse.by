@@ -256,6 +256,11 @@ public class ContextApiController {
         return legacy.taskAttachments(taskId);
     }
 
+    @PostMapping("/api/kanban/subtasks/create")
+    public Map<String, Object> createSubtaskAuto(@RequestBody Map<String, Object> payload) {
+        return legacy.createSubtask(payload);
+    }
+
     @PostMapping("/api/kanban/subtasks/toggle")
     public Map<String, Object> toggleSubtaskAuto(@RequestBody Map<String, Object> payload) {
         return legacy.toggleSubtask(payload);
@@ -685,6 +690,14 @@ public class ContextApiController {
                                                      @RequestParam Long taskId) {
         ensureContextAccess(orgId, teamId);
         return legacy.taskAttachments(taskId);
+    }
+
+    @PostMapping("/o/{orgId}/t/{teamId}/api/kanban/subtasks/create")
+    public Map<String, Object> createSubtask(@PathVariable String orgId,
+                                             @PathVariable String teamId,
+                                             @RequestBody Map<String, Object> payload) {
+        ensureContextAccess(orgId, teamId);
+        return legacy.createSubtask(payload);
     }
 
     @PostMapping("/o/{orgId}/t/{teamId}/api/kanban/subtasks/toggle")

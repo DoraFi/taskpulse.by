@@ -1,0 +1,21 @@
+<div class="modal-overlay" id="createSubtaskModal" aria-hidden="true">
+    <div class="modal-content create-subtask-modal" role="dialog" aria-labelledby="createSubtaskModalTitle">
+        <div class="modal-header">
+            <p class="text-header" id="createSubtaskModalTitle">Добавить подзадачу</p>
+            <button type="button" class="modal-close" id="createSubtaskModalClose" aria-label="Закрыть">
+                <img src="/static/source/icons/cross.svg" alt="" width="24" height="24">
+            </button>
+        </div>
+        <div class="modal-body create-subtask-modal__body">
+            <p class="text-signature create-subtask-modal__parent" id="createSubtaskParentLabel"></p>
+            <div class="auth-field create-subtask-modal__field">
+                <label for="createSubtaskName">Наименование подзадачи <img class="required-icon" src="/static/source/icons/required.svg" alt="" aria-hidden="true"></label>
+                <input id="createSubtaskName" type="text" class="filter-input" placeholder="Краткое название" maxlength="200" autocomplete="off">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="button-secondary" id="createSubtaskModalCancel">Отмена</button>
+            <button type="button" class="button-basic" id="createSubtaskModalSubmit">Добавить</button>
+        </div>
+    </div>
+</div>

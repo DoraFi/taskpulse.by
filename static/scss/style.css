@@ -599,9 +599,6 @@ a.button-secondary, .button-basic {
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.4);
 }
-.header .search-panel input::-moz-placeholder {
-  color: rgba(45, 50, 41, 0.5);
-}
 .header .search-panel input::placeholder {
   color: rgba(45, 50, 41, 0.5);
 }
@@ -629,9 +626,6 @@ body[data-theme=dark] .header .search-panel input:hover {
 body[data-theme=dark] .header .search-panel input:focus {
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.38);
-}
-body[data-theme=dark] .header .search-panel input::-moz-placeholder {
-  color: rgba(250, 253, 247, 0.45);
 }
 body[data-theme=dark] .header .search-panel input::placeholder {
   color: rgba(250, 253, 247, 0.45);
@@ -843,7 +837,6 @@ body[data-theme=dark] .header-global-search__hit.is-active {
   height: 0.75rem;
   -webkit-appearance: none;
   appearance: none;
-  -webkit-transition: height 0.2s ease;
   transition: height 0.2s ease;
 }
 
@@ -856,7 +849,6 @@ body[data-theme=dark] .header-global-search__hit.is-active {
 *::-webkit-scrollbar-thumb {
   background: rgba(97, 160, 57, 0.3);
   backdrop-filter: blur(4px);
-  -webkit-transition: all 0.2s ease;
   transition: all 0.2s ease;
 }
 *::-webkit-scrollbar-thumb:hover {
@@ -926,9 +918,7 @@ body[data-theme=dark] .header-global-search__hit.is-active {
   transition: all 0.2s ease;
   position: relative;
   white-space: nowrap;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
   color: #fafdf7;
 }
 .status.neutral, .tasks-grid .col-status .neutral.status-select {
@@ -1036,9 +1026,6 @@ body[data-theme=dark] .header-global-search__hit.is-active {
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.1);
 }
-.modal-content .modal-body input::-moz-placeholder {
-  color: rgba(45, 50, 41, 0.5);
-}
 .modal-content .modal-body input::placeholder {
   color: rgba(45, 50, 41, 0.5);
 }
@@ -1066,9 +1053,6 @@ body[data-theme=dark] .header-global-search__hit.is-active {
   color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.1);
 }
-.modal-content .modal-body .filter-section .filter-input::-moz-placeholder {
-  color: rgba(45, 50, 41, 0.5);
-}
 .modal-content .modal-body .filter-section .filter-input::placeholder {
   color: rgba(45, 50, 41, 0.5);
 }
@@ -1085,8 +1069,7 @@ body[data-theme=dark] .header-global-search__hit.is-active {
 .modal-content .modal-body .filter-section .filter-range .range-input {
   width: 100%;
   height: 0.375rem;
-  -moz-appearance: none;
-       appearance: none;
+  appearance: none;
   -webkit-appearance: none;
   background: rgba(97, 160, 57, 0.15);
   outline: none;
@@ -1098,7 +1081,6 @@ body[data-theme=dark] .header-global-search__hit.is-active {
   background: #61A039;
   border-radius: 50%;
   cursor: pointer;
-  -webkit-transition: all 0.2s ease;
   transition: all 0.2s ease;
 }
 .modal-content .modal-body .filter-section .filter-range .range-input::-webkit-slider-thumb:hover {
@@ -1569,9 +1551,7 @@ body[data-theme=dark] .dropdown-menu .dropdown-header {
 }
 
 .checkbox-item {
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
 }
 
 .checkbox-item input {
@@ -1603,8 +1583,7 @@ select.create-task-select {
   width: 100%;
   max-width: 100%;
   cursor: pointer;
-  -moz-appearance: none;
-       appearance: none;
+  appearance: none;
   -webkit-appearance: none;
   accent-color: #61A039;
   padding: 0.25rem 0.75rem;
@@ -1624,9 +1603,6 @@ select.create-task-select:focus {
   outline: none;
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.4);
-}
-select.create-task-select::-moz-placeholder {
-  color: rgba(45, 50, 41, 0.5);
 }
 select.create-task-select::placeholder {
   color: rgba(45, 50, 41, 0.5);
@@ -1653,9 +1629,6 @@ body[data-theme=dark] select.create-task-select:hover {
 body[data-theme=dark] select.create-task-select:focus {
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.35);
-}
-body[data-theme=dark] select.create-task-select::-moz-placeholder {
-  color: rgba(250, 253, 247, 0.45);
 }
 body[data-theme=dark] select.create-task-select::placeholder {
   color: rgba(250, 253, 247, 0.45);
@@ -1699,9 +1672,6 @@ select.tp-field-plain:focus {
   background-color: rgba(97, 160, 57, 0.16);
   box-shadow: none;
 }
-input.tp-field-plain::-moz-placeholder, textarea.tp-field-plain::-moz-placeholder, select.tp-field-plain::-moz-placeholder {
-  color: rgba(45, 50, 41, 0.5);
-}
 input.tp-field-plain::placeholder,
 textarea.tp-field-plain::placeholder,
 select.tp-field-plain::placeholder {
@@ -1725,9 +1695,6 @@ body[data-theme=dark] select.tp-field-plain:focus {
   background-color: rgba(97, 160, 57, 0.2);
   box-shadow: none;
 }
-body[data-theme=dark] input.tp-field-plain::-moz-placeholder, body[data-theme=dark] textarea.tp-field-plain::-moz-placeholder, body[data-theme=dark] select.tp-field-plain::-moz-placeholder {
-  color: rgba(250, 253, 247, 0.45);
-}
 body[data-theme=dark] input.tp-field-plain::placeholder,
 body[data-theme=dark] textarea.tp-field-plain::placeholder,
 body[data-theme=dark] select.tp-field-plain::placeholder {
@@ -1736,8 +1703,7 @@ body[data-theme=dark] select.tp-field-plain::placeholder {
 
 select.tp-field-plain {
   cursor: pointer;
-  -moz-appearance: none;
-       appearance: none;
+  appearance: none;
   -webkit-appearance: none;
   padding-right: calc(0.75rem + 0.625rem + 0.375rem);
   background-image: url("/static/source/icons/arrow_dark_cropped.svg");
@@ -1797,8 +1763,7 @@ body[data-theme=dark] select.tp-field-plain {
   width: 100%;
   max-width: 100%;
   cursor: pointer;
-  -moz-appearance: none;
-       appearance: none;
+  appearance: none;
   -webkit-appearance: none;
   accent-color: #61A039;
   padding: 0.25rem 0.75rem;
@@ -1818,9 +1783,6 @@ body[data-theme=dark] select.tp-field-plain {
   outline: none;
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.4);
-}
-.tp-date-picker .tp-date-picker__selects .tp-select__trigger::-moz-placeholder {
-  color: rgba(45, 50, 41, 0.5);
 }
 .tp-date-picker .tp-date-picker__selects .tp-select__trigger::placeholder {
   color: rgba(45, 50, 41, 0.5);
@@ -2057,9 +2019,6 @@ body[data-theme=dark] .tp-date-picker .tp-date-picker__selects .tp-select__trigg
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.35);
 }
-body[data-theme=dark] .tp-date-picker .tp-date-picker__selects .tp-select__trigger::-moz-placeholder {
-  color: rgba(250, 253, 247, 0.45);
-}
 body[data-theme=dark] .tp-date-picker .tp-date-picker__selects .tp-select__trigger::placeholder {
   color: rgba(250, 253, 247, 0.45);
 }
@@ -2255,8 +2214,7 @@ body[data-theme=dark] .tp-dropdown-panel::-webkit-scrollbar-thumb:hover {
   width: 100%;
   max-width: 100%;
   cursor: pointer;
-  -moz-appearance: none;
-       appearance: none;
+  appearance: none;
   -webkit-appearance: none;
   accent-color: #61A039;
   padding: 0.25rem 0.75rem;
@@ -2276,9 +2234,6 @@ body[data-theme=dark] .tp-dropdown-panel::-webkit-scrollbar-thumb:hover {
   outline: none;
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.4);
-}
-.tp-select__trigger::-moz-placeholder {
-  color: rgba(45, 50, 41, 0.5);
 }
 .tp-select__trigger::placeholder {
   color: rgba(45, 50, 41, 0.5);
@@ -2313,9 +2268,6 @@ body[data-theme=dark] .tp-select__trigger:hover {
 body[data-theme=dark] .tp-select__trigger:focus {
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.35);
-}
-body[data-theme=dark] .tp-select__trigger::-moz-placeholder {
-  color: rgba(250, 253, 247, 0.45);
 }
 body[data-theme=dark] .tp-select__trigger::placeholder {
   color: rgba(250, 253, 247, 0.45);
@@ -2503,8 +2455,7 @@ body[data-theme=dark] .modal-content.create-task-modal .create-task-deps-suggest
 .create-task-selected-file__thumb {
   width: 58px;
   height: 42px;
-  -o-object-fit: cover;
-     object-fit: cover;
+  object-fit: cover;
   border-radius: 6px;
   border: 0.0625rem solid rgba(97, 160, 57, 0.28);
 }
@@ -2544,6 +2495,25 @@ body[data-theme=dark] .create-task-selected-file .create-task-selected-file__thu
   border-color: rgba(250, 253, 247, 0.35);
 }
 
+.modal-content.create-subtask-modal {
+  width: min(420px, 92vw);
+  height: auto;
+  max-height: none;
+  min-height: 0;
+}
+.modal-content.create-subtask-modal .create-subtask-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.modal-content.create-subtask-modal .create-subtask-modal__parent {
+  margin: 0;
+  word-break: break-word;
+}
+.modal-content.create-subtask-modal .create-subtask-modal__field {
+  margin: 0;
+}
+
 .modal-content.profile-modal {
   width: 44vw;
   height: 92vh;
@@ -2571,8 +2541,7 @@ body[data-theme=dark] .create-task-selected-file .create-task-selected-file__thu
   width: 5.5rem;
   height: 5.5rem;
   border-radius: 50%;
-  -o-object-fit: cover;
-     object-fit: cover;
+  object-fit: cover;
   flex-shrink: 0;
   border: 0.0625rem solid rgba(97, 160, 57, 0.4);
 }
@@ -2685,9 +2654,7 @@ body[data-theme=dark] .create-task-selected-file .create-task-selected-file__thu
 }
 .modal-content.profile-modal .profile-modal__exit-dot {
   color: rgba(45, 50, 41, 0.45);
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
 }
 .modal-content.profile-modal .profile-modal__exit-answer {
   margin: 0;
@@ -2992,9 +2959,6 @@ body[data-theme=dark] .modal-content.profile-modal .profile-modal__settings-hint
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.4);
 }
-.modal-content.settings-modal .settings-modal__section-card input.tp-field-plain::-moz-placeholder {
-  color: rgba(45, 50, 41, 0.5);
-}
 .modal-content.settings-modal .settings-modal__section-card input.tp-field-plain::placeholder {
   color: rgba(45, 50, 41, 0.5);
 }
@@ -3176,9 +3140,6 @@ body[data-theme=dark] .modal-content.settings-modal .settings-modal__integration
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.35);
 }
-body[data-theme=dark] .modal-content.settings-modal .settings-modal__section-card input.tp-field-plain::-moz-placeholder, body[data-theme=dark] .modal-content.settings-modal .settings-modal__session-row input.tp-field-plain::-moz-placeholder, body[data-theme=dark] .modal-content.settings-modal .settings-modal__integration-card input.tp-field-plain::-moz-placeholder {
-  color: rgba(250, 253, 247, 0.45);
-}
 body[data-theme=dark] .modal-content.settings-modal .settings-modal__section-card input.tp-field-plain::placeholder,
 body[data-theme=dark] .modal-content.settings-modal .settings-modal__session-row input.tp-field-plain::placeholder,
 body[data-theme=dark] .modal-content.settings-modal .settings-modal__integration-card input.tp-field-plain::placeholder {
@@ -3269,9 +3230,6 @@ body[data-theme=dark] .modal-content.settings-modal .settings-modal__danger-zone
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.4);
 }
-.projects-search input::-moz-placeholder {
-  color: rgba(45, 50, 41, 0.5);
-}
 .projects-search input::placeholder {
   color: rgba(45, 50, 41, 0.5);
 }
@@ -3292,9 +3250,6 @@ body[data-theme=dark] .projects-search input:hover {
 body[data-theme=dark] .projects-search input:focus {
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.35);
-}
-body[data-theme=dark] .projects-search input::-moz-placeholder {
-  color: rgba(250, 253, 247, 0.45);
 }
 body[data-theme=dark] .projects-search input::placeholder {
   color: rgba(250, 253, 247, 0.45);
@@ -3652,8 +3607,7 @@ body[data-theme=dark] .team-page__title-input:focus {
   height: 3.25rem;
   border-radius: 50%;
   border-radius: 0.8rem;
-  -o-object-fit: cover;
-     object-fit: cover;
+  object-fit: cover;
   flex-shrink: 0;
   border: 0.0625rem solid rgba(97, 160, 57, 0.28);
 }
@@ -4407,8 +4361,7 @@ body[data-theme=dark] .chartjs-tooltip .chartjs-tooltip-footer {
   }
   .analytics-card,
   .analytics-kpi {
-    -moz-column-break-inside: avoid;
-         break-inside: avoid;
+    break-inside: avoid;
   }
   .analytics-chart-wrap {
     height: 11rem;
@@ -4641,9 +4594,6 @@ body[data-theme=dark] .help-ticket-form .tp-field-plain:hover {
 body[data-theme=dark] .help-ticket-form .tp-field-plain:focus {
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.35);
-}
-body[data-theme=dark] .help-ticket-form .tp-field-plain::-moz-placeholder {
-  color: rgba(250, 253, 247, 0.45);
 }
 body[data-theme=dark] .help-ticket-form .tp-field-plain::placeholder {
   color: rgba(250, 253, 247, 0.45);
@@ -4909,7 +4859,6 @@ body[data-theme=dark] .help-search-hit {
   }
 }
 .events-page__calendar-card {
-  width: -moz-fit-content;
   width: fit-content;
   max-width: 100%;
   padding: 1.125rem;
@@ -5050,7 +4999,6 @@ body[data-theme=dark] .help-search-hit {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem;
-  width: -moz-fit-content;
   width: fit-content;
   max-width: 100%;
 }
@@ -5146,8 +5094,7 @@ body[data-theme=dark] .help-search-hit {
 .index-event-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) max-content;
-  -moz-column-gap: 1.125rem;
-       column-gap: 1.125rem;
+  column-gap: 1.125rem;
   align-items: center;
   width: 100%;
   padding: 0.25rem 0;
@@ -5596,7 +5543,6 @@ body[data-theme=dark] .modal-content.event-detail-modal .events-detail-modal__le
   position: relative;
   margin: 0;
   align-self: flex-start;
-  width: -moz-fit-content;
   width: fit-content;
   max-width: 100%;
 }
@@ -5639,13 +5585,11 @@ body[data-theme=dark] .modal-content.event-detail-modal .events-detail-modal__le
 }
 
 .auth-motif--board {
-  width: -moz-fit-content;
   width: fit-content;
   max-width: 100%;
 }
 
 .auth-motif--web {
-  width: -moz-fit-content;
   width: fit-content;
   max-width: 19rem;
 }
@@ -6259,9 +6203,6 @@ body[data-theme=dark] .modal-content.event-detail-modal .events-detail-modal__le
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.4);
 }
-.modal-content .modal-body input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger)::-moz-placeholder, .modal-content .modal-body textarea:not(.create-task-desc)::-moz-placeholder, .modal-content .modal-body .filter-input::-moz-placeholder, .modal-content .modal-body input.tp-field-plain::-moz-placeholder, .modal-content .modal-body textarea.tp-field-plain::-moz-placeholder, .modal-content .modal-body input.team-add-member-modal__email::-moz-placeholder, .modal-content .form-auth input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger)::-moz-placeholder, .modal-content .form-auth textarea:not(.create-task-desc)::-moz-placeholder, .modal-content .form-auth .filter-input::-moz-placeholder, .modal-content .form-auth input.tp-field-plain::-moz-placeholder, .modal-content .form-auth textarea.tp-field-plain::-moz-placeholder, .modal-content .form-auth input.team-add-member-modal__email::-moz-placeholder {
-  color: rgba(45, 50, 41, 0.5);
-}
 .modal-content .modal-body input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger)::placeholder,
 .modal-content .modal-body textarea:not(.create-task-desc)::placeholder,
 .modal-content .modal-body .filter-input::placeholder,
@@ -6307,9 +6248,6 @@ body[data-theme=dark] .modal-content.event-detail-modal .events-detail-modal__le
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.4);
 }
-.modal-content .modal-body textarea.create-task-desc::-moz-placeholder, .modal-content .modal-body textarea.profile-modal__bio::-moz-placeholder, .modal-content .form-auth textarea.create-task-desc::-moz-placeholder, .modal-content .form-auth textarea.profile-modal__bio::-moz-placeholder {
-  color: rgba(45, 50, 41, 0.5);
-}
 .modal-content .modal-body textarea.create-task-desc::placeholder,
 .modal-content .modal-body textarea.profile-modal__bio::placeholder,
 .modal-content .form-auth textarea.create-task-desc::placeholder,
@@ -6340,8 +6278,7 @@ body[data-theme=dark] .modal-content.event-detail-modal .events-detail-modal__le
   width: 100%;
   max-width: 100%;
   cursor: pointer;
-  -moz-appearance: none;
-       appearance: none;
+  appearance: none;
   -webkit-appearance: none;
   accent-color: #61A039;
   padding: 0.25rem 0.75rem;
@@ -6371,9 +6308,6 @@ body[data-theme=dark] .modal-content.event-detail-modal .events-detail-modal__le
   outline: none;
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.4);
-}
-.modal-content .modal-body .tp-select__trigger::-moz-placeholder, .modal-content .modal-body select.create-task-select:not(.tp-select__native)::-moz-placeholder, .modal-content .modal-body select.tp-field-plain.create-task-select:not(.tp-select__native)::-moz-placeholder, .modal-content .form-auth .tp-select__trigger::-moz-placeholder, .modal-content .form-auth select.create-task-select:not(.tp-select__native)::-moz-placeholder, .modal-content .form-auth select.tp-field-plain.create-task-select:not(.tp-select__native)::-moz-placeholder {
-  color: rgba(45, 50, 41, 0.5);
 }
 .modal-content .modal-body .tp-select__trigger::placeholder,
 .modal-content .modal-body select.create-task-select:not(.tp-select__native)::placeholder,
@@ -6425,8 +6359,7 @@ body[data-theme=dark] .modal-content.event-detail-modal .events-detail-modal__le
   width: 100%;
   max-width: 100%;
   cursor: pointer;
-  -moz-appearance: none;
-       appearance: none;
+  appearance: none;
   -webkit-appearance: none;
   accent-color: #61A039;
   padding: 0.25rem 0.75rem;
@@ -6448,9 +6381,6 @@ body[data-theme=dark] .modal-content.event-detail-modal .events-detail-modal__le
   outline: none;
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.4);
-}
-.modal-content .modal-body select.tp-field-plain:not(.create-task-select)::-moz-placeholder, .modal-content .form-auth select.tp-field-plain:not(.create-task-select)::-moz-placeholder {
-  color: rgba(45, 50, 41, 0.5);
 }
 .modal-content .modal-body select.tp-field-plain:not(.create-task-select)::placeholder,
 .modal-content .form-auth select.tp-field-plain:not(.create-task-select)::placeholder {
@@ -6493,9 +6423,6 @@ body[data-theme=dark] .modal-content.event-detail-modal .events-detail-modal__le
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.4);
 }
-.modal-content .tp-combobox__control::-moz-placeholder {
-  color: rgba(45, 50, 41, 0.5);
-}
 .modal-content .tp-combobox__control::placeholder {
   color: rgba(45, 50, 41, 0.5);
 }
@@ -6524,9 +6451,6 @@ body[data-theme=dark] .modal-content.event-detail-modal .events-detail-modal__le
   border: none !important;
   background: transparent !important;
   box-shadow: none !important;
-}
-.modal-content .tp-combobox__control input.tp-combobox__input::-moz-placeholder {
-  color: rgba(45, 50, 41, 0.5);
 }
 .modal-content .tp-combobox__control input.tp-combobox__input::placeholder {
   color: rgba(45, 50, 41, 0.5);
@@ -6566,9 +6490,6 @@ body[data-theme=dark] .modal-content.event-detail-modal .events-detail-modal__le
   outline: none;
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.4);
-}
-.modal-content .tp-date-field.search-panel::-moz-placeholder {
-  color: rgba(45, 50, 41, 0.5);
 }
 .modal-content .tp-date-field.search-panel::placeholder {
   color: rgba(45, 50, 41, 0.5);
@@ -6644,9 +6565,6 @@ body[data-theme=dark] .modal-content .form-auth input.team-add-member-modal__ema
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.35);
 }
-body[data-theme=dark] .modal-content .modal-body input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger)::-moz-placeholder, body[data-theme=dark] .modal-content .modal-body textarea:not(.create-task-desc)::-moz-placeholder, body[data-theme=dark] .modal-content .modal-body .filter-input::-moz-placeholder, body[data-theme=dark] .modal-content .modal-body input.tp-field-plain::-moz-placeholder, body[data-theme=dark] .modal-content .modal-body textarea.tp-field-plain::-moz-placeholder, body[data-theme=dark] .modal-content .modal-body input.team-add-member-modal__email::-moz-placeholder, body[data-theme=dark] .modal-content .form-auth input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger)::-moz-placeholder, body[data-theme=dark] .modal-content .form-auth textarea:not(.create-task-desc)::-moz-placeholder, body[data-theme=dark] .modal-content .form-auth .filter-input::-moz-placeholder, body[data-theme=dark] .modal-content .form-auth input.tp-field-plain::-moz-placeholder, body[data-theme=dark] .modal-content .form-auth textarea.tp-field-plain::-moz-placeholder, body[data-theme=dark] .modal-content .form-auth input.team-add-member-modal__email::-moz-placeholder {
-  color: rgba(250, 253, 247, 0.45);
-}
 body[data-theme=dark] .modal-content .modal-body input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]):not(.tp-combobox__input):not(.tp-select__trigger)::placeholder,
 body[data-theme=dark] .modal-content .modal-body textarea:not(.create-task-desc)::placeholder,
 body[data-theme=dark] .modal-content .modal-body .filter-input::placeholder,
@@ -6682,9 +6600,6 @@ body[data-theme=dark] .modal-content .form-auth textarea.create-task-desc:focus,
 body[data-theme=dark] .modal-content .form-auth textarea.profile-modal__bio:focus {
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.35);
-}
-body[data-theme=dark] .modal-content .modal-body textarea.create-task-desc::-moz-placeholder, body[data-theme=dark] .modal-content .modal-body textarea.profile-modal__bio::-moz-placeholder, body[data-theme=dark] .modal-content .form-auth textarea.create-task-desc::-moz-placeholder, body[data-theme=dark] .modal-content .form-auth textarea.profile-modal__bio::-moz-placeholder {
-  color: rgba(250, 253, 247, 0.45);
 }
 body[data-theme=dark] .modal-content .modal-body textarea.create-task-desc::placeholder,
 body[data-theme=dark] .modal-content .modal-body textarea.profile-modal__bio::placeholder,
@@ -6725,9 +6640,6 @@ body[data-theme=dark] .modal-content .form-auth select.tp-field-plain.create-tas
 body[data-theme=dark] .modal-content .form-auth select.tp-field-plain:not(.create-task-select):focus {
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.35);
-}
-body[data-theme=dark] .modal-content .modal-body .tp-select__trigger::-moz-placeholder, body[data-theme=dark] .modal-content .modal-body select.create-task-select:not(.tp-select__native)::-moz-placeholder, body[data-theme=dark] .modal-content .modal-body select.tp-field-plain.create-task-select:not(.tp-select__native)::-moz-placeholder, body[data-theme=dark] .modal-content .modal-body select.tp-field-plain:not(.create-task-select)::-moz-placeholder, body[data-theme=dark] .modal-content .form-auth .tp-select__trigger::-moz-placeholder, body[data-theme=dark] .modal-content .form-auth select.create-task-select:not(.tp-select__native)::-moz-placeholder, body[data-theme=dark] .modal-content .form-auth select.tp-field-plain.create-task-select:not(.tp-select__native)::-moz-placeholder, body[data-theme=dark] .modal-content .form-auth select.tp-field-plain:not(.create-task-select)::-moz-placeholder {
-  color: rgba(250, 253, 247, 0.45);
 }
 body[data-theme=dark] .modal-content .modal-body .tp-select__trigger::placeholder,
 body[data-theme=dark] .modal-content .modal-body select.create-task-select:not(.tp-select__native)::placeholder,
@@ -6777,13 +6689,7 @@ body[data-theme=dark] .modal-content .tp-combobox__control:focus {
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.35);
 }
-body[data-theme=dark] .modal-content .tp-combobox__control::-moz-placeholder {
-  color: rgba(250, 253, 247, 0.45);
-}
 body[data-theme=dark] .modal-content .tp-combobox__control::placeholder {
-  color: rgba(250, 253, 247, 0.45);
-}
-body[data-theme=dark] .modal-content .tp-combobox__control input.tp-combobox__input::-moz-placeholder {
   color: rgba(250, 253, 247, 0.45);
 }
 body[data-theme=dark] .modal-content .tp-combobox__control input.tp-combobox__input::placeholder {
@@ -6801,9 +6707,6 @@ body[data-theme=dark] .modal-content .tp-date-field.search-panel:hover {
 body[data-theme=dark] .modal-content .tp-date-field.search-panel:focus {
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.35);
-}
-body[data-theme=dark] .modal-content .tp-date-field.search-panel::-moz-placeholder {
-  color: rgba(250, 253, 247, 0.45);
 }
 body[data-theme=dark] .modal-content .tp-date-field.search-panel::placeholder {
   color: rgba(250, 253, 247, 0.45);
@@ -7034,19 +6937,14 @@ body.tp-no-enter .app-container {
 }
 
 .board-list .cards {
-  -moz-column-count: 2;
-       column-count: 2;
-  -moz-column-gap: 2.25rem;
-       column-gap: 2.25rem;
+  column-count: 2;
+  column-gap: 2.25rem;
   flex: 1;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
 }
 .board-list .cards.dragging-active:not(.scrum-board-view):not(.scrum-tables-view) {
   gap: 2.25rem;
-  -moz-column-count: unset;
-       column-count: unset;
+  column-count: unset;
   display: flex;
   flex-wrap: wrap;
 }
@@ -7055,8 +6953,7 @@ body.tp-no-enter .app-container {
 }
 .board-list .tables-view.dragging-active:not(.scrum-board-view):not(.scrum-tables-view),
 .board-list .board-view.dragging-active:not(.scrum-board-view):not(.scrum-tables-view) {
-  -moz-column-count: 1;
-       column-count: 1;
+  column-count: 1;
 }
 .board-list .tables-view.dragging-active:not(.scrum-board-view):not(.scrum-tables-view) .card,
 .board-list .board-view.dragging-active:not(.scrum-board-view):not(.scrum-tables-view) .card {
@@ -7069,14 +6966,11 @@ body.tp-no-enter .app-container {
   width: 100%;
 }
 .board-list .card {
-  -moz-column-break-inside: avoid;
-       break-inside: avoid;
+  break-inside: avoid;
   margin-bottom: 2.25rem;
   width: 100%;
   transition: transform 0.2s ease;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
 }
 .board-list .card:active {
   cursor: grabbing;
@@ -7121,9 +7015,7 @@ body.tp-no-enter .app-container {
   gap: 0.5625rem;
   cursor: grab;
   transition: all 0.2s ease;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
   position: relative;
 }
 .board-list .card .list .item:active {
@@ -7211,22 +7103,18 @@ body.tp-no-enter .app-container {
 }
 
 .board-list .cards.tables-view {
-  -moz-column-count: 1 !important;
-       column-count: 1 !important;
+  column-count: 1 !important;
   display: block;
 }
 
 .board-list .cards.timeline-view {
-  -moz-column-count: 1 !important;
-       column-count: 1 !important;
+  column-count: 1 !important;
   display: block;
 }
 
 .board-kanban .cards {
-  -moz-column-count: 1 !important;
-       column-count: 1 !important;
-  -moz-column-gap: 0;
-       column-gap: 0;
+  column-count: 1 !important;
+  column-gap: 0;
 }
 
 .kanban-board-card,
@@ -7261,7 +7149,6 @@ body.tp-no-enter .app-container {
 .kanban-board-card[data-kanban-scroll=true] .kanban-stages-row,
 .kanban-archive-board[data-kanban-scroll=true] .kanban-columns-head,
 .kanban-archive-board[data-kanban-scroll=true] .kanban-stages-row {
-  width: -moz-max-content;
   width: max-content;
   gap: 0.75rem;
 }
@@ -7271,7 +7158,6 @@ body.tp-no-enter .app-container {
 }
 .kanban-board-card[data-kanban-scroll=true] .kanban-priority-section,
 .kanban-archive-board[data-kanban-scroll=true] .kanban-priority-section {
-  width: -moz-fit-content;
   width: fit-content;
   margin-right: 0.0625rem;
 }
@@ -7846,6 +7732,57 @@ body[data-theme=dark] .kanban-stage-group.sortable-fallback .kanban-stage-sep-li
   margin-bottom: 0.375rem;
 }
 
+.kanban-task-item.task-card--subtask-addable,
+.board-list .card .list .item.task-card--subtask-addable,
+.board-list .timeline-task-card.task-card--subtask-addable {
+  position: relative;
+}
+
+.task-subtask-add-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 1.125rem;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 0.3rem;
+  background: rgba(97, 160, 57, 0.12);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 5;
+  line-height: 0;
+}
+.task-subtask-add-btn img {
+  width: 10px;
+  height: 10px;
+  display: block;
+  pointer-events: none;
+}
+
+.kanban-task-item.task-card--subtask-addable:hover .task-subtask-add-btn,
+.kanban-task-item.task-card--subtask-addable:focus-within .task-subtask-add-btn,
+.board-list .card .list .item.task-card--subtask-addable:hover .task-subtask-add-btn,
+.board-list .card .list .item.task-card--subtask-addable:focus-within .task-subtask-add-btn,
+.board-list .timeline-task-card.task-card--subtask-addable:hover .task-subtask-add-btn,
+.board-list .timeline-task-card.task-card--subtask-addable:focus-within .task-subtask-add-btn,
+.task-subtask-add-btn:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+body[data-theme=dark] .task-subtask-add-btn {
+  background: rgba(97, 160, 57, 0.28);
+}
+body[data-theme=dark] .task-subtask-add-btn img {
+  filter: brightness(0) invert(1);
+}
+
 .kanban-task-item.sortable-fallback .tag .deadline.dependency-chip::before,
 .kanban-board-card .kanban-stage-col .tag .deadline.dependency-chip::before,
 .kanban-archive-board .kanban-stage-col .tag .deadline.dependency-chip::before,
@@ -7906,8 +7843,7 @@ body[data-theme=dark] .scrum-backlog-panel .tag .deadline {
 
 .board-list .cards.reports-view,
 .board-list .cards.archive-view {
-  -moz-column-count: 1 !important;
-       column-count: 1 !important;
+  column-count: 1 !important;
   display: block;
   width: 100%;
 }
@@ -8153,8 +8089,7 @@ body[data-theme=dark] .scrum-backlog-panel .tag .deadline {
   width: 1.125rem;
   height: 1.125rem;
   border-radius: 50%;
-  -o-object-fit: cover;
-     object-fit: cover;
+  object-fit: cover;
 }
 body[data-theme=dark] .board-timeline-card .timeline-task-card .checkbox-item {
   color: #fafdf7;
@@ -8504,7 +8439,6 @@ body[data-theme=dark] .kanban-archive-board .kanban-stage-table {
   align-items: flex-start;
   gap: 1.5rem !important;
   flex-wrap: nowrap;
-  width: -moz-max-content;
   width: max-content;
   min-width: 100%;
 }
@@ -8546,7 +8480,6 @@ body[data-theme=dark] .kanban-archive-board .kanban-stage-table {
   flex-direction: column;
   align-items: flex-start;
   gap: 0.75rem;
-  width: -moz-fit-content;
   width: fit-content;
   min-width: 0;
   box-sizing: border-box;
@@ -8651,14 +8584,12 @@ body[data-theme=dark] .scrum-backlog-panel .kanban-task-item .subtasks .checkbox
 }
 
 .scrum-board-view .scrum-sprint-board .board-card-collapsible {
-  width: -moz-fit-content;
   width: fit-content;
   min-width: 0;
   align-items: flex-start;
 }
 
 .scrum-board-view .kanban-board-card.scrum-sprint-board {
-  width: -moz-fit-content;
   width: fit-content;
   flex: 0 0 auto;
   min-width: 0;
@@ -8675,7 +8606,6 @@ body[data-theme=dark] .scrum-backlog-panel .kanban-task-item .subtasks .checkbox
 }
 
 .scrum-sprint-board .kanban-priority-body {
-  width: -moz-fit-content;
   width: fit-content;
   box-sizing: border-box;
 }
@@ -8686,7 +8616,6 @@ body[data-theme=dark] .scrum-backlog-panel .kanban-task-item .subtasks .checkbox
 
 .scrum-sprint-board .kanban-columns-head,
 .scrum-sprint-board .kanban-stages-row {
-  width: -moz-fit-content;
   width: fit-content;
   gap: 0.75rem;
   box-sizing: border-box;
@@ -8695,7 +8624,6 @@ body[data-theme=dark] .scrum-backlog-panel .kanban-task-item .subtasks .checkbox
   flex: 0 0 22vw;
 }
 .scrum-sprint-board .kanban-priority-section {
-  width: -moz-fit-content;
   width: fit-content;
   margin-right: 0.0625rem;
   box-sizing: border-box;
@@ -8727,7 +8655,6 @@ body[data-theme=dark] .scrum-backlog-panel .scrum-backlog-accordion {
 }
 
 .task-detail-sheet.modal-content.create-task-modal {
-  width: -moz-fit-content;
   width: fit-content;
   max-width: 98vw;
   height: auto;
@@ -8867,9 +8794,6 @@ body[data-theme=dark] .scrum-backlog-panel .scrum-backlog-accordion {
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.4);
 }
-.task-detail-sheet.modal-content.create-task-modal textarea.create-task-desc::-moz-placeholder {
-  color: rgba(45, 50, 41, 0.5);
-}
 .task-detail-sheet.modal-content.create-task-modal textarea.create-task-desc::placeholder {
   color: rgba(45, 50, 41, 0.5);
 }
@@ -8893,8 +8817,7 @@ body[data-theme=dark] .scrum-backlog-panel .scrum-backlog-accordion {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  -moz-column-gap: 0.375rem;
-       column-gap: 0.375rem;
+  column-gap: 0.375rem;
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -8946,9 +8869,6 @@ body[data-theme=dark] .task-detail-sheet.modal-content.create-task-modal textare
 body[data-theme=dark] .task-detail-sheet.modal-content.create-task-modal textarea.create-task-desc:focus {
   border-color: #61A039;
   box-shadow: 0 0 0 0.125rem rgba(97, 160, 57, 0.35);
-}
-body[data-theme=dark] .task-detail-sheet.modal-content.create-task-modal textarea.create-task-desc::-moz-placeholder {
-  color: rgba(250, 253, 247, 0.45);
 }
 body[data-theme=dark] .task-detail-sheet.modal-content.create-task-modal textarea.create-task-desc::placeholder {
   color: rgba(250, 253, 247, 0.45);
@@ -9153,7 +9073,6 @@ body[data-theme=dark] {
 .app-container .column {
   display: flex;
   flex-direction: column;
-  height: -moz-fit-content;
   height: fit-content;
   padding-bottom: 2.25rem;
 }
@@ -9425,8 +9344,7 @@ body[data-theme=dark] #indexTeamMembers {
 .events-grid .grid-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) max-content;
-  -moz-column-gap: 1.125rem;
-       column-gap: 1.125rem;
+  column-gap: 1.125rem;
   align-items: center;
   width: 100%;
 }
@@ -10165,7 +10083,6 @@ aside .submenu .events-grid .col-event .nav-link,
   display: flex;
   gap: 1.125rem;
   padding: 0.375rem 1.125rem;
-  width: -moz-fit-content;
   width: fit-content;
 }
 
@@ -10194,7 +10111,6 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   display: grid;
   grid-template-columns: auto 1fr auto auto auto auto auto auto auto auto;
   gap: 0.75rem;
-  width: -moz-max-content;
   width: max-content;
   min-width: 100%;
   overflow-x: auto;
@@ -10215,9 +10131,7 @@ body[data-theme=dark] .tabs-buttons > .button-basic[data-tab].active {
   align-items: center;
   gap: 0.25rem;
   cursor: pointer;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-          user-select: none;
+  user-select: none;
 }
 .tasks-grid .grid-header > div .header-title {
   display: inline-block;
@@ -10379,7 +10293,6 @@ body[data-theme=dark] .deadline {
 .tp-table-row-fallback .tasks-grid {
   display: grid;
   gap: 0.75rem;
-  width: -moz-max-content;
   width: max-content;
   min-width: 100%;
   overflow-x: auto;
@@ -10475,4 +10388,4 @@ body[data-theme=dark] .toast-notification {
     opacity: 1;
     transform: translateY(0);
   }
-}/*# sourceMappingURL=style.css.map */
+}

@@ -1227,6 +1227,10 @@ function createTimelineTaskCard(task, boardIndex) {
         card.appendChild(tagBlock);
     }
 
+    if (typeof window.tpAttachSubtaskAddButton === 'function') {
+        window.tpAttachSubtaskAddButton(card, task);
+    }
+
     return card;
 }
 
@@ -2604,6 +2608,10 @@ function createTaskItem(task, boardIndex, taskIndex) {
     const tagBlock = createTagBlock(task);
     if (tagBlock) {
         item.appendChild(tagBlock);
+    }
+
+    if (typeof window.tpAttachSubtaskAddButton === 'function') {
+        window.tpAttachSubtaskAddButton(item, task);
     }
 
     return item;
