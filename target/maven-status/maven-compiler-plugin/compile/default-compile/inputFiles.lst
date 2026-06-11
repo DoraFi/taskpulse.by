@@ -8,6 +8,7 @@ D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\auth\JwtServi
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\auth\LoginAudit.java
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\auth\SecurityConfig.java
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\config\CustomErrorAttributes.java
+D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\config\OpenApiConfig.java
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\config\WebConfig.java
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\domain\Board.java
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\domain\Project.java
@@ -30,6 +31,8 @@ D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\web\api\Conte
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\web\api\GlobalSearchService.java
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\web\api\HelpCenterService.java
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\web\api\LegacyDataApiController.java
+D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\web\api\StoredFileService.java
+D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\web\api\SupportAttachmentGcService.java
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\web\ContextPageGate.java
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\web\PageController.java
 D:\4 курс\Диплом\taskpulse.by\src\main\java\by\taskpulse\web\TeamContextHolder.java

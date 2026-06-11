@@ -145,17 +145,21 @@ $task-detail-col-side: 20vw;
     }
 
     .task-detail-static__dates .filter-date.task-detail-static__filter-date {
-        display: flex;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
         align-items: center;
-        gap: $space-8;
+        column-gap: $space-8;
         width: 100%;
         max-width: 100%;
-        flex-wrap: nowrap;
+        min-width: 0;
+        box-sizing: border-box;
 
         .filter-input[type='date'] {
-            flex: 0 1 10rem;
+            width: 100%;
             min-width: 0;
+            max-width: 100%;
             min-height: 2.75rem;
+            box-sizing: border-box;
             cursor: pointer;
 
             &::-webkit-calendar-picker-indicator {
@@ -169,7 +173,27 @@ $task-detail-col-side: 20vw;
         }
 
         span {
-            flex-shrink: 0;
+            justify-self: center;
+        }
+    }
+
+    &.modal-content.create-task-modal .create-task-attachments {
+        padding: $space-16;
+        background: rgba($green, 0.04);
+
+        &--drag {
+            background: rgba($green, 0.12);
+        }
+    }
+}
+
+body[data-theme='dark'] .task-detail-sheet.modal-content.create-task-modal {
+    .create-task-attachments {
+        background: $black;
+        border: $space-1 solid rgba($light-light-green, 0.35);
+
+        &--drag {
+            background: rgba($green, 0.12);
         }
     }
 }

@@ -36,6 +36,9 @@ public class SecurityConfig {
                                 "/error",
                                 "/favicon.ico",
                                 "/static/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
                                 "/templates/pages/auth_*.html",
                                 "/templates/pages/onboarding_*.html"
                         ).permitAll()

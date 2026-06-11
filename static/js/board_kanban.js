@@ -6,7 +6,7 @@
     let scrumDisplayBoardIds = null;
     let currentView = 'board';
     const KANBAN_VIEW_STORAGE_KEY = 'boardKanbanCurrentView';
-    const KANBAN_ALLOWED_VIEWS = new Set(['board', 'tables', 'timeline', 'reports', 'archive']);
+    const KANBAN_ALLOWED_VIEWS = new Set(['board', 'tables', 'timeline', 'archive']);
 
     const KANBAN_DATA_VERSION_KEY = 'kanbanDataVersion';
     const KANBAN_DATA_VERSION = '7';
@@ -939,7 +939,6 @@
         if (tab === 'board') currentView = 'board';
         else if (tab === 'tables') currentView = 'tables';
         else if (tab === 'timeline') currentView = 'timeline';
-        else if (tab === 'reports') currentView = 'reports';
         else if (tab === 'archive') currentView = 'archive';
         persistCurrentView();
         syncActiveViewButton();
@@ -1000,7 +999,6 @@
             else renderKanbanTablesView();
         }
         else if (currentView === 'timeline') renderKanbanTimelineView();
-        else if (currentView === 'reports') renderKanbanReportsView();
         else if (currentView === 'archive') {
             if (isScrumView()) renderScrumSprintHistoryView();
             else renderKanbanArchiveView();

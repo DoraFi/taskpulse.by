@@ -22,16 +22,20 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class HelpCenterService {
 
-    private static final Path SUPPORT_UPLOADS_ROOT = Path.of("static", "uploads", "help");
     private static final int MAX_FILES = 5;
     private static final long MAX_FILE_BYTES = 10L * 1024 * 1024;
+    private static final int SUPPORT_ATTACHMENT_RETENTION_DAYS = 180;
 
     private final JdbcTemplate jdbcTemplate;
     private final CurrentUserProvider currentUserProvider;
+    private final StoredFileService storedFileService;
 
-    public HelpCenterService(JdbcTemplate jdbcTemplate, CurrentUserProvider currentUserProvider) {
+    public HelpCenterService(JdbcTemplate jdbcTemplate,
+                             CurrentUserProvider currentUserProvider,
+                             StoredFileService storedFileService) {
         this.jdbcTemplate = jdbcTemplate;
         this.currentUserProvider = currentUserProvider;
+        this.storedFileService = storedFileService;
     }
 
     public Map<String, Object> supportInfo() {
@@ -406,24 +410,16 @@ public class HelpCenterService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Недопустимый тип файла: " + ext);
         }
 
-        String stored = UUID.randomUUID().toString().replace("-", "") + "_" + original;
-        String ym = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMM"));
-        Path dir = SUPPORT_UPLOADS_ROOT.resolve(ym);
-        Path out = dir.resolve(stored);
-        try {
-            Files.createDirectories(dir);
-            file.transferTo(out);
-        } catch (IOException ex) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Не удалось сохранить файл");
-        }
-
-        String fileUrl = "/static/uploads/help/" + ym + "/" + stored;
+        StoredFileService.StoredFile sf = storedFileService.storeOrReuse(file);
+        String fileUrl = sf.url();
         jdbcTemplate.update(
                 """
-                insert into help_support_attachment (ticket_id, file_name, file_url, content_type, file_size)
-                values (?, ?, ?, ?, ?)
+                insert into help_support_attachment
+                    (ticket_id, file_name, file_url, content_type, file_size, stored_file_id, expires_at)
+                values
+                    (?, ?, ?, ?, ?, ?, now() + (? * interval '1 day'))
                 """,
-                ticketId, original, fileUrl, file.getContentType(), file.getSize()
+                ticketId, original, fileUrl, file.getContentType(), file.getSize(), sf.id(), SUPPORT_ATTACHMENT_RETENTION_DAYS
         );
     }
 

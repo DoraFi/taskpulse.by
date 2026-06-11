@@ -166,7 +166,7 @@
         try {
             const stored = sessionStorage.getItem('tpActiveTeamBase');
             if (stored && /^\/o\/[^/]+\/t\/[^/]+$/.test(stored)) return `${stored}/api`;
-        } catch (_) { /* ignore */ }
+        } catch (_) {}
         return null;
     }
 
@@ -641,6 +641,7 @@
             incoming.forEach(f => map.set(`${f.name}|${f.size}|${f.lastModified}`, f));
             selectedFiles = Array.from(map.values());
             renderAttachmentHint();
+            fileInput.value = '';
         });
         attachZone?.addEventListener('dragover', e => {
             e.preventDefault();

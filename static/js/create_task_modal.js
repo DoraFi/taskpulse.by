@@ -149,7 +149,10 @@
             e.stopPropagation();
             fileInput.click();
         });
-        fileInput.addEventListener('change', () => setFiles(fileInput.files));
+        fileInput.addEventListener('change', () => {
+            setFiles(fileInput.files);
+            fileInput.value = '';
+        });
         zone?.addEventListener('click', e => e.stopPropagation());
         zone?.addEventListener('dragover', e => {
             e.preventDefault();

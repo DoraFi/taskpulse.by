@@ -66,7 +66,7 @@ public class PageController {
     }
 
     @GetMapping({"/auth/register", "/templates/pages/auth_register.html"})
-    public String authRegister() {
+    public String authRostostegister() {
         return "pages/auth_register";
     }
 

@@ -6,7 +6,7 @@ let teamMembers = [];
 let tableSortColumn = null;
 let tableSortDirection = 'asc';
 const BOARD_LIST_VIEW_STORAGE_KEY = 'boardListCurrentView';
-const BOARD_LIST_ALLOWED_VIEWS = new Set(['board', 'tables', 'timeline', 'reports', 'archive']);
+const BOARD_LIST_ALLOWED_VIEWS = new Set(['board', 'tables', 'timeline', 'archive']);
 
 function getApiBasePath() {
     const m = window.location.pathname.match(/^\/o\/([^/]+)\/t\/([^/]+)/);
@@ -328,7 +328,6 @@ function handleTabClick(e) {
     if (tab === 'board') currentView = 'board';
     else if (tab === 'tables') currentView = 'tables';
     else if (tab === 'timeline') currentView = 'timeline';
-    else if (tab === 'reports') currentView = 'reports';
     else if (tab === 'archive') currentView = 'archive';
     persistCurrentView();
     syncActiveViewButton();
@@ -340,7 +339,6 @@ function renderCurrentView() {
     if (currentView === 'board') renderBoardView();
     else if (currentView === 'tables') renderTableView();
     else if (currentView === 'timeline') renderTimelineView();
-    else if (currentView === 'reports') renderReportsView();
     else if (currentView === 'archive') renderArchiveView();
 }
 

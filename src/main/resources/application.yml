@@ -35,6 +35,15 @@ logging:
   level:
     org.hibernate.SQL: info
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    try-it-out-enabled: true
+
 app:
   jwt:
     secret: ${JWT_SECRET:taskpulse-dev-secret-key-taskpulse-dev-secret-key}

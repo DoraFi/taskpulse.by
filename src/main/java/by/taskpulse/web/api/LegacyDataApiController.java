@@ -65,19 +65,22 @@ public class LegacyDataApiController {
     private final PasswordEncoder passwordEncoder;
     private final AnalyticsDashboardService analyticsDashboardService;
     private final CalendarEventService calendarEventService;
+    private final StoredFileService storedFileService;
 
     public LegacyDataApiController(JdbcTemplate jdbcTemplate,
             CurrentUserProvider currentUserProvider,
             HttpServletRequest request,
             PasswordEncoder passwordEncoder,
             AnalyticsDashboardService analyticsDashboardService,
-            CalendarEventService calendarEventService) {
+            CalendarEventService calendarEventService,
+            StoredFileService storedFileService) {
         this.jdbcTemplate = jdbcTemplate;
         this.currentUserProvider = currentUserProvider;
         this.request = request;
         this.passwordEncoder = passwordEncoder;
         this.analyticsDashboardService = analyticsDashboardService;
         this.calendarEventService = calendarEventService;
+        this.storedFileService = storedFileService;
     }
 
     @GetMapping("/api/team")
@@ -1768,24 +1771,15 @@ public class LegacyDataApiController {
 
         String original = file.getOriginalFilename() == null ? "file"
                 : Path.of(file.getOriginalFilename()).getFileName().toString();
-        String stored = UUID.randomUUID().toString().replace("-", "") + "_" + original;
-        String ym = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMM"));
-        Path dir = TASK_UPLOADS_ROOT.resolve(ym);
-        Path out = dir.resolve(stored);
-        try {
-            Files.createDirectories(dir);
-            file.transferTo(out);
-        } catch (IOException ex) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Не удалось сохранить файл");
-        }
 
-        String fileUrl = "/static/uploads/tasks/" + ym + "/" + stored;
+        StoredFileService.StoredFile sf = storedFileService.storeOrReuse(file);
+        String fileUrl = sf.url();
         jdbcTemplate.update(
                 """
-                        insert into task_attachment(task_id, uploaded_by, file_name, file_url, created_at)
-                        values (?, ?, ?, ?, now())
+                        insert into task_attachment(task_id, uploaded_by, file_name, file_url, stored_file_id, created_at)
+                        values (?, ?, ?, ?, ?, now())
                         """,
-                taskId, userId, original, fileUrl);
+                taskId, userId, original, fileUrl, sf.id());
 
         return Map.of(
                 "ok", true,
@@ -4050,7 +4044,6 @@ public class LegacyDataApiController {
         return ids.isEmpty() ? null : ids.get(0);
     }
 
-    /** Команда, в которой пользователь видит задачу (предпочтение — контекст URL/сессии). */
     private Long resolveTeamIdForAccessibleTask(Long taskId, Long userId) {
         if (taskId == null || taskId <= 0 || userId == null) {
             return null;

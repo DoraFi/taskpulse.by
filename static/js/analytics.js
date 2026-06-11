@@ -258,7 +258,6 @@
             { label: 'В очереди', value: kpis.queue, hint: 'Ещё не взяты в работу' },
             { label: 'Просрочено', value: kpis.overdue, hint: `${executive.overdueRate}% от среза периода` },
             { label: 'Срочные', value: kpis.urgent, hint: 'Приоритет «срочно» в срезе периода' },
-            { label: 'Завершено за период', value: kpis.donePeriod, hint: 'Переведено в «Готово» за интервал' },
             { label: 'Создано за период', value: kpis.createdPeriod, hint: 'Новые задачи за период' },
         ];
         grid.innerHTML = items.map((item) => `

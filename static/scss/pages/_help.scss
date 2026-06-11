@@ -128,7 +128,7 @@ body[data-theme='dark'] .help-faq-block {
 }
 
 body[data-theme='dark'] .help-faq__item {
-    background: #353b30;
+    background: $lighter-dark-gray;
     border: none;
     color: $light-light-green;
 }
@@ -162,8 +162,10 @@ body[data-theme='dark'] .help-faq__answer {
     border: none;
     box-shadow: none;
 
-    .filter-label {
+    &__title {
         margin: 0;
+        font-size: 1.25rem;
+        line-height: 1.2;
     }
 
     .profile-modal__section-lead {
@@ -222,6 +224,11 @@ body[data-theme='dark'] .help-ticket-form {
 
 body[data-theme='dark'] .help-ticket-form .tp-field-plain {
     @include tp-field-skin-dark();
+}
+
+body[data-theme='dark'] .help-ticket-form .create-task-attachments {
+    background: $black;
+    border: $space-1 solid rgba($light-light-green, 0.35);
 }
 
 .help-docs-panel {

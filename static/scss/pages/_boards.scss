@@ -695,7 +695,7 @@ body[data-theme="dark"] .kanban-stage-group.sortable-fallback .kanban-stage-sep-
 
 body[data-theme="dark"] .kanban-task-item,
 body[data-theme="dark"] .board-list .card .list .item {
-    background: #353b30;
+    background: $lighter-dark-gray;
     border: none;
     color: $light-light-green;
 }
@@ -1331,7 +1331,7 @@ body[data-theme="dark"] .board-table-card .tasks-grid .col-name {
 }
 
 body[data-theme="dark"] .form-add-task {
-    background: #353b30;
+    background: $lighter-dark-gray;
 }
 
 body[data-theme="dark"] .form-add-task input {
@@ -1359,7 +1359,7 @@ body[data-theme="dark"] .form-add-task:focus-within {
 
 body[data-theme="dark"] .kanban-board-card .kanban-stage-table,
 body[data-theme="dark"] .kanban-archive-board .kanban-stage-table {
-    background-color: #353b30;
+    background-color: $lighter-dark-gray;
 }
 
 .kanban-board-card .kanban-stage-table-head {

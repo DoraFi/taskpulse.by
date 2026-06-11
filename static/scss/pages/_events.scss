@@ -261,7 +261,7 @@
         min-width: min(100%, 12rem);
     }
     padding: $space-12 $space-16;
-    border: $space-1 solid rgba($green, 0.12);
+    border: none;
     border-radius: $radius-sm;
     background: rgba($green, 0.04);
     cursor: pointer;
@@ -422,14 +422,21 @@
 body[data-theme='dark'] {
     .events-page__hero,
     .events-day-item {
-        background: rgba($green, 0.08);
-        border-color: rgba($green, 0.22);
+        background: $lighter-dark-gray;
+    }
+
+    .events-day-item,
+    .index-event-row {
+        color: $light-light-green;
+    }
+
+    .index-event-row__kind {
+        color: rgba($light-light-green, 0.7);
     }
 
     .events-calendar--embedded.custom-calendar {
-        background: $dark-gray;
+        background: $lighter-dark-gray;
         color: $light-light-green;
-        border: $space-1 solid rgba($green, 0.45);
 
         .custom-calendar-header {
             button {
@@ -447,7 +454,7 @@ body[data-theme='dark'] {
         }
 
         .custom-calendar-month .days .day {
-            background: rgba($green, 0.12);
+            background: transparent;
             color: $light-light-green;
 
             &.weekend {

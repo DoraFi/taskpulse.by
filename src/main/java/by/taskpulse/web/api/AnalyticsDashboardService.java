@@ -69,8 +69,8 @@ public class AnalyticsDashboardService {
             activityGranularity = "day";
             activity = loadDailyActivity(inProjects, days);
         }
-        List<Map<String, Object>> assignees = loadAssignees(teamId, inProjects);
-        List<Map<String, Object>> projects = loadProjectRows(inProjects);
+        List<Map<String, Object>> assignees = loadAssignees(teamId, inProjects, days);
+        List<Map<String, Object>> projects = loadProjectRows(inProjects, days);
         List<Map<String, Object>> risks = loadRisks(projects);
         Map<String, Object> leadTime = loadLeadTime(inProjects, days);
         List<Map<String, Object>> transitions = loadTopTransitions(inProjects, days);
@@ -547,7 +547,8 @@ public class AnalyticsDashboardService {
         return out;
     }
 
-    private List<Map<String, Object>> loadAssignees(Long teamId, String inProjects) {
+    private List<Map<String, Object>> loadAssignees(Long teamId, String inProjects, int days) {
+        Timestamp asOf = Timestamp.valueOf(LocalDate.now().atTime(23, 59, 59));
         return jdbcTemplate.query(
                 """
                         select
@@ -558,15 +559,43 @@ public class AnalyticsDashboardService {
                                 u.email,
                                 'Без имени'
                             ) as name,
-                            count(t.id) filter (where t.archived_at is null and b.id is not null) as assigned,
-                            count(t.id) filter (where t.stage = 'Готово' and b.id is not null) as done,
-                            count(t.id) filter (where t.archived_at is null and t.stage in ('В работе', 'Тестирование') and b.id is not null) as in_progress,
-                            count(t.id) filter (where t.archived_at is null and t.due_date is not null and t.due_date < current_date
-                                and coalesce(t.stage, 'Очередь') <> 'Готово' and b.id is not null) as overdue
+                            count(t.id) as assigned,
+                            count(case when t.stage_as_of = 'Готово' then 1 end) as done,
+                            count(case when t.stage_as_of in ('В работе', 'Тестирование') then 1 end) as in_progress,
+                            count(case when t.due_date is not null and t.due_date < current_date and t.stage_as_of <> 'Готово' then 1 end) as overdue
                         from app_user u
                         join team_membership tm on tm.user_id = u.id and tm.team_id = ?
-                        left join task_item t on t.assignee_id = u.id
-                        left join board b on b.id = t.board_id and b.project_id in (%s)
+                        left join (
+                            select
+                                t.id,
+                                t.assignee_id,
+                                t.due_date,
+                                coalesce(
+                                    nullif(
+                                        trim((
+                                            select h.new_stage
+                                            from task_status_history h
+                                            where h.task_id = t.id
+                                              and h.changed_at <= ?
+                                            order by h.changed_at desc, h.id desc
+                                            limit 1
+                                        )),
+                                        ''
+                                    ),
+                                    'Очередь'
+                                ) as stage_as_of
+                            from task_item t
+                            join board b on b.id = t.board_id
+                            where b.project_id in (%s)
+                              and t.assignee_id is not null
+                              and (
+                                t.created_at::date >= current_date - ?
+                                or exists (
+                                    select 1 from task_status_history h2
+                                    where h2.task_id = t.id and h2.changed_at::date >= current_date - ?
+                                )
+                              )
+                        ) t on t.assignee_id = u.id
                         group by u.id, u.last_name, u.first_name, u.full_name, u.email
                         order by assigned desc, name
                         """.formatted(inProjects),
@@ -582,30 +611,59 @@ public class AnalyticsDashboardService {
                     row.put("doneRate", percent(done, Math.max(assigned + done, 1)));
                     return row;
                 },
-                teamId);
+                teamId,
+                asOf,
+                days,
+                days);
     }
 
-    private List<Map<String, Object>> loadProjectRows(String inProjects) {
+    private List<Map<String, Object>> loadProjectRows(String inProjects, int days) {
+        Timestamp asOf = Timestamp.valueOf(LocalDate.now().atTime(23, 59, 59));
         return jdbcTemplate.query(
                 """
                         select
                             p.name as project,
                             p.code,
-                            count(t.id) as total,
-                            count(t.id) filter (where t.archived_at is null and coalesce(t.stage, 'Очередь') = 'Очередь') as queue,
-                            count(t.id) filter (where t.archived_at is null and t.stage in ('В работе', 'Тестирование')) as in_progress,
-                            count(t.id) filter (where t.stage = 'Готово') as done,
-                            count(t.id) filter (where t.archived_at is null and t.priority = 'срочно' and coalesce(t.stage, 'Очередь') <> 'Готово') as urgent,
-                            count(t.id) filter (where t.archived_at is null and t.due_date is not null and t.due_date < current_date
-                                and coalesce(t.stage, 'Очередь') <> 'Готово') as overdue
-                        from project p
-                        left join board b on b.project_id = p.id
-                        left join task_item t on t.board_id = b.id
-                        where p.id in (%s)
+                            count(*) as total,
+                            count(case when stage_as_of not in ('В работе', 'Тестирование', 'Готово') then 1 end) as queue,
+                            count(case when stage_as_of in ('В работе', 'Тестирование') then 1 end) as in_progress,
+                            count(case when stage_as_of = 'Готово' then 1 end) as done,
+                            count(case when priority = 'срочно' and stage_as_of <> 'Готово' then 1 end) as urgent,
+                            count(case when due_date is not null and due_date < current_date and stage_as_of <> 'Готово' then 1 end) as overdue
+                        from (
+                            select
+                                b.project_id,
+                                t.due_date,
+                                coalesce(t.priority, 'обычный') as priority,
+                                coalesce(
+                                    nullif(
+                                        trim((
+                                            select h.new_stage
+                                            from task_status_history h
+                                            where h.task_id = t.id
+                                              and h.changed_at <= ?
+                                            order by h.changed_at desc, h.id desc
+                                            limit 1
+                                        )),
+                                        ''
+                                    ),
+                                    'Очередь'
+                                ) as stage_as_of
+                            from task_item t
+                            join board b on b.id = t.board_id
+                            where b.project_id in (%s)
+                              and (
+                                t.created_at::date >= current_date - ?
+                                or exists (
+                                    select 1 from task_status_history h2
+                                    where h2.task_id = t.id and h2.changed_at::date >= current_date - ?
+                                )
+                              )
+                        ) snap
+                        join project p on p.id = snap.project_id
                         group by p.id, p.name, p.code
                         order by p.name
-                        """
-                        .formatted(inProjects),
+                        """.formatted(inProjects),
                 (rs, rowNum) -> {
                     Map<String, Object> row = new LinkedHashMap<>();
                     int total = rs.getInt("total");
@@ -619,7 +677,10 @@ public class AnalyticsDashboardService {
                     row.put("overdue", rs.getInt("overdue"));
                     row.put("doneRate", percent(rs.getInt("done"), Math.max(total, 1)));
                     return row;
-                });
+                },
+                asOf,
+                days,
+                days);
     }
 
     private List<Map<String, Object>> loadRisks(List<Map<String, Object>> projects) {
